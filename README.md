@@ -75,3 +75,17 @@ no secrets or external AI configuration are used.
 
 Verification evidence for BE-001 is available in
 [`docs/BE-001-evidence.md`](docs/BE-001-evidence.md).
+
+## Review and testing files
+
+| File | Purpose |
+|------|---------|
+| `docs/REVIEW-CHECKLIST.md` | Step-by-step guide for the reviewer, acceptance criteria table, code review points |
+| `docs/BE-001-evidence.md` | Build, test and API evidence |
+| `docs/api-examples.http` | Ready-to-send request examples (VS Code REST Client, Rider, Visual Studio) |
+| `scripts/smoke-test.ps1` | Automated check of 200 and 400 cases against a running API (works on Windows PowerShell 5.1 and 7+) |
+
+Quick check: start the API, then run `.\scripts\smoke-test.ps1`.
+
+> The `Invoke-WebRequest -SkipHttpErrorCheck` example above needs PowerShell 7+.
+> On Windows PowerShell 5.1 use the smoke-test script instead.
