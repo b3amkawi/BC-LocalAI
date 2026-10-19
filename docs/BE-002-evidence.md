@@ -74,6 +74,17 @@ response). `OllamaAIService` now maps any failure while reading the response bod
 `AI_INVALID_RESPONSE`. Test: `InvalidResponse_WhenOkResponseDeclaresUnsupportedCharset` fails on the old code and passes now.
 Also added: non-JSON content types, empty body, emoji / non-BMP prompt, lone surrogate over HTTP.
 
+### Contract alignment with AI-002 (PR #8)
+
+The Ollama contract delivered by AI-002 (`docs/ai/ollama-integration-contract.md` in PR #8, branch `pao02_AI`, not merged yet)
+was compared with the implementation. All request fields and the nine success conditions match. The one difference was the
+`system` prompt: the AI-002 document asks the model to answer "in the same language as the user ... with the final answer",
+which is more specific than the example in Issue #5. The implementation now uses the AI-002 wording. With it, real Thai
+questions are answered in Thai (for example "ประเทศไทยมีกี่จังหวัด ตอบสั้น ๆ" -> `77 จังหวัด`) and English questions in English.
+AI-002 also asks for a configurable timeout, cancellation support, and re-testing when the prompt changes: all done
+(`Ollama:TimeoutSeconds`; live smoke test re-run with the new prompt). It suggests up to 300 s on machines without a GPU or on the
+first model load; the default here is 180 s and can be raised through configuration.
+
 ## 3. Live smoke test with real Ollama (`qwen3:4b`)
 
 ```text

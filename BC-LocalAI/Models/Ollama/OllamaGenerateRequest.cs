@@ -7,7 +7,7 @@ namespace BC_LocalAI.Models.Ollama;
 public sealed class OllamaGenerateRequest
 {
     public const string SystemPrompt =
-        "Answer the user briefly. Return a JSON object containing only an answer field.";
+        "Answer the user briefly in the same language as the user. Return a JSON object containing only an answer field with the final answer.";
 
     private static readonly JsonElement AnswerSchema = JsonDocument.Parse(
         """

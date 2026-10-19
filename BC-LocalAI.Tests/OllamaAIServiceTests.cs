@@ -34,7 +34,7 @@ public sealed class OllamaAIServiceTests
         Assert.False(root.GetProperty("stream").GetBoolean());
         Assert.False(root.GetProperty("think").GetBoolean());
         Assert.Equal(
-            "Answer the user briefly. Return a JSON object containing only an answer field.",
+            "Answer the user briefly in the same language as the user. Return a JSON object containing only an answer field with the final answer.",
             root.GetProperty("system").GetString());
 
         var format = root.GetProperty("format");

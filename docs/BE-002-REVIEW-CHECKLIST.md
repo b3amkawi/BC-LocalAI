@@ -73,7 +73,7 @@ Expected: HTTP 503 `AI_UNAVAILABLE`. Invalid settings (for example `$env:Ollama_
 - Answers longer than 256 tokens are cut by Ollama and returned as `502 AI_INVALID_RESPONSE` (contract: `num_predict` 256).
 - Ollama answers one request at a time: bursts of simultaneous users queue and can get `504 AI_TIMEOUT`; not measured at 40-100 users.
 - No authentication or rate limit (separate issue).
-- The Ollama contract in Issue #5 has not been approved in writing yet; confirm it.
+- The Ollama contract (Issue #5 / PR #8) has not been approved in writing yet; confirm it. The implementation follows the AI-002 document in PR #8 (same request fields, success conditions and system prompt).
 
 ## 7. Reviewer sign-off
 

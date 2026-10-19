@@ -63,7 +63,7 @@
 
 ## 5. สัญญา Ollama ยังไม่ได้รับการอนุมัติ
 
-Issue #5 (AI-002) ยังเปิดอยู่และไม่มีคอมเมนต์อนุมัติ งานนี้ทำตามสัญญาที่เขียนไว้ใน issue นั้น ถ้า Backend Developer / Tech Lead
+Issue #5 (AI-002) และ PR #8 ยังเปิดอยู่และยังไม่มีการอนุมัติ งานนี้ทำตามเอกสารสัญญาใน PR #8 (`docs/ai/ollama-integration-contract.md`) ซึ่งตรงกับ Issue #5 ทุกจุด ยกเว้น system prompt ที่ใช้ฉบับใน PR #8 (ตอบภาษาเดียวกับผู้ใช้) ถ้า Backend Developer / Tech Lead
 ขอเปลี่ยน (เช่น `num_predict`, system prompt) ต้องแก้ `OllamaGenerateRequest` และเทสต์ที่เกี่ยวข้อง
 
 ## 6. `Ollama:BaseUrl` ไม่ถูกบังคับให้เป็น loopback
