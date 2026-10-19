@@ -26,7 +26,8 @@ Implemented scope:
 
 ## 4. API Contract Evidence
 
-Live smoke test against `http://localhost:5291`:
+Live smoke test against `http://localhost:5291` (any free port works; the default
+launch profile and `scripts/smoke-test.ps1` use `http://localhost:5290`):
 
 ```text
 POST /api/chat
