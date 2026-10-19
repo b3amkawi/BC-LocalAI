@@ -130,18 +130,63 @@ ollama ps
 
 ## 6. เปิด PowerShell ที่โฟลเดอร์ Repository
 
-เปิดโฟลเดอร์ repository ใน File Explorer คลิกช่อง address bar พิมพ์ `powershell` แล้วกด Enter จากนั้นตรวจตำแหน่ง:
+สคริปต์ทดสอบไม่ได้มากับ Ollama แต่เก็บอยู่ใน Repository `BC-LocalAI` เครื่องใหม่จึงต้องดาวน์โหลด Repository ก่อน เลือกวิธีใดวิธีหนึ่งต่อไปนี้
+
+### วิธี A: ดาวน์โหลด ZIP (แนะนำสำหรับผู้ที่ยังไม่ใช้ Git)
+
+1. เปิดหน้า [BC-LocalAI บน GitHub](https://github.com/b3amkawi/BC-LocalAI) และลงชื่อเข้าใช้บัญชีที่ได้รับสิทธิ์ ถ้า Repository เปิดไม่ได้ให้ขอสิทธิ์จากเจ้าของก่อน
+2. กดตัวเลือก branch บริเวณด้านซ้ายเหนือรายการไฟล์ แล้วเลือก `pao01_AI`
+3. ตรวจว่าชื่อ branch บนหน้าจอเป็น `pao01_AI`
+4. กดปุ่มสีเขียว **Code** แล้วเลือก **Download ZIP**
+5. เปิดโฟลเดอร์ Downloads คลิกขวาไฟล์ ZIP แล้วเลือก **Extract All...** และกด **Extract**
+6. เข้าโฟลเดอร์ที่แตกแล้ว ชื่อโดยทั่วไปคือ `BC-LocalAI-pao01_AI` ภายในต้องเห็น `README.md`, `docs` และ `scripts`
+
+ห้ามเปิด PowerShell ขณะยังดูไฟล์อยู่ภายใน ZIP เพราะสคริปต์อาจเข้าถึงไฟล์ข้างเคียงไม่ได้ ต้อง **Extract All** ก่อนเสมอ
+
+### วิธี B: Clone ด้วย Git
+
+ตรวจว่ามี Git:
+
+```powershell
+git --version
+```
+
+หากมี Git ให้รันทีละบรรทัด:
+
+```powershell
+cd $HOME\Documents
+git clone --branch pao01_AI --single-branch https://github.com/b3amkawi/BC-LocalAI.git
+cd .\BC-LocalAI
+git branch --show-current
+```
+
+บรรทัดสุดท้ายต้องแสดง `pao01_AI` หาก GitHub ขอเข้าสู่ระบบ ให้ใช้บัญชีที่ได้รับสิทธิ์ Repository และอย่าใส่รหัสผ่านหรือ token ลงในไฟล์ของโปรเจกต์ ถ้าไม่มี Git ให้ใช้วิธี ZIP ซึ่งไม่ต้องติดตั้ง Git
+
+### เปิด PowerShell ภายในโฟลเดอร์ที่ดาวน์โหลด
+
+1. เปิดโฟลเดอร์ `BC-LocalAI-pao01_AI` จากวิธี ZIP หรือ `BC-LocalAI` จากวิธี Git ใน File Explorer
+2. ตรวจว่ามองเห็น `README.md`, `docs` และ `scripts`
+3. คลิกช่อง address bar ด้านบนของ File Explorer
+4. พิมพ์ `powershell` แล้วกด Enter
+5. PowerShell ที่เปิดขึ้นมาต้องมีตำแหน่งท้าย prompt เป็นชื่อโฟลเดอร์ดังกล่าว
+
+ตรวจตำแหน่งและไฟล์ที่จำเป็น:
 
 ```powershell
 Get-Location
 Test-Path .\scripts\test-ollama.ps1
+Test-Path .\scripts\open-chat.cmd
+Test-Path .\docs\ai\ollama-api.md
 ```
 
-บรรทัดที่สองต้องเป็น `True` หากเป็น `False` แสดงว่าอยู่ผิดโฟลเดอร์ ให้ใช้ `cd` ตามด้วย path เช่น:
+คำสั่ง `Test-Path` ทั้งสามบรรทัดต้องเป็น `True` หากมีบรรทัดใดเป็น `False` ให้หยุดก่อน เพราะอาจดาวน์โหลดผิด branch, ยังไม่ได้แตก ZIP หรือเปิดผิดโฟลเดอร์ หากทราบตำแหน่งที่ถูกต้อง ใช้ `cd` เช่น:
 
 ```powershell
-cd "C:\Users\ชื่อผู้ใช้\Documents\BC-LocalAI"
+cd "$HOME\Downloads\BC-LocalAI-pao01_AI"
+Test-Path .\scripts\test-ollama.ps1
 ```
+
+เมื่อได้ `True` จึงไปข้อ 7
 
 ## 7. ทดสอบ REST API ด้วยสคริปต์โปรเจกต์
 
@@ -158,7 +203,7 @@ pwsh -NoProfile -File .\scripts\test-ollama.ps1
 pwsh -NoProfile -File .\scripts\test-ollama.ps1 -OutputPath .\docs\ai\ollama-test-result.json
 ```
 
-หาก `pwsh is not recognized` ให้ติดตั้งตาม [คู่มือ PowerShell บน Windows ของ Microsoft](https://learn.microsoft.com/powershell/scripting/install/installing-powershell-on-windows) แล้วเปิด terminal ใหม่ `powershell` และ `pwsh` เป็นคนละโปรแกรม: Windows PowerShell เดิมใช้ `powershell`; PowerShell 7 ใช้ `pwsh`
+หาก `pwsh is not recognized` ให้ติดตั้งตาม [คู่มือ PowerShell บน Windows ของ Microsoft](https://learn.microsoft.com/powershell/scripting/install/installing-powershell-on-windows) แล้วเปิด terminal ใหม่ `powershell` และ `pwsh` เป็นคนละโปรแกรม: Windows PowerShell เดิมใช้ `powershell`; PowerShell 7 ใช้ `pwsh` หลังติดตั้งต้องตรวจ `pwsh --version` ให้สำเร็จก่อนรันสคริปต์
 
 ผลสำเร็จต้องมี `PASS`, HTTP 200, `done=true`, `done_reason=stop` และคำตอบไม่ว่าง ตรวจรหัสออกทันที:
 
@@ -202,5 +247,21 @@ $LASTEXITCODE
 | ตอบช้าหรือ timeout | โหลดครั้งแรกหรือ RAM/VRAM ไม่พอ | ปิดงานที่ใช้ GPU แล้วทดสอบด้วย `-TimeoutSec 300` |
 | คำถามกลายเป็น error สีแดง | พิมพ์ที่ prompt `PS ...>` | เปิด `scripts\open-chat.cmd` แล้วรอ prompt `คุณ:` |
 | port 11434 ถูกใช้งานแล้ว | Ollama ทำงานอยู่แล้ว | ไม่ต้องเปิด `ollama serve` ซ้ำ ให้ทดสอบ API ต่อ |
+
+## 11. Checklist สำหรับยืนยันบนเครื่องใหม่
+
+การติดตั้งถือว่าผ่านเมื่อทำครบและเห็นผลตามนี้:
+
+- [ ] `ollama --version` แสดงเวอร์ชัน
+- [ ] `Invoke-RestMethod http://127.0.0.1:11434/api/version` คืนข้อมูลเวอร์ชัน
+- [ ] `ollama list` มี `qwen3:4b`
+- [ ] `ollama run qwen3:4b` รับคำถามและตอบกลับ แล้วออกด้วย `/bye` ได้
+- [ ] ดาวน์โหลด branch `pao01_AI` และ `Test-Path` ทั้งสามไฟล์ได้ `True`
+- [ ] `pwsh --version` แสดงเวอร์ชัน PowerShell 7
+- [ ] `pwsh -NoProfile -File .\scripts\test-ollama.ps1` แสดง `PASS` และ `$LASTEXITCODE` เป็น `0`
+- [ ] `pwsh -NoProfile -File .\scripts\test-ollama.ps1 -Port 11435` แสดง error ที่เข้าใจได้ และ `$LASTEXITCODE` เป็น `1`
+- [ ] `.\scripts\open-chat.cmd` เปิดได้ เห็น prompt `คุณ:` และตอบคำถามได้
+
+บันทึก Windows, RAM, GPU/VRAM, เวอร์ชัน Ollama, เวอร์ชัน PowerShell และผล `PASS` ของเครื่องใหม่ไว้เป็นหลักฐานด้วย หากข้อใดไม่ผ่าน ให้บันทึกข้อความ error ตามจริงและแก้ตามตารางก่อน ยังไม่ควรสรุปว่าติดตั้งสำเร็จเพียงเพราะเปิดโปรแกรมได้
 
 อย่าเปลี่ยนโมเดลเพื่ออ้างว่า Issue ผ่าน เพราะเกณฑ์ระบุ `qwen3:4b` ดู [คู่มือ API](ollama-api.md) และ [หลักฐานการทดสอบ](ollama-test-evidence.md) เพิ่มเติม ผลจาก Windows 11 เป็นหลักฐานของเครื่องทดสอบนี้ ไม่ใช่หลักฐาน Windows Server
