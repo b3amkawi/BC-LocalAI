@@ -9,7 +9,23 @@ POST http://127.0.0.1:11434/api/generate
 Content-Type: application/json; charset=utf-8
 ```
 
-Backend ต้องเรียกผ่าน `127.0.0.1` เท่านั้น ห้ามตั้ง Ollama ให้รับจาก `0.0.0.0`, public interface, port forwarding หรือ public endpoint สำหรับ contract นี้
+`Ollama BaseUrl` ต้องเป็น Loopback URL เท่านั้น ตัวอย่างที่อนุญาต:
+
+```text
+http://127.0.0.1:11434
+http://localhost:11434
+http://[::1]:11434
+```
+
+ห้ามใช้ Private IP, Domain หรือ Public URL เช่น:
+
+```text
+http://192.168.1.10:11434
+https://ollama.internal:11434
+https://ollama.example.com
+```
+
+Backend ต้อง parse BaseUrl เป็น absolute `Uri`, ตรวจด้วย `Uri.IsLoopback` และต้องไม่ยอมให้ระบบเริ่มทำงานหาก URL ไม่ใช่ Loopback ห้ามตั้ง Ollama ให้รับจาก `0.0.0.0`, เพิ่ม firewall rule, ทำ port forwarding หรือเปิด public endpoint สำหรับ contract นี้
 
 ## Request contract
 
@@ -96,7 +112,8 @@ Ollama response ชั้นนอก:
 | Provider behavior | Detection | Contract classification |
 | --- | --- | --- |
 | ต่อ `127.0.0.1:11434` ไม่ได้ | connection refused/DNS/socket exception ก่อนมี HTTP response | `Provider unavailable` |
-| เกินเวลาที่กำหนด | client timeout/cancellation | `Provider timeout` |
+| Ollama ตอบไม่ทันเวลาที่กำหนด | provider timeout ที่หมดเวลาก่อนผู้ใช้ยกเลิก | `Provider timeout` |
+| ผู้ใช้ยกเลิก request หรือปิดการเชื่อมต่อ | request cancellation token ถูกยกเลิก | `Request cancelled` |
 | Ollama ตอบ HTTP non-2xx | HTTP status ไม่ใช่ 200 | `Provider error` |
 | `done=false` หรือชนิดไม่ใช่ boolean | outer validation | `Invalid/incomplete response` |
 | `done_reason=length` | outer validation | `Truncated response` |
@@ -108,12 +125,14 @@ Ollama response ชั้นนอก:
 
 เก็บ provider error สำหรับ log ภายในตามนโยบายทีม แต่อย่านำ prompt, ข้อมูลส่วนตัว หรือรายละเอียดระบบที่ไม่จำเป็นไปแสดงต่อผู้ใช้
 
+Backend ต้องแยก cancellation source ให้ได้ กรณีผู้ใช้ยกเลิก request หรือปิดการเชื่อมต่อไม่ใช่ `Provider timeout` และ Backend ไม่ควรตอบ HTTP 504 สำหรับกรณีดังกล่าว ส่วนการกำหนด HTTP response mapping จริงยังเป็นขอบเขตของ Backend Developer
+
 ## Timeout guidance
 
 - smoke script ใช้ค่าเริ่มต้น `180` วินาที และปรับได้ด้วย `-TimeoutSec`
 - การโหลดโมเดลครั้งแรกอาจช้ากว่าคำขอถัดไป เครื่องทดสอบหรือเครื่องไม่มี GPU อาจต้องใช้ `300` วินาที
 - preflight `GET /api/version` ใช้ค่าน้อยกว่าระหว่าง 10 วินาทีกับ timeout ที่กำหนด
-- Backend ควรทำ timeout เป็น configuration และรองรับ cancellation ห้ามรอไม่จำกัด
+- Backend ควรทำ timeout เป็น configuration และรองรับ cancellation ห้ามรอไม่จำกัด โดยต้องแยก provider timeout ออกจาก request cancellation ของผู้ใช้
 - timeout หมายถึงไม่ทราบผลลัพธ์สุดท้าย ห้ามนำ evidence เก่าหรือ partial response มาใช้เป็นคำตอบใหม่
 
 ## Reproduce ด้วย PowerShell

@@ -1,6 +1,6 @@
 # AI-002: ผลทดสอบ Ollama Integration Contract
 
-ทดสอบวันที่ 19 ตุลาคม 2026 (Asia/Bangkok) บน Windows 11, Ollama `0.40.5`, `qwen3:4b`, PowerShell 7.6.5 และ NVIDIA RTX 4050 Laptop GPU 6141 MiB VRAM เครื่องนี้ต่างจาก RTX 4060/4070 ที่ระบุใน Issue จึงต้องให้ Backend Developer หรือ Tech Lead ยืนยันว่าจะรับผลได้หรือขอทดสอบซ้ำบน hardware ที่กำหนด
+ทดสอบวันที่ 19 ตุลาคม 2026 (Asia/Bangkok) บน Windows 11, Ollama `0.40.5`, `qwen3:4b`, PowerShell 7.6.5 และ NVIDIA RTX 4050 Laptop GPU 6141 MiB VRAM Reviewer ยืนยันแล้วว่าผล RTX 4050 ใช้รับ AI-002 ได้ เพราะ Issue นี้ตรวจ Integration Contract และไม่ได้วัดประสิทธิภาพ GPU
 
 ## Live API
 
@@ -26,7 +26,7 @@
 py -3 -m unittest discover -s tests -v
 ```
 
-ผลล่าสุดหลัง rebase บน `origin/main` คือ `Ran 9 tests in 19.401s`, `OK` โดย test method แบบ subtest ครอบคลุม 21 scenarios และใช้ mock HTTP เฉพาะ `127.0.0.1`:
+ผลล่าสุดหลังแก้ Contract ตาม Review คือ `Ran 9 tests in 19.539s`, `OK` โดย test method แบบ subtest ครอบคลุม 21 scenarios และใช้ mock HTTP เฉพาะ `127.0.0.1`:
 
 - success, UTF-8 prompt, request contract และ evidence output
 - `done=false`, `done` เป็น string และ `done_reason=length`
@@ -39,7 +39,7 @@ py -3 -m unittest discover -s tests -v
 
 mock timeout ยืนยันการตรวจจับและ exit behavior ของ client โดยไม่ต้องทำให้ live model ค้างโดยตั้งใจ ส่วน live unavailable ยืนยัน connection failure กับเครื่องจริง
 
-รัน `dotnet test .\BC-LocalAI.slnx` หลัง restore และ rebase บน main ล่าสุดแล้วผ่าน 17 tests, ล้มเหลว 0, ข้าม 0 เพื่อยืนยันว่า AI-002 ไม่ทำให้ชุดทดสอบ Backend ที่รวมเข้ามาใน main เสีย
+รัน `dotnet test .\BC-LocalAI.slnx` หลังแก้ Contract แล้วผ่าน 17 tests, ล้มเหลว 0, ข้าม 0 เพื่อยืนยันว่า AI-002 ไม่ทำให้ชุดทดสอบ Backend ที่รวมเข้ามาใน main เสีย
 
 ## Reproduce
 
