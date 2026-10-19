@@ -12,6 +12,9 @@ public sealed class ChatController(IAIService aiService) : ControllerBase
     [ProducesResponseType<ChatResponse>(StatusCodes.Status200OK)]
     [ProducesResponseType<ApiErrorResponse>(StatusCodes.Status400BadRequest)]
     [ProducesResponseType<ApiErrorResponse>(StatusCodes.Status500InternalServerError)]
+    [ProducesResponseType<ApiErrorResponse>(StatusCodes.Status502BadGateway)]
+    [ProducesResponseType<ApiErrorResponse>(StatusCodes.Status503ServiceUnavailable)]
+    [ProducesResponseType<ApiErrorResponse>(StatusCodes.Status504GatewayTimeout)]
     public async Task<ActionResult<ChatResponse>> PostAsync(
         [FromBody] ChatRequest? request,
         CancellationToken cancellationToken)

@@ -16,6 +16,7 @@ public sealed class ChatApiProductionErrorTests(WebApplicationFactory<Program> f
         factory.WithWebHostBuilder(builder =>
         {
             builder.UseEnvironment(environment);
+            builder.PinOllama();
             builder.ConfigureTestServices(services =>
                 services.AddScoped<IAIService, ThrowingAIService>());
         }).CreateClient();
@@ -44,8 +45,8 @@ public sealed class ChatApiProductionErrorTests(WebApplicationFactory<Program> f
         var response = await client.PostAsJsonAsync("/api/chat", new { message = "hello" });
         var text = await response.Content.ReadAsStringAsync();
 
-        Assert.DoesNotContain("secret internal detail", text);
-        Assert.DoesNotContain("ThrowingAIService", text);
+        Check.NotLeaked(text, "secret internal detail");
+        Check.NotLeaked(text, "ThrowingAIService");
     }
 
     [Fact]

@@ -1,4 +1,5 @@
 using BC_LocalAI.Models;
+using BC_LocalAI.Services;
 
 namespace BC_LocalAI.Middleware;
 
@@ -15,6 +16,13 @@ public sealed class ExceptionHandlingMiddleware(
         catch (OperationCanceledException) when (context.RequestAborted.IsCancellationRequested)
         {
             logger.LogInformation("Request was cancelled by the client.");
+        }
+        catch (AiServiceException exception) when (!context.Response.HasStarted)
+        {
+            // Provider failures were already logged (without prompt/response) by the service.
+            context.Response.StatusCode = (int)exception.StatusCode;
+            await context.Response.WriteAsJsonAsync(
+                new ApiErrorResponse(new ApiError(exception.Code, exception.Message)));
         }
         catch (Exception exception)
         {
