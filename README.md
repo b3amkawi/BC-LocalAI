@@ -7,7 +7,7 @@ answered by a local Ollama model (`qwen3:4b`) through `OllamaAIService` (BE-002)
 ## Requirements
 
 - .NET 10 SDK
-- Ollama with the `qwen3:4b` model for running the API (`ollama pull qwen3:4b`); not needed for `dotnet build` / `dotnet test`
+- Ollama with the `qwen3:4b` model for running the API; not needed for `dotnet build` / `dotnet test`. Installation: [docs/ai/ollama-setup.md](docs/ai/ollama-setup.md)
 
 ## Run locally
 
@@ -103,6 +103,13 @@ All errors use `{ "error": { "code": "...", "message": "..." } }` and never incl
 | Ollama returns an HTTP error | 502 | `AI_PROVIDER_ERROR` |
 | Malformed / incomplete Ollama response (`done` not true, `done_reason` not `stop`, bad or empty `answer`, wrong model) | 502 | `AI_INVALID_RESPONSE` |
 | Unexpected error | 500 | `INTERNAL_ERROR` |
+
+### Known limits
+
+- The Ollama request is capped at 256 generated tokens (`num_predict`, per the Issue #5 contract). A question that needs a longer
+  answer is cut off by Ollama (`done_reason=length`) and the API returns `502 AI_INVALID_RESPONSE` instead of a partial answer.
+  Ask for short answers, or raise the limit through a contract change approved by the Tech Lead.
+- Single question and answer only: no conversation history and no streaming.
 
 ### Live smoke test (needs Ollama)
 

@@ -93,6 +93,20 @@ Ollama-down used a closed port; the others used a small fake provider on loopbac
 | Body is `{}` (incomplete) | `502 AI_INVALID_RESPONSE` |
 | `Ollama__TimeoutSeconds=0` | app refuses to start: `Ollama:TimeoutSeconds must be between 1 and 600.` |
 
+## 4b. Edge cases against the real Ollama (`qwen3:4b`, Production mode)
+
+| Scenario | Result |
+|----------|--------|
+| `Ollama__Model=model-does-not-exist` (real Ollama answers HTTP 404) | `502 AI_PROVIDER_ERROR` in 0.9 s |
+| `Ollama__TimeoutSeconds=1` with a heavier Thai prompt | `504 AI_TIMEOUT` in 1.7 s |
+| Thai question asking for a 1500-word essay | `502 AI_INVALID_RESPONSE` in 4.6 s: Ollama stops at `num_predict=256` (`done_reason=length`) and the truncated JSON is rejected, as the contract requires |
+| Client disconnects after 1 s during a long generation | handled quietly (information log "Request was cancelled by the client", no error); the next request answered normally (`{"response":"2","model":"qwen3:4b"}`) |
+| Ollama listener | `127.0.0.1:11434` only (checked with `Get-NetTCPConnection`); no `OLLAMA_HOST` override set |
+
+Known limit found here: answers longer than 256 tokens cannot be returned (see README "Known limits").
+Testing note: send Thai text as UTF-8 (`Invoke-RestMethod` with UTF-8 bytes or `curl --data-binary @file`);
+Git Bash `curl -d` on Windows turns Thai into `?`, which makes Ollama answer about question marks.
+
 ## 5. Acceptance criteria (Issue #6, section 11)
 
 | Criterion | Evidence |
@@ -116,4 +130,4 @@ Ollama-down used a closed port; the others used a small fake provider on loopbac
   written contract; it still needs confirmation from the Backend Developer or Tech Lead.
 - **Human code review** of the pull request and merge into `main` (owner only).
 - **Post-merge check** of `/api/chat` (Definition of Done) after the owner merges.
-- This work sits on the same branch as BE-001 (`watzapon01_Backend`), so it appears in the same pull request.
+- `main` (with BE-001 and the AI-001 Ollama setup docs) was merged into `watzapon01_Backend`; build and 98 tests pass on the merged result.

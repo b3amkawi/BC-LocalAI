@@ -69,6 +69,7 @@ Expected: HTTP 503 `AI_UNAVAILABLE`. Invalid settings (for example `$env:Ollama_
 ## 6. Known limits (by design, per Issue #6)
 
 - No streaming, conversation history, authentication, database, or multiple providers.
+- Answers longer than 256 tokens are cut by Ollama and returned as `502 AI_INVALID_RESPONSE` (contract: `num_predict` 256).
 - The Ollama contract in Issue #5 has not been approved in writing yet; confirm it.
 
 ## 7. Reviewer sign-off
