@@ -94,6 +94,18 @@ class SmokeScriptTests(unittest.TestCase):
         self.assertEqual(requests[0][0], "/api/generate")
         self.assertEqual(requests[0][1]["prompt"], "สวัสดี")
         self.assertFalse(requests[0][1]["stream"])
+        self.assertFalse(requests[0][1]["think"])
+        self.assertEqual(requests[0][1]["model"], "qwen3:4b")
+        self.assertEqual(requests[0][1]["options"], {"temperature": 0, "num_predict": 256})
+        self.assertEqual(
+            requests[0][1]["format"],
+            {
+                "type": "object",
+                "properties": {"answer": {"type": "string"}},
+                "required": ["answer"],
+                "additionalProperties": False,
+            },
+        )
         self.assertEqual(evidence["http_status"], 200)
         self.assertEqual(evidence["result"], VALID)
         self.assertEqual(evidence["ollama_version"], "contract-test")
@@ -101,6 +113,7 @@ class SmokeScriptTests(unittest.TestCase):
     def test_rejects_truncated_or_invalid_responses(self):
         cases = {
             "truncated": {**VALID, "done_reason": "length"},
+            "not_done": {**VALID, "done": False},
             "string_boolean": {**VALID, "done": "true"},
             "wrong_model": {**VALID, "model": "qwen3:8b"},
             "array_model": {**VALID, "model": ["qwen3:4b"]},
@@ -110,6 +123,7 @@ class SmokeScriptTests(unittest.TestCase):
             "extra_field": {**VALID, "response": '{"answer":"ok","extra":1}'},
             "wrong_key_case": {**VALID, "response": '{"ANSWER":"ok"}'},
             "empty_answer": {**VALID, "response": '{"answer":" "}'},
+            "missing_answer": {**VALID, "response": '{}'},
             "thinking_marker": {**VALID, "response": '{"answer":"<think>trace</think>ok"}'},
         }
         for name, result in cases.items():
