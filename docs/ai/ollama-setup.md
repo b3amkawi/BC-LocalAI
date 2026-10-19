@@ -132,6 +132,64 @@ ollama ps
 
 สคริปต์ทดสอบไม่ได้มากับ Ollama แต่เก็บอยู่ใน Repository `BC-LocalAI` เครื่องใหม่จึงต้องดาวน์โหลด Repository ก่อน เลือกวิธีใดวิธีหนึ่งต่อไปนี้
 
+### กรณี clone ไม่ได้หรือไม่มีสิทธิ์ดาวน์โหลด
+
+หาก Git แสดง `Repository not found`, GitHub เปิด Repository ไม่ได้ หรือบัญชีไม่มีสิทธิ์ดาวน์โหลดไฟล์ ให้ทำดังนี้:
+
+1. ติดต่อฝ่าย Software หรือเจ้าของ Repository เพื่อขอสิทธิ์เข้าถึง `b3amkawi/BC-LocalAI` และ branch `pao01_AI`
+2. แจ้งข้อความ error ที่เห็น ชื่อบัญชี GitHub และเวลาที่พบปัญหา โดยห้ามส่งรหัสผ่านหรือ access token
+3. ระหว่างรอสิทธิ์ ให้ข้ามการทดสอบสคริปต์ของ Repository แล้วทดสอบ Ollama โดยตรงตามขั้นตอนด้านล่าง
+4. เมื่อได้รับสิทธิ์แล้ว ให้กลับมาทำข้อ 6 และข้อ 7 เพื่อยืนยันสคริปต์ของโปรเจกต์
+
+ตรวจ Ollama และโมเดล:
+
+```powershell
+ollama --version
+Invoke-RestMethod http://127.0.0.1:11434/api/version
+ollama list
+ollama run qwen3:4b
+```
+
+เมื่อ `ollama run` แสดง `>>>` ให้พิมพ์คำถาม แล้วพิมพ์ `/bye` เพื่อออก จากนั้นทดสอบ REST API โดยตรง:
+
+```powershell
+$body = @{
+    model  = 'qwen3:4b'
+    prompt = 'สวัสดี กรุณาตอบสั้น ๆ'
+    stream = $false
+    think  = $false
+} | ConvertTo-Json
+
+$response = Invoke-RestMethod `
+    -Uri 'http://127.0.0.1:11434/api/generate' `
+    -Method Post `
+    -ContentType 'application/json; charset=utf-8' `
+    -Body ([Text.Encoding]::UTF8.GetBytes($body))
+
+$response | Select-Object model, response, done, done_reason
+```
+
+ผลที่ผ่านต้องมี `model` เป็น `qwen3:4b`, `response` มีคำตอบ, `done` เป็น `True` และ `done_reason` เป็น `stop` บันทึกหลักฐานชั่วคราวบน Desktop ได้ด้วย:
+
+```powershell
+$response | ConvertTo-Json -Depth 10 | Set-Content "$HOME\Desktop\ollama-test-result.json" -Encoding UTF8
+```
+
+ทดสอบ endpoint ไม่พร้อมโดยใช้ port ที่ไม่มี service:
+
+```powershell
+try {
+    Invoke-RestMethod -Uri 'http://127.0.0.1:11435/api/version' -TimeoutSec 5
+    Write-Host 'ไม่ผ่าน: port นี้มี service ทำงานอยู่'
+}
+catch {
+    Write-Host 'ผ่าน: แสดงข้อผิดพลาดเมื่อ Ollama endpoint ไม่พร้อม'
+    Write-Host $_.Exception.Message
+}
+```
+
+ระหว่างรอสิทธิ์ สามารถยืนยันการตรวจเครื่อง, การติดตั้ง Ollama, โมเดล `qwen3:4b`, CLI, REST API และกรณี endpoint ไม่พร้อมได้ แต่ยังห้ามติ๊กว่าผ่านหัวข้อสคริปต์ตาม README, ไฟล์ส่งมอบใน Repository, การตรวจ secret หรือการเปิดแชทด้วย `open-chat.cmd` จนกว่าจะได้ไฟล์จากฝ่าย Software และทดสอบข้อ 6–8 ครบ
+
 ### วิธี A: ดาวน์โหลด ZIP (แนะนำสำหรับผู้ที่ยังไม่ใช้ Git)
 
 1. เปิดหน้า [BC-LocalAI บน GitHub](https://github.com/b3amkawi/BC-LocalAI) และลงชื่อเข้าใช้บัญชีที่ได้รับสิทธิ์ ถ้า Repository เปิดไม่ได้ให้ขอสิทธิ์จากเจ้าของก่อน
