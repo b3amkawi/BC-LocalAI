@@ -1,11 +1,13 @@
 # BC-LocalAI
 
-ASP.NET Core application targeting .NET 10. The backend exposes a mock chat API
-so the API contract can be developed and tested without running Ollama.
+ASP.NET Core application targeting .NET 10. The backend exposes `POST /api/chat`,
+answered by a local Ollama model (`qwen3:4b`) through `OllamaAIService` (BE-002).
+`MockAIService` (BE-001) is kept for automated tests, so `dotnet test` does not need Ollama.
 
 ## Requirements
 
 - .NET 10 SDK
+- Ollama with the `qwen3:4b` model for running the API (`ollama pull qwen3:4b`); not needed for `dotnet build` / `dotnet test`
 
 ## Run locally
 
@@ -40,12 +42,12 @@ Invoke-RestMethod `
   -Body $body
 ```
 
-HTTP 200 response:
+HTTP 200 response (a real answer from Ollama; for example, asking "หนึ่งบวกหนึ่งได้เท่าไร ตอบสั้น ๆ"):
 
 ```json
 {
-  "response": "Mock AI response",
-  "model": "mock"
+  "response": "2",
+  "model": "qwen3:4b"
 }
 ```
 
@@ -70,20 +72,58 @@ Invoke-WebRequest `
 }
 ```
 
-The current response is produced by `MockAIService`; Ollama is not required and
-no secrets or external AI configuration are used.
+There is no silent fallback to `MockAIService`: if Ollama is not reachable the API returns an error (see below).
+No secrets are used. Ollama is only called on loopback by default and must not be exposed to the public internet.
 
-Verification evidence for BE-001 is available in
-[`docs/BE-001-evidence.md`](docs/BE-001-evidence.md).
+### Ollama configuration
+
+`BC-LocalAI/appsettings.json` (override with environment variables such as `Ollama__BaseUrl`):
+
+```json
+{
+  "Ollama": {
+    "BaseUrl": "http://127.0.0.1:11434",
+    "Model": "qwen3:4b",
+    "TimeoutSeconds": 180
+  }
+}
+```
+
+The configuration is validated at startup; an invalid value (bad URL, empty model, timeout outside 1-600) stops the app with a clear error.
+
+### Error contract
+
+All errors use `{ "error": { "code": "...", "message": "..." } }` and never include exceptions, stack traces or provider details.
+
+| Case | HTTP | Code |
+|------|------|------|
+| Empty / missing message, malformed JSON | 400 | `INVALID_MESSAGE` |
+| Cannot connect to Ollama | 503 | `AI_UNAVAILABLE` |
+| Ollama timeout | 504 | `AI_TIMEOUT` |
+| Ollama returns an HTTP error | 502 | `AI_PROVIDER_ERROR` |
+| Malformed / incomplete Ollama response (`done` not true, `done_reason` not `stop`, bad or empty `answer`, wrong model) | 502 | `AI_INVALID_RESPONSE` |
+| Unexpected error | 500 | `INTERNAL_ERROR` |
+
+### Live smoke test (needs Ollama)
+
+```powershell
+.\scripts\live-smoke-test.ps1   # exit code 0 = passed, 1 = failed
+```
+
+Verification evidence: [`docs/BE-001-evidence.md`](docs/BE-001-evidence.md) (mock API),
+[`docs/BE-002-evidence.md`](docs/BE-002-evidence.md) (Ollama integration).
 
 ## Review and testing files
 
 | File | Purpose |
 |------|---------|
-| `docs/REVIEW-CHECKLIST.md` | Step-by-step guide for the reviewer, acceptance criteria table, code review points |
-| `docs/BE-001-evidence.md` | Build, test and API evidence |
+| `docs/REVIEW-CHECKLIST.md` | BE-001 reviewer guide, acceptance criteria table, code review points |
+| `docs/BE-001-evidence.md` | BE-001 build, test and API evidence |
+| `docs/BE-002-REVIEW-CHECKLIST.md` | BE-002 (Ollama) reviewer guide and acceptance criteria table |
+| `docs/BE-002-evidence.md` | BE-002 build, test, live smoke test and failure-scenario evidence |
+| `scripts/live-smoke-test.ps1` | Live check against a real Ollama (Thai, English, calculation, empty message) |
 | `docs/api-examples.http` | Ready-to-send request examples (VS Code REST Client, Rider, Visual Studio) |
-| `scripts/smoke-test.ps1` | Automated check of 200 and 400 cases against a running API (works on Windows PowerShell 5.1 and 7+) |
+| `scripts/smoke-test.ps1` | Contract check of 200 and 400 cases against a running API (needs Ollama for the 200 case; works on Windows PowerShell 5.1 and 7+) |
 
 Quick check: start the API, then run `.\scripts\smoke-test.ps1`.
 

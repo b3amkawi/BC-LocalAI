@@ -6,10 +6,11 @@ using Microsoft.AspNetCore.Mvc.Testing;
 
 namespace BC_LocalAI.Tests;
 
+/// <summary>Public /api/chat contract using MockAIService (Ollama is not needed).</summary>
 public sealed class ChatApiIntegrationTests(WebApplicationFactory<Program> factory)
     : IClassFixture<WebApplicationFactory<Program>>
 {
-    private readonly HttpClient _client = factory.CreateClient();
+    private readonly HttpClient _client = factory.CreateClientWithMock();
 
     [Fact]
     public async Task Post_ValidMessage_Returns200WithContract()

@@ -2,7 +2,7 @@
 ### Start the API first: dotnet run --project BC-LocalAI/BC-LocalAI.csproj --launch-profile http
 @host = http://localhost:5290
 
-### 1) Valid message -> 200 {"response":"Mock AI response","model":"mock"}
+### 1) Valid message -> 200 {"response":"<answer>","model":"qwen3:4b"} (needs Ollama running)
 POST {{host}}/api/chat
 Content-Type: application/json
 

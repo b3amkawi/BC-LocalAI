@@ -1,6 +1,8 @@
+using BC_LocalAI.Configuration;
 using BC_LocalAI.Middleware;
 using BC_LocalAI.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using BC_LocalAI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,7 +15,19 @@ builder.Services.AddControllersWithViews()
         options.InvalidModelStateResponseFactory = _ => new BadRequestObjectResult(
             new ApiErrorResponse(new ApiError("INVALID_MESSAGE", "Message is required")));
     });
-builder.Services.AddScoped<IAIService, MockAIService>();
+builder.Services.AddSingleton<IValidateOptions<OllamaOptions>, OllamaOptionsValidator>();
+builder.Services.AddOptions<OllamaOptions>()
+    .Bind(builder.Configuration.GetSection(OllamaOptions.SectionName))
+    .ValidateOnStart();
+
+// Typed HttpClient: /api/chat is served by Ollama. There is intentionally no silent
+// fallback to MockAIService; automated tests replace IAIService explicitly.
+builder.Services.AddHttpClient<IAIService, OllamaAIService>((serviceProvider, client) =>
+{
+    var ollama = serviceProvider.GetRequiredService<IOptions<OllamaOptions>>().Value;
+    client.BaseAddress = new Uri(ollama.BaseUrl.TrimEnd('/') + "/");
+    client.Timeout = TimeSpan.FromSeconds(ollama.TimeoutSeconds);
+});
 
 var app = builder.Build();
 

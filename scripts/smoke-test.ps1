@@ -1,6 +1,9 @@
-<#
+﻿<#
 .SYNOPSIS
-  Smoke-tests POST /api/chat against a running BC-LocalAI instance (BE-001).
+  Smoke-tests the /api/chat contract against a running BC-LocalAI instance (BE-001).
+  Since BE-002 the app answers through Ollama, so Ollama (qwen3:4b) must be running for the 200 case.
+  Without Ollama the 200 case fails with 503 AI_UNAVAILABLE by design; the 400 cases still pass.
+  Use `dotnet test` for the Ollama-free (MockAIService) checks.
 .EXAMPLE
   dotnet run --project .\BC-LocalAI\BC-LocalAI.csproj --launch-profile http   # terminal 1
   .\scripts\smoke-test.ps1                                                    # terminal 2
@@ -23,7 +26,7 @@ function Test-Case($name, $body, $expectedStatus, $check) {
     else { Write-Host "FAIL  $name -> $status $text" -ForegroundColor Red; $script:failed++ }
 }
 
-$isOk  = { param($j) $j.response -eq "Mock AI response" -and $j.model -eq "mock" }
+$isOk  = { param($j) -not [string]::IsNullOrWhiteSpace($j.response) -and -not [string]::IsNullOrWhiteSpace($j.model) }
 $isErr = { param($j) $j.error.code -eq "INVALID_MESSAGE" -and $j.error.message -eq "Message is required" }
 
 Test-Case "valid message"   '{"message":"สวัสดี AI"}' 200 $isOk

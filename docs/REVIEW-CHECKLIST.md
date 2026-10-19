@@ -2,7 +2,7 @@
 
 Issue: #2 · PR: #3 · Branch: `watzapon01_Backend` · Target: `main` (**do not merge until review is done**)
 
-Requirements: .NET 10 SDK. No Ollama and no secrets are needed.
+Requirements: .NET 10 SDK. Build and tests need no Ollama and no secrets. Since BE-002 the running API needs Ollama (see `docs/BE-002-REVIEW-CHECKLIST.md`); the Ollama-free demo of BE-001 is covered by the automated tests (`MockAIService`).
 
 ## 1. Build and automated tests
 
@@ -13,7 +13,7 @@ dotnet build .\BC-LocalAI.slnx
 dotnet test .\BC-LocalAI.slnx
 ```
 
-Expected: 0 warnings / 0 errors, `Passed: 17, Failed: 0`.
+Expected: 0 warnings / 0 errors, `Failed: 0` (all tests; the count grows with BE-002).
 
 ## 2. Run and try the API
 
@@ -27,7 +27,7 @@ In a second terminal either run the script or open `docs/api-examples.http`:
 .\scripts\smoke-test.ps1
 ```
 
-Expected: six `PASS` lines and `All smoke tests passed`.
+Expected (Ollama running): six `PASS` lines and `All smoke tests passed`.
 
 ## 3. Acceptance criteria (Issue #2)
 
