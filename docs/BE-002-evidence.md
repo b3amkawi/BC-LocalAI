@@ -1,7 +1,7 @@
 # BE-002 Verification Evidence
 
 - Date: 2026-10-19 (Asia/Bangkok)
-- Branch: `watzapon01_Backend`
+- Branch: `watzapon02_Backend`
 - Scope: GitHub Issue #6 — Integrate ASP.NET Chat API with Ollama
 - Runtime: .NET 10, Ollama with `qwen3:4b` (loopback `127.0.0.1:11434`)
 - Provider contract used: Issue #5 (AI-002), section 4 and 5
@@ -37,7 +37,7 @@ Design notes:
 
 ```text
 dotnet build .\BC-LocalAI.slnx  ->  0 Warning(s), 0 Error(s)
-dotnet test  .\BC-LocalAI.slnx  ->  Passed! Failed: 0, Passed: 105, Skipped: 0, Total: 105
+dotnet test  .\BC-LocalAI.slnx  ->  Passed! Failed: 0, Passed: 132, Skipped: 0, Total: 132
 ```
 
 No test needs Ollama: provider behaviour is simulated with a fake `HttpMessageHandler`.
@@ -133,12 +133,27 @@ Ollama serves requests one at a time (10 simultaneous 3-sentence answers took 26
 timeout gave 4 x 200 and 11 x 504, then the API recovered immediately); 200 KB and emoji messages work; capacity at
 40-100 users was not measured.
 
+## 4d. Loopback-only enforcement (review comment on PR #9)
+
+`OllamaOptionsValidator` now requires `Uri.IsLoopback` (AI-002: Ollama through loopback only).
+
+| `Ollama:BaseUrl` | Result (real app) |
+|------------------|-------------------|
+| `http://127.0.0.1:11434` (default) | starts, `200 {"response":"2","model":"qwen3:4b"}` |
+| `http://localhost:11434` | starts, `200` |
+| `http://[::1]:11434` | starts (valid loopback), `503 AI_UNAVAILABLE` because Ollama here listens on IPv4 `127.0.0.1` only |
+| `https://ollama.internal:11434`, `http://192.168.1.10:11434`, `https://ollama.example.com`, `http://0.0.0.0:11434` | application does not start: `Ollama:BaseUrl must be an absolute loopback http or https URL.` |
+
+Tests: unit tests for accepted (`127.0.0.1`, `localhost`, `[::1]`, ...) and rejected hosts (including `0.0.0.0`,
+`127.0.0.1.nip.io`, `localhost.example.com`), and integration tests that the application cannot start with a
+non-loopback URL and does start with loopback URLs. Removing or weakening the rule makes 5 to 62 tests fail.
+
 ## 5. Acceptance criteria (Issue #6, section 11)
 
 | Criterion | Evidence |
 |-----------|----------|
 | `dotnet build` passes | section 2 |
-| `dotnet test` passes | section 2 (105/105) |
+| `dotnet test` passes | section 2 (132/132) |
 | `/api/chat` calls real Ollama | section 3 |
 | Valid message returns 200, contract, no nested JSON, model `qwen3:4b` | section 3, `OllamaChatApiTests` |
 | Empty message returns 400 | section 3, integration tests |
@@ -147,7 +162,7 @@ timeout gave 4 x 200 and 11 x 504, then the API recovered immediately); 200 KB a
 | Automated tests need no Ollama | fake HTTP handler |
 | Live smoke test passes with Ollama | section 3 |
 | No secret in repository | secret scan of source and scripts found nothing |
-| Ollama not exposed to the public internet | default `127.0.0.1`; the app never opens Ollama |
+| Ollama not exposed to the public internet | `Ollama:BaseUrl` must be loopback (validated at startup, the app refuses other hosts); Ollama itself listens on `127.0.0.1` only |
 | README has reproduce steps | `README.md` |
 
 ## 6. Open items (not done by the developer)
@@ -156,4 +171,4 @@ timeout gave 4 x 200 and 11 x 504, then the API recovered immediately); 200 KB a
   written contract; it still needs confirmation from the Backend Developer or Tech Lead.
 - **Human code review** of the pull request and merge into `main` (owner only).
 - **Post-merge check** of `/api/chat` (Definition of Done) after the owner merges.
-- `main` (with BE-001 and the AI-001 Ollama setup docs) was merged into `watzapon01_Backend`; build and 105 tests pass on the merged result.
+- `main` (with BE-001 and the AI-001 Ollama setup docs) was merged into `watzapon02_Backend`; build and 132 tests pass on the merged result.

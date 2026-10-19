@@ -1,6 +1,6 @@
 # BE-002 Reviewer Guide
 
-Issue: #6 · Branch: `watzapon01_Backend` · Target: `main` (**do not merge until review is done**)
+Issue: #6 · Branch: `watzapon02_Backend` · Target: `main` (**do not merge until review is done**)
 
 Requirements: .NET 10 SDK. Build and tests need no Ollama. The live steps need Ollama with `qwen3:4b`.
 
@@ -8,12 +8,12 @@ Requirements: .NET 10 SDK. Build and tests need no Ollama. The live steps need O
 
 ```powershell
 git fetch origin
-git checkout watzapon01_Backend
+git checkout watzapon02_Backend
 dotnet build .\BC-LocalAI.slnx
 dotnet test .\BC-LocalAI.slnx
 ```
 
-Expected: 0 warnings / 0 errors, `Failed: 0` (105 tests).
+Expected: 0 warnings / 0 errors, `Failed: 0` (132 tests).
 
 ## 2. Live check with real Ollama
 
@@ -35,7 +35,7 @@ $env:Ollama__BaseUrl = "http://127.0.0.1:59999"
 dotnet run --project .\BC-LocalAI\BC-LocalAI.csproj --launch-profile http
 ```
 
-Expected: HTTP 503 `AI_UNAVAILABLE`. Invalid settings (for example `$env:Ollama__TimeoutSeconds = "0"`) stop the app at startup.
+Expected: HTTP 503 `AI_UNAVAILABLE`. A non-loopback URL such as `$env:Ollama__BaseUrl = "http://192.168.1.10:11434"` stops the app at startup (loopback only). Other invalid settings (for example `$env:Ollama__TimeoutSeconds = "0"`) stop the app at startup.
 
 ## 4. Acceptance criteria (Issue #6)
 
@@ -52,7 +52,7 @@ Expected: HTTP 503 `AI_UNAVAILABLE`. Invalid settings (for example `$env:Ollama_
 | 9 | Automated tests run without Ollama | step 1 with Ollama stopped | [ ] |
 | 13 | Known limitations understood and accepted | `docs/KNOWN-LIMITATIONS.md` | [ ] |
 | 10 | No secrets in the repository | review the diff | [ ] |
-| 11 | Ollama not exposed publicly | default `127.0.0.1`, no listener code | [ ] |
+| 11 | Ollama reached through loopback only | `OllamaOptionsValidator` rejects non-loopback `Ollama:BaseUrl`; try step 3 with `http://192.168.1.10:11434` (app must not start) | [ ] |
 | 12 | README has reproduce steps | `README.md` | [ ] |
 
 ## 5. Code review points
@@ -61,7 +61,7 @@ Expected: HTTP 503 `AI_UNAVAILABLE`. Invalid settings (for example `$env:Ollama_
 |------|------|----------|
 | Provider call | `BC-LocalAI/Services/OllamaAIService.cs` | request matches Issue #5, success conditions, timeout vs caller cancellation, no prompt/response logging |
 | DTOs | `BC-LocalAI/Models/Ollama/` | separate from the public `ChatRequest` / `ChatResponse` |
-| Configuration | `BC-LocalAI/Configuration/OllamaOptions.cs`, `appsettings.json`, `Program.cs` | validation at startup, loopback default, no secrets |
+| Configuration | `BC-LocalAI/Configuration/OllamaOptions.cs`, `appsettings.json`, `Program.cs` | validation at startup, loopback enforced (`IsLoopback`), no secrets |
 | Error mapping | `BC-LocalAI/Services/AiServiceException.cs`, `Middleware/ExceptionHandlingMiddleware.cs` | codes/status match Issue #6 section 7, nothing internal leaks |
 | Controller | `BC-LocalAI/Controllers/ChatController.cs` | still only calls `IAIService`, no Ollama logic |
 | No Mock fallback | `Program.cs` | `IAIService` is Ollama only; tests override it explicitly |

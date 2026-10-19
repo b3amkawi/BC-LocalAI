@@ -11,7 +11,7 @@ answered by a local Ollama model (`qwen3:4b`) through `OllamaAIService` (BE-002)
 ## Requirements
 
 - .NET 10 SDK
-- Ollama with the `qwen3:4b` model for running the API; not needed for `dotnet build` / `dotnet test`. Installation: [docs/ai/ollama-setup.md](docs/ai/ollama-setup.md)
+- Ollama (on the same machine, loopback only) with the `qwen3:4b` model for running the API; not needed for `dotnet build` / `dotnet test`. Installation: [docs/ai/ollama-setup.md](docs/ai/ollama-setup.md)
 
 ## Run locally
 
@@ -77,7 +77,7 @@ Invoke-WebRequest `
 ```
 
 There is no silent fallback to `MockAIService`: if Ollama is not reachable the API returns an error (see below).
-No secrets are used. Ollama is only called on loopback by default and must not be exposed to the public internet.
+No secrets are used. Ollama is reached through loopback only (AI-002 contract): `Ollama:BaseUrl` must be a loopback http/https URL (`127.0.0.1`, `localhost`, `[::1]`); any other host stops the application at startup. Ollama itself must not be exposed to the public internet.
 
 ### Ollama configuration
 
@@ -93,7 +93,7 @@ No secrets are used. Ollama is only called on loopback by default and must not b
 }
 ```
 
-The configuration is validated at startup; an invalid value (bad URL, empty model, timeout outside 1-600) stops the app with a clear error.
+The configuration is validated at startup; an invalid value (bad URL, a URL that is not loopback, empty model, timeout outside 1-600) stops the app with a clear error.
 
 ### Error contract
 

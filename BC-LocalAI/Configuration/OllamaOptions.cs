@@ -19,10 +19,12 @@ public sealed class OllamaOptionsValidator : IValidateOptions<OllamaOptions>
     {
         var failures = new List<string>();
 
+        // AI-002 contract: Ollama is reached through loopback only, never over a network.
         if (!Uri.TryCreate(options.BaseUrl, UriKind.Absolute, out var uri)
-            || (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps))
+            || (uri.Scheme != Uri.UriSchemeHttp && uri.Scheme != Uri.UriSchemeHttps)
+            || !uri.IsLoopback)
         {
-            failures.Add("Ollama:BaseUrl must be an absolute http or https URL.");
+            failures.Add("Ollama:BaseUrl must be an absolute loopback http or https URL.");
         }
 
         if (string.IsNullOrWhiteSpace(options.Model))

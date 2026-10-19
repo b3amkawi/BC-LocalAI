@@ -197,8 +197,39 @@ public sealed class OllamaChatApiTests(WebApplicationFactory<Program> factory)
     }
 
     [Theory]
+    [InlineData("https://ollama.internal:11434")]
+    [InlineData("http://192.168.1.10:11434")]
+    [InlineData("https://ollama.example.com")]
+    public void NonLoopbackBaseUrl_StopsApplicationStartup_WithClearMessage(string baseUrl)
+    {
+        var broken = factory.WithWebHostBuilder(builder => builder.PinOllama(baseUrl));
+
+        var exception = Assert.Throws<OptionsValidationException>(() => broken.CreateClient());
+
+        Assert.Contains("loopback", exception.Message);
+    }
+
+    [Theory]
+    [InlineData("http://127.0.0.1:11434")]
+    [InlineData("http://localhost:11434")]
+    [InlineData("http://[::1]:11434")]
+    public void LoopbackBaseUrl_StartsApplication(string baseUrl)
+    {
+        var app = factory.WithWebHostBuilder(builder => builder.PinOllama(baseUrl));
+
+        using var client = app.CreateClient();
+        var options = app.Services.GetRequiredService<IOptions<OllamaOptions>>().Value;
+
+        Assert.Equal(baseUrl, options.BaseUrl);
+    }
+
+    [Theory]
     [InlineData("not a url", "qwen3:4b", "180")]
     [InlineData("ftp://127.0.0.1:11434", "qwen3:4b", "180")]
+    [InlineData("https://ollama.internal:11434", "qwen3:4b", "180")]
+    [InlineData("http://192.168.1.10:11434", "qwen3:4b", "180")]
+    [InlineData("https://ollama.example.com", "qwen3:4b", "180")]
+    [InlineData("http://0.0.0.0:11434", "qwen3:4b", "180")]
     [InlineData("http://127.0.0.1:11434", "", "180")]
     [InlineData("http://127.0.0.1:11434", "qwen3:4b", "0")]
     [InlineData("http://127.0.0.1:11434", "qwen3:4b", "-5")]
