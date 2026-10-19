@@ -1,8 +1,54 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    // The chat page has its own full-screen layout instead of the default site layout.
+    Layout = null;
+    ViewData["Title"] = "Local AI Chat";
 }
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#16386a" />
+    <title>@ViewData["Title"]</title>
+    <link rel="icon" href="~/favicon.ico" />
+    <link rel="stylesheet" href="~/css/chat.css" asp-append-version="true" />
+</head>
+<body>
+    <div class="app">
+        <header class="app__header">
+            <span class="app__mark" aria-hidden="true">AI</span>
+            <div class="app__titles">
+                <h1 class="app__title">Local AI Chat</h1>
+                <p class="app__subtitle">ถามตอบกับ AI ที่ทำงานในเครื่องของคุณ</p>
+            </div>
+            <span id="model-chip" class="chip">โมเดล: —</span>
+        </header>
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
-</div>
+        <main id="conversation" class="conversation" tabindex="0" aria-label="พื้นที่การสนทนา (กดลูกศรขึ้นลงเพื่อเลื่อนอ่าน)">
+            <ol id="messages" class="messages" role="log" aria-label="การสนทนา" aria-relevant="additions">
+                <li id="empty-state" class="empty">
+                    <p class="empty__title">เริ่มถามได้เลย</p>
+                    <p class="empty__text">พิมพ์คำถามด้านล่าง แล้วกด Enter เพื่อส่ง</p>
+                </li>
+            </ol>
+            <noscript>
+                <p class="noscript">หน้านี้ต้องเปิดใช้งาน JavaScript จึงจะส่งข้อความได้</p>
+            </noscript>
+        </main>
+
+        <form id="composer" class="composer" action="#" method="post" novalidate>
+            <p id="hint" class="composer__hint" role="alert"></p>
+            <div class="composer__row">
+                <label for="message" class="visually-hidden">ข้อความของคุณ</label>
+                <textarea id="message" name="message" class="composer__input" rows="1"
+                          placeholder="พิมพ์คำถามของคุณ…" autocomplete="off" aria-describedby="keys"></textarea>
+                <button id="send" type="submit" class="composer__send">ส่ง</button>
+            </div>
+            <p id="keys" class="composer__keys">Enter เพื่อส่ง · Shift+Enter เพื่อขึ้นบรรทัดใหม่</p>
+        </form>
+    </div>
+
+    <script src="~/js/chat-core.js" asp-append-version="true"></script>
+    <script src="~/js/chat.js" asp-append-version="true"></script>
+</body>
+</html>
