@@ -207,3 +207,5 @@ for the measured cold/warm timings, environment, quality failures, and limitatio
 
 For a Thai explanation of AI-001 through AI-003, the tools used, file locations,
 limitations, and questions for team handoff, read the [AI work handoff guide](docs/ai/ai-001-003-handoff.md).
+For a beginner explanation of API/JSON terminology, the request flow, testing,
+timing metrics, PowerShell syntax, and Git workflow, start with the [Thai learning guide](docs/ai/ai-001-003-explained.md).
