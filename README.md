@@ -31,6 +31,14 @@ With Ollama running and `qwen3:4b` downloaded, run from the repository root:
 pwsh -NoProfile -File .\scripts\test-ollama.ps1
 ```
 
+For an interactive local chat that displays only the final structured answer:
+
+```powershell
+pwsh -NoProfile -File .\scripts\chat-ollama.ps1
+```
+
+Type `/bye` to exit.
+
 See [local test evidence](docs/ai/ollama-test-evidence.md) for results and hardware limitations.
 
 To check the smoke script against a simulated local API without loading a model,
