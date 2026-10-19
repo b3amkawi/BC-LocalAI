@@ -93,6 +93,8 @@ No secrets are used. Ollama is reached through loopback only (AI-002 contract): 
 }
 ```
 
+`TimeoutSeconds` is 180 by default; AI-002 suggests up to 300 on a machine without a GPU or for the first model load (maximum 600).
+
 The configuration is validated at startup; an invalid value (bad URL, a URL that is not loopback, empty model, timeout outside 1-600) stops the app with a clear error.
 
 ### Error contract

@@ -75,11 +75,15 @@ internal static class TestApp
     public static HttpClient CreateClientWithOllama(
         this WebApplicationFactory<Program> factory,
         HttpMessageHandler handler,
-        string environment = "Development") =>
+        string environment = "Development",
+        bool pinOllama = true) =>
         factory.WithWebHostBuilder(builder =>
         {
             builder.UseEnvironment(environment);
-            builder.PinOllama();
+            if (pinOllama)
+            {
+                builder.PinOllama();
+            }
             builder.ConfigureTestServices(services =>
                 services.AddHttpClient<IAIService, OllamaAIService>()
                     .ConfigurePrimaryHttpMessageHandler(() => handler));

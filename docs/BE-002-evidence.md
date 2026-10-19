@@ -37,7 +37,7 @@ Design notes:
 
 ```text
 dotnet build .\BC-LocalAI.slnx  ->  0 Warning(s), 0 Error(s)
-dotnet test  .\BC-LocalAI.slnx  ->  Passed! Failed: 0, Passed: 132, Skipped: 0, Total: 132
+dotnet test  .\BC-LocalAI.slnx  ->  Passed! Failed: 0, Passed: 135, Skipped: 0, Total: 135
 ```
 
 No test needs Ollama: provider behaviour is simulated with a fake `HttpMessageHandler`.
@@ -148,12 +148,35 @@ Tests: unit tests for accepted (`127.0.0.1`, `localhost`, `[::1]`, ...) and reje
 `127.0.0.1.nip.io`, `localhost.example.com`), and integration tests that the application cannot start with a
 non-loopback URL and does start with loopback URLs. Removing or weakening the rule makes 5 to 62 tests fail.
 
+## 4e. Compliance with the AI-002 contract (files pulled from `pao02_AI`, commit `766800d`)
+
+The AI-002 files (`docs/ai/ollama-integration-contract.md` and its evidence) were merged from `pao02_AI` into this branch.
+Each "Backend must" requirement of the latest contract was checked against the code and tests:
+
+| AI-002 requirement | Implementation | Verified by |
+|--------------------|----------------|-------------|
+| `BaseUrl` is parsed as an absolute `Uri`, checked with `Uri.IsLoopback`, and the application must not start otherwise | `OllamaOptionsValidator` + `ValidateOnStart` | unit tests (allowed: `127.0.0.1`, `localhost`, `[::1]`; refused: `192.168.1.10`, `ollama.internal`, `ollama.example.com`, ...), integration test that startup fails, real app refuses to start |
+| Request fields, `system` prompt, `format` schema, `num_predict` 256, `stream`/`think` false | `OllamaGenerateRequest` | unit test of the request body, live smoke test |
+| Nine success conditions (model, `done` boolean `true`, `done_reason` `stop`, one non-empty `answer`, no think markers, ...) | `OllamaAIService.ExtractAnswer` | unit tests for each failure, mutation checks |
+| Parse both JSON layers with a JSON parser, never regex or string cutting | `System.Text.Json` for both layers | code review, unit tests |
+| `done_reason=length` is truncated and must not be a success | `AI_INVALID_RESPONSE` (502) | unit + live (long essay) |
+| No partial answer is returned as a success | every failure throws `AiServiceException` | unit + integration tests |
+| Provider timeout is separate from user cancellation; a cancelled request must not answer 504 | service distinguishes by the caller's token; middleware logs a client cancellation and returns nothing | `OllamaCancellationApiTests` (HTTP level): a disconnect cancels the Ollama call and is not logged as a timeout; a real `HttpClient` timeout returns 504 `AI_TIMEOUT`; 4 deliberate bugs each fail these tests |
+| Timeout is configuration and must not wait forever | `Ollama:TimeoutSeconds`, 1 to 600, default 180 | validator tests, live 504 scenario |
+| Unreachable provider is a distinct class | 503 `AI_UNAVAILABLE` | unit, integration, live |
+
+Real Ollama check of cancellation: a client that disconnects after 1 s during a long generation is handled quietly
+(information log only, no timeout line, no error). Measured directly against Ollama and through the app, the next short
+request is answered in 0.2 s after an abandoned request, so Ollama does not keep working on cancelled requests.
+AI-002 suggests up to 300 s for machines without a GPU or on the first model load; the default here is 180 s
+(`Ollama:TimeoutSeconds`, maximum 600).
+
 ## 5. Acceptance criteria (Issue #6, section 11)
 
 | Criterion | Evidence |
 |-----------|----------|
 | `dotnet build` passes | section 2 |
-| `dotnet test` passes | section 2 (132/132) |
+| `dotnet test` passes | section 2 (135/135) |
 | `/api/chat` calls real Ollama | section 3 |
 | Valid message returns 200, contract, no nested JSON, model `qwen3:4b` | section 3, `OllamaChatApiTests` |
 | Empty message returns 400 | section 3, integration tests |
@@ -171,4 +194,4 @@ non-loopback URL and does start with loopback URLs. Removing or weakening the ru
   written contract; it still needs confirmation from the Backend Developer or Tech Lead.
 - **Human code review** of the pull request and merge into `main` (owner only).
 - **Post-merge check** of `/api/chat` (Definition of Done) after the owner merges.
-- `main` (with BE-001 and the AI-001 Ollama setup docs) was merged into `watzapon02_Backend`; build and 132 tests pass on the merged result.
+- `main` (with BE-001 and the AI-001 Ollama setup docs) was merged into `watzapon02_Backend`; build and 135 tests pass on the merged result.

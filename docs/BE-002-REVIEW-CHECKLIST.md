@@ -13,7 +13,7 @@ dotnet build .\BC-LocalAI.slnx
 dotnet test .\BC-LocalAI.slnx
 ```
 
-Expected: 0 warnings / 0 errors, `Failed: 0` (132 tests).
+Expected: 0 warnings / 0 errors, `Failed: 0` (135 tests).
 
 ## 2. Live check with real Ollama
 
@@ -48,7 +48,7 @@ Expected: HTTP 503 `AI_UNAVAILABLE`. A non-loopback URL such as `$env:Ollama__Ba
 | 5 | No nested JSON in `response` | step 2, `OllamaChatApiTests` | [ ] |
 | 6 | Empty message returns 400 | step 2 | [ ] |
 | 7 | Unavailable 503 / timeout 504 / provider error 502 / invalid response 502 | `OllamaChatApiTests`, step 3 | [ ] |
-| 8 | Cancellation is forwarded | `OllamaAIServiceTests.Cancellation_ByCaller_...` | [ ] |
+| 8 | Cancellation is forwarded and is not reported as a provider timeout (AI-002) | `OllamaAIServiceTests.Cancellation_ByCaller_...`, `OllamaCancellationApiTests` | [ ] |
 | 9 | Automated tests run without Ollama | step 1 with Ollama stopped | [ ] |
 | 13 | Known limitations understood and accepted | `docs/KNOWN-LIMITATIONS.md` | [ ] |
 | 10 | No secrets in the repository | review the diff | [ ] |
