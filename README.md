@@ -1,6 +1,6 @@
 # BC-LocalAI
 
-ASP.NET Core application targeting .NET 10. The backend exposes `POST /api/chat`,
+ASP.NET Core application targeting .NET 10. It serves a Chat web page (FE-001) at `/` and the backend exposes `POST /api/chat`,
 answered by a local Ollama model (`qwen3:4b`) through `OllamaAIService` (BE-002).
 `MockAIService` (BE-001) is kept for automated tests, so `dotnet test` does not need Ollama.
 
@@ -19,7 +19,44 @@ answered by a local Ollama model (`qwen3:4b`) through `OllamaAIService` (BE-002)
 dotnet run --project .\BC-LocalAI\BC-LocalAI.csproj --launch-profile http
 ```
 
-Open <http://localhost:5290> in a browser.
+Open <http://localhost:5290> in a browser: this is the Chat page.
+
+## Chat web page (FE-001)
+
+Type a question and press **Enter** (or the **ส่ง** button) to send it; **Shift+Enter** starts a new line. The answer appears
+with the model name. While the AI is working a "กำลังประมวลผล" bubble is shown and the send button is disabled, so a question
+cannot be sent twice. The page works on desktop and on phones, and everything can be done with the keyboard
+(Tab reaches the message area, the input and the button; the arrow keys scroll the message area).
+
+![Desktop](docs/fe-001/desktop-conversation.jpg)
+
+| Situation | Text shown to the user |
+|-----------|------------------------|
+| Empty message (not sent) / `INVALID_MESSAGE` | กรุณาพิมพ์ข้อความก่อนส่ง |
+| `AI_UNAVAILABLE` | ไม่สามารถเชื่อมต่อ AI ได้ กรุณาตรวจว่า Ollama เปิดอยู่ |
+| `AI_TIMEOUT` | AI ใช้เวลาตอบนานเกินไป กรุณาลองใหม่ |
+| `AI_PROVIDER_ERROR` | AI เกิดข้อผิดพลาด กรุณาลองใหม่ |
+| `AI_INVALID_RESPONSE` | ได้รับคำตอบที่ไม่สมบูรณ์ กรุณาลองใหม่ |
+| `INTERNAL_ERROR` or anything unknown | ระบบเกิดข้อผิดพลาด กรุณาลองใหม่ |
+| The server cannot be reached at all | ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาตรวจการเชื่อมต่อแล้วลองใหม่ |
+
+After an error the question is put back in the input so it can be sent again. Exceptions, stack traces and server messages are never shown.
+
+Rules the page follows: it calls only `POST /api/chat` (never Ollama on port 11434); every text is written with `textContent`,
+so HTML or script in an answer is shown as plain text; there is no CDN or new dependency; nothing is stored in the browser
+(the conversation is kept in memory only and is gone when the page is reloaded). The page sends a Content-Security-Policy
+header (`script-src 'self'`, `connect-src 'self'`, ...), which also stops the browser from calling anything but this site.
+
+Files: `BC-LocalAI/Views/Home/Index.cshtml`, `BC-LocalAI/wwwroot/js/chat-core.js` (logic), `chat.js` (page wiring), `css/chat.css`.
+Colors come from the BetterCode logo (navy `#16386A`, yellow `#F9CB00`, red `#ED1C24`, white).
+Review guide and evidence: [docs/FE-001-REVIEW-CHECKLIST.md](docs/FE-001-REVIEW-CHECKLIST.md), [docs/FE-001-evidence.md](docs/FE-001-evidence.md).
+
+### Tests for the Chat page
+
+```powershell
+dotnet test .\BC-LocalAI.slnx                    # includes the page, static-file and security checks
+node --test "tests/ui/*.test.mjs"               # logic tests (Node 20+, no packages to install)
+```
 
 > **Stop the running app before `dotnet build` or `dotnet test`.** A running `BC-LocalAI.exe` locks the output files and the
 > build fails with `MSB3021` / `MSB3027` ("Unable to copy file ... BC-LocalAI.exe"; typically `10 Warning(s), 2 Error(s)`).
@@ -140,6 +177,8 @@ Verification evidence: [`docs/BE-001-evidence.md`](docs/BE-001-evidence.md) (moc
 |------|---------|
 | `docs/REVIEW-CHECKLIST.md` | BE-001 reviewer guide, acceptance criteria table, code review points |
 | `docs/BE-001-evidence.md` | BE-001 build, test and API evidence |
+| `docs/FE-001-REVIEW-CHECKLIST.md` | FE-001 (Chat page) reviewer guide and acceptance criteria table |
+| `docs/FE-001-evidence.md` | FE-001 test results, browser test notes and screenshots (`docs/fe-001/`) |
 | `docs/KNOWN-LIMITATIONS.md` | Known limitations of the Ollama integration with measured numbers (read before merging) |
 | `docs/BE-002-REVIEW-CHECKLIST.md` | BE-002 (Ollama) reviewer guide and acceptance criteria table |
 | `docs/BE-002-evidence.md` | BE-002 build, test, live smoke test and failure-scenario evidence |
