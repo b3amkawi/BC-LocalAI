@@ -14,7 +14,7 @@
 | Model | qwen3:4b; ดาวน์โหลดด้วย ollama pull สำเร็จ |
 | Test shell | PowerShell 7.6.5 |
 
-**Hardware deviation:** ไม่ใช่ RTX 4060/4070 ตาม issue จึงยังต้องให้ Tech Lead รับทราบ/ยอมรับ หรือทดสอบซ้ำบนเครื่องตามสเปก ไม่ได้ทดสอบบน Windows Server และไม่ได้ทดสอบ fresh install เพราะเครื่องนี้มี runtime อยู่แล้ว
+**Hardware deviation:** เครื่องหลักใช้ RTX 4050 ซึ่งต่างจาก RTX 4060/4070 ที่ระบุใน Issue ผลทดสอบนี้จึงต้องให้ Tech Lead ยืนยันว่าจะรับผลจาก RTX 4050 ได้หรือให้ทดสอบซ้ำบนเครื่องตามสเปก ไม่ได้ทดสอบบน Windows Server ส่วนขั้นตอนติดตั้ง Ollama และดาวน์โหลด `qwen3:4b` ได้ให้สมาชิกทดลองบนเครื่องใหม่แล้วสำเร็จ แต่ยังไม่ได้ทดสอบขั้นตอน clone และสคริปต์โปรเจกต์บนเครื่องนั้นเพราะบัญชียังไม่มีสิทธิ์ Repository
 
 ## REST API: PASS
 
@@ -71,7 +71,7 @@ Windows PowerShell 5.1 ในเครื่องนี้บล็อก `.ps1
 
 การทดสอบช่วงแรกที่ใช้ค่า thinking เริ่มต้นใช้เวลานาน จึงยกเลิกและทดสอบซ้ำ ผล PASS ข้างต้นเป็นรุ่น structured output ที่ตอบครบแล้ว สคริปต์ปัจจุบันไม่ให้ PASS หาก done_reason=length หรือ answer ไม่ครบรูปแบบ
 
-ยังไม่สร้าง PR, ไม่ push และไม่ merge ตามคำสั่งผู้ใช้ การตรวจรับ hardware, Tech Lead Review และ merge จึงยังไม่เสร็จ และ Issue ยังไม่ถือว่า Done ตาม workflow ทั้งหมด
+branch `pao01_AI` push ขึ้น GitHub แล้ว การตรวจรับ hardware, Tech Lead Review และ merge ยังไม่เสร็จ และ Issue ยังไม่ถือว่า Done ตาม workflow ทั้งหมด
 
 ## สถานะส่งมอบสำหรับ Tech Lead
 
@@ -81,20 +81,22 @@ Windows PowerShell 5.1 ในเครื่องนี้บล็อก `.ps1
 | ส่ง REST API และได้รับคำตอบ | ผ่าน greeting และ arithmetic แบบ structured output |
 | Script รันตาม README | ผ่าน PowerShell 7; exit 0 |
 | Error เข้าใจได้เมื่อปลายทางไม่พร้อม | ผ่าน port ว่าง; exit 1 |
-| Installation Guide และ API Guide | มีครบ; ยังไม่ได้ให้สมาชิกใหม่ทดสอบ fresh install |
+| Installation Guide และ API Guide | มีครบ; สมาชิกใหม่ติดตั้ง Ollama และดาวน์โหลดโมเดลตามคู่มือสำเร็จ แต่ยังไม่ได้ทดสอบส่วน Repository เพราะไม่มีสิทธิ์ |
 | ไม่มี secret ในไฟล์ที่เพิ่ม | ตรวจไฟล์และค้นรูปแบบ credential ทั่วไปแล้ว ไม่พบ |
 | Hardware RTX 4060/4070 | รอทดสอบซ้ำหรือ Tech Lead ยอมรับ deviation RTX 4050 |
-| PR / Tech Lead Review / Merge | ยังไม่ทำตามคำสั่งผู้ใช้ |
+| PR / Tech Lead Review / Merge | branch push แล้ว; กำลังจัดทำ PR ตามคำสั่ง Tech Lead; ยังไม่ review หรือ merge |
 
-ไฟล์งานจำกัดอยู่ที่ README, docs/ai, scripts/test-ollama.ps1 และ tests สำหรับตรวจ script ไม่เปลี่ยน ASP.NET Backend หรือ Web UI ตรวจ `git diff --check` ผ่าน และ local main/origin/main/HEAD ยังตรง base commit ที่ระบุข้างต้น งานยังเป็น local changes ไม่มี commit ใหม่หรือการอัปโหลด
+ไฟล์งานจำกัดอยู่ที่ README, `docs/ai`, scripts สำหรับ Ollama และ tests สำหรับตรวจ script ไม่เปลี่ยน ASP.NET Backend หรือ Web UI ตรวจ `git diff --check` ผ่าน และ `main`/`origin/main` ยังอยู่ที่ base commit ที่ระบุข้างต้น
 
 ## Regression tests สำหรับตัว script
 
 ```powershell
 python -m unittest discover -s tests -v
+# หรือบน Windows ที่เรียก Python ผ่าน Launcher
+py -3 -m unittest discover -s tests -v
 ```
 
-ผลล่าสุด: `Ran 9 tests in 17.545s`, `OK` รวม subtests เป็น 19 กรณี ใช้ HTTP จำลองบน loopback ไม่เรียกโมเดลจริง:
+ผลล่าสุดจากคำสั่ง Windows `py -3 -m unittest discover -s tests -v`: `Ran 9 tests in 17.701s`, `OK` รวม subtests เป็น 19 กรณี ใช้ HTTP จำลองบน loopback ไม่เรียกโมเดลจริง:
 
 - success พร้อม prompt ภาษาไทย UTF-8 และ JSON evidence
 - ปฏิเสธ truncated response, done ที่เป็น string, model ผิด/เป็น array, done_reason ที่เป็น array

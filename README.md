@@ -48,4 +48,10 @@ developers with Python 3 and PowerShell 7 can run:
 python -m unittest discover -s tests -v
 ```
 
+If the `python` command is unavailable on Windows but the Python Launcher is installed, use:
+
+```powershell
+py -3 -m unittest discover -s tests -v
+```
+
 Python is only needed for these developer tests, not for running Ollama or the smoke script.
