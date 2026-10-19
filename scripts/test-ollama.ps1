@@ -33,7 +33,7 @@ try {
     $hint = 'Run: ollama pull qwen3:4b. For a slow first load, increase -TimeoutSec and check available RAM/VRAM.'
     $payload = @{
         model = 'qwen3:4b'; prompt = $Prompt; stream = $false; think = $false
-        system = 'Answer the user briefly in Thai. Return a JSON object with an answer field containing only your final answer.'
+        system = 'Answer the user briefly in the same language as the user. Return a JSON object containing only an answer field with the final answer.'
         format = @{
             type = 'object'
             properties = @{ answer = @{ type = 'string' } }

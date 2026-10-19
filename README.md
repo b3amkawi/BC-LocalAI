@@ -110,6 +110,7 @@ For an interactive local chat that displays only the final structured answer:
 The launcher finds PowerShell 7 from `PATH` or the bundled Codex runtime. Type `/bye` to exit.
 
 See [local test evidence](docs/ai/ollama-test-evidence.md) for results and hardware limitations.
+Backend integration must follow the validated [Ollama integration contract](docs/ai/ollama-integration-contract.md).
 
 To check the smoke script against a simulated local API without loading a model,
 developers with Python 3 and PowerShell 7 can run:
