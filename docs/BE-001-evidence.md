@@ -91,9 +91,9 @@ controller calls AI through `IAIService`.
 - Ollama integration, Web UI, production deployment, and authentication are not
   included in this branch.
 
-## 10. Definition of Done and Code Review
+## 10. Definition of Done and Self-check
 
-Code review compared `origin/main...watzapon01_Backend` for security,
+Automated self-check (not a team code review) compared `origin/main...watzapon01_Backend` for security,
 correctness, performance, maintainability, and test coverage.
 
 - Critical findings: 0
@@ -104,5 +104,6 @@ correctness, performance, maintainability, and test coverage.
 - Automated tests: 13/13 passed
 - API smoke tests: passed
 
-The remaining workflow gates are creation of the pull request, attachment of
-this evidence to Issue #2, review of the pull request, and merge into `main`.
+The pull request (#3) is open and this evidence is attached to Issue #2.
+Remaining: Tech Lead confirmation of the API Contract, human code review by a
+teammate, and merge into `main` (owner only).
