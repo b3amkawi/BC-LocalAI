@@ -1,0 +1,98 @@
+{
+  "tested_at": "2026-10-19T11:14:05.4904042+07:00",
+  "endpoint": "http://127.0.0.1:11434/api/generate",
+  "ollama_version": "0.40.5",
+  "http_status": 200,
+  "elapsed_ms": 1204,
+  "request": {
+    "stream": false,
+    "model": "qwen3:4b",
+    "think": false,
+    "options": {
+      "temperature": 0,
+      "num_predict": 256
+    },
+    "prompt": "สวัสดี",
+    "format": {
+      "additionalProperties": false,
+      "required": [
+        "answer"
+      ],
+      "type": "object",
+      "properties": {
+        "answer": {
+          "type": "string"
+        }
+      }
+    },
+    "system": "Answer the user briefly in Thai. Return a JSON object with an answer field containing only your final answer."
+  },
+  "result": {
+    "model": "qwen3:4b",
+    "created_at": "2026-10-19T04:14:05.4627316Z",
+    "response": "{\"answer\": \"สวัสดีครับ!\"}",
+    "done": true,
+    "done_reason": "stop",
+    "context": [
+      151644,
+      8948,
+      198,
+      16141,
+      279,
+      1196,
+      26753,
+      304,
+      26392,
+      13,
+      3411,
+      264,
+      4718,
+      1633,
+      448,
+      458,
+      4226,
+      2070,
+      8482,
+      1172,
+      697,
+      1590,
+      4226,
+      382,
+      151645,
+      198,
+      151644,
+      872,
+      198,
+      143126,
+      23271,
+      125136,
+      28319,
+      151645,
+      198,
+      151644,
+      77091,
+      198,
+      151667,
+      198,
+      4913,
+      9217,
+      788,
+      330,
+      143126,
+      23271,
+      125136,
+      28319,
+      123886,
+      83546,
+      8958,
+      92
+    ],
+    "total_duration": 1184574500,
+    "load_duration": 4162700,
+    "prompt_eval_count": 40,
+    "prompt_eval_cached_count": 39,
+    "prompt_eval_duration": 287005000,
+    "eval_count": 13,
+    "eval_duration": 888565000
+  }
+}
