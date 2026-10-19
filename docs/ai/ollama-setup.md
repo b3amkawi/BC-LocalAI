@@ -143,24 +143,90 @@ ollama ps
 
 ห้ามเปิด PowerShell ขณะยังดูไฟล์อยู่ภายใน ZIP เพราะสคริปต์อาจเข้าถึงไฟล์ข้างเคียงไม่ได้ ต้อง **Extract All** ก่อนเสมอ
 
+วิธี ZIP ไม่มีคำสั่ง `git pull` หากต้องการไฟล์รุ่นใหม่ในภายหลัง ให้ดาวน์โหลด ZIP จาก branch `pao01_AI` ใหม่และแตกเป็นโฟลเดอร์ใหม่ เพื่อไม่ให้ปะปนกับไฟล์เดิม
+
 ### วิธี B: Clone ด้วย Git
 
-ตรวจว่ามี Git:
+#### B1. ติดตั้ง Git for Windows
+
+ตรวจว่ามี Git อยู่แล้วหรือไม่:
 
 ```powershell
 git --version
 ```
 
-หากมี Git ให้รันทีละบรรทัด:
+ถ้าแสดงเลขเวอร์ชัน ให้ข้ามไปหัวข้อ B2 หากขึ้นว่า `git is not recognized` ให้ติดตั้งด้วยวิธีใดวิธีหนึ่ง:
+
+**ติดตั้งด้วยไฟล์ Setup (แนะนำสำหรับมือใหม่)**
+
+1. เปิด [Git for Windows จากเว็บไซต์ทางการ](https://git-scm.com/download/win)
+2. ดาวน์โหลด **64-bit Git for Windows Setup** เครื่อง Windows on ARM ให้เลือก ARM64
+3. เปิดไฟล์ Setup ที่ดาวน์โหลด
+4. ใช้ค่าเริ่มต้นของตัวติดตั้งได้ เมื่อถึงหน้าเลือก PATH ให้เลือกตัวเลือกที่อนุญาตให้ใช้ Git จาก command line และโปรแกรมภายนอก
+5. กด Install แล้วรอจนเสร็จ
+6. ปิด PowerShell เดิมและเปิดใหม่
+
+หรือติดตั้งผ่าน `winget` ใน PowerShell:
+
+```powershell
+winget install --id Git.Git -e --source winget
+```
+
+ถ้า `winget` ไม่รู้จัก ให้ใช้ไฟล์ Setup ด้านบน หลังติดตั้งเสร็จตรวจ:
+
+```powershell
+git --version
+Get-Command git
+```
+
+ทั้งสองคำสั่งต้องแสดงข้อมูล Git หากยังไม่พบ ให้ปิด terminal ทุกหน้าต่างแล้วเปิดใหม่ หรือ restart Windows หนึ่งครั้ง
+
+#### B2. Clone branch งานลงเครื่องครั้งแรก
+
+เปิด PowerShell แล้วรันทีละบรรทัด:
 
 ```powershell
 cd $HOME\Documents
 git clone --branch pao01_AI --single-branch https://github.com/b3amkawi/BC-LocalAI.git
 cd .\BC-LocalAI
 git branch --show-current
+git remote -v
+git status
 ```
 
-บรรทัดสุดท้ายต้องแสดง `pao01_AI` หาก GitHub ขอเข้าสู่ระบบ ให้ใช้บัญชีที่ได้รับสิทธิ์ Repository และอย่าใส่รหัสผ่านหรือ token ลงในไฟล์ของโปรเจกต์ ถ้าไม่มี Git ให้ใช้วิธี ZIP ซึ่งไม่ต้องติดตั้ง Git
+ผลที่ต้องเห็น:
+
+- `git branch --show-current` แสดง `pao01_AI`
+- `git remote -v` แสดง URL `https://github.com/b3amkawi/BC-LocalAI.git`
+- `git status` แสดงว่าอยู่ branch `pao01_AI` และไม่มีไฟล์เปลี่ยนแปลง
+
+หาก GitHub เปิดหน้าต่างเบราว์เซอร์ให้ยืนยันตัวตน ให้ลงชื่อเข้าใช้บัญชีที่ได้รับสิทธิ์ Repository ห้ามใส่รหัสผ่าน, token หรือข้อมูลลับลงในไฟล์ของโปรเจกต์
+
+ถ้าขึ้น `destination path 'BC-LocalAI' already exists and is not an empty directory` แปลว่ามีโฟลเดอร์นี้อยู่แล้ว อย่า clone ทับ ให้เข้าโฟลเดอร์เดิมและใช้ขั้นตอนดึงอัปเดตด้านล่าง หรือเลือกชื่อโฟลเดอร์ใหม่:
+
+```powershell
+git clone --branch pao01_AI --single-branch https://github.com/b3amkawi/BC-LocalAI.git BC-LocalAI-pao01_AI
+cd .\BC-LocalAI-pao01_AI
+```
+
+#### B3. ดึงงานล่าสุดในครั้งต่อไป
+
+การ clone ทำเพียงครั้งแรก ครั้งต่อไปให้เปิด PowerShell ในโฟลเดอร์ `BC-LocalAI` แล้วตรวจว่าไม่มีงานของตนเองที่ยังไม่บันทึก:
+
+```powershell
+git status --short
+git branch --show-current
+```
+
+บรรทัดแรกควรว่าง และบรรทัดที่สองต้องเป็น `pao01_AI` จากนั้นดึงงานล่าสุดแบบไม่สร้าง merge commit อัตโนมัติ:
+
+```powershell
+git pull --ff-only origin pao01_AI
+```
+
+ถ้าขึ้น `Already up to date.` แปลว่ามีไฟล์ล่าสุดแล้ว หาก `git status --short` แสดงชื่อไฟล์ หรือ `git pull --ff-only` ปฏิเสธเพราะ branch แยกจาก remote ให้หยุดและขอผู้ดูแลทีมช่วยตรวจ อย่าใช้ `git reset --hard`, ลบไฟล์ หรือแก้ conflict เอง เพราะอาจทำให้งานที่ยังไม่ได้บันทึกหาย
+
+การตั้ง `user.name` และ `user.email` ยังไม่จำเป็นสำหรับการ clone หรือ pull ต้องตั้งเมื่อได้รับมอบหมายให้ commit เท่านั้น คู่มือนี้ไม่ให้ push หรือ merge เข้า `main`
 
 ### เปิด PowerShell ภายในโฟลเดอร์ที่ดาวน์โหลด
 
@@ -240,6 +306,9 @@ $LASTEXITCODE
 | อาการ | สาเหตุที่เป็นไปได้ | วิธีแก้ |
 | --- | --- | --- |
 | `irm is not recognized` | ใช้ Command Prompt | เปิด PowerShell ให้ prompt ขึ้นต้น `PS` หรือใช้ตัวติดตั้ง `.exe` |
+| `git is not recognized` | ยังไม่มี Git หรือ terminal ยังไม่โหลด PATH | ติดตั้ง Git for Windows แล้วเปิด terminal ใหม่ |
+| Clone ขึ้น `Repository not found` | ยังไม่ได้เข้าสู่ระบบหรือไม่มีสิทธิ์ Repository | เปิด Repository ในเบราว์เซอร์ด้วยบัญชีที่ได้รับสิทธิ์ก่อน |
+| Clone ขึ้น `destination path ... already exists` | มีโฟลเดอร์ชื่อเดียวกันอยู่แล้ว | เข้าโฟลเดอร์เดิมแล้ว pull หรือ clone โดยกำหนดชื่อโฟลเดอร์ใหม่ |
 | `ollama is not recognized` | terminal ยังไม่โหลด PATH หรือติดตั้งไม่สำเร็จ | เปิด terminal ใหม่ เปิด Ollama แล้วลอง `Get-Command ollama` |
 | `pwsh is not recognized` | ไม่มี PowerShell 7 | ติดตั้ง PowerShell 7 ตามคู่มือ Microsoft |
 | ต่อ `127.0.0.1:11434` ไม่ได้ | Ollama ยังไม่เปิด | เปิด Ollama หรือรัน `ollama serve` ในอีกหน้าต่าง |
@@ -256,7 +325,8 @@ $LASTEXITCODE
 - [ ] `Invoke-RestMethod http://127.0.0.1:11434/api/version` คืนข้อมูลเวอร์ชัน
 - [ ] `ollama list` มี `qwen3:4b`
 - [ ] `ollama run qwen3:4b` รับคำถามและตอบกลับ แล้วออกด้วย `/bye` ได้
-- [ ] ดาวน์โหลด branch `pao01_AI` และ `Test-Path` ทั้งสามไฟล์ได้ `True`
+- [ ] วิธี Git: `git --version` สำเร็จ, branch เป็น `pao01_AI` และ `git status` ไม่มีไฟล์เปลี่ยนแปลง หรือวิธี ZIP: แตกไฟล์จาก branch `pao01_AI` แล้ว
+- [ ] `Test-Path` ทั้งสามไฟล์ได้ `True`
 - [ ] `pwsh --version` แสดงเวอร์ชัน PowerShell 7
 - [ ] `pwsh -NoProfile -File .\scripts\test-ollama.ps1` แสดง `PASS` และ `$LASTEXITCODE` เป็น `0`
 - [ ] `pwsh -NoProfile -File .\scripts\test-ollama.ps1 -Port 11435` แสดง error ที่เข้าใจได้ และ `$LASTEXITCODE` เป็น `1`
