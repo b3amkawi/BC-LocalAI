@@ -13,7 +13,7 @@ dotnet build .\BC-LocalAI.slnx
 dotnet test .\BC-LocalAI.slnx
 ```
 
-Expected: 0 warnings / 0 errors, `Failed: 0` (98 tests).
+Expected: 0 warnings / 0 errors, `Failed: 0` (105 tests).
 
 ## 2. Live check with real Ollama
 
@@ -50,6 +50,7 @@ Expected: HTTP 503 `AI_UNAVAILABLE`. Invalid settings (for example `$env:Ollama_
 | 7 | Unavailable 503 / timeout 504 / provider error 502 / invalid response 502 | `OllamaChatApiTests`, step 3 | [ ] |
 | 8 | Cancellation is forwarded | `OllamaAIServiceTests.Cancellation_ByCaller_...` | [ ] |
 | 9 | Automated tests run without Ollama | step 1 with Ollama stopped | [ ] |
+| 13 | Known limitations understood and accepted | `docs/KNOWN-LIMITATIONS.md` | [ ] |
 | 10 | No secrets in the repository | review the diff | [ ] |
 | 11 | Ollama not exposed publicly | default `127.0.0.1`, no listener code | [ ] |
 | 12 | README has reproduce steps | `README.md` | [ ] |
@@ -66,15 +67,18 @@ Expected: HTTP 503 `AI_UNAVAILABLE`. Invalid settings (for example `$env:Ollama_
 | No Mock fallback | `Program.cs` | `IAIService` is Ollama only; tests override it explicitly |
 | Tests | `BC-LocalAI.Tests/` | fake HTTP handler, no real Ollama, failure cases covered |
 
-## 6. Known limits (by design, per Issue #6)
+## 6. Known limits (full list with measurements: `docs/KNOWN-LIMITATIONS.md`)
 
 - No streaming, conversation history, authentication, database, or multiple providers.
 - Answers longer than 256 tokens are cut by Ollama and returned as `502 AI_INVALID_RESPONSE` (contract: `num_predict` 256).
+- Ollama answers one request at a time: bursts of simultaneous users queue and can get `504 AI_TIMEOUT`; not measured at 40-100 users.
+- No authentication or rate limit (separate issue).
 - The Ollama contract in Issue #5 has not been approved in writing yet; confirm it.
 
 ## 7. Reviewer sign-off
 
 - [ ] Ollama contract (Issue #5) confirmed by Backend Developer / Tech Lead
+- [ ] Known limitations (`docs/KNOWN-LIMITATIONS.md`) reviewed and accepted
 - [ ] Code review approved
 - [ ] Merge into `main` (owner only)
 - [ ] `/api/chat` checked after the merge

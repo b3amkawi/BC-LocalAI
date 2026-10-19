@@ -242,6 +242,50 @@ public sealed class OllamaAIServiceTests
         AssertError(await Fail(handler), "AI_INVALID_RESPONSE", HttpStatusCode.BadGateway);
     }
 
+    [Theory]
+    [InlineData("text/html")]
+    [InlineData("text/plain")]
+    public async Task InvalidResponse_WhenOkResponseIsNotJsonContent(string contentType)
+    {
+        var handler = FakeHandler.Returning(new HttpResponseMessage(HttpStatusCode.OK)
+        {
+            Content = new StringContent("<html>proxy error page</html>", System.Text.Encoding.UTF8, contentType)
+        });
+
+        AssertError(await Fail(handler), "AI_INVALID_RESPONSE", HttpStatusCode.BadGateway);
+    }
+
+    [Fact]
+    public async Task InvalidResponse_WhenOkResponseDeclaresUnsupportedCharset()
+    {
+        // HttpContent.ReadFromJsonAsync throws NotSupportedException for an unknown charset.
+        var content = new StringContent("{\"model\":\"qwen3:4b\"}", System.Text.Encoding.UTF8, "application/json");
+        content.Headers.ContentType!.CharSet = "not-a-real-charset";
+        var handler = FakeHandler.Returning(new HttpResponseMessage(HttpStatusCode.OK) { Content = content });
+
+        AssertError(await Fail(handler), "AI_INVALID_RESPONSE", HttpStatusCode.BadGateway);
+    }
+
+    [Fact]
+    public async Task InvalidResponse_WhenOkResponseHasEmptyBody()
+    {
+        var handler = FakeHandler.Returning(new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent("") });
+
+        AssertError(await Fail(handler), "AI_INVALID_RESPONSE", HttpStatusCode.BadGateway);
+    }
+
+    [Fact]
+    public async Task Request_KeepsEmojiAndOtherNonBmpCharactersIntact()
+    {
+        var handler = FakeHandler.OllamaOk();
+        const string message = "😀 สวัสดี 𠮷";
+
+        await CreateService(handler).GenerateResponseAsync(message);
+
+        using var sent = JsonDocument.Parse(Assert.Single(handler.RequestBodies));
+        Assert.Equal(message, sent.RootElement.GetProperty("prompt").GetString());
+    }
+
     [Fact]
     public async Task Errors_DoNotLeakProviderDetails()
     {

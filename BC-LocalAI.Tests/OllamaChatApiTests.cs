@@ -128,6 +128,33 @@ public sealed class OllamaChatApiTests(WebApplicationFactory<Program> factory)
     }
 
     [Fact]
+    public async Task LoneSurrogateInMessage_Returns400Contract_NotInternalError()
+    {
+        var handler = FakeHandler.OllamaOk();
+
+        // "\\ud800" puts the JSON escape for a lone surrogate on the wire (a plain "\ud800" in C# would be
+        // silently replaced by U+FFFD when encoded as UTF-8, which is a valid message).
+        var response = await PostAsync(handler, "{\"message\":\"\\ud800 hi\"}");
+
+        await AssertErrorAsync(response, HttpStatusCode.BadRequest, "INVALID_MESSAGE", "Message is required");
+        Assert.Empty(handler.RequestBodies);
+    }
+
+    [Fact]
+    public async Task EmojiMessage_ReachesOllamaIntact_AndReturns200()
+    {
+        var handler = FakeHandler.OllamaOk("{\"answer\":\"ok 😀\"}");
+
+        var response = await PostAsync(handler, "{\"message\":\"😀 สวัสดี\"}");
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var body = await response.Content.ReadFromJsonAsync<ChatResponse>();
+        Assert.Equal("ok 😀", body!.Response);
+        using var sent = JsonDocument.Parse(Assert.Single(handler.RequestBodies));
+        Assert.Equal("😀 สวัสดี", sent.RootElement.GetProperty("prompt").GetString());
+    }
+
+    [Fact]
     public async Task Production_DefaultsToOllama_NotMock()
     {
         // No IAIService override: the app must use OllamaAIService (no silent Mock fallback).

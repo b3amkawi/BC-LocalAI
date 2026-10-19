@@ -37,7 +37,7 @@ Design notes:
 
 ```text
 dotnet build .\BC-LocalAI.slnx  ->  0 Warning(s), 0 Error(s)
-dotnet test  .\BC-LocalAI.slnx  ->  Passed! Failed: 0, Passed: 98, Skipped: 0, Total: 98
+dotnet test  .\BC-LocalAI.slnx  ->  Passed! Failed: 0, Passed: 105, Skipped: 0, Total: 105
 ```
 
 No test needs Ollama: provider behaviour is simulated with a fake `HttpMessageHandler`.
@@ -65,6 +65,14 @@ Each deliberate bug was applied to a throw-away copy of the code; the tests must
 
 Three of these initially survived (a lone `<think>`, a dropped token, a hardcoded request model);
 tests were tightened until all were caught.
+
+### Defect found and fixed during the final audit
+
+A provider response declaring an unknown `charset` made `ReadFromJsonAsync` throw `InvalidOperationException`, which was
+not handled, so the user received `500 INTERNAL_ERROR` instead of `502 AI_INVALID_RESPONSE` (Issue #6 section 7: malformed
+response). `OllamaAIService` now maps any failure while reading the response body (other than cancellation) to
+`AI_INVALID_RESPONSE`. Test: `InvalidResponse_WhenOkResponseDeclaresUnsupportedCharset` fails on the old code and passes now.
+Also added: non-JSON content types, empty body, emoji / non-BMP prompt, lone surrogate over HTTP.
 
 ## 3. Live smoke test with real Ollama (`qwen3:4b`)
 
@@ -107,12 +115,19 @@ Known limit found here: answers longer than 256 tokens cannot be returned (see R
 Testing note: send Thai text as UTF-8 (`Invoke-RestMethod` with UTF-8 bytes or `curl --data-binary @file`);
 Git Bash `curl -d` on Windows turns Thai into `?`, which makes Ollama answer about question marks.
 
+## 4c. Limits measured with the real Ollama
+
+Full table and caveats: [KNOWN-LIMITATIONS.md](KNOWN-LIMITATIONS.md). Highlights: answers over 256 tokens return 502;
+Ollama serves requests one at a time (10 simultaneous 3-sentence answers took 26 s in total; 15 simultaneous with a 12 s
+timeout gave 4 x 200 and 11 x 504, then the API recovered immediately); 200 KB and emoji messages work; capacity at
+40-100 users was not measured.
+
 ## 5. Acceptance criteria (Issue #6, section 11)
 
 | Criterion | Evidence |
 |-----------|----------|
 | `dotnet build` passes | section 2 |
-| `dotnet test` passes | section 2 (98/98) |
+| `dotnet test` passes | section 2 (105/105) |
 | `/api/chat` calls real Ollama | section 3 |
 | Valid message returns 200, contract, no nested JSON, model `qwen3:4b` | section 3, `OllamaChatApiTests` |
 | Empty message returns 400 | section 3, integration tests |
@@ -130,4 +145,4 @@ Git Bash `curl -d` on Windows turns Thai into `?`, which makes Ollama answer abo
   written contract; it still needs confirmation from the Backend Developer or Tech Lead.
 - **Human code review** of the pull request and merge into `main` (owner only).
 - **Post-merge check** of `/api/chat` (Definition of Done) after the owner merges.
-- `main` (with BE-001 and the AI-001 Ollama setup docs) was merged into `watzapon01_Backend`; build and 98 tests pass on the merged result.
+- `main` (with BE-001 and the AI-001 Ollama setup docs) was merged into `watzapon01_Backend`; build and 105 tests pass on the merged result.

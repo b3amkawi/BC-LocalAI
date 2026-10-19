@@ -63,8 +63,10 @@ public sealed class OllamaAIService(
             {
                 throw AiServiceException.Timeout();
             }
-            catch (Exception exception) when (exception is JsonException or NotSupportedException)
+            catch (Exception exception) when (exception is not OperationCanceledException)
             {
+                // Any failure while reading the body (bad JSON, unknown charset, wrong content type, ...)
+                // means the provider response is unusable; it must map to AI_INVALID_RESPONSE, not a 500.
                 logger.LogWarning("Ollama returned a malformed response body.");
                 throw AiServiceException.InvalidResponse(exception);
             }

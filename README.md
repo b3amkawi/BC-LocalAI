@@ -4,6 +4,10 @@ ASP.NET Core application targeting .NET 10. The backend exposes `POST /api/chat`
 answered by a local Ollama model (`qwen3:4b`) through `OllamaAIService` (BE-002).
 `MockAIService` (BE-001) is kept for automated tests, so `dotnet test` does not need Ollama.
 
+> **Known limitations (read before merging / deploying):** answers longer than 256 tokens return `502 AI_INVALID_RESPONSE`;
+> Ollama answers one request at a time, so many simultaneous users queue and can receive `504 AI_TIMEOUT`; there is no
+> authentication, rate limit, conversation history or streaming. Details and measurements: [docs/KNOWN-LIMITATIONS.md](docs/KNOWN-LIMITATIONS.md).
+
 ## Requirements
 
 - .NET 10 SDK
@@ -106,10 +110,14 @@ All errors use `{ "error": { "code": "...", "message": "..." } }` and never incl
 
 ### Known limits
 
-- The Ollama request is capped at 256 generated tokens (`num_predict`, per the Issue #5 contract). A question that needs a longer
-  answer is cut off by Ollama (`done_reason=length`) and the API returns `502 AI_INVALID_RESPONSE` instead of a partial answer.
-  Ask for short answers, or raise the limit through a contract change approved by the Tech Lead.
-- Single question and answer only: no conversation history and no streaming.
+See [docs/KNOWN-LIMITATIONS.md](docs/KNOWN-LIMITATIONS.md) for the full list with measurements. In short:
+
+- Answers longer than 256 tokens (`num_predict`, per the Issue #5 contract) are cut off by Ollama and the API returns
+  `502 AI_INVALID_RESPONSE`. Ask for short answers, or raise the limit through a contract change approved by the Tech Lead.
+- Ollama handles one request at a time. Under a burst, requests queue and later ones can time out with `504 AI_TIMEOUT`
+  (measured on the development laptop: 15 simultaneous 3-sentence answers with a 12 s timeout -> 4 succeeded, 11 got 504,
+  and the API recovered immediately).
+- No authentication, rate limit, conversation history or streaming.
 
 ### Live smoke test (needs Ollama)
 
@@ -126,6 +134,7 @@ Verification evidence: [`docs/BE-001-evidence.md`](docs/BE-001-evidence.md) (moc
 |------|---------|
 | `docs/REVIEW-CHECKLIST.md` | BE-001 reviewer guide, acceptance criteria table, code review points |
 | `docs/BE-001-evidence.md` | BE-001 build, test and API evidence |
+| `docs/KNOWN-LIMITATIONS.md` | Known limitations of the Ollama integration with measured numbers (read before merging) |
 | `docs/BE-002-REVIEW-CHECKLIST.md` | BE-002 (Ollama) reviewer guide and acceptance criteria table |
 | `docs/BE-002-evidence.md` | BE-002 build, test, live smoke test and failure-scenario evidence |
 | `scripts/live-smoke-test.ps1` | Live check against a real Ollama (Thai, English, calculation, empty message) |
