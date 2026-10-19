@@ -13,7 +13,7 @@ dotnet build .\BC-LocalAI.slnx
 dotnet test .\BC-LocalAI.slnx
 ```
 
-Expected: 0 warnings / 0 errors, `Passed: 13, Failed: 0`.
+Expected: 0 warnings / 0 errors, `Passed: 17, Failed: 0`.
 
 ## 2. Run and try the API
 
@@ -48,7 +48,7 @@ Expected: six `PASS` lines and `All smoke tests passed`.
 | Controller | `BC-LocalAI/Controllers/ChatController.cs` | validation, async, depends only on `IAIService` |
 | Service | `BC-LocalAI/Services/IAIService.cs`, `MockAIService.cs` | interface boundary, fixed mock output |
 | DI | `BC-LocalAI/Program.cs` | `IAIService` -> `MockAIService`; malformed-JSON 400 follows contract |
-| Errors | `BC-LocalAI/Middleware/ExceptionHandlingMiddleware.cs` | JSON 500 `INTERNAL_ERROR`, no stack trace leaked |
+| Errors | `BC-LocalAI/Middleware/ExceptionHandlingMiddleware.cs`, `Program.cs` | JSON 500 `INTERNAL_ERROR` in Production too (HTML handler skipped for `/api`), no stack trace leaked |
 | Tests | `BC-LocalAI.Tests/` | controller, service and HTTP integration tests |
 | Secrets | whole diff | none hardcoded |
 

@@ -76,7 +76,7 @@ dotnet test .\BC-LocalAI.slnx -c Release --no-build --no-restore --verbosity min
 Observed result:
 
 ```text
-Passed! - Failed: 0, Passed: 13, Skipped: 0, Total: 13
+Passed! - Failed: 0, Passed: 17, Skipped: 0, Total: 17
 ```
 
 The integration tests verify HTTP 200 and response contract for valid input,
@@ -101,9 +101,28 @@ correctness, performance, maintainability, and test coverage.
 - Secrets found: 0
 - Diff whitespace errors: 0
 - Build: passed
-- Automated tests: 13/13 passed
+- Automated tests: 17/17 passed
 - API smoke tests: passed
 
 The pull request (#3) is open and this evidence is attached to Issue #2.
 Remaining: Tech Lead confirmation of the API Contract, human code review by a
 teammate, and merge into `main` (owner only).
+
+## Review follow-up: Production error handling
+
+Finding: in Production, `UseExceptionHandler("/Home/Error")` ran inside
+`ExceptionHandlingMiddleware`, so an exception in `/api/chat` returned the HTML
+error page instead of the JSON contract.
+
+Fix: `Program.cs` now applies the HTML exception handler only to paths outside
+`/api`. `/api/*` errors are handled by `ExceptionHandlingMiddleware`.
+
+New tests (`BC-LocalAI.Tests/ChatApiProductionErrorTests.cs`):
+
+- `IAIService` throws, environment `Production` and `Development` -> HTTP 500,
+  `application/json`, `{"error":{"code":"INTERNAL_ERROR","message":"An unexpected error occurred"}}`
+- Exception details are not leaked in the response
+- `GET /` in Production still returns the HTML home page
+
+Before the fix the Production case failed with `text/html`; after the fix all
+17 tests pass.

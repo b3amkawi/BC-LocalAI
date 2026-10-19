@@ -22,7 +22,11 @@ app.UseMiddleware<ExceptionHandlingMiddleware>();
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
-    app.UseExceptionHandler("/Home/Error");
+    // The HTML error page is for the MVC site only. /api/* errors must stay JSON,
+    // so they are left to ExceptionHandlingMiddleware (INTERNAL_ERROR contract).
+    app.UseWhen(
+        context => !context.Request.Path.StartsWithSegments("/api"),
+        branch => branch.UseExceptionHandler("/Home/Error"));
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
