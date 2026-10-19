@@ -169,11 +169,16 @@ $response = Invoke-RestMethod `
 $response | Select-Object model, response, done, done_reason
 ```
 
-ผลที่ผ่านต้องมี `model` เป็น `qwen3:4b`, `response` มีคำตอบ, `done` เป็น `True` และ `done_reason` เป็น `stop` บันทึกหลักฐานชั่วคราวบน Desktop ได้ด้วย:
+ผลที่ผ่านต้องมี `model` เป็น `qwen3:4b`, `response` มีคำตอบ, `done` เป็น `True` และ `done_reason` เป็น `stop` บันทึกหลักฐานชั่วคราวในโฟลเดอร์ผู้ใช้ได้ด้วย:
 
 ```powershell
-$response | ConvertTo-Json -Depth 10 | Set-Content "$HOME\Desktop\ollama-test-result.json" -Encoding UTF8
+$outputPath = Join-Path $HOME 'ollama-test-result.json'
+$response | ConvertTo-Json -Depth 10 | Set-Content $outputPath -Encoding UTF8
+Write-Host "บันทึกผลที่: $outputPath"
+Test-Path $outputPath
 ```
+
+`Test-Path` ต้องแสดง `True` หลีกเลี่ยงการเขียนตายตัวเป็น `$HOME\Desktop` เพราะ Windows บางเครื่องย้าย Desktop ไป OneDrive หรือไม่มีโฟลเดอร์ดังกล่าว หากต้องการเปิดตำแหน่งไฟล์ ให้รัน `explorer.exe $HOME`
 
 ทดสอบ endpoint ไม่พร้อมโดยใช้ port ที่ไม่มี service:
 
@@ -187,6 +192,8 @@ catch {
     Write-Host $_.Exception.Message
 }
 ```
+
+การเข้า `catch` และแสดงข้อความว่าเชื่อมต่อ port `11435` ไม่ได้คือ **ผลผ่านที่คาดหวัง** ของกรณี endpoint ไม่พร้อม ไม่ใช่ความผิดพลาดที่ต้องแก้ หากกลับแสดง `ไม่ผ่าน: port นี้มี service ทำงานอยู่` ให้เลือก port ว่างอื่นแล้วทดสอบใหม่
 
 ระหว่างรอสิทธิ์ สามารถยืนยันการตรวจเครื่อง, การติดตั้ง Ollama, โมเดล `qwen3:4b`, CLI, REST API และกรณี endpoint ไม่พร้อมได้ แต่ยังห้ามติ๊กว่าผ่านหัวข้อสคริปต์ตาม README, ไฟล์ส่งมอบใน Repository, การตรวจ secret หรือการเปิดแชทด้วย `open-chat.cmd` จนกว่าจะได้ไฟล์จากฝ่าย Software และทดสอบข้อ 6–8 ครบ
 
@@ -367,6 +374,7 @@ $LASTEXITCODE
 | `git is not recognized` | ยังไม่มี Git หรือ terminal ยังไม่โหลด PATH | ติดตั้ง Git for Windows แล้วเปิด terminal ใหม่ |
 | Clone ขึ้น `Repository not found` | ยังไม่ได้เข้าสู่ระบบหรือไม่มีสิทธิ์ Repository | เปิด Repository ในเบราว์เซอร์ด้วยบัญชีที่ได้รับสิทธิ์ก่อน |
 | Clone ขึ้น `destination path ... already exists` | มีโฟลเดอร์ชื่อเดียวกันอยู่แล้ว | เข้าโฟลเดอร์เดิมแล้ว pull หรือ clone โดยกำหนดชื่อโฟลเดอร์ใหม่ |
+| `Could not find a part of the path ...\Desktop\...` | Desktop ถูกย้ายไป OneDrive หรือไม่มีโฟลเดอร์นั้น | บันทึกเป็น `$HOME\ollama-test-result.json` ตามตัวอย่างในข้อ 6 |
 | `ollama is not recognized` | terminal ยังไม่โหลด PATH หรือติดตั้งไม่สำเร็จ | เปิด terminal ใหม่ เปิด Ollama แล้วลอง `Get-Command ollama` |
 | `pwsh is not recognized` | ไม่มี PowerShell 7 | ติดตั้ง PowerShell 7 ตามคู่มือ Microsoft |
 | ต่อ `127.0.0.1:11434` ไม่ได้ | Ollama ยังไม่เปิด | เปิด Ollama หรือรัน `ollama serve` ในอีกหน้าต่าง |
