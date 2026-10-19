@@ -212,6 +212,20 @@ public sealed class ChatPageTests(WebApplicationFactory<Program> factory)
     }
 
     [Fact]
+    public async Task ChatCore_RequiresBothResponseAndModelToBeNonEmptyStrings()
+    {
+        // API contract: { "response": string, "model": string }. A missing or empty model is an incomplete
+        // answer (AI_INVALID_RESPONSE). The Node tests (tests/ui) cover the behavior; this keeps the rule
+        // from being dropped when only `dotnet test` is run.
+        var core = await GetTextAsync("/js/chat-core.js");
+        var page = await GetTextAsync("/js/chat.js");
+
+        Assert.Contains("isNonEmptyString(body.response) && isNonEmptyString(body.model)", core);
+        Assert.Contains("value.trim() !== ''", core);
+        Check.NotLeaked(page, "result.model ?", "|| 'AI'"); // no fallback label for a missing model
+    }
+
+    [Fact]
     public async Task ChatCore_ContainsEveryRequiredErrorText()
     {
         var js = await GetTextAsync("/js/chat-core.js");

@@ -147,10 +147,9 @@
             var result = await requestAnswer(text);
 
             if (result.ok) {
-                addMessage('ai', result.response, result.model ? 'AI · ' + result.model : 'AI');
-                if (result.model) {
-                    modelChip.textContent = 'โมเดล: ' + result.model;
-                }
+                // classifyResponse guarantees both values are non-empty strings.
+                addMessage('ai', result.response, 'AI · ' + result.model);
+                modelChip.textContent = 'โมเดล: ' + result.model;
             } else {
                 addMessage('error', result.message, 'ข้อผิดพลาด');
                 // Give the question back so it can be sent again, unless a new one is already being typed.

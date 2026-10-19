@@ -24,8 +24,8 @@ The theme uses the colors of the BetterCode logo supplied with the issue: navy `
 
 ```text
 dotnet build .\BC-LocalAI.slnx   -> 0 Warning(s), 0 Error(s)
-dotnet test  .\BC-LocalAI.slnx   -> Passed! Failed: 0, Passed: 156, Skipped: 0, Total: 156   (21 of them are the new ChatPageTests)
-node --test "tests/ui/*.test.mjs" -> tests 13, pass 13, fail 0
+dotnet test  .\BC-LocalAI.slnx   -> Passed! Failed: 0, Passed: 157, Skipped: 0, Total: 157   (22 of them are the ChatPageTests)
+node --test "tests/ui/*.test.mjs" -> tests 18, pass 18, fail 0
 ```
 
 What they check: the page is the Chat UI and has a labelled input, send button and a `role="log"` message list; the viewport,
@@ -79,6 +79,27 @@ Screenshots: [desktop](fe-001/desktop-conversation.jpg), [mobile](fe-001/mobile-
 ![Desktop](fe-001/desktop-conversation.jpg)
 ![Mobile](fe-001/mobile-conversation.jpg)
 ![Error](fe-001/error-ai-unavailable.jpg)
+
+### Review of PR #12: `model` is part of the contract
+
+The reviewer pointed out that the page still treated an answer as successful when `model` was missing or wrong, although
+Issue #10 requires showing both the answer and the model name. Fixed in `chat-core.js`:
+
+- `classifyResponse` now requires **both** `response` and `model` to be non-empty strings (a string made only of spaces,
+  tabs or line breaks counts as empty). Anything else (missing, `null`, empty, number, boolean, object, array, not JSON)
+  returns `AI_INVALID_RESPONSE` with the text `ได้รับคำตอบที่ไม่สมบูรณ์ กรุณาลองใหม่`.
+- The page no longer has a fallback label for a missing model: an invalid answer is never shown as an AI answer, the model chip
+  is not changed, the question is put back in the input and the button is enabled again.
+- Tests: the old test that accepted a missing model was replaced. New Node tests cover 13 bad `model` values, 9 bad `response`
+  values, both bad, every combination of 16 values for `response` and `model` (256 cases: success only when both are good),
+  extra fields, any 2xx status, and "a missing model is never turned into a fake name". A .NET guard test keeps the rule when
+  only `dotnet test` is run.
+- Mutation check: loosening the rule in 6 different ways (model optional, empty model allowed, no trim, response not checked,
+  values coerced to text, invalid result still carrying an answer) each fails 2 to 4 Node tests. A 7th change (a fake model
+  name for a missing model) cannot be reached any more after the stricter check, so it changes no behavior.
+- Browser: with Ollama the normal question still shows `AI · qwen3:4b`; 14 bad bodies (model missing / null / empty / spaces /
+  number / object / array / boolean, response missing / empty / number / null, both missing, not JSON) all show the
+  incomplete-answer text with no AI bubble; a valid answer with another model name (`other-model:1b`) is shown with that name.
 
 ### Defects found by this testing and fixed
 

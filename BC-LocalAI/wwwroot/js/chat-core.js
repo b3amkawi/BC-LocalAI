@@ -71,19 +71,21 @@
         return null;
     }
 
+    function isNonEmptyString(value) {
+        return typeof value === 'string' && value.trim() !== '';
+    }
+
     /**
      * Turns an HTTP status and body text from POST /api/chat into either
      * { ok: true, response, model } or { ok: false, code, message }.
+     * The API contract is { "response": string, "model": string }: both must be non-empty strings,
+     * otherwise the answer is treated as incomplete (AI_INVALID_RESPONSE) and nothing is shown as an answer.
      */
     function classifyResponse(status, bodyText) {
         if (status >= 200 && status < 300) {
             var body = tryParse(bodyText);
-            if (body && typeof body === 'object' && typeof body.response === 'string' && body.response.trim() !== '') {
-                return {
-                    ok: true,
-                    response: body.response,
-                    model: typeof body.model === 'string' ? body.model : ''
-                };
+            if (body && typeof body === 'object' && isNonEmptyString(body.response) && isNonEmptyString(body.model)) {
+                return { ok: true, response: body.response, model: body.model };
             }
             return failure('AI_INVALID_RESPONSE');
         }

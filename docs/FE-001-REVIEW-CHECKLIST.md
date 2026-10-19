@@ -16,7 +16,7 @@ dotnet test .\BC-LocalAI.slnx
 node --test "tests/ui/*.test.mjs"
 ```
 
-Expected: 0 warnings / 0 errors, `Failed: 0` (156 tests), Node `pass 13, fail 0`.
+Expected: 0 warnings / 0 errors, `Failed: 0` (157 tests), Node `pass 18, fail 0`.
 
 ## 2. Try the page
 

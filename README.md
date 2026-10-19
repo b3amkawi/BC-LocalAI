@@ -36,7 +36,7 @@ cannot be sent twice. The page works on desktop and on phones, and everything ca
 | `AI_UNAVAILABLE` | ไม่สามารถเชื่อมต่อ AI ได้ กรุณาตรวจว่า Ollama เปิดอยู่ |
 | `AI_TIMEOUT` | AI ใช้เวลาตอบนานเกินไป กรุณาลองใหม่ |
 | `AI_PROVIDER_ERROR` | AI เกิดข้อผิดพลาด กรุณาลองใหม่ |
-| `AI_INVALID_RESPONSE` | ได้รับคำตอบที่ไม่สมบูรณ์ กรุณาลองใหม่ |
+| `AI_INVALID_RESPONSE`, or a successful answer where `response` or `model` is missing, empty or not a string | ได้รับคำตอบที่ไม่สมบูรณ์ กรุณาลองใหม่ |
 | `INTERNAL_ERROR` or anything unknown | ระบบเกิดข้อผิดพลาด กรุณาลองใหม่ |
 | The server cannot be reached at all | ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาตรวจการเชื่อมต่อแล้วลองใหม่ |
 

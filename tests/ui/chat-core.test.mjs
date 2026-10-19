@@ -85,19 +85,85 @@ test('an answer that looks like HTML is returned unchanged as plain data', () =>
     assert.equal(result.response, html);
 });
 
-test('a 200 response in the wrong shape is an incomplete answer', () => {
-    const wrong = ['', 'not json', 'null', '[]', '{}', '{"response":""}', '{"response":"   "}', '{"response":5}',
-        '{"response":null,"model":"x"}', '{"model":"qwen3:4b"}', '"2"'];
-    for (const body of wrong) {
-        const result = core.classifyResponse(200, body);
-        assert.equal(result.ok, false, body);
-        assert.equal(result.code, 'AI_INVALID_RESPONSE', body);
-        assert.equal(result.message, REQUIRED.AI_INVALID_RESPONSE, body);
+const INCOMPLETE = REQUIRED.AI_INVALID_RESPONSE;
+const incomplete = (body, label) => {
+    const result = core.classifyResponse(200, typeof body === 'string' ? body : JSON.stringify(body));
+    assert.equal(result.ok, false, label);
+    assert.equal(result.code, 'AI_INVALID_RESPONSE', label);
+    assert.equal(result.message, INCOMPLETE, label);
+    assert.equal('response' in result, false, `${label}: nothing may be shown as an answer`);
+};
+
+test('a 200 response that is not the contract shape is an incomplete answer', () => {
+    for (const body of ['', 'not json', 'null', '[]', '{}', '"2"', '5', 'true', '{"response":""}', '{"response":"   "}',
+        '{"response":5}', '{"response":null,"model":"x"}', '{"model":"qwen3:4b"}']) {
+        incomplete(body, body);
     }
 });
 
-test('a missing model name does not break a valid answer', () => {
-    assert.deepEqual(core.classifyResponse(200, '{"response":"ok"}'), { ok: true, response: 'ok', model: '' });
+test('a missing or invalid model makes the answer incomplete (review of PR #12)', () => {
+    const answer = '2';
+    const badModels = [
+        ['model missing', undefined], ['model null', null], ['model empty', ''], ['model spaces only', '   '],
+        ['model tab/newline only', '\t\n'], ['model number', 4], ['model zero', 0], ['model boolean true', true],
+        ['model boolean false', false], ['model object', { name: 'qwen3:4b' }], ['model array', ['qwen3:4b']],
+        ['model empty object', {}], ['model empty array', []]
+    ];
+    for (const [label, model] of badModels) {
+        const body = model === undefined ? { response: answer } : { response: answer, model };
+        incomplete(body, label);
+    }
+});
+
+test('a missing or invalid response makes the answer incomplete even when model is valid', () => {
+    const badAnswers = [
+        ['response missing', undefined], ['response null', null], ['response empty', ''], ['response spaces only', '   '],
+        ['response newlines only', '\n\n'], ['response number', 2], ['response boolean', false],
+        ['response object', { text: '2' }], ['response array', ['2']]
+    ];
+    for (const [label, response] of badAnswers) {
+        const body = response === undefined ? { model: 'qwen3:4b' } : { response, model: 'qwen3:4b' };
+        incomplete(body, label);
+    }
+});
+
+test('both values invalid is incomplete as well', () => {
+    incomplete({}, 'neither');
+    incomplete({ response: '', model: '' }, 'both empty');
+    incomplete({ response: 1, model: 2 }, 'both numbers');
+});
+
+test('every combination of response and model: success only when BOTH are non-empty strings', () => {
+    const values = ['2', 'qwen3:4b', ' x ', 'ก', '<b>', '0', undefined, null, '', ' ', 0, 1, false, true, {}, []];
+    const good = (v) => typeof v === 'string' && v.trim() !== '';
+    for (const response of values) {
+        for (const model of values) {
+            const body = {};
+            if (response !== undefined) body.response = response;
+            if (model !== undefined) body.model = model;
+            const result = core.classifyResponse(200, JSON.stringify(body));
+            const label = JSON.stringify(body);
+            if (good(response) && good(model)) {
+                assert.deepEqual(result, { ok: true, response, model }, label);
+            } else {
+                assert.equal(result.ok, false, label);
+                assert.equal(result.code, 'AI_INVALID_RESPONSE', label);
+            }
+        }
+    }
+});
+
+test('extra fields and any 2xx status do not matter when both values are good', () => {
+    for (const status of [200, 201, 202, 299]) {
+        const result = core.classifyResponse(status, '{"response":"ok","model":"qwen3:4b","extra":{"a":1}}');
+        assert.deepEqual(result, { ok: true, response: 'ok', model: 'qwen3:4b' }, String(status));
+    }
+});
+
+test('a missing model is never turned into a fake model name', () => {
+    const result = core.classifyResponse(200, '{"response":"ok"}');
+    assert.equal(result.ok, false);
+    assert.equal('model' in result, false);
 });
 
 test('each API error status maps to the required text', () => {
