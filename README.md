@@ -21,6 +21,10 @@ dotnet run --project .\BC-LocalAI\BC-LocalAI.csproj --launch-profile http
 
 Open <http://localhost:5290> in a browser.
 
+> **Stop the running app before `dotnet build` or `dotnet test`.** A running `BC-LocalAI.exe` locks the output files and the
+> build fails with `MSB3021` / `MSB3027` ("Unable to copy file ... BC-LocalAI.exe"; typically `10 Warning(s), 2 Error(s)`).
+> This is not a code problem: press Ctrl+C in the terminal running the app, then build again.
+
 ## Build
 
 ```powershell

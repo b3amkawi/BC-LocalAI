@@ -6,6 +6,9 @@ Requirements: .NET 10 SDK. Build and tests need no Ollama. The live steps need O
 
 ## 1. Build and automated tests (no Ollama needed)
 
+Stop any running copy of the app first (Ctrl+C). If `dotnet build` / `dotnet test` reports `MSB3021` / `MSB3027` and
+`2 Error(s)`, the app is still running and is locking `BC-LocalAI.exe`; it is not a code error.
+
 ```powershell
 git fetch origin
 git checkout watzapon02_Backend
