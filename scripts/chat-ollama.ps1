@@ -5,7 +5,7 @@ Opens a simple interactive Thai chat with local qwen3:4b through Ollama.
 Uses only http://127.0.0.1:11434 and prints the final structured answer.
 Enter /bye to exit.
 #>
-#requires -Version 5.1
+#requires -Version 7.0
 [CmdletBinding()]
 param(
     [ValidateRange(1, 65535)][int]$Port = 11434,
@@ -40,19 +40,44 @@ while ($true) {
             options = @{ temperature = 0.2; num_predict = 512 }
         } | ConvertTo-Json -Depth 8
 
-        $result = Invoke-RestMethod -Uri $endpoint -Method Post `
+        $http = Invoke-WebRequest -UseBasicParsing -Uri $endpoint -Method Post `
             -ContentType 'application/json; charset=utf-8' `
-            -Body ([Text.Encoding]::UTF8.GetBytes($payload)) -TimeoutSec $TimeoutSec
+            -Body ([Text.Encoding]::UTF8.GetBytes($payload)) -NoProxy -MaximumRedirection 0 -TimeoutSec $TimeoutSec
 
-        if ($result.done -ne $true -or $result.done_reason -ne 'stop' -or
-            $result.response -isnot [string]) {
-            throw 'โมเดลตอบไม่สมบูรณ์ กรุณาลองคำถามที่สั้นลง'
-        }
-        $structured = $result.response | ConvertFrom-Json
-        if ($structured.answer -isnot [string] -or [string]::IsNullOrWhiteSpace($structured.answer)) {
-            throw 'ไม่พบคำตอบที่ใช้งานได้จากโมเดล'
-        }
-        Write-Host "AI > $($structured.answer)" -ForegroundColor Cyan
+        # Validate before printing; JsonDocument preserves duplicate field names.
+        $document = [Text.Json.JsonDocument]::Parse([string]$http.Content)
+        try {
+            if ($http.StatusCode -ne 200 -or $document.RootElement.ValueKind -ne [Text.Json.JsonValueKind]::Object) {
+                throw 'ต้องได้รับ HTTP 200 และ JSON object จาก Ollama'
+            }
+            $properties = @($document.RootElement.EnumerateObject())
+            $fields = @{}
+            foreach ($name in 'model', 'done', 'done_reason', 'response') {
+                $matchingProperties = @($properties | Where-Object { $_.Name -ceq $name })
+                if ($matchingProperties.Count -ne 1) { throw "Ollama ต้องมี field '$name' เพียงครั้งเดียว" }
+                $fields[$name] = $matchingProperties[0].Value
+            }
+            if ($fields.model.ValueKind -ne [Text.Json.JsonValueKind]::String -or $fields.model.GetString() -cne 'qwen3:4b' -or
+                $fields.done.ValueKind -ne [Text.Json.JsonValueKind]::True -or
+                $fields.done_reason.ValueKind -ne [Text.Json.JsonValueKind]::String -or $fields.done_reason.GetString() -cne 'stop' -or
+                $fields.response.ValueKind -ne [Text.Json.JsonValueKind]::String -or [string]::IsNullOrWhiteSpace($fields.response.GetString())) {
+                throw 'โมเดลหรือรูปแบบคำตอบไม่ตรง qwen3:4b หรือคำตอบยังไม่สมบูรณ์'
+            }
+            $inner = [Text.Json.JsonDocument]::Parse($fields.response.GetString())
+            try {
+                if ($inner.RootElement.ValueKind -ne [Text.Json.JsonValueKind]::Object) { throw 'คำตอบต้องเป็น JSON object' }
+                $answerProperties = @($inner.RootElement.EnumerateObject())
+                if ($answerProperties.Count -ne 1 -or $answerProperties[0].Name -cne 'answer' -or
+                    $answerProperties[0].Value.ValueKind -ne [Text.Json.JsonValueKind]::String) {
+                    throw 'ต้องมี answer เป็น string เพียง field เดียว'
+                }
+                $answerText = $answerProperties[0].Value.GetString()
+                if ([string]::IsNullOrWhiteSpace($answerText) -or $answerText -match '</?think>') {
+                    throw 'ไม่พบคำตอบสุดท้ายที่ใช้งานได้ หรือมี Thinking marker ปะปน'
+                }
+            } finally { $inner.Dispose() }
+        } finally { $document.Dispose() }
+        Write-Host "AI > $answerText" -ForegroundColor Cyan
     } catch {
         Write-Host "ผิดพลาด > $($_.Exception.Message)" -ForegroundColor Red
         Write-Host 'ตรวจว่า Ollama เปิดอยู่และติดตั้ง qwen3:4b แล้ว' -ForegroundColor DarkYellow

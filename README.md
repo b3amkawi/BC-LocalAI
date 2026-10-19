@@ -204,3 +204,6 @@ Ollama directly. Exit 0 means every case passed. Any failed case returns exit 1
 and remains in the JSON evidence with the actual Backend body and failure reasons.
 See [evaluation results and reproduction steps](docs/ai/chat-evaluation-results.md)
 for the measured cold/warm timings, environment, quality failures, and limitations.
+
+For a Thai explanation of AI-001 through AI-003, the tools used, file locations,
+limitations, and questions for team handoff, read the [AI work handoff guide](docs/ai/ai-001-003-handoff.md).

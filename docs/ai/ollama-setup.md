@@ -132,11 +132,13 @@ ollama ps
 
 สคริปต์ทดสอบไม่ได้มากับ Ollama แต่เก็บอยู่ใน Repository `BC-LocalAI` เครื่องใหม่จึงต้องดาวน์โหลด Repository ก่อน เลือกวิธีใดวิธีหนึ่งต่อไปนี้
 
+ปัจจุบัน AI-001 และ AI-002 merge เข้า `main` แล้ว คู่มือสำหรับเครื่องใหม่จึงใช้ `main` เพื่อรับไฟล์ที่ทีมรวมแล้ว หากต้องตรวจย้อนหลังตาม PR ให้ใช้ branch/commit ที่ผู้ดูแลระบุ แทนการถือว่า branch งานเก่าคือรุ่นล่าสุด
+
 ### กรณี clone ไม่ได้หรือไม่มีสิทธิ์ดาวน์โหลด
 
 หาก Git แสดง `Repository not found`, GitHub เปิด Repository ไม่ได้ หรือบัญชีไม่มีสิทธิ์ดาวน์โหลดไฟล์ ให้ทำดังนี้:
 
-1. ติดต่อฝ่าย Software หรือเจ้าของ Repository เพื่อขอสิทธิ์เข้าถึง `b3amkawi/BC-LocalAI` และ branch `pao01_AI`
+1. ติดต่อฝ่าย Software หรือเจ้าของ Repository เพื่อขอสิทธิ์เข้าถึง `b3amkawi/BC-LocalAI` และ branch `main`
 2. แจ้งข้อความ error ที่เห็น ชื่อบัญชี GitHub และเวลาที่พบปัญหา โดยห้ามส่งรหัสผ่านหรือ access token
 3. ระหว่างรอสิทธิ์ ให้ข้ามการทดสอบสคริปต์ของ Repository แล้วทดสอบ Ollama โดยตรงตามขั้นตอนด้านล่าง
 4. เมื่อได้รับสิทธิ์แล้ว ให้กลับมาทำข้อ 6 และข้อ 7 เพื่อยืนยันสคริปต์ของโปรเจกต์
@@ -164,12 +166,14 @@ $response = Invoke-RestMethod `
     -Uri 'http://127.0.0.1:11434/api/generate' `
     -Method Post `
     -ContentType 'application/json; charset=utf-8' `
-    -Body ([Text.Encoding]::UTF8.GetBytes($body))
+    -Body ([Text.Encoding]::UTF8.GetBytes($body)) -TimeoutSec 300
 
-$response | Select-Object model, response, done, done_reason
+$response | Select-Object model, response, done, done_reason | Format-List
 ```
 
-ผลที่ผ่านต้องมี `model` เป็น `qwen3:4b`, `response` มีคำตอบ, `done` เป็น `True` และ `done_reason` เป็น `stop` บันทึกหลักฐานชั่วคราวในโฟลเดอร์ผู้ใช้ได้ด้วย:
+ผลที่ผ่านต้องมี `model` เป็น `qwen3:4b`, `response` มีคำตอบ, `done` เป็น `True` และ `done_reason` เป็น `stop` ใช้ `Format-List` เพื่อไม่ให้ข้อความยาวซ่อนคอลัมน์ `done`/`done_reason` ตัวอย่างนี้ตรวจการเชื่อมต่อเบื้องต้นและไม่ได้บังคับ structured schema ของ AI-002 หากคำตอบมีข้อความคิดปะปน ยังห้ามอ้างว่าผ่าน contract หรือพร้อมส่งให้ผู้ใช้ ให้กลับมารันสคริปต์ข้อ 7 หลังได้ไฟล์ Repository
+
+บันทึกหลักฐานชั่วคราวในโฟลเดอร์ผู้ใช้ได้ด้วย โดยต้องรันคำขอด้านบนสำเร็จในหน้าต่างเดียวกันก่อน มิฉะนั้น `$response` อาจว่างหรือเป็นผลเก่าของคำขอก่อนหน้า:
 
 ```powershell
 $outputPath = Join-Path $HOME 'ollama-test-result.json'
@@ -200,15 +204,15 @@ catch {
 ### วิธี A: ดาวน์โหลด ZIP (แนะนำสำหรับผู้ที่ยังไม่ใช้ Git)
 
 1. เปิดหน้า [BC-LocalAI บน GitHub](https://github.com/b3amkawi/BC-LocalAI) และลงชื่อเข้าใช้บัญชีที่ได้รับสิทธิ์ ถ้า Repository เปิดไม่ได้ให้ขอสิทธิ์จากเจ้าของก่อน
-2. กดตัวเลือก branch บริเวณด้านซ้ายเหนือรายการไฟล์ แล้วเลือก `pao01_AI`
-3. ตรวจว่าชื่อ branch บนหน้าจอเป็น `pao01_AI`
+2. กดตัวเลือก branch บริเวณด้านซ้ายเหนือรายการไฟล์ แล้วเลือก `main`
+3. ตรวจว่าชื่อ branch บนหน้าจอเป็น `main`
 4. กดปุ่มสีเขียว **Code** แล้วเลือก **Download ZIP**
 5. เปิดโฟลเดอร์ Downloads คลิกขวาไฟล์ ZIP แล้วเลือก **Extract All...** และกด **Extract**
-6. เข้าโฟลเดอร์ที่แตกแล้ว ชื่อโดยทั่วไปคือ `BC-LocalAI-pao01_AI` ภายในต้องเห็น `README.md`, `docs` และ `scripts`
+6. เข้าโฟลเดอร์ที่แตกแล้ว ชื่อโดยทั่วไปคือ `BC-LocalAI-main` ภายในต้องเห็น `README.md`, `docs` และ `scripts`
 
 ห้ามเปิด PowerShell ขณะยังดูไฟล์อยู่ภายใน ZIP เพราะสคริปต์อาจเข้าถึงไฟล์ข้างเคียงไม่ได้ ต้อง **Extract All** ก่อนเสมอ
 
-วิธี ZIP ไม่มีคำสั่ง `git pull` หากต้องการไฟล์รุ่นใหม่ในภายหลัง ให้ดาวน์โหลด ZIP จาก branch `pao01_AI` ใหม่และแตกเป็นโฟลเดอร์ใหม่ เพื่อไม่ให้ปะปนกับไฟล์เดิม
+วิธี ZIP ไม่มีคำสั่ง `git pull` หากต้องการไฟล์รุ่นใหม่ในภายหลัง ให้ดาวน์โหลด ZIP จาก branch `main` ใหม่และแตกเป็นโฟลเดอร์ใหม่ เพื่อไม่ให้ปะปนกับไฟล์เดิม
 
 ### วิธี B: Clone ด้วย Git
 
@@ -246,13 +250,13 @@ Get-Command git
 
 ทั้งสองคำสั่งต้องแสดงข้อมูล Git หากยังไม่พบ ให้ปิด terminal ทุกหน้าต่างแล้วเปิดใหม่ หรือ restart Windows หนึ่งครั้ง
 
-#### B2. Clone branch งานลงเครื่องครั้งแรก
+#### B2. Clone รุ่นที่รวมแล้วลงเครื่องครั้งแรก
 
 เปิด PowerShell แล้วรันทีละบรรทัด:
 
 ```powershell
 cd $HOME\Documents
-git clone --branch pao01_AI --single-branch https://github.com/b3amkawi/BC-LocalAI.git
+git clone --branch main --single-branch https://github.com/b3amkawi/BC-LocalAI.git
 cd .\BC-LocalAI
 git branch --show-current
 git remote -v
@@ -261,17 +265,17 @@ git status
 
 ผลที่ต้องเห็น:
 
-- `git branch --show-current` แสดง `pao01_AI`
+- `git branch --show-current` แสดง `main`
 - `git remote -v` แสดง URL `https://github.com/b3amkawi/BC-LocalAI.git`
-- `git status` แสดงว่าอยู่ branch `pao01_AI` และไม่มีไฟล์เปลี่ยนแปลง
+- `git status` แสดงว่าอยู่ branch `main` และไม่มีไฟล์เปลี่ยนแปลง
 
 หาก GitHub เปิดหน้าต่างเบราว์เซอร์ให้ยืนยันตัวตน ให้ลงชื่อเข้าใช้บัญชีที่ได้รับสิทธิ์ Repository ห้ามใส่รหัสผ่าน, token หรือข้อมูลลับลงในไฟล์ของโปรเจกต์
 
 ถ้าขึ้น `destination path 'BC-LocalAI' already exists and is not an empty directory` แปลว่ามีโฟลเดอร์นี้อยู่แล้ว อย่า clone ทับ ให้เข้าโฟลเดอร์เดิมและใช้ขั้นตอนดึงอัปเดตด้านล่าง หรือเลือกชื่อโฟลเดอร์ใหม่:
 
 ```powershell
-git clone --branch pao01_AI --single-branch https://github.com/b3amkawi/BC-LocalAI.git BC-LocalAI-pao01_AI
-cd .\BC-LocalAI-pao01_AI
+git clone --branch main --single-branch https://github.com/b3amkawi/BC-LocalAI.git BC-LocalAI-main
+cd .\BC-LocalAI-main
 ```
 
 #### B3. ดึงงานล่าสุดในครั้งต่อไป
@@ -283,10 +287,10 @@ git status --short
 git branch --show-current
 ```
 
-บรรทัดแรกควรว่าง และบรรทัดที่สองต้องเป็น `pao01_AI` จากนั้นดึงงานล่าสุดแบบไม่สร้าง merge commit อัตโนมัติ:
+บรรทัดแรกควรว่าง และบรรทัดที่สองต้องเป็น `main` จากนั้นดึงงานล่าสุดแบบไม่สร้าง merge commit อัตโนมัติ หากยังอยู่ branch งานเดิม ให้ผู้ดูแลช่วยเลือก branch ก่อน อย่าดึง `main` รวมเข้ากับ branch อื่นโดยไม่ตั้งใจ:
 
 ```powershell
-git pull --ff-only origin pao01_AI
+git pull --ff-only origin main
 ```
 
 ถ้าขึ้น `Already up to date.` แปลว่ามีไฟล์ล่าสุดแล้ว หาก `git status --short` แสดงชื่อไฟล์ หรือ `git pull --ff-only` ปฏิเสธเพราะ branch แยกจาก remote ให้หยุดและขอผู้ดูแลทีมช่วยตรวจ อย่าใช้ `git reset --hard`, ลบไฟล์ หรือแก้ conflict เอง เพราะอาจทำให้งานที่ยังไม่ได้บันทึกหาย
@@ -295,7 +299,7 @@ git pull --ff-only origin pao01_AI
 
 ### เปิด PowerShell ภายในโฟลเดอร์ที่ดาวน์โหลด
 
-1. เปิดโฟลเดอร์ `BC-LocalAI-pao01_AI` จากวิธี ZIP หรือ `BC-LocalAI` จากวิธี Git ใน File Explorer
+1. เปิดโฟลเดอร์ `BC-LocalAI-main` จากวิธี ZIP หรือ `BC-LocalAI` จากวิธี Git ใน File Explorer
 2. ตรวจว่ามองเห็น `README.md`, `docs` และ `scripts`
 3. คลิกช่อง address bar ด้านบนของ File Explorer
 4. พิมพ์ `powershell` แล้วกด Enter
@@ -313,7 +317,7 @@ Test-Path .\docs\ai\ollama-api.md
 คำสั่ง `Test-Path` ทั้งสามบรรทัดต้องเป็น `True` หากมีบรรทัดใดเป็น `False` ให้หยุดก่อน เพราะอาจดาวน์โหลดผิด branch, ยังไม่ได้แตก ZIP หรือเปิดผิดโฟลเดอร์ หากทราบตำแหน่งที่ถูกต้อง ใช้ `cd` เช่น:
 
 ```powershell
-cd "$HOME\Downloads\BC-LocalAI-pao01_AI"
+cd "$HOME\Downloads\BC-LocalAI-main"
 Test-Path .\scripts\test-ollama.ps1
 ```
 
@@ -331,10 +335,14 @@ pwsh --version
 
 ```powershell
 pwsh -NoProfile -File .\scripts\test-ollama.ps1
-pwsh -NoProfile -File .\scripts\test-ollama.ps1 -OutputPath .\docs\ai\ollama-test-result.json
+pwsh -NoProfile -File .\scripts\test-ollama.ps1 -OutputPath "$HOME\ollama-test-result.json"
 ```
 
+เก็บหลักฐานใหม่ในโฟลเดอร์ผู้ใช้ตามตัวอย่าง เพื่อไม่เขียนทับหลักฐานเดิมที่ทีมบันทึกไว้ใน `docs/ai` หากใช้ตัวเลือก `-OutputPath` จะต้องเป็นโฟลเดอร์ที่มีอยู่จริงและเขียนไฟล์ได้
+
 หาก `pwsh is not recognized` ให้ติดตั้งตาม [คู่มือ PowerShell บน Windows ของ Microsoft](https://learn.microsoft.com/powershell/scripting/install/installing-powershell-on-windows) แล้วเปิด terminal ใหม่ `powershell` และ `pwsh` เป็นคนละโปรแกรม: Windows PowerShell เดิมใช้ `powershell`; PowerShell 7 ใช้ `pwsh` หลังติดตั้งต้องตรวจ `pwsh --version` ให้สำเร็จก่อนรันสคริปต์
+
+สคริปต์ `test-ollama.ps1` และ `chat-ollama.ps1` รุ่นทบทวนกำหนด `#requires -Version 7.0` จริง เพื่อใช้ parser ตรวจ JSON และ field ซ้ำอย่างเข้มงวด คำสั่งติดตั้ง/ตรวจเครื่อง/เรียก API แบบ manual ในข้อก่อนหน้ายังใช้ Windows PowerShell ได้ แต่การรันสคริปต์โปรเจกต์ให้ใช้ `pwsh` เท่านั้น
 
 ผลสำเร็จต้องมี `PASS`, HTTP 200, `done=true`, `done_reason=stop` และคำตอบไม่ว่าง ตรวจรหัสออกทันที:
 
@@ -391,7 +399,7 @@ $LASTEXITCODE
 - [ ] `Invoke-RestMethod http://127.0.0.1:11434/api/version` คืนข้อมูลเวอร์ชัน
 - [ ] `ollama list` มี `qwen3:4b`
 - [ ] `ollama run qwen3:4b` รับคำถามและตอบกลับ แล้วออกด้วย `/bye` ได้
-- [ ] วิธี Git: `git --version` สำเร็จ, branch เป็น `pao01_AI` และ `git status` ไม่มีไฟล์เปลี่ยนแปลง หรือวิธี ZIP: แตกไฟล์จาก branch `pao01_AI` แล้ว
+- [ ] วิธี Git: `git --version` สำเร็จ, branch เป็น `main` และ `git status` ไม่มีไฟล์เปลี่ยนแปลง หรือวิธี ZIP: แตกไฟล์จาก branch `main` แล้ว
 - [ ] `Test-Path` ทั้งสามไฟล์ได้ `True`
 - [ ] `pwsh --version` แสดงเวอร์ชัน PowerShell 7
 - [ ] `pwsh -NoProfile -File .\scripts\test-ollama.ps1` แสดง `PASS` และ `$LASTEXITCODE` เป็น `0`

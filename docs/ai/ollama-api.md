@@ -30,11 +30,15 @@ $result.response
 pwsh -NoProfile -File .\scripts\test-ollama.ps1 -Prompt 'สวัสดี' -TimeoutSec 300
 ```
 
-สคริปต์ใช้โมเดลคงที่ `qwen3:4b` และส่ง `think: false`, `temperature: 0`, `num_predict: 256` พร้อม system prompt ให้ตอบสั้นเป็นภาษาไทย และ JSON schema ที่กำหนด `answer` เป็น string ตาม [Structured Outputs](https://docs.ollama.com/capabilities/structured-outputs) ตัวอย่าง request ขั้นต่ำข้างต้นไม่ได้บังคับ schema นี้
+สคริปต์ปัจจุบันใช้โมเดลคงที่ `qwen3:4b` และส่ง `think: false`, `temperature: 0`, `num_predict: 256` พร้อม system prompt ให้ตอบสั้นเป็นภาษาเดียวกับผู้ถาม และ JSON schema ที่กำหนด `answer` เป็น string ตาม [Structured Outputs](https://docs.ollama.com/capabilities/structured-outputs) ตัวอย่าง request ขั้นต่ำข้างต้นไม่ได้บังคับ schema นี้ ดู request และ validation ฉบับปัจจุบันใน [Integration Contract ของ AI-002](ollama-integration-contract.md)
+
+หลักฐาน AI-001 เดิมใช้ system prompt ภาษาไทย ส่วน AI-002 เปลี่ยนเป็นภาษาเดียวกับผู้ถาม ไฟล์หลักฐานเก่าจึงบันทึกพฤติกรรมของ request ในรอบนั้น ไม่ใช่การทดสอบ prompt ปัจจุบันย้อนหลัง
 
 ผล HTTP ชั้นนอกยังเป็น Ollama response ตามปกติ ส่วน `response` เป็นข้อความ JSON เช่น `{"answer":"สวัสดีครับ!"}` สคริปต์ parse JSON นี้แล้วแสดง `answer` โดยไม่ลบหรือแต่งคำตอบจริงในไฟล์หลักฐาน
 
 สคริปต์ตรวจ HTTP 200, model, done ที่เป็น boolean true จริง, done_reason=stop และ answer ที่เป็น string ไม่ว่าง โดย JSON ต้องเป็น object ที่มี key `answer` เพียง key เดียว หากชนเพดาน token (`done_reason=length`), JSON ใช้ไม่ได้, root เป็น array หรือมี think marker ใน answer จะคืน exit 1 แทน PASS จึงไม่สับสนระหว่างรับ HTTP สำเร็จกับได้รับคำตอบครบ
+
+สคริปต์รุ่นทบทวนต้องใช้ PowerShell 7 ขึ้นไป เพราะใช้ `System.Text.Json.JsonDocument` ตรวจชนิดและนับ key ก่อนแปลง JSON จึงปฏิเสธ key ซ้ำ เช่น `{"answer":"one","answer":"two"}` แทนการปล่อยให้ parser ยุบเหลือค่าหลังสุด ทั้ง preflight และ generate ไม่ตาม HTTP redirect (`MaximumRedirection=0`) และใช้ `NoProxy` เพื่อให้คำขอ loopback ไม่ผ่าน proxy หรือถูกพาไปยังปลายทางอื่น
 
 พารามิเตอร์ `-Port` ใช้ทดสอบ endpoint loopback ที่ไม่พร้อม `-OutputPath` บันทึก request/response, HTTP status, เวอร์ชัน runtime และเวลาทดสอบลง JSON; โฟลเดอร์ปลายทางต้องมีอยู่ก่อน สคริปต์เขียนไฟล์ชั่วคราวในโฟลเดอร์เดียวกันให้ครบก่อนใช้ File.Replace แทนที่ไฟล์เดิม หรือ File.Move หากเป็นไฟล์ใหม่ จึงไม่ตัดไฟล์เดิมก่อนเขียน JSON ครบ หากคำขอหรือ validation ล้มเหลวจะไม่แตะหลักฐานเดิม ต้องดู exit code และเวลาของไฟล์เพื่อไม่เข้าใจผิดว่าเป็นผลรอบใหม่
 
@@ -54,6 +58,8 @@ Connection refused หรือ timeout ไม่ใช่ HTTP 500: อาจ�
 
 ```powershell
 python -m unittest discover -s tests -v
+# หรือใช้ Python Launcher บน Windows
+py -3 -m unittest discover -s tests -v
 ```
 
 ชุดทดสอบเปิด HTTP จำลองบน `127.0.0.1` ด้วย port ที่ระบบเลือก แล้วปิดเมื่อจบ ตรวจ success/UTF-8/evidence, payload ผิดรูปแบบหรือถูกตัด, metadata version ไม่ถูกต้อง, model not found, timeout, endpoint ไม่พร้อม และ path บันทึกไม่ได้ ไม่เรียกโมเดลจริง ผลนี้เสริมหลักฐาน live API; ไม่ใช้แทนการทดสอบ Ollama จริง
