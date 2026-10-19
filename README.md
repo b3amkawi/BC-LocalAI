@@ -188,3 +188,19 @@ py -3 -m unittest discover -s tests -v
 ```
 
 Python is only needed for these developer tests, not for running Ollama or the smoke script.
+
+## Chat quality evaluation (AI-003)
+
+The [evaluation dataset](docs/ai/chat-evaluation-cases.json) contains 160 questions:
+40 Thai, 40 English, 40 arithmetic, and 40 edge cases. Start the Backend and run:
+
+```powershell
+pwsh -NoProfile -File .\scripts\test-chat-e2e.ps1
+$LASTEXITCODE
+```
+
+The evaluator calls only the loopback Backend `POST /api/chat`; it does not query
+Ollama directly. Exit 0 means every case passed. Any failed case returns exit 1
+and remains in the JSON evidence with the actual Backend body and failure reasons.
+See [evaluation results and reproduction steps](docs/ai/chat-evaluation-results.md)
+for the measured cold/warm timings, environment, quality failures, and limitations.

@@ -1,4 +1,4 @@
-"""Regression tests for the AI-003 Backend-only evaluation script."""
+"""Exercise AI-003 evaluator failures against a loopback mock Backend."""
 
 import json
 from pathlib import Path
@@ -6,41 +6,70 @@ import shutil
 import subprocess
 import tempfile
 import threading
+import time
 import unittest
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 
 SCRIPT = Path(__file__).resolve().parents[1] / "scripts" / "test-chat-e2e.ps1"
 PWSH = shutil.which("pwsh")
+PER_CATEGORY = 40
+TOTAL = PER_CATEGORY * 4
 
 
 def dataset():
     cases = []
     for category in ("thai", "english", "math", "edge"):
-        for number in range(5):
+        language = {"thai": "th", "english": "en"}.get(category, "any")
+        answer = {"thai": "ตกลง", "math": "42"}.get(category, "ok")
+        for number in range(PER_CATEGORY):
             cases.append({
-                "id": f"{category}-{number}",
+                "id": f"{category}-{number:02}",
                 "category": category,
-                "language": "any",
-                "prompt": f"safe prompt {category} {number}",
-                "expected_regex": "^ok$",
+                "language": language,
+                "prompt": f"safe prompt {category} {number} 😊",
+                "expected_regex": f"^{answer}$",
             })
-    return {"version": 1, "cases": cases}
+    return {"version": 1, "api": "POST http://localhost:5290/api/chat", "cases": cases}
+
+
+def valid_response(request):
+    category = request["message"].split()[2]
+    answer = {"thai": "ตกลง", "math": "42"}.get(category, "ok")
+    return {"response": answer, "model": "qwen3:4b"}
 
 
 @unittest.skipUnless(PWSH, "PowerShell 7 (pwsh) is required")
 class ChatE2EScriptTests(unittest.TestCase):
-    def run_script(self, response_factory):
+    def run_script(self, reply_factory=None, fixture=None, extra_args=None,
+                   base_url=None, invalid_output=False, expect_evidence=True, timeout_sec=10):
         requests = []
 
         class Handler(BaseHTTPRequestHandler):
             def do_POST(self):
-                content_length = int(self.headers["Content-Length"])
-                body = json.loads(self.rfile.read(content_length).decode("utf-8"))
-                requests.append((self.path, body))
-                payload = json.dumps(response_factory(len(requests)), ensure_ascii=False).encode("utf-8")
-                self.send_response(200)
+                content_length = int(self.headers.get("Content-Length", "0"))
+                request = json.loads(self.rfile.read(content_length).decode("utf-8"))
+                requests.append((self.path, request))
+                reply = reply_factory(len(requests), request) if reply_factory else {}
+                if "delay" in reply:
+                    time.sleep(reply["delay"])
+                body = reply.get("body", valid_response(request))
+                payload = reply.get("raw", json.dumps(body, ensure_ascii=False)).encode("utf-8")
+                self.send_response(reply.get("status", 200))
                 self.send_header("Content-Type", "application/json; charset=utf-8")
+                if reply.get("redirect"):
+                    self.send_header("Location", f"http://127.0.0.1:{self.server.server_port}/forbidden")
+                self.send_header("Content-Length", str(len(payload)))
+                self.end_headers()
+                try:
+                    self.wfile.write(payload)
+                except (BrokenPipeError, ConnectionResetError, ConnectionAbortedError):
+                    pass  # Expected when the client timeout cancels a delayed request.
+
+            def do_GET(self):
+                requests.append((self.path, {}))
+                payload = b'{"response":"ok","model":"qwen3:4b"}'
+                self.send_response(200)
                 self.send_header("Content-Length", str(len(payload)))
                 self.end_headers()
                 self.wfile.write(payload)
@@ -49,58 +78,181 @@ class ChatE2EScriptTests(unittest.TestCase):
                 pass
 
         with ThreadingHTTPServer(("127.0.0.1", 0), Handler) as server:
-            thread = threading.Thread(target=server.serve_forever, daemon=True)
+            thread = threading.Thread(target=server.serve_forever, kwargs={"poll_interval": 0.05}, daemon=True)
             thread.start()
             try:
                 with tempfile.TemporaryDirectory(prefix="chat-e2e-") as folder:
                     folder_path = Path(folder)
                     dataset_path = folder_path / "cases.json"
                     evidence_path = folder_path / "evidence.json"
-                    dataset_path.write_text(json.dumps(dataset()), encoding="utf-8")
-                    result = subprocess.run(
-                        [
-                            PWSH, "-NoProfile", "-File", str(SCRIPT),
-                            "-BaseUrl", f"http://127.0.0.1:{server.server_port}",
-                            "-DatasetPath", str(dataset_path),
-                            "-OutputPath", str(evidence_path),
-                            "-TimeoutSec", "10",
-                        ],
-                        capture_output=True,
-                        encoding="utf-8",
-                        errors="replace",
-                        timeout=30,
-                    )
-                    if not evidence_path.exists():
-                        self.fail(
-                            "Evaluator did not create evidence.\n"
-                            f"exit={result.returncode}\nstdout={result.stdout}\nstderr={result.stderr}"
-                        )
-                    evidence = json.loads(evidence_path.read_text(encoding="utf-8"))
+                    if invalid_output:
+                        evidence_path = folder_path / "missing-folder" / "evidence.json"
+                    dataset_path.write_text(json.dumps(fixture or dataset(), ensure_ascii=False), encoding="utf-8")
+                    arguments = [
+                        PWSH, "-NoProfile", "-File", str(SCRIPT),
+                        "-BaseUrl", base_url or f"http://127.0.0.1:{server.server_port}",
+                        "-DatasetPath", str(dataset_path),
+                        "-OutputPath", str(evidence_path),
+                        "-TimeoutSec", str(timeout_sec),
+                    ]
+                    arguments.extend(extra_args or [])
+                    result = subprocess.run(arguments, capture_output=True, encoding="utf-8",
+                                            errors="replace", timeout=90)
+                    evidence = None
+                    if evidence_path.exists():
+                        evidence = json.loads(evidence_path.read_text(encoding="utf-8"))
+                    elif expect_evidence:
+                        self.fail("Evaluator did not create evidence.\n"
+                                  f"exit={result.returncode}\nstdout={result.stdout}\nstderr={result.stderr}")
                     return result, evidence, requests
             finally:
                 server.shutdown()
                 thread.join(timeout=5)
 
     def test_all_valid_backend_responses_return_zero(self):
-        result, evidence, requests = self.run_script(
-            lambda _: {"response": "ok", "model": "qwen3:4b"}
-        )
+        result, evidence, requests = self.run_script()
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
-        self.assertEqual(evidence["total"], 20)
-        self.assertEqual(evidence["passed"], 20)
+        self.assertEqual(evidence["total"], TOTAL)
+        self.assertEqual(evidence["passed"], TOTAL)
         self.assertEqual(evidence["failed"], 0)
+        self.assertEqual(evidence["warm_sample_count"], TOTAL - 1)
         self.assertTrue(all(path == "/api/chat" for path, _ in requests))
         self.assertTrue(all(set(body) == {"message"} for _, body in requests))
+        self.assertTrue(all("😊" in body["message"] for _, body in requests))
+        self.assertEqual(evidence["results"][0]["phase"], "cold_candidate")
 
-    def test_one_invalid_model_returns_nonzero(self):
+    def test_invalid_response_matrix_returns_nonzero_and_keeps_raw_evidence(self):
+        valid = {"response": "ตกลง", "model": "qwen3:4b"}
+        failures = {
+            1: {"body": None},
+            2: {"body": []},
+            3: {"body": [valid]},
+            4: {"body": "ตกลง"},
+            5: {"body": False},
+            6: {"body": {**valid, "response": None}},
+            7: {"body": {**valid, "response": ["ตกลง"]}},
+            8: {"body": {"model": "qwen3:4b"}},
+            9: {"body": {"Response": "ตกลง", "model": "qwen3:4b"}},
+            10: {"body": {"response": "ตกลง", "Model": "qwen3:4b"}},
+            11: {"body": {**valid, "model": "mock"}},
+            12: {"body": {**valid, "model": ["qwen3:4b"]}},
+            13: {"body": {**valid, "response": ""}},
+            14: {"body": {**valid, "response": "  \n"}},
+            15: {"body": {**valid, "response": '{"answer":"ตกลง"}'}},
+            16: {"body": {**valid, "response": '```json\n{"answer":"ตกลง"}\n```'}},
+            17: {"body": {**valid, "response": '["ตกลง"]'}},
+            18: {"body": {**valid, "response": '```json\n["ตกลง"]\n```'}},
+            19: {"body": {**valid, "response": "<think>ตกลง</think>"}},
+            20: {"body": {**valid, "response": "ตกลง </THINK>"}},
+            21: {"body": {**valid, "response": "ตกลง System.InvalidOperationException: failure"}},
+            22: {"body": {**valid, "response": "ตกลง stack trace: internal method"}},
+            23: {"body": {**valid, "response": "English answer only"}},
+            24: {"body": {**valid, "response": "ไม่ทราบ"}},
+            25: {"status": 503},
+            26: {"raw": "{malformed JSON"},
+            27: {"raw": ""},
+            PER_CATEGORY + 1: {"body": {**valid, "response": "ตกลง"}},
+            PER_CATEGORY * 2 + 1: {"body": {**valid, "response": "43"}},
+        }
+        fixture = dataset()
+        for index in failures:
+            # Isolate contract/language guards from factual-answer matching.
+            if index not in (24, PER_CATEGORY * 2 + 1):
+                fixture["cases"][index - 1]["expected_regex"] = "(?s).*"
         result, evidence, requests = self.run_script(
-            lambda index: {"response": "ok", "model": "mock" if index == 1 else "qwen3:4b"}
+            lambda index, _: failures.get(index, {}), fixture=fixture
         )
         self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
-        self.assertEqual(evidence["passed"], 19)
+        self.assertEqual(len(requests), TOTAL)
+        self.assertEqual(evidence["failed"], len(failures))
+        for index in failures:
+            with self.subTest(case=index):
+                entry = evidence["results"][index - 1]
+                self.assertFalse(entry["passed"], entry)
+                self.assertTrue(entry["errors"], entry)
+                self.assertIsInstance(entry["raw_body"], str)
+        for index, expected_error in (
+            (15, "nested JSON"), (16, "nested JSON"),
+            (17, "nested JSON"), (18, "nested JSON"),
+            (19, "thinking marker"), (20, "thinking marker"),
+            (21, "system details"), (22, "system details"),
+            (23, "language"), (24, "expected_regex"),
+            (PER_CATEGORY + 1, "language"),
+            (PER_CATEGORY * 2 + 1, "expected_regex"),
+        ):
+            with self.subTest(guard=expected_error, case=index):
+                self.assertIn(expected_error, " ".join(evidence["results"][index - 1]["errors"]))
+        failed_warm = len(failures) - 1
+        self.assertEqual(evidence["warm_sample_count"], TOTAL - 1 - failed_warm)
+
+    def test_invalid_datasets_fail_before_any_request(self):
+        fixtures = {}
+        too_small = dataset()
+        too_small["cases"].pop()
+        fixtures["category too small"] = too_small
+        for label, field, value in (
+            ("duplicate ID", "id", "thai-01"),
+            ("empty prompt", "prompt", " "),
+            ("unknown category", "category", "other"),
+            ("unknown language", "language", "xx"),
+            ("blank regex", "expected_regex", ""),
+            ("invalid regex", "expected_regex", "["),
+        ):
+            fixture = dataset()
+            fixture["cases"][0][field] = value
+            fixtures[label] = fixture
+        for label, fixture in fixtures.items():
+            with self.subTest(label=label):
+                result, evidence, requests = self.run_script(fixture=fixture, expect_evidence=False)
+                self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+                self.assertFalse(requests)
+                self.assertIsNone(evidence)
+
+    def test_rejects_unsafe_backend_urls_before_any_request(self):
+        for base_url in (
+            "http://192.168.1.10:5290", "ftp://localhost:5290", "http://localhost:11434",
+            "http://user:password@localhost:5290", "http://localhost:5290/other",
+            "http://localhost:5290/?query=value", "http://localhost:5290/#fragment",
+        ):
+            with self.subTest(base_url=base_url):
+                result, evidence, requests = self.run_script(base_url=base_url, expect_evidence=False)
+                self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+                self.assertFalse(requests)
+                self.assertIsNone(evidence)
+
+    def test_redirect_is_not_followed(self):
+        result, evidence, requests = self.run_script(
+            lambda index, _: {"status": 307, "redirect": True} if index == 1 else {}
+        )
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
         self.assertEqual(evidence["failed"], 1)
-        self.assertIn("expected qwen3:4b", evidence["results"][0]["errors"][0])
-        self.assertEqual(len(requests), 20)
+        self.assertEqual(evidence["results"][0]["http_status"], 307)
+        self.assertEqual(len(requests), TOTAL)
+        self.assertTrue(all(path == "/api/chat" for path, _ in requests))
+
+    def test_timeout_fails_one_case_and_continues(self):
+        result, evidence, requests = self.run_script(
+            lambda index, _: {"delay": 2} if index == 1 else {},
+            timeout_sec=1,
+        )
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertEqual(evidence["failed"], 1)
+        self.assertEqual(len(requests), TOTAL)
+        self.assertTrue(evidence["results"][0]["errors"])
+
+    def test_invalid_evidence_destination_returns_nonzero(self):
+        result, evidence, requests = self.run_script(invalid_output=True, expect_evidence=False)
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertFalse(requests)
+        self.assertIsNone(evidence)
+
+    def test_cold_start_note_is_recorded_without_warmup_requests(self):
+        note = "Model unloaded manually immediately before this mock-only run."
+        result, evidence, requests = self.run_script(extra_args=["-ColdStartNote", note])
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(evidence["results"][0]["phase"], "cold")
+        self.assertEqual(evidence["cold_start_note"], note)
+        self.assertEqual(len(requests), TOTAL)
 
 
 if __name__ == "__main__":
