@@ -72,3 +72,6 @@ Invoke-WebRequest `
 
 The current response is produced by `MockAIService`; Ollama is not required and
 no secrets or external AI configuration are used.
+
+Verification evidence for BE-001 is available in
+[`docs/BE-001-evidence.md`](docs/BE-001-evidence.md).
