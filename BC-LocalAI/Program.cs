@@ -1,9 +1,23 @@
+using BC_LocalAI.Middleware;
+using BC_LocalAI.Models;
+using Microsoft.AspNetCore.Mvc;
+using BC_LocalAI.Services;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-builder.Services.AddControllersWithViews();
+builder.Services.AddControllersWithViews()
+    .ConfigureApiBehaviorOptions(options =>
+    {
+        // Malformed JSON / wrong types must follow the same error contract.
+        options.InvalidModelStateResponseFactory = _ => new BadRequestObjectResult(
+            new ApiErrorResponse(new ApiError("INVALID_MESSAGE", "Message is required")));
+    });
+builder.Services.AddScoped<IAIService, MockAIService>();
 
 var app = builder.Build();
+
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 // Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
@@ -20,6 +34,8 @@ app.UseAuthorization();
 
 app.MapStaticAssets();
 
+app.MapControllers();
+
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}")
@@ -27,3 +43,5 @@ app.MapControllerRoute(
 
 
 app.Run();
+
+public partial class Program;
