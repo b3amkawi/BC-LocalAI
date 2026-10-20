@@ -41,6 +41,10 @@ ends (1) · not stopping at the outcome while the server keeps the connection op
 1. After a completed answer the final state was reported twice (a duplicate UI update) - found by the "states in order" test.
 2. In the first version of `chat.js` the page went back to "ready" only after the `try` block, so an exception while rendering would have
    left it stuck in "generating" with no Send button - found by the FE-001 page test that requires the reset in `finally`.
+3. Outside FE-002, found while re-running every suite: `scripts/test-ollama.ps1` (AI-002) intermittently reported "FAIL while saving evidence"
+   because `File.Replace` hit a file briefly held by another process on Windows ("Unable to remove the file to be replaced"; the test
+   `test_success_replaces_previous_evidence` failed 1 run in 12). The replace is now retried up to 5 times (100-500 ms) for that case only; a
+   missing path still fails at once. With the fix: 24 of 24 runs passed.
 
 ## 2. Browser, real backend and real Ollama
 
