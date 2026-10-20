@@ -22,6 +22,7 @@ public sealed class StaticAssetsTests(WebApplicationFactory<Program> factory) : 
                 data.Add(environment, encoding, "css/chat.css");
                 data.Add(environment, encoding, "js/chat.js");
                 data.Add(environment, encoding, "js/chat-core.js");
+                data.Add(environment, encoding, "js/chat-stream.js");
             }
         }
 

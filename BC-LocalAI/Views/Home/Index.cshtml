@@ -37,19 +37,21 @@
             </noscript>
         </main>
 
-        <form id="composer" class="composer" action="#" method="post" novalidate data-timeout-seconds="@(OllamaOptions.Value.TimeoutSeconds + 20)">
+        <form id="composer" class="composer" action="#" method="post" novalidate data-state="idle" data-timeout-seconds="@(OllamaOptions.Value.TimeoutSeconds + 20)">
             <p id="hint" class="composer__hint" role="alert"></p>
             <div class="composer__row">
                 <label for="message" class="visually-hidden">ข้อความของคุณ</label>
                 <textarea id="message" name="message" class="composer__input" rows="1"
                           placeholder="พิมพ์คำถามของคุณ…" autocomplete="off" aria-describedby="keys"></textarea>
                 <button id="send" type="submit" class="composer__send">ส่ง</button>
+                <button id="stop" type="button" class="composer__stop" hidden aria-keyshortcuts="Escape">หยุดสร้างคำตอบ</button>
             </div>
-            <p id="keys" class="composer__keys">Enter เพื่อส่ง · Shift+Enter เพื่อขึ้นบรรทัดใหม่</p>
+            <p id="keys" class="composer__keys">Enter เพื่อส่ง · Shift+Enter เพื่อขึ้นบรรทัดใหม่ · Esc เพื่อหยุดสร้างคำตอบ</p>
         </form>
     </div>
 
     <script src="~/js/chat-core.js" asp-append-version="true"></script>
+    <script src="~/js/chat-stream.js" asp-append-version="true"></script>
     <script src="~/js/chat.js" asp-append-version="true"></script>
 </body>
 </html>
