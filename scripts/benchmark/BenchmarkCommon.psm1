@@ -14,6 +14,16 @@ $script:Prompts = [ordered]@{
         'Which planet is known as the Red Planet? Answer with one word.'
         'ประเทศไทยมีเมืองหลวงชื่ออะไร ตอบสั้น ๆ'
         'What is the opposite of hot? Answer with one word.'
+        'What is the largest ocean on Earth? Answer with one word.'
+        'What is 9 × 7? Answer with the number only.'
+        'What color do you get by mixing blue and yellow? Answer with one word.'
+        'How many days are in a week? Answer with the number only.'
+        'What is the chemical symbol for gold? Answer with the symbol only.'
+        'ดาวเคราะห์ที่ใหญ่ที่สุดในระบบสุริยะคือดาวอะไร ตอบสั้น ๆ'
+        'What is the opposite of up? Answer with one word.'
+        'What is 100 - 58? Answer with the number only.'
+        'Which animal is known as the king of the jungle? Answer with one word.'
+        'หนึ่งปีมีกี่เดือน ตอบเป็นตัวเลขอย่างเดียว'
     )
     medium = @(
         'Explain in exactly three sentences why the sky looks blue.'
@@ -21,6 +31,16 @@ $script:Prompts = [ordered]@{
         'อธิบายเป็นภาษาไทยสามประโยคว่าทำไมควรล้างมือก่อนรับประทานอาหาร'
         'In three sentences, describe how photosynthesis works.'
         'In three sentences, explain what an HTTP status code is.'
+        'In three sentences, explain what a firewall does.'
+        'In three sentences, describe how a bicycle stays upright.'
+        'Explain in exactly three sentences what causes the seasons on Earth.'
+        'In three sentences, explain why we need sleep.'
+        'In three sentences, explain what an API is.'
+        'อธิบายเป็นภาษาไทยสามประโยคว่าฝนเกิดขึ้นได้อย่างไร'
+        'In three sentences, describe how a refrigerator keeps food cold.'
+        'In three sentences, explain what inflation means.'
+        'อธิบายเป็นภาษาไทยสามประโยคว่าทำไมต้องดื่มน้ำให้เพียงพอ'
+        'In three sentences, explain what a computer processor does.'
     )
     long   = @(
         'Write one paragraph of about 120 words explaining how a web browser loads a page.'
@@ -28,6 +48,16 @@ $script:Prompts = [ordered]@{
         'เขียนย่อหน้าภาษาไทยประมาณ 120 คำ อธิบายประโยชน์ของการอ่านหนังสือ'
         'Write one paragraph of about 120 words explaining what cloud computing is.'
         'Write one paragraph of about 120 words describing how rain forms.'
+        'Write one paragraph of about 120 words describing how vaccines work.'
+        'Write one paragraph of about 120 words explaining why recycling matters.'
+        'Write one paragraph of about 120 words describing the water cycle.'
+        'Write one paragraph of about 120 words explaining how electricity reaches a home.'
+        'Write one paragraph of about 120 words describing the history of the bicycle.'
+        'เขียนย่อหน้าภาษาไทยประมาณ 120 คำ อธิบายความสำคัญของการนอนหลับ'
+        'Write one paragraph of about 120 words explaining how the internet works.'
+        'Write one paragraph of about 120 words explaining what machine learning is.'
+        'เขียนย่อหน้าภาษาไทยประมาณ 120 คำ อธิบายประโยชน์ของการออกกำลังกาย'
+        'Write one paragraph of about 120 words describing how coffee is produced.'
     )
 }
 
@@ -75,7 +105,7 @@ function Get-HostEnvironment {
             $environment.cpu = $cpu.Name.Trim(); $environment.cpu_cores = $cpu.NumberOfCores
             $environment.cpu_threads = $cpu.NumberOfLogicalProcessors
             $environment.ram_total_mb = [math]::Round($os.TotalVisibleMemorySize / 1024)
-            $environment.ram_available_mb = [math]::Round($os.FreePhysicalMemory / 1024)
+            $environment.ram_available_mb = [double](Get-CimInstance Win32_PerfFormattedData_PerfOS_Memory).AvailableMBytes
         } catch { }
     }
     $nvidia = Get-Command nvidia-smi -ErrorAction SilentlyContinue
@@ -168,9 +198,14 @@ function Start-ResourceSampler([int]$IntervalMs) {
             try {
                 if ($IsWindows) {
                     $sample.cpu_percent = [double](Get-CimInstance Win32_PerfFormattedData_PerfOS_Processor -Filter "Name='_Total'").PercentProcessorTime
-                    $sample.ram_available_mb = [math]::Round((Get-CimInstance Win32_OperatingSystem).FreePhysicalMemory / 1024)
+                    # Available memory includes the standby cache; FreePhysicalMemory does not and
+                    # reads far too low on a machine that has been running for a while.
+                    $sample.ram_available_mb = [double](Get-CimInstance Win32_PerfFormattedData_PerfOS_Memory).AvailableMBytes
                 }
-                $ollama = @(Get-Process -Name 'ollama*' -ErrorAction SilentlyContinue)
+                # The Ollama server (ollama*.exe) and the model runner it starts (llama-server.exe,
+                # which holds the model's CPU-side memory) both live under the Ollama install folder.
+                $ollama = @(Get-Process -Name 'ollama*', 'llama-server' -ErrorAction SilentlyContinue |
+                    Where-Object { $_.Path -like '*\Ollama\*' })
                 if ($ollama.Count) { $sample.ollama_working_set_mb = [math]::Round(($ollama | Measure-Object WorkingSet64 -Sum).Sum / 1MB) }
                 if ($nvidia) {
                     $gpu = (& $nvidia.Source --query-gpu=utilization.gpu,memory.used,memory.total --format=csv,noheader,nounits | Select-Object -First 1) -split ',\s*'
@@ -302,10 +337,12 @@ function Invoke-ChatBenchmark {
         [int[]]$Concurrency,
         [string[]]$Profiles,
         [int]$Rounds,
+        [int]$MinSamples = 0,
         [int]$WarmupRequests,
         [int]$TimeoutSec,
         [int]$ResourceIntervalMs,
         [int]$MinAvailableMemoryMB,
+        [int]$MemoryRecoveryWaitSec = 120,
         [string]$ColdStartNote,
         [string]$OutputCsv,
         [switch]$AppendCsv,
@@ -333,6 +370,8 @@ function Invoke-ChatBenchmark {
     $rows = [Collections.Generic.List[object]]::new()
     $scenarios = [Collections.Generic.List[object]]::new()
     $aborted = $null
+    $memoryPauseSeconds = 0.0
+    $memoryPauseCount = 0
     $promptCounter = [ref]0
 
     $toRow = {
@@ -355,7 +394,7 @@ function Invoke-ChatBenchmark {
             total_ms = $parsed.total_ms; tokens_per_sec = $parsed.tokens_per_sec
             # Ollama's total_duration already includes the time spent waiting in its queue, so the
             # wait is what is left after load + prompt evaluation + generation.
-            queue_wait_ms = if ($null -ne $parsed.eval_ms -and $null -ne $parsed.prompt_eval_ms -and $null -ne $parsed.load_ms) { [math]::Max(0, [math]::Round($elapsed - $parsed.load_ms - $parsed.prompt_eval_ms - $parsed.eval_ms, 1)) } else { $null }
+            queue_wait_ms = if ($null -ne $parsed.eval_ms -and $null -ne $parsed.prompt_eval_ms -and $null -ne $parsed.load_ms) { [math]::Max(0.0, [math]::Round($elapsed - $parsed.load_ms - $parsed.prompt_eval_ms - $parsed.eval_ms, 1)) } else { $null }
         }
     }
     $runBatch = {
@@ -384,10 +423,22 @@ function Invoke-ChatBenchmark {
         :scenarioLoop foreach ($profile in $Profiles) {
             foreach ($level in $Concurrency) {
                 $scenarioRows = [Collections.Generic.List[object]]::new(); $wall = 0.0
-                for ($round = 1; $round -le $Rounds; $round++) {
+                # Enough rounds that every scenario sends at least $MinSamples requests (needed for P99).
+                $roundsForLevel = [math]::Max($Rounds, [int][math]::Ceiling($MinSamples / $level))
+                for ($round = 1; $round -le $roundsForLevel; $round++) {
                     $available = Get-LatestAvailableMemoryMb $sampler
+                    # Other applications make available RAM dip briefly; wait for it to recover and stop
+                    # only when it stays below the limit for -MemoryRecoveryWaitSec seconds.
+                    $waitStarted = [DateTime]::UtcNow
+                    while ($null -ne $available -and $available -lt $MinAvailableMemoryMB -and
+                           ([DateTime]::UtcNow - $waitStarted).TotalSeconds -lt $MemoryRecoveryWaitSec) {
+                        Start-Sleep -Seconds 2
+                        $available = Get-LatestAvailableMemoryMb $sampler
+                    }
+                    $pausedSeconds = ([DateTime]::UtcNow - $waitStarted).TotalSeconds
+                    if ($pausedSeconds -ge 2) { $memoryPauseSeconds += $pausedSeconds; $memoryPauseCount++ }
                     if ($null -ne $available -and $available -lt $MinAvailableMemoryMB) {
-                        $aborted = "Stopped before $profile c=$level round $round`: available RAM $available MB < $MinAvailableMemoryMB MB."
+                        $aborted = "Stopped before $profile c=$level round $round`: available RAM $available MB < $MinAvailableMemoryMB MB for $MemoryRecoveryWaitSec s."
                         break
                     }
                     $result = & $runBatch 'measured' $profile $level $round
@@ -397,7 +448,7 @@ function Invoke-ChatBenchmark {
                 if ($scenarioRows.Count) {
                     $snapshot = if ($sampler) { @($sampler.Samples.ToArray()) } else { @() }
                     $summary = Get-ScenarioSummary -Rows $scenarioRows.ToArray() -Samples $snapshot -WallSeconds $wall
-                    $scenario = [ordered]@{ target = $Target; profile = $profile; concurrency = $level; rounds = $Rounds }
+                    $scenario = [ordered]@{ target = $Target; profile = $profile; concurrency = $level; rounds = $roundsForLevel }
                     foreach ($key in $summary.Keys) { $scenario[$key] = $summary[$key] }
                     $scenarios.Add($scenario)
                     Write-Host ("SCENARIO {0} {1} c={2}: {3}/{4} success, p50={5} p95={6} ms, {7} req/s" -f $Target, $profile, $level,
@@ -422,14 +473,16 @@ function Invoke-ChatBenchmark {
         run_id = $runId; target = $Target; endpoint = $Endpoint.AbsoluteUri; tested_at = [DateTimeOffset]::Now.ToString('o')
         preliminary = $true
         parameters = [ordered]@{
-            concurrency = $Concurrency; profiles = $Profiles; rounds = $Rounds; warmup_requests = $WarmupRequests
+            concurrency = $Concurrency; profiles = $Profiles; rounds = $Rounds; min_samples_per_scenario = $MinSamples; warmup_requests = $WarmupRequests
             client_timeout_sec = $TimeoutSec; resource_interval_ms = $ResourceIntervalMs; min_available_memory_mb = $MinAvailableMemoryMB
+            memory_recovery_wait_sec = $MemoryRecoveryWaitSec
         }
         prompts = $prompts
         environment = $Environment
         cold_start_note = $ColdStartNote
         cold_start = if ($cold.Count) { $cold[0] } else { $null }
         aborted = $aborted
+        memory_pauses = [ordered]@{ count = $memoryPauseCount; total_seconds = [math]::Round($memoryPauseSeconds, 1) }
         scenarios = $scenarios.ToArray()
         resource_samples = $samples
     }

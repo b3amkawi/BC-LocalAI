@@ -22,11 +22,13 @@ param(
     [uri]$BaseUrl = 'http://127.0.0.1:11434',
     [string[]]$Concurrency = @('1', '2', '5', '10'),
     [string[]]$Profiles = @('short', 'medium', 'long'),
-    [ValidateRange(1, 100)][int]$Rounds = 5,
+    [ValidateRange(1, 500)][int]$Rounds = 5,
+    [ValidateRange(0, 2000)][int]$MinSamples = 0,
     [ValidateRange(0, 20)][int]$WarmupRequests = 3,
     [ValidateRange(1, 1800)][int]$TimeoutSec = 300,
     [ValidateRange(0, 60000)][int]$ResourceIntervalMs = 1000,
-    [ValidateRange(0, 1048576)][int]$MinAvailableMemoryMB = 1024,
+    [ValidateRange(0, 1048576)][int]$MinAvailableMemoryMB = 512,
+    [ValidateRange(0, 3600)][int]$MemoryRecoveryWaitSec = 120,
     [string]$ColdStartNote = '',
     [string]$OutputCsv = (Join-Path $PSScriptRoot '..\..\docs\performance\benchmark-results.csv'),
     [switch]$AppendCsv,
@@ -77,8 +79,8 @@ $newBody = {
 
 try {
     $run = Invoke-ChatBenchmark -Target ollama -Endpoint ([uri]::new($BaseUrl, '/api/generate')) -NewBody $newBody -Model $model `
-        -Concurrency $Concurrency -Profiles $Profiles -Rounds $Rounds -WarmupRequests $WarmupRequests -TimeoutSec $TimeoutSec `
-        -ResourceIntervalMs $ResourceIntervalMs -MinAvailableMemoryMB $MinAvailableMemoryMB -ColdStartNote $ColdStartNote `
+        -Concurrency $Concurrency -Profiles $Profiles -Rounds $Rounds -MinSamples $MinSamples -WarmupRequests $WarmupRequests -TimeoutSec $TimeoutSec `
+        -ResourceIntervalMs $ResourceIntervalMs -MinAvailableMemoryMB $MinAvailableMemoryMB -MemoryRecoveryWaitSec $MemoryRecoveryWaitSec -ColdStartNote $ColdStartNote `
         -OutputCsv $OutputCsv -AppendCsv:$AppendCsv -OutputJson $OutputJson -Environment $environment
 } catch {
     [Console]::Error.WriteLine("FAIL: $($_.Exception.Message)")

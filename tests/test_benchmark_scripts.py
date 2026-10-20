@@ -19,6 +19,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 ROOT = Path(__file__).resolve().parents[1]
 OLLAMA_SCRIPT = ROOT / "scripts" / "benchmark" / "ollama-benchmark.ps1"
+COLD_SCRIPT = ROOT / "scripts" / "benchmark" / "cold-start-benchmark.ps1"
 BACKEND_SCRIPT = ROOT / "scripts" / "benchmark" / "backend-benchmark.ps1"
 CONTRACT = ROOT / "BC-LocalAI" / "Models" / "Ollama" / "OllamaGenerateRequest.cs"
 PWSH = shutil.which("pwsh")
@@ -43,6 +44,7 @@ class MockServer:
 
     def __init__(self, reply, tags=None):
         self.requests = []
+        self.loaded_models = []
         self.in_flight = 0
         self.peak = 0
         lock = threading.Lock()
@@ -68,6 +70,8 @@ class MockServer:
                     self.send_json(200, {"version": "mock-1.0"})
                 elif self.path == "/api/tags":
                     self.send_json(200, tags)
+                elif self.path == "/api/ps":
+                    self.send_json(200, {"models": outer.loaded_models})
                 else:
                     self.send_json(404, {"error": "not found"})
 
@@ -158,6 +162,33 @@ class BenchmarkScriptTests(unittest.TestCase):
         self.assertEqual(summary["environment"]["model_digest"], "abc123")
         self.assertTrue(summary["preliminary"])
 
+    def test_min_samples_raises_rounds_so_every_scenario_reaches_the_target(self):
+        with MockServer(backend_ok) as server:
+            result, rows, summary = self.run_script(
+                BACKEND_SCRIPT, server.url, "-Concurrency", "1,2,5,10", "-Profiles", "short", "-Rounds", "2",
+                "-MinSamples", "12", "-WarmupRequests", "0", "-ResourceIntervalMs", "0", timeout=180)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        by_level = {s["concurrency"]: s for s in summary["scenarios"]}
+        self.assertEqual({level: s["rounds"] for level, s in by_level.items()}, {1: 12, 2: 6, 5: 3, 10: 2})
+        self.assertEqual({level: s["requests"] for level, s in by_level.items()}, {1: 12, 2: 12, 5: 15, 10: 20})
+        self.assertEqual(summary["parameters"]["min_samples_per_scenario"], 12)
+
+    def test_prompt_pool_has_fifteen_unique_prompts_per_profile(self):
+        source = (ROOT / "scripts" / "benchmark" / "BenchmarkCommon.psm1").read_text(encoding="utf-8")
+        result = subprocess.run(
+            [PWSH, "-NoProfile", "-Command",
+             f"Import-Module '{ROOT / 'scripts' / 'benchmark' / 'BenchmarkCommon.psm1'}'; Get-BenchmarkPrompts | ConvertTo-Json -Depth 3"],
+            capture_output=True, encoding="utf-8", timeout=60)
+        self.assertEqual(result.returncode, 0, result.stderr)
+        pools = json.loads(result.stdout)
+        self.assertEqual(set(pools), {"short", "medium", "long"})
+        for name, prompts in pools.items():
+            with self.subTest(profile=name):
+                self.assertEqual(len(prompts), 15)
+                self.assertEqual(len(set(prompts)), 15)
+                self.assertGreaterEqual(sum(bool(re.search(r"[฀-๿]", prompt)) for prompt in prompts), 2)
+        self.assertEqual(pools["short"][0], "What is the capital of Japan? Answer with one word.")
+
     def test_ollama_request_body_matches_the_backend_contract(self):
         source = CONTRACT.read_text(encoding="utf-8")
         system_prompt = re.search(r'SystemPrompt =\s*"([^"]+)"', source)[1]
@@ -177,7 +208,7 @@ class BenchmarkScriptTests(unittest.TestCase):
     def test_ollama_outcomes_are_classified_and_kept_as_data(self):
         def reply(body):
             prompt = body["prompt"]
-            if "capital of Japan" in prompt:
+            if "opposite of hot" in prompt:
                 return {"body": {**ollama_ok(body)["body"], "done_reason": "length"}}
             if "12 + 30" in prompt:
                 return {"status": 500, "body": {"error": "model runner crashed"}}
@@ -191,7 +222,8 @@ class BenchmarkScriptTests(unittest.TestCase):
                 "-WarmupRequests", "0", "-ResourceIntervalMs", "0", "-TimeoutSec", "1")
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         outcomes = {row["prompt_id"]: row for row in rows if row["phase"] == "measured"}
-        self.assertEqual(outcomes["short-1"]["outcome"], "truncated")
+        # The first request of a run is the warm-up/cold request (short-1); measured ones start at short-2.
+        self.assertEqual(outcomes["short-5"]["outcome"], "truncated")
         self.assertEqual(outcomes["short-2"]["outcome"], "server_error")
         self.assertEqual(outcomes["short-2"]["error_code"], "OLLAMA_ERROR")
         self.assertEqual(outcomes["short-3"]["outcome"], "client_timeout")
@@ -202,9 +234,9 @@ class BenchmarkScriptTests(unittest.TestCase):
 
     def test_backend_run_separates_server_timeout_from_server_error(self):
         def reply(body):
-            if "capital of Japan" in body["message"]:
+            if "one word" in body["message"]:
                 return {"status": 504, "body": {"error": {"code": "AI_TIMEOUT", "message": "AI service timed out"}}}
-            if "12 + 30" in body["message"]:
+            if "number only" in body["message"]:
                 return {"status": 502, "body": {"error": {"code": "AI_INVALID_RESPONSE", "message": "invalid"}}}
             return backend_ok(body)
 
@@ -245,10 +277,14 @@ class BenchmarkScriptTests(unittest.TestCase):
         with MockServer(backend_ok) as server:
             result, rows, summary = self.run_script(
                 BACKEND_SCRIPT, server.url, "-Concurrency", "1", "-Profiles", "short", "-Rounds", "1",
-                "-WarmupRequests", "0", "-ResourceIntervalMs", "200", "-MinAvailableMemoryMB", "1048576")
+                "-WarmupRequests", "0", "-ResourceIntervalMs", "200", "-MinAvailableMemoryMB", "1048576",
+                "-MemoryRecoveryWaitSec", "3")
         self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
         self.assertIn("STOPPED", result.stderr)
         self.assertIn("available RAM", summary["aborted"])
+        # It waited for the memory to recover before giving up, and recorded the wait.
+        self.assertGreaterEqual(summary["memory_pauses"]["total_seconds"], 3)
+        self.assertEqual(summary["memory_pauses"]["count"], 1)
         self.assertFalse([row for row in rows if row["phase"] == "measured"])
         self.assertTrue(summary["resource_samples"])
 
@@ -281,6 +317,41 @@ class BenchmarkScriptTests(unittest.TestCase):
                     self.assertIsNone(rows)
                     self.assertIsNone(summary)
             self.assertFalse(server.requests)
+
+    def run_cold_script(self, target, base_url, ollama_url, shim_exit_code=0, repeats=3):
+        folder = tempfile.TemporaryDirectory(prefix="cold-")
+        self.addCleanup(folder.cleanup)
+        shim_dir = Path(folder.name) / "bin"
+        shim_dir.mkdir()
+        # A fake `ollama stop` so the real Ollama is never touched.
+        (shim_dir / "ollama.cmd").write_text(f"@echo off\r\nexit /b {shim_exit_code}\r\n", encoding="ascii", newline="")
+        csv_path = Path(folder.name) / "cold.csv"
+        env = {**__import__("os").environ, "PATH": f"{shim_dir};{__import__('os').environ['PATH']}"}
+        result = subprocess.run(
+            [PWSH, "-NoProfile", "-File", str(COLD_SCRIPT), "-Target", target, "-Repeats", str(repeats),
+             "-BaseUrl", base_url, "-OllamaUrl", ollama_url, "-UnloadWaitSec", "2", "-OutputCsv", str(csv_path)],
+            capture_output=True, encoding="utf-8", errors="replace", timeout=180, env=env)
+        rows = list(csv.DictReader(csv_path.open(encoding="utf-8"))) if csv_path.exists() else None
+        return result, rows
+
+    def test_cold_start_script_records_one_cold_row_per_repetition(self):
+        with MockServer(ollama_ok) as server:
+            result, rows = self.run_cold_script("ollama", server.url, server.url)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual([row["repetition"] for row in rows], ["1", "2", "3"])
+        self.assertTrue(all(row["phase"] == "cold" and row["outcome"] == "success" for row in rows))
+        # Each repetition sends the cold request plus one warm request whose row the script discards.
+        self.assertEqual(len(server.posts()), 6)
+        self.assertIn("SUMMARY: target=ollama repeats=3 success=3", result.stdout)
+
+    def test_cold_start_script_fails_when_the_model_stays_loaded(self):
+        with MockServer(ollama_ok) as server:
+            server.loaded_models = [{"name": "qwen3:4b"}]
+            result, rows = self.run_cold_script("ollama", server.url, server.url, repeats=1)
+        self.assertEqual(result.returncode, 1)
+        self.assertIn("still loaded", result.stderr)
+        self.assertIsNone(rows)
+        self.assertFalse(server.posts())
 
     def test_ollama_without_the_model_fails_before_benchmarking(self):
         with MockServer(ollama_ok, tags={"models": [{"name": "llama3:8b"}]}) as server:
