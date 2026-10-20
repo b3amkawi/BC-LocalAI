@@ -55,7 +55,7 @@ public sealed class OllamaCancellationApiTests(WebApplicationFactory<Program> fa
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() => request.WaitAsync(Patience));
         await logs.WaitForAsync("Request was cancelled by the client.", Patience);
 
-        Check.NotLeaked(logs.Text, "timed out", "AI_TIMEOUT");
+        Check.NotLeaked(logs.Text, "did not answer in time", "AI_TIMEOUT");
     }
 
     [Fact]
@@ -77,7 +77,7 @@ public sealed class OllamaCancellationApiTests(WebApplicationFactory<Program> fa
         var body = await response.Content.ReadFromJsonAsync<ApiErrorResponse>();
         Assert.Equal("AI_TIMEOUT", body!.Error.Code);
         Assert.InRange(clock.Elapsed.TotalSeconds, 0.5, 8); // the configured 1 s timeout, not the 100 s HttpClient default
-        await logs.WaitForAsync("timed out", Patience);
+        await logs.WaitForAsync("did not answer in time", Patience);
         Check.NotLeaked(logs.Text, "cancelled by the client");
     }
 
@@ -90,17 +90,28 @@ public sealed class OllamaCancellationApiTests(WebApplicationFactory<Program> fa
         var response = await client.PostAsync("/api/chat", Body());
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        Check.NotLeaked(logs.Text, "timed out", "cancelled by the client");
+        Check.NotLeaked(logs.Text, "did not answer in time", "cancelled by the client");
     }
 }
 
+internal sealed record LogEntry(
+    LogLevel Level,
+    EventId EventId,
+    string Message,
+    IReadOnlyDictionary<string, object?> Fields,
+    Exception? Exception);
+
 internal sealed class CapturingLoggerProvider : ILoggerProvider
 {
-    private readonly ConcurrentQueue<string> _messages = new();
+    private readonly ConcurrentQueue<LogEntry> _entries = new();
 
-    public string Text => string.Join("\n", _messages);
+    public IReadOnlyList<LogEntry> Entries => _entries.ToArray();
 
-    public ILogger CreateLogger(string categoryName) => new CapturingLogger(_messages);
+    public string Text => string.Join(Environment.NewLine, _entries.Select(e => $"{e.Level}: {e.Message}"));
+
+    public ILogger CreateLogger(string categoryName) => new CapturingLogger(_entries);
+
+    public ILogger<T> CreateLogger<T>() => new CapturingLogger<T>(_entries);
 
     public void Dispose()
     {
@@ -120,7 +131,7 @@ internal sealed class CapturingLoggerProvider : ILoggerProvider
         }
     }
 
-    private sealed class CapturingLogger(ConcurrentQueue<string> messages) : ILogger
+    private class CapturingLogger(ConcurrentQueue<LogEntry> entries) : ILogger
     {
         public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
 
@@ -131,7 +142,21 @@ internal sealed class CapturingLoggerProvider : ILoggerProvider
             EventId eventId,
             TState state,
             Exception? exception,
-            Func<TState, Exception?, string> formatter) =>
-            messages.Enqueue($"{logLevel}: {formatter(state, exception)}");
+            Func<TState, Exception?, string> formatter)
+        {
+            var fields = new Dictionary<string, object?>();
+            if (state is IEnumerable<KeyValuePair<string, object?>> pairs)
+            {
+                foreach (var pair in pairs)
+                {
+                    fields[pair.Key] = pair.Value;
+                }
+            }
+
+            entries.Enqueue(new LogEntry(logLevel, eventId, formatter(state, exception), fields, exception));
+        }
     }
+
+    private sealed class CapturingLogger<T>(ConcurrentQueue<LogEntry> entries)
+        : CapturingLogger(entries), ILogger<T>;
 }

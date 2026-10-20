@@ -1,0 +1,1395 @@
+{
+  "tested_at": "2026-10-20T15:07:08.2735926+07:00",
+  "endpoint": "http://127.0.0.1:11434/api/generate",
+  "ollama_version": "0.40.5",
+  "model": "qwen3:4b",
+  "model_digest": "359d7dd4bcdab3d86b87d73ac27966f4dbb9f5efdfcc75d34a8764a09474fae7",
+  "script_sha256": "EB13377A4FB5932897B5D80AC0C3C00061E7D8BCCEF6F581FE87D1A01AC66D9D",
+  "module_sha256": "EC5173B7C4360DA3AD4425CE4C65803A7937111C85EC510D133C2C4599EC5530",
+  "total": 15,
+  "passed": 15,
+  "failed": 0,
+  "opt_in": {
+    "runner_stop": true,
+    "cold_start": true
+  },
+  "scenarios": [
+    {
+      "id": "S00",
+      "name": "Cold start: first record after ollama stop",
+      "expected": [
+        "model unloaded before the request",
+        "request completes",
+        "first record arrives within 30 s"
+      ],
+      "request": {
+        "model": "qwen3:4b",
+        "format": {
+          "properties": {
+            "answer": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "answer"
+          ],
+          "additionalProperties": false,
+          "type": "object"
+        },
+        "stream": true,
+        "system": "Answer the user briefly in the same language as the user. Return a JSON object containing only an answer field with the final answer.",
+        "options": {
+          "temperature": 0,
+          "num_predict": 256
+        },
+        "prompt": "What is the capital of Japan? Answer briefly.",
+        "think": false
+      },
+      "actual": {
+        "outcome": "completed",
+        "error_code": null,
+        "http_status": 200,
+        "content_type": "application/x-ndjson",
+        "records": 11,
+        "deltas": 2,
+        "answer": "Tokyo",
+        "done": true,
+        "done_reason": "stop",
+        "has_thinking_field": false,
+        "thinking_chars": 0,
+        "first_record_ms": 4143.9,
+        "first_answer_ms": 4205.3,
+        "completed_ms": 4307.6,
+        "total_ms": 4327.3,
+        "interval_mean_ms": 13.0,
+        "interval_max_ms": 47.9,
+        "eval_count": 11,
+        "timeout_kind": null,
+        "upstream_error": null,
+        "problems": []
+      },
+      "checks": [
+        {
+          "name": "model is unloaded",
+          "expected": "no loaded model",
+          "actual": "0",
+          "passed": true
+        },
+        {
+          "name": "outcome is completed",
+          "expected": "completed",
+          "actual": "completed",
+          "passed": true
+        },
+        {
+          "name": "first record within 30 s",
+          "expected": "< 30000 ms",
+          "actual": "4143.9",
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "S01",
+      "name": "English streaming (format + think=false)",
+      "expected": [
+        "HTTP 200, application/x-ndjson",
+        "several records, last has done=true and done_reason=stop",
+        "answer assembled from chunks equals the JSON answer",
+        "no thinking field"
+      ],
+      "request": {
+        "model": "qwen3:4b",
+        "format": {
+          "properties": {
+            "answer": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "answer"
+          ],
+          "additionalProperties": false,
+          "type": "object"
+        },
+        "stream": true,
+        "system": "Answer the user briefly in the same language as the user. Return a JSON object containing only an answer field with the final answer.",
+        "options": {
+          "temperature": 0,
+          "num_predict": 256
+        },
+        "prompt": "What is the capital of Japan? Answer briefly in English.",
+        "think": false
+      },
+      "actual": {
+        "outcome": "completed",
+        "error_code": null,
+        "http_status": 200,
+        "content_type": "application/x-ndjson",
+        "records": 11,
+        "deltas": 2,
+        "answer": "Tokyo",
+        "done": true,
+        "done_reason": "stop",
+        "has_thinking_field": false,
+        "thinking_chars": 0,
+        "first_record_ms": 62.1,
+        "first_answer_ms": 167.0,
+        "completed_ms": 252.0,
+        "total_ms": 253.7,
+        "interval_mean_ms": 18.8,
+        "interval_max_ms": 35.2,
+        "eval_count": 11,
+        "timeout_kind": null,
+        "upstream_error": null,
+        "problems": []
+      },
+      "checks": [
+        {
+          "name": "outcome is completed",
+          "expected": "completed",
+          "actual": "completed",
+          "passed": true
+        },
+        {
+          "name": "HTTP 200 and application/x-ndjson",
+          "expected": "200 application/x-ndjson",
+          "actual": "200 application/x-ndjson",
+          "passed": true
+        },
+        {
+          "name": "final record done=true with done_reason=stop",
+          "expected": "stop",
+          "actual": "stop",
+          "passed": true
+        },
+        {
+          "name": "no thinking field in a think=false/format request",
+          "expected": "no thinking field",
+          "actual": "False",
+          "passed": true
+        },
+        {
+          "name": "no thinking marker in the answer",
+          "expected": "none",
+          "actual": "Tokyo",
+          "passed": true
+        },
+        {
+          "name": "decoded answer equals the answer of the assembled JSON",
+          "expected": "equal",
+          "actual": "equal",
+          "passed": true
+        },
+        {
+          "name": "several records",
+          "expected": ">= 5",
+          "actual": "11",
+          "passed": true
+        },
+        {
+          "name": "answer mentions Tokyo",
+          "expected": "Tokyo",
+          "actual": "Tokyo",
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "S02",
+      "name": "Thai streaming (format + think=false)",
+      "expected": [
+        "answer contains Thai characters",
+        "Thai syllables split across records are reassembled without replacement characters"
+      ],
+      "request": {
+        "model": "qwen3:4b",
+        "format": {
+          "properties": {
+            "answer": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "answer"
+          ],
+          "additionalProperties": false,
+          "type": "object"
+        },
+        "stream": true,
+        "system": "Answer the user briefly in the same language as the user. Return a JSON object containing only an answer field with the final answer.",
+        "options": {
+          "temperature": 0,
+          "num_predict": 256
+        },
+        "prompt": "ประเทศไทยมีเมืองหลวงชื่ออะไร ตอบสั้น ๆ เป็นภาษาไทย",
+        "think": false
+      },
+      "actual": {
+        "outcome": "completed",
+        "error_code": null,
+        "http_status": 200,
+        "content_type": "application/x-ndjson",
+        "records": 13,
+        "deltas": 7,
+        "answer": "กรุงเทพมหานคร",
+        "done": true,
+        "done_reason": "stop",
+        "has_thinking_field": false,
+        "thinking_chars": 0,
+        "first_record_ms": 42.4,
+        "first_answer_ms": 107.0,
+        "completed_ms": 282.4,
+        "total_ms": 283.2,
+        "interval_mean_ms": 19.8,
+        "interval_max_ms": 58.2,
+        "eval_count": 13,
+        "timeout_kind": null,
+        "upstream_error": null,
+        "problems": []
+      },
+      "checks": [
+        {
+          "name": "outcome is completed",
+          "expected": "completed",
+          "actual": "completed",
+          "passed": true
+        },
+        {
+          "name": "HTTP 200 and application/x-ndjson",
+          "expected": "200 application/x-ndjson",
+          "actual": "200 application/x-ndjson",
+          "passed": true
+        },
+        {
+          "name": "final record done=true with done_reason=stop",
+          "expected": "stop",
+          "actual": "stop",
+          "passed": true
+        },
+        {
+          "name": "no thinking field in a think=false/format request",
+          "expected": "no thinking field",
+          "actual": "False",
+          "passed": true
+        },
+        {
+          "name": "no thinking marker in the answer",
+          "expected": "none",
+          "actual": "กรุงเทพมหานคร",
+          "passed": true
+        },
+        {
+          "name": "decoded answer equals the answer of the assembled JSON",
+          "expected": "equal",
+          "actual": "equal",
+          "passed": true
+        },
+        {
+          "name": "answer contains Thai characters",
+          "expected": "Thai characters",
+          "actual": "กรุงเทพมหานคร",
+          "passed": true
+        },
+        {
+          "name": "no replacement character (U+FFFD)",
+          "expected": "none",
+          "actual": "กรุงเทพมหานคร",
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "S03",
+      "name": "Chunk assembly: the answer arrives incrementally",
+      "expected": [
+        "more than one answer delta",
+        "first answer delta arrives before the stream completes",
+        "concatenated deltas equal the answer"
+      ],
+      "request": {
+        "model": "qwen3:4b",
+        "format": {
+          "properties": {
+            "answer": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "answer"
+          ],
+          "additionalProperties": false,
+          "type": "object"
+        },
+        "stream": true,
+        "system": "Answer the user briefly in the same language as the user. Return a JSON object containing only an answer field with the final answer.",
+        "options": {
+          "temperature": 0,
+          "num_predict": 160
+        },
+        "prompt": "Describe the Sun in one sentence of about 25 words.",
+        "think": false
+      },
+      "actual": {
+        "outcome": "completed",
+        "error_code": null,
+        "http_status": 200,
+        "content_type": "application/x-ndjson",
+        "records": 32,
+        "deltas": 24,
+        "answer": "The Sun, a massive star at the center of our solar system, provides light and heat essential for life on Earth.",
+        "done": true,
+        "done_reason": "stop",
+        "has_thinking_field": false,
+        "thinking_chars": 0,
+        "first_record_ms": 49.8,
+        "first_answer_ms": 160.4,
+        "completed_ms": 579.7,
+        "total_ms": 580.0,
+        "interval_mean_ms": 17.1,
+        "interval_max_ms": 36.4,
+        "eval_count": 32,
+        "timeout_kind": null,
+        "upstream_error": null,
+        "problems": []
+      },
+      "checks": [
+        {
+          "name": "outcome is completed",
+          "expected": "completed",
+          "actual": "completed",
+          "passed": true
+        },
+        {
+          "name": "HTTP 200 and application/x-ndjson",
+          "expected": "200 application/x-ndjson",
+          "actual": "200 application/x-ndjson",
+          "passed": true
+        },
+        {
+          "name": "final record done=true with done_reason=stop",
+          "expected": "stop",
+          "actual": "stop",
+          "passed": true
+        },
+        {
+          "name": "no thinking field in a think=false/format request",
+          "expected": "no thinking field",
+          "actual": "False",
+          "passed": true
+        },
+        {
+          "name": "no thinking marker in the answer",
+          "expected": "none",
+          "actual": "The Sun, a massive star at the center of our solar system, provides light and heat essential for life on Earth.",
+          "passed": true
+        },
+        {
+          "name": "decoded answer equals the answer of the assembled JSON",
+          "expected": "equal",
+          "actual": "equal",
+          "passed": true
+        },
+        {
+          "name": "more than one delta",
+          "expected": ">= 5",
+          "actual": "24",
+          "passed": true
+        },
+        {
+          "name": "first answer delta before completion",
+          "expected": "first_answer_ms < completed_ms",
+          "actual": "160.4 / 579.7",
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "S04",
+      "name": "Unicode and special characters",
+      "expected": [
+        "emoji, quotes and a line break survive streaming and JSON escaping"
+      ],
+      "request": "three requests (emoji, quotes, line break)",
+      "actual": {
+        "emoji": {
+          "outcome": "completed",
+          "error_code": null,
+          "http_status": 200,
+          "content_type": "application/x-ndjson",
+          "records": 15,
+          "deltas": 6,
+          "answer": "Hello 😊🎉 ครับ",
+          "done": true,
+          "done_reason": "stop",
+          "has_thinking_field": false,
+          "thinking_chars": 0,
+          "first_record_ms": 52.1,
+          "first_answer_ms": 159.5,
+          "completed_ms": 323.5,
+          "total_ms": 323.7,
+          "interval_mean_ms": 19.3,
+          "interval_max_ms": 35.3,
+          "eval_count": 16,
+          "timeout_kind": null,
+          "upstream_error": null,
+          "problems": []
+        },
+        "quotes": {
+          "outcome": "completed",
+          "error_code": null,
+          "http_status": 200,
+          "content_type": "application/x-ndjson",
+          "records": 15,
+          "deltas": 6,
+          "answer": "He said \"hi\" twice",
+          "done": true,
+          "done_reason": "stop",
+          "has_thinking_field": false,
+          "thinking_chars": 0,
+          "first_record_ms": 43.9,
+          "first_answer_ms": 153.3,
+          "completed_ms": 300.5,
+          "total_ms": 300.6,
+          "interval_mean_ms": 18.2,
+          "interval_max_ms": 33.4,
+          "eval_count": 15,
+          "timeout_kind": null,
+          "upstream_error": null,
+          "problems": []
+        },
+        "line break": {
+          "outcome": "completed",
+          "error_code": null,
+          "http_status": 200,
+          "content_type": "application/x-ndjson",
+          "records": 12,
+          "deltas": 3,
+          "answer": "A\nB",
+          "done": true,
+          "done_reason": "stop",
+          "has_thinking_field": false,
+          "thinking_chars": 0,
+          "first_record_ms": 68.9,
+          "first_answer_ms": 164.2,
+          "completed_ms": 268.3,
+          "total_ms": 268.6,
+          "interval_mean_ms": 18.0,
+          "interval_max_ms": 35.8,
+          "eval_count": 12,
+          "timeout_kind": null,
+          "upstream_error": null,
+          "problems": []
+        }
+      },
+      "checks": [
+        {
+          "name": "emoji: outcome is completed",
+          "expected": "completed",
+          "actual": "completed",
+          "passed": true
+        },
+        {
+          "name": "emoji: expected characters present",
+          "expected": "present",
+          "actual": "Hello 😊🎉 ครับ",
+          "passed": true
+        },
+        {
+          "name": "emoji: no replacement character",
+          "expected": "none",
+          "actual": "Hello 😊🎉 ครับ",
+          "passed": true
+        },
+        {
+          "name": "quotes: outcome is completed",
+          "expected": "completed",
+          "actual": "completed",
+          "passed": true
+        },
+        {
+          "name": "quotes: expected characters present",
+          "expected": "present",
+          "actual": "He said \"hi\" twice",
+          "passed": true
+        },
+        {
+          "name": "quotes: no replacement character",
+          "expected": "none",
+          "actual": "He said \"hi\" twice",
+          "passed": true
+        },
+        {
+          "name": "line break: outcome is completed",
+          "expected": "completed",
+          "actual": "completed",
+          "passed": true
+        },
+        {
+          "name": "line break: expected characters present",
+          "expected": "present",
+          "actual": "A\nB",
+          "passed": true
+        },
+        {
+          "name": "line break: no replacement character",
+          "expected": "none",
+          "actual": "A\nB",
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "S05",
+      "name": "Thinking: think=true is separated into a thinking field",
+      "expected": [
+        "thinking field present and never part of the answer",
+        "answer completes after the thinking",
+        "first answer delta arrives later than the first record"
+      ],
+      "request": {
+        "model": "qwen3:4b",
+        "format": {
+          "properties": {
+            "answer": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "answer"
+          ],
+          "additionalProperties": false,
+          "type": "object"
+        },
+        "stream": true,
+        "system": "Answer the user briefly in the same language as the user. Return a JSON object containing only an answer field with the final answer.",
+        "options": {
+          "temperature": 0,
+          "num_predict": 512
+        },
+        "prompt": "What is the capital of France?",
+        "think": true
+      },
+      "actual": {
+        "outcome": "completed",
+        "error_code": null,
+        "http_status": 200,
+        "content_type": "application/x-ndjson",
+        "records": 188,
+        "deltas": 1,
+        "answer": "Paris",
+        "done": true,
+        "done_reason": "stop",
+        "has_thinking_field": true,
+        "thinking_chars": 812,
+        "first_record_ms": 53.3,
+        "first_answer_ms": 2971.1,
+        "completed_ms": 3015.2,
+        "total_ms": 3015.4,
+        "interval_mean_ms": 15.8,
+        "interval_max_ms": 31.2,
+        "eval_count": 188,
+        "timeout_kind": null,
+        "upstream_error": null,
+        "problems": []
+      },
+      "checks": [
+        {
+          "name": "outcome is completed",
+          "expected": "completed",
+          "actual": "completed",
+          "passed": true
+        },
+        {
+          "name": "thinking field present",
+          "expected": "true",
+          "actual": "True",
+          "passed": true
+        },
+        {
+          "name": "thinking characters counted",
+          "expected": "> 0",
+          "actual": "812",
+          "passed": true
+        },
+        {
+          "name": "answer does not contain the thinking text",
+          "expected": "no \"the user\"",
+          "actual": "Paris",
+          "passed": true
+        },
+        {
+          "name": "answer arrives after thinking",
+          "expected": "first_answer_ms > first_record_ms + 200",
+          "actual": "2971.1 vs 53.3",
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "S06",
+      "name": "Observation: think=false without format leaks reasoning into response",
+      "expected": [
+        "stream is rejected (not completed) because the response is not the {answer} JSON",
+        "classified as invalid response"
+      ],
+      "request": {
+        "model": "qwen3:4b",
+        "stream": true,
+        "system": "Answer the user briefly in the same language as the user.",
+        "options": {
+          "temperature": 0,
+          "num_predict": 256
+        },
+        "prompt": "What is the capital of Japan? Answer in one sentence.",
+        "think": false
+      },
+      "actual": {
+        "outcome": "invalid",
+        "error_code": "AI_INVALID_RESPONSE",
+        "http_status": 200,
+        "content_type": "application/x-ndjson",
+        "records": 1,
+        "deltas": 0,
+        "answer": "",
+        "done": false,
+        "done_reason": null,
+        "has_thinking_field": false,
+        "thinking_chars": 0,
+        "first_record_ms": 44.9,
+        "first_answer_ms": null,
+        "completed_ms": null,
+        "total_ms": 50.1,
+        "interval_mean_ms": null,
+        "interval_max_ms": null,
+        "eval_count": null,
+        "timeout_kind": null,
+        "upstream_error": null,
+        "problems": [
+          "answer decoder: not_a_json_object"
+        ],
+        "first_fragment": "Okay"
+      },
+      "checks": [
+        {
+          "name": "outcome is not completed",
+          "expected": "invalid",
+          "actual": "invalid",
+          "passed": true
+        },
+        {
+          "name": "public error code",
+          "expected": "AI_INVALID_RESPONSE",
+          "actual": "AI_INVALID_RESPONSE",
+          "passed": true
+        },
+        {
+          "name": "first fragment is prose, not a JSON object",
+          "expected": "does not start with {",
+          "actual": "Okay",
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "S07",
+      "name": "Truncation: done_reason=length is not a completion",
+      "expected": [
+        "outcome truncated",
+        "error code AI_RESPONSE_TOO_LARGE",
+        "the JSON answer is incomplete"
+      ],
+      "request": {
+        "model": "qwen3:4b",
+        "format": {
+          "properties": {
+            "answer": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "answer"
+          ],
+          "additionalProperties": false,
+          "type": "object"
+        },
+        "stream": true,
+        "system": "Answer the user briefly in the same language as the user. Return a JSON object containing only an answer field with the final answer.",
+        "options": {
+          "temperature": 0,
+          "num_predict": 8
+        },
+        "prompt": "Explain photosynthesis in detail.",
+        "think": false
+      },
+      "actual": {
+        "outcome": "truncated",
+        "error_code": "AI_RESPONSE_TOO_LARGE",
+        "http_status": 200,
+        "content_type": "application/x-ndjson",
+        "records": 9,
+        "deltas": 2,
+        "answer": "Photosynthesis",
+        "done": true,
+        "done_reason": "length",
+        "has_thinking_field": false,
+        "thinking_chars": 0,
+        "first_record_ms": 63.1,
+        "first_answer_ms": 173.7,
+        "completed_ms": 195.3,
+        "total_ms": 195.4,
+        "interval_mean_ms": 16.4,
+        "interval_max_ms": 29.2,
+        "eval_count": 8,
+        "timeout_kind": null,
+        "upstream_error": null,
+        "problems": []
+      },
+      "checks": [
+        {
+          "name": "outcome is truncated",
+          "expected": "truncated",
+          "actual": "truncated",
+          "passed": true
+        },
+        {
+          "name": "done_reason is length",
+          "expected": "length",
+          "actual": "length",
+          "passed": true
+        },
+        {
+          "name": "error code",
+          "expected": "AI_RESPONSE_TOO_LARGE",
+          "actual": "AI_RESPONSE_TOO_LARGE",
+          "passed": true
+        },
+        {
+          "name": "the assembled response is not valid JSON",
+          "expected": "not parseable",
+          "actual": "{\n  \"answer\": \"Photosynthesis",
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "S08",
+      "name": "HTTP errors before the stream starts",
+      "expected": [
+        "unknown model: HTTP 404 with an error body",
+        "invalid option type: HTTP 500",
+        "malformed request JSON: HTTP 400",
+        "all classified as http_error / AI_PROVIDER_ERROR"
+      ],
+      "request": "unknown model, invalid option, malformed JSON",
+      "actual": {
+        "unknown_model": {
+          "outcome": "http_error",
+          "error_code": "AI_PROVIDER_ERROR",
+          "http_status": 404,
+          "content_type": "application/json",
+          "records": 0,
+          "deltas": 0,
+          "answer": "",
+          "done": false,
+          "done_reason": null,
+          "has_thinking_field": false,
+          "thinking_chars": 0,
+          "first_record_ms": null,
+          "first_answer_ms": null,
+          "completed_ms": null,
+          "total_ms": 27.7,
+          "interval_mean_ms": null,
+          "interval_max_ms": null,
+          "eval_count": null,
+          "timeout_kind": null,
+          "upstream_error": "model 'does-not-exist:1b' not found",
+          "problems": []
+        },
+        "invalid_option": {
+          "outcome": "http_error",
+          "error_code": "AI_PROVIDER_ERROR",
+          "http_status": 500,
+          "content_type": "application/json",
+          "records": 0,
+          "deltas": 0,
+          "answer": "",
+          "done": false,
+          "done_reason": null,
+          "has_thinking_field": false,
+          "thinking_chars": 0,
+          "first_record_ms": null,
+          "first_answer_ms": null,
+          "completed_ms": null,
+          "total_ms": 6.5,
+          "interval_mean_ms": null,
+          "interval_max_ms": null,
+          "eval_count": null,
+          "timeout_kind": null,
+          "upstream_error": "option \"num_predict\" must be of type integer",
+          "problems": []
+        },
+        "malformed_json": {
+          "outcome": "http_error",
+          "error_code": "AI_PROVIDER_ERROR",
+          "http_status": 400,
+          "content_type": "application/json",
+          "records": 0,
+          "deltas": 0,
+          "answer": "",
+          "done": false,
+          "done_reason": null,
+          "has_thinking_field": false,
+          "thinking_chars": 0,
+          "first_record_ms": null,
+          "first_answer_ms": null,
+          "completed_ms": null,
+          "total_ms": 10.5,
+          "interval_mean_ms": null,
+          "interval_max_ms": null,
+          "eval_count": null,
+          "timeout_kind": null,
+          "upstream_error": "unexpected EOF",
+          "problems": []
+        }
+      },
+      "checks": [
+        {
+          "name": "unknown model: HTTP 404",
+          "expected": "404",
+          "actual": "404",
+          "passed": true
+        },
+        {
+          "name": "unknown model: http_error with a message",
+          "expected": "http_error",
+          "actual": "http_error / model 'does-not-exist:1b' not found",
+          "passed": true
+        },
+        {
+          "name": "invalid option: HTTP 500 with an error",
+          "expected": "500 http_error",
+          "actual": "500 http_error",
+          "passed": true
+        },
+        {
+          "name": "malformed JSON: HTTP 400",
+          "expected": "400 http_error",
+          "actual": "400 http_error",
+          "passed": true
+        },
+        {
+          "name": "error code is AI_PROVIDER_ERROR",
+          "expected": "AI_PROVIDER_ERROR",
+          "actual": "AI_PROVIDER_ERROR",
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "S09",
+      "name": "Empty prompt returns done_reason=load, which is not a completion",
+      "expected": [
+        "HTTP 200 with a final record that has done_reason load",
+        "classified as invalid response"
+      ],
+      "request": {
+        "model": "qwen3:4b",
+        "format": {
+          "properties": {
+            "answer": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "answer"
+          ],
+          "additionalProperties": false,
+          "type": "object"
+        },
+        "stream": true,
+        "system": "Answer the user briefly in the same language as the user. Return a JSON object containing only an answer field with the final answer.",
+        "options": {
+          "temperature": 0,
+          "num_predict": 16
+        },
+        "prompt": "",
+        "think": false
+      },
+      "actual": {
+        "outcome": "invalid",
+        "error_code": "AI_INVALID_RESPONSE",
+        "http_status": 200,
+        "content_type": "application/json",
+        "records": 1,
+        "deltas": 0,
+        "answer": "",
+        "done": true,
+        "done_reason": "load",
+        "has_thinking_field": false,
+        "thinking_chars": 0,
+        "first_record_ms": 11.4,
+        "first_answer_ms": null,
+        "completed_ms": 11.7,
+        "total_ms": 13.6,
+        "interval_mean_ms": null,
+        "interval_max_ms": null,
+        "eval_count": null,
+        "timeout_kind": null,
+        "upstream_error": null,
+        "problems": [
+          "unexpected content type 'application/json'",
+          "done_reason is 'load', expected 'stop'"
+        ]
+      },
+      "checks": [
+        {
+          "name": "HTTP 200",
+          "expected": "200",
+          "actual": "200",
+          "passed": true
+        },
+        {
+          "name": "done_reason is load",
+          "expected": "load",
+          "actual": "load",
+          "passed": true
+        },
+        {
+          "name": "outcome is invalid",
+          "expected": "invalid",
+          "actual": "invalid",
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "S10",
+      "name": "Client cancellation stops generation on the Ollama side",
+      "expected": [
+        "cancelled after 25 records",
+        "with the connection closed at once the next request starts immediately",
+        "with the .NET default drain (2 s) Ollama keeps generating and the next request waits about 2 s"
+      ],
+      "request": {
+        "model": "qwen3:4b",
+        "format": {
+          "properties": {
+            "answer": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "answer"
+          ],
+          "additionalProperties": false,
+          "type": "object"
+        },
+        "stream": true,
+        "system": "Answer the user briefly in the same language as the user. Return a JSON object containing only an answer field with the final answer.",
+        "options": {
+          "temperature": 0,
+          "num_predict": 1024
+        },
+        "prompt": "Write a long essay of 600 words about the history of the bicycle.",
+        "think": true
+      },
+      "actual": {
+        "baseline_total_ms": 340.2,
+        "cancelled": {
+          "outcome": "cancelled",
+          "error_code": null,
+          "http_status": 200,
+          "content_type": "application/x-ndjson",
+          "records": 25,
+          "deltas": 0,
+          "answer": "",
+          "done": false,
+          "done_reason": null,
+          "has_thinking_field": true,
+          "thinking_chars": 104,
+          "first_record_ms": 28.8,
+          "first_answer_ms": null,
+          "completed_ms": null,
+          "total_ms": 408.6,
+          "interval_mean_ms": 15.8,
+          "interval_max_ms": 18.2,
+          "eval_count": null,
+          "timeout_kind": null,
+          "upstream_error": null,
+          "problems": []
+        },
+        "next_first_record_ms": 73.8,
+        "next_total_ms": 367.3,
+        "next_first_record_ms_with_default_drain": 2071.9
+      },
+      "checks": [
+        {
+          "name": "baseline request completes",
+          "expected": "completed",
+          "actual": "completed",
+          "passed": true
+        },
+        {
+          "name": "outcome is cancelled",
+          "expected": "cancelled",
+          "actual": "cancelled",
+          "passed": true
+        },
+        {
+          "name": "cancelled after 25 records",
+          "expected": "25",
+          "actual": "25",
+          "passed": true
+        },
+        {
+          "name": "next request completes",
+          "expected": "completed",
+          "actual": "completed",
+          "passed": true
+        },
+        {
+          "name": "next request starts at once (connection closed on cancel)",
+          "expected": "first record < 1000 ms (an uninterrupted 1024-token generation would keep Ollama busy for more than 10 s)",
+          "actual": "73.8",
+          "passed": true
+        },
+        {
+          "name": "with the default drain the next request waits for the drain (documents the pitfall)",
+          "expected": "first record >= 1500 ms",
+          "actual": "2071.9",
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "S11",
+      "name": "Total timeout cancels the request and frees Ollama",
+      "expected": [
+        "outcome timeout with kind total",
+        "error code AI_TIMEOUT",
+        "the next request completes quickly"
+      ],
+      "request": {
+        "model": "qwen3:4b",
+        "format": {
+          "properties": {
+            "answer": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "answer"
+          ],
+          "additionalProperties": false,
+          "type": "object"
+        },
+        "stream": true,
+        "system": "Answer the user briefly in the same language as the user. Return a JSON object containing only an answer field with the final answer.",
+        "options": {
+          "temperature": 0,
+          "num_predict": 1024
+        },
+        "prompt": "Write a long essay of 600 words about the history of the bicycle.",
+        "think": true
+      },
+      "actual": {
+        "timeout": {
+          "outcome": "timeout",
+          "error_code": "AI_TIMEOUT",
+          "http_status": 200,
+          "content_type": "application/x-ndjson",
+          "records": 126,
+          "deltas": 0,
+          "answer": "",
+          "done": false,
+          "done_reason": null,
+          "has_thinking_field": true,
+          "thinking_chars": 541,
+          "first_record_ms": 29.8,
+          "first_answer_ms": null,
+          "completed_ms": null,
+          "total_ms": 2022.8,
+          "interval_mean_ms": null,
+          "interval_max_ms": null,
+          "eval_count": null,
+          "timeout_kind": "total",
+          "upstream_error": null,
+          "problems": []
+        },
+        "next_request_total_ms": 332.0
+      },
+      "checks": [
+        {
+          "name": "outcome is timeout",
+          "expected": "timeout",
+          "actual": "timeout",
+          "passed": true
+        },
+        {
+          "name": "timeout kind is total",
+          "expected": "total",
+          "actual": "total",
+          "passed": true
+        },
+        {
+          "name": "error code",
+          "expected": "AI_TIMEOUT",
+          "actual": "AI_TIMEOUT",
+          "passed": true
+        },
+        {
+          "name": "next request completes",
+          "expected": "completed",
+          "actual": "completed",
+          "passed": true
+        },
+        {
+          "name": "next request is not blocked",
+          "expected": "< 3000 ms",
+          "actual": "332",
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "S12",
+      "name": "Unavailable endpoint",
+      "expected": [
+        "connection refused",
+        "outcome unavailable and error code AI_UNAVAILABLE",
+        "fast failure"
+      ],
+      "request": "POST http://127.0.0.1:11499/api/generate (nothing listening)",
+      "actual": {
+        "outcome": "unavailable",
+        "error_code": "AI_UNAVAILABLE",
+        "http_status": null,
+        "content_type": null,
+        "records": 0,
+        "deltas": 0,
+        "answer": "",
+        "done": false,
+        "done_reason": null,
+        "has_thinking_field": false,
+        "thinking_chars": 0,
+        "first_record_ms": null,
+        "first_answer_ms": null,
+        "completed_ms": null,
+        "total_ms": 2042.3,
+        "interval_mean_ms": null,
+        "interval_max_ms": null,
+        "eval_count": null,
+        "timeout_kind": null,
+        "upstream_error": null,
+        "problems": [
+          "connection failed: MethodInvocationException"
+        ]
+      },
+      "checks": [
+        {
+          "name": "outcome is unavailable",
+          "expected": "unavailable",
+          "actual": "unavailable",
+          "passed": true
+        },
+        {
+          "name": "error code",
+          "expected": "AI_UNAVAILABLE",
+          "actual": "AI_UNAVAILABLE",
+          "passed": true
+        },
+        {
+          "name": "fails fast",
+          "expected": "< 3000 ms",
+          "actual": "2042.3",
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "S13",
+      "name": "Latency profile of streaming (warm, 5 requests)",
+      "expected": [
+        "all requests complete",
+        "first record and first answer delta times are recorded"
+      ],
+      "request": "format + think=false, 5 requests",
+      "actual": {
+        "requests": [
+          {
+            "first_record_ms": 93.9,
+            "first_answer_ms": 301.4,
+            "total_ms": 401.2,
+            "interval_mean_ms": 34.1
+          },
+          {
+            "first_record_ms": 37.4,
+            "first_answer_ms": 159.5,
+            "total_ms": 234.8,
+            "interval_mean_ms": 21.8
+          },
+          {
+            "first_record_ms": 36.5,
+            "first_answer_ms": 155.3,
+            "total_ms": 232.8,
+            "interval_mean_ms": 21.5
+          },
+          {
+            "first_record_ms": 38.5,
+            "first_answer_ms": 150.6,
+            "total_ms": 221.7,
+            "interval_mean_ms": 20.3
+          },
+          {
+            "first_record_ms": 36.3,
+            "first_answer_ms": 143.2,
+            "total_ms": 214.6,
+            "interval_mean_ms": 19.7
+          }
+        ],
+        "median_first_record_ms": 37.4,
+        "median_first_answer_ms": 155.3,
+        "median_total_ms": 232.8
+      },
+      "checks": [
+        {
+          "name": "request 1 completed",
+          "expected": "completed",
+          "actual": "completed",
+          "passed": true
+        },
+        {
+          "name": "request 2 completed",
+          "expected": "completed",
+          "actual": "completed",
+          "passed": true
+        },
+        {
+          "name": "request 3 completed",
+          "expected": "completed",
+          "actual": "completed",
+          "passed": true
+        },
+        {
+          "name": "request 4 completed",
+          "expected": "completed",
+          "actual": "completed",
+          "passed": true
+        },
+        {
+          "name": "request 5 completed",
+          "expected": "completed",
+          "actual": "completed",
+          "passed": true
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "S14",
+      "name": "Interrupted stream: the Ollama model runner is stopped mid-generation (failure injection)",
+      "expected": [
+        "the stream ends with an {\"error\": ...} record and no done=true",
+        "outcome provider_error, error code AI_PROVIDER_ERROR",
+        "the upstream message is sanitized (no loopback endpoint)",
+        "Ollama serves the next request again"
+      ],
+      "request": {
+        "model": "qwen3:4b",
+        "format": {
+          "properties": {
+            "answer": {
+              "type": "string"
+            }
+          },
+          "required": [
+            "answer"
+          ],
+          "additionalProperties": false,
+          "type": "object"
+        },
+        "stream": true,
+        "system": "Answer the user briefly in the same language as the user. Return a JSON object containing only an answer field with the final answer.",
+        "options": {
+          "temperature": 0,
+          "num_predict": 1024
+        },
+        "prompt": "Write a long essay of 600 words about the history of the bicycle.",
+        "think": true
+      },
+      "actual": {
+        "interrupted": {
+          "outcome": "provider_error",
+          "error_code": "AI_PROVIDER_ERROR",
+          "http_status": 200,
+          "content_type": "application/x-ndjson",
+          "records": 18,
+          "deltas": 0,
+          "answer": "",
+          "done": false,
+          "done_reason": null,
+          "has_thinking_field": true,
+          "thinking_chars": 62,
+          "first_record_ms": 29.9,
+          "first_answer_ms": null,
+          "completed_ms": null,
+          "total_ms": 315.1,
+          "interval_mean_ms": 16.8,
+          "interval_max_ms": 34.4,
+          "eval_count": null,
+          "timeout_kind": null,
+          "upstream_error": "an error was encountered while running the model: read tcp <loopback>-><loopback>: wsarecv: An existing connection was forcibly closed by the remote host.",
+          "problems": []
+        },
+        "next_request_total_ms": 5293.8
+      },
+      "checks": [
+        {
+          "name": "outcome is provider_error",
+          "expected": "provider_error",
+          "actual": "provider_error",
+          "passed": true
+        },
+        {
+          "name": "error code",
+          "expected": "AI_PROVIDER_ERROR",
+          "actual": "AI_PROVIDER_ERROR",
+          "passed": true
+        },
+        {
+          "name": "no final done record",
+          "expected": "done=false",
+          "actual": "False",
+          "passed": true
+        },
+        {
+          "name": "upstream message is present but has no loopback endpoint",
+          "expected": "sanitized",
+          "actual": "an error was encountered while running the model: read tcp <loopback>-><loopback>: wsarecv: An existing connection was forcibly closed by the remote host.",
+          "passed": true
+        },
+        {
+          "name": "Ollama serves the next request",
+          "expected": "completed",
+          "actual": "completed",
+          "passed": true
+        }
+      ],
+      "passed": true
+    }
+  ]
+}

@@ -20,6 +20,8 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
+# Thai answers must survive redirection: on an English Windows the console code page is 437 and turns them into '?'.
+[Console]::OutputEncoding = [System.Text.UTF8Encoding]::new($false)
 # Keep this smoke test on loopback; never expose the Ollama listener.
 $baseUri = "http://127.0.0.1:$Port"
 $stage = 'checking Ollama availability'
@@ -100,10 +102,23 @@ try {
         $temporary = Join-Path ([IO.Path]::GetDirectoryName($destination)) ('.ollama-' + [Guid]::NewGuid().ToString('N') + '.tmp')
         try {
             [IO.File]::WriteAllText($temporary, $json, [Text.UTF8Encoding]::new($false))
-            if ([IO.File]::Exists($destination)) {
-                [IO.File]::Replace($temporary, $destination, [NullString]::Value)
-            } else {
-                [IO.File]::Move($temporary, $destination)
+            # On Windows another process (antivirus, search indexer) can hold a just-written file for a moment, and
+            # Replace then fails with "Unable to remove the file to be replaced". Retry that briefly; a missing path or
+            # a permission problem still fails at once.
+            for ($attempt = 1; ; $attempt++) {
+                try {
+                    if ([IO.File]::Exists($destination)) {
+                        [IO.File]::Replace($temporary, $destination, [NullString]::Value)
+                    } else {
+                        [IO.File]::Move($temporary, $destination)
+                    }
+                    break
+                } catch [IO.FileNotFoundException], [IO.DirectoryNotFoundException] {
+                    throw
+                } catch [IO.IOException] {
+                    if ($attempt -ge 5) { throw }
+                    Start-Sleep -Milliseconds (100 * $attempt)
+                }
             }
         } finally {
             if ([IO.File]::Exists($temporary)) { [IO.File]::Delete($temporary) }

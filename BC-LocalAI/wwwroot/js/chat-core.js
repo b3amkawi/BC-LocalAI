@@ -22,12 +22,30 @@
         AI_TIMEOUT: 'AI ใช้เวลาตอบนานเกินไป กรุณาลองใหม่',
         AI_PROVIDER_ERROR: 'AI เกิดข้อผิดพลาด กรุณาลองใหม่',
         AI_INVALID_RESPONSE: 'ได้รับคำตอบที่ไม่สมบูรณ์ กรุณาลองใหม่',
+        AI_RESPONSE_TOO_LARGE: 'คำตอบยาวเกินกว่าที่ระบบรองรับ กรุณาถามให้สั้นลงหรือแบ่งเป็นหลายคำถาม',
         INTERNAL_ERROR: 'ระบบเกิดข้อผิดพลาด กรุณาลองใหม่',
-        NETWORK_ERROR: 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาตรวจการเชื่อมต่อแล้วลองใหม่'
+        NETWORK_ERROR: 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาตรวจการเชื่อมต่อแล้วลองใหม่',
+        // FE-002: the stream ended before a terminal event (connection dropped); what arrived may be incomplete.
+        STREAM_INTERRUPTED: 'การเชื่อมต่อขาดก่อนที่คำตอบจะเสร็จ คำตอบที่เห็นอาจไม่ครบ กรุณาลองใหม่'
     });
 
     function hasOwn(object, key) {
         return Object.prototype.hasOwnProperty.call(object, key);
+    }
+
+    var DEFAULT_REQUEST_TIMEOUT_MS = 200000;
+    var MAX_REQUEST_TIMEOUT_MS = 3600000;
+
+    /**
+     * How long the browser waits for POST /api/chat. The server renders its own deadline plus a margin into the page,
+     * so the server's AI_TIMEOUT arrives first. Anything missing or invalid falls back to 200 s; never unlimited.
+     */
+    function requestTimeoutMs(seconds) {
+        var value = typeof seconds === 'string' && seconds.trim() !== '' ? Number(seconds) : seconds;
+        if (typeof value !== 'number' || !isFinite(value) || value < 1) {
+            return DEFAULT_REQUEST_TIMEOUT_MS;
+        }
+        return Math.min(Math.round(value * 1000), MAX_REQUEST_TIMEOUT_MS);
     }
 
     /** Text for an error code. Unknown codes fall back to INTERNAL_ERROR; no server detail is ever shown. */
@@ -100,6 +118,7 @@
         prepareMessage: prepareMessage,
         isSendKey: isSendKey,
         parseErrorCode: parseErrorCode,
-        classifyResponse: classifyResponse
+        classifyResponse: classifyResponse,
+        requestTimeoutMs: requestTimeoutMs
     };
 }));

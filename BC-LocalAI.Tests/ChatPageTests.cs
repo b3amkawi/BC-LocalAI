@@ -97,6 +97,7 @@ public sealed class ChatPageTests(WebApplicationFactory<Program> factory)
     [Theory]
     [InlineData("/css/chat.css", "text/css")]
     [InlineData("/js/chat-core.js", "text/javascript")]
+    [InlineData("/js/chat-stream.js", "text/javascript")]
     [InlineData("/js/chat.js", "text/javascript")]
     public async Task StaticFiles_AreServedWithTheRightType(string url, string mediaType)
     {
@@ -114,9 +115,10 @@ public sealed class ChatPageTests(WebApplicationFactory<Program> factory)
         var scripts = Regex.Matches(html, "<script[^>]*src=\"([^\"]+)\"").Select(m => m.Groups[1].Value).ToList();
         var styles = Regex.Matches(html, "<link[^>]*rel=\"stylesheet\"[^>]*href=\"([^\"]+)\"").Select(m => m.Groups[1].Value).ToList();
 
-        Assert.Equal(2, scripts.Count);
-        Assert.StartsWith("/js/chat-core.js", scripts[0]); // loads before chat.js, which needs it
-        Assert.StartsWith("/js/chat.js", scripts[1]);
+        Assert.Equal(3, scripts.Count);
+        Assert.StartsWith("/js/chat-core.js", scripts[0]); // chat-stream.js and chat.js need it
+        Assert.StartsWith("/js/chat-stream.js", scripts[1]); // FE-002: chat.js needs it
+        Assert.StartsWith("/js/chat.js", scripts[2]);
         Assert.Single(styles);
         Assert.StartsWith("/css/chat.css", styles[0]);
     }
@@ -158,6 +160,7 @@ public sealed class ChatPageTests(WebApplicationFactory<Program> factory)
     [InlineData("/")]
     [InlineData("/css/chat.css")]
     [InlineData("/js/chat-core.js")]
+    [InlineData("/js/chat-stream.js")]
     [InlineData("/js/chat.js")]
     public async Task Page_UsesNoCdnOrExternalHost_AndNeverNamesOllama(string url)
     {
@@ -170,6 +173,7 @@ public sealed class ChatPageTests(WebApplicationFactory<Program> factory)
     [Theory]
     [InlineData("/js/chat.js")]
     [InlineData("/js/chat-core.js")]
+    [InlineData("/js/chat-stream.js")]
     public async Task Scripts_NeverInsertMarkupOrStoreOrExecuteText(string url)
     {
         var js = await GetTextAsync(url);
@@ -183,32 +187,82 @@ public sealed class ChatPageTests(WebApplicationFactory<Program> factory)
     }
 
     [Fact]
-    public async Task ChatScript_WritesTextWithTextContent_AndCallsOnlyTheChatApi()
+    public async Task ChatScript_WritesTextAsText_AndCallsOnlyTheStreamingChatApi()
     {
         var js = await GetTextAsync("/js/chat.js");
 
         Assert.Contains(".textContent = text", js);
         Assert.Contains(".textContent = label", js.Replace("meta.textContent = label", ".textContent = label"));
+        // FE-002: streamed text goes into a text node, never into markup.
+        Assert.Contains("document.createTextNode('')", js);
+        Assert.Contains("textNode.appendData(", js);
 
         var fetches = Regex.Matches(js, "\\bfetch\\(").Count;
         Assert.Equal(1, fetches);
-        Assert.Contains("var CHAT_URL = '/api/chat';", js);
-        Assert.Contains("fetch(CHAT_URL", js);
+        Assert.Contains("var STREAM_URL = '/api/chat/stream';", js);
+        Assert.Contains("fetch(STREAM_URL", js);
         Assert.Contains("method: 'POST'", js);
         Assert.Contains("'Content-Type': 'application/json'", js);
-        Check.NotLeaked(js, "XMLHttpRequest");
+        Assert.Contains("signal: request.controller.signal", js); // Stop and leaving the page abort the request
+        Check.NotLeaked(js, "XMLHttpRequest", "EventSource");
     }
 
     [Fact]
-    public async Task ChatScript_HasADoubleSubmitGuard_AndReenablesTheButtonInFinally()
+    public async Task ChatScript_AllowsOneAnswerAtATime_AndAlwaysReturnsToReadyInFinally()
     {
         var js = await GetTextAsync("/js/chat.js");
 
-        Assert.Matches("if \\(sending\\) \\{\\s*return;", js);
-        Assert.Contains("sendButton.disabled = value", js);
-        // The button must come back even if rendering throws: setSending(false) lives in the last finally block.
-        var lastFinally = js[js.LastIndexOf("finally {", StringComparison.Ordinal)..];
-        Assert.Contains("setSending(false)", lastFinally);
+        Assert.Matches("if \\(active\\) \\{\\s*return;", js);
+        Assert.Contains("sendButton.disabled = busy", js);
+        // Send must come back even if rendering throws: the reset lives in the finally block of onSubmit.
+        var start = js.IndexOf("async function onSubmit", StringComparison.Ordinal);
+        var end = js.IndexOf("async function askAndShow", StringComparison.Ordinal);
+        var submit = js[start..end];
+        var lastFinally = submit[submit.LastIndexOf("finally {", StringComparison.Ordinal)..];
+        Assert.Contains("active = null", lastFinally);
+        Assert.Contains("setState(stream.STATES.IDLE)", lastFinally);
+    }
+
+    [Fact]
+    public async Task Page_HasAHiddenStopButton_AndStartsIdle()
+    {
+        var html = await GetTextAsync("/");
+
+        Assert.Matches("<button id=\"stop\" type=\"button\"[^>]*hidden[^>]*>หยุดสร้างคำตอบ</button>", html);
+        Assert.Contains("data-state=\"idle\"", html);
+        Assert.Contains("Esc เพื่อหยุดสร้างคำตอบ", html);
+    }
+
+    [Fact]
+    public async Task Page_RendersTheServerTimeoutPlusMargin_ForTheBrowserWaitLimit()
+    {
+        // The browser waits a little longer than the server's own deadline, so the server's AI_TIMEOUT arrives first.
+        var html = await GetTextAsync("/");
+
+        Assert.Contains("data-timeout-seconds=\"200\"", html); // default Ollama:TimeoutSeconds 180 + 20
+    }
+
+    [Theory]
+    [InlineData("30", "50")]
+    [InlineData("1", "21")]
+    [InlineData("600", "620")]
+    public async Task Page_FollowsTheConfiguredServerTimeout(string configured, string expectedOnPage)
+    {
+        // The page does not call the AI, so no service override is needed; only the pinned configuration matters.
+        var client = factory.WithWebHostBuilder(builder => builder.PinOllama(timeoutSeconds: configured)).CreateClient();
+
+        var html = await client.GetStringAsync("/");
+
+        Assert.Contains($"data-timeout-seconds=\"{expectedOnPage}\"", html);
+    }
+
+    [Fact]
+    public async Task ChatScript_TakesItsWaitLimitFromThePage_NotFromAFixedNumber()
+    {
+        var js = await GetTextAsync("/js/chat.js");
+
+        Assert.Contains("core.requestTimeoutMs(form.getAttribute('data-timeout-seconds'))", js);
+        Check.NotLeaked(js, "= 200000", "=200000");
     }
 
     [Fact]
@@ -237,6 +291,7 @@ public sealed class ChatPageTests(WebApplicationFactory<Program> factory)
             "AI ใช้เวลาตอบนานเกินไป กรุณาลองใหม่",
             "AI เกิดข้อผิดพลาด กรุณาลองใหม่",
             "ได้รับคำตอบที่ไม่สมบูรณ์ กรุณาลองใหม่",
+            "คำตอบยาวเกินกว่าที่ระบบรองรับ กรุณาถามให้สั้นลงหรือแบ่งเป็นหลายคำถาม", // BE-003: AI_RESPONSE_TOO_LARGE
             "ระบบเกิดข้อผิดพลาด กรุณาลองใหม่"
         })
         {

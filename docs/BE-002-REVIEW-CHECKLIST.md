@@ -73,7 +73,7 @@ Expected: HTTP 503 `AI_UNAVAILABLE`. A non-loopback URL such as `$env:Ollama__Ba
 ## 6. Known limits (full list with measurements: `docs/KNOWN-LIMITATIONS.md`)
 
 - No streaming, conversation history, authentication, database, or multiple providers.
-- Answers longer than 256 tokens are cut by Ollama and returned as `502 AI_INVALID_RESPONSE` (contract: `num_predict` 256).
+- Answers longer than 256 tokens are cut by Ollama and returned as `502 AI_INVALID_RESPONSE` (contract: `num_predict` 256). **Superseded by BE-003 (Issue #16):** the limit is now the setting `Ollama:MaxOutputTokens` (default 1024) and the error is `AI_RESPONSE_TOO_LARGE`; see `docs/BE-003-ROOT-CAUSE.md`.
 - Ollama answers one request at a time: bursts of simultaneous users queue and can get `504 AI_TIMEOUT`; not measured at 40-100 users.
 - No authentication or rate limit (separate issue).
 - The Ollama contract (Issue #5 / PR #8) has not been approved in writing yet; confirm it. The implementation follows the AI-002 document in PR #8 (same request fields, success conditions and system prompt).

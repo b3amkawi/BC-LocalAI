@@ -188,3 +188,47 @@ test('errors without the API contract (proxy page, empty body, unknown code) sho
         assert.equal(result.message, REQUIRED.INTERNAL_ERROR, `${status} ${body}`);
     }
 });
+
+// ---- BE-003: a new error code and the request time limit rendered by the server
+
+test('AI_RESPONSE_TOO_LARGE has its own readable text, different from the incomplete-answer text', () => {
+    const text = core.messageFor('AI_RESPONSE_TOO_LARGE');
+    assert.equal(text, 'คำตอบยาวเกินกว่าที่ระบบรองรับ กรุณาถามให้สั้นลงหรือแบ่งเป็นหลายคำถาม');
+    assert.notEqual(text, REQUIRED.AI_INVALID_RESPONSE);
+    assert.notEqual(text, REQUIRED.INTERNAL_ERROR);
+});
+
+test('a 502 AI_RESPONSE_TOO_LARGE from the API shows the too-large text and keeps the code', () => {
+    const result = core.classifyResponse(502, errorBody('AI_RESPONSE_TOO_LARGE', 'secret internal detail'));
+    assert.equal(result.ok, false);
+    assert.equal(result.code, 'AI_RESPONSE_TOO_LARGE');
+    assert.equal(result.message, core.MESSAGES.AI_RESPONSE_TOO_LARGE);
+    assert.ok(!result.message.includes('secret'));
+});
+
+test('all seven API error codes have different texts (the user can tell them apart)', () => {
+    const codes = ['INVALID_MESSAGE', 'AI_UNAVAILABLE', 'AI_TIMEOUT', 'AI_PROVIDER_ERROR', 'AI_INVALID_RESPONSE', 'AI_RESPONSE_TOO_LARGE', 'INTERNAL_ERROR'];
+    const texts = codes.map((code) => core.messageFor(code));
+    assert.equal(new Set(texts).size, codes.length);
+});
+
+test('requestTimeoutMs turns the server value (seconds) into milliseconds', () => {
+    assert.equal(core.requestTimeoutMs('200'), 200000);
+    assert.equal(core.requestTimeoutMs(200), 200000);
+    assert.equal(core.requestTimeoutMs('50'), 50000);
+    assert.equal(core.requestTimeoutMs('620'), 620000);
+    assert.equal(core.requestTimeoutMs(' 30 '), 30000);
+    assert.equal(core.requestTimeoutMs('1'), 1000);
+});
+
+test('requestTimeoutMs never returns an unlimited, zero or nonsense wait', () => {
+    for (const bad of [undefined, null, '', '   ', 'abc', 'NaN', 'Infinity', '-Infinity', 0, '0', -5, '-5', 0.4, {}, [], true, false]) {
+        assert.equal(core.requestTimeoutMs(bad), 200000, String(bad));
+    }
+    assert.equal(core.requestTimeoutMs('1e9'), 3600000);
+    assert.equal(core.requestTimeoutMs(99999999), 3600000);
+    for (const value of ['1', '600', '5000', '1e9', 'x', undefined]) {
+        const ms = core.requestTimeoutMs(value);
+        assert.ok(Number.isFinite(ms) && ms >= 1000 && ms <= 3600000, String(value));
+    }
+});

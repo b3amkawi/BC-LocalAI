@@ -44,7 +44,8 @@ public sealed class OllamaAIServiceTests
         Assert.False(format.GetProperty("additionalProperties").GetBoolean());
 
         Assert.Equal(0, root.GetProperty("options").GetProperty("temperature").GetInt32());
-        Assert.Equal(256, root.GetProperty("options").GetProperty("num_predict").GetInt32());
+        // BE-003: the output token limit comes from configuration (default 1024, was a fixed 256).
+        Assert.Equal(1024, root.GetProperty("options").GetProperty("num_predict").GetInt32());
     }
 
     [Fact]
@@ -187,9 +188,9 @@ public sealed class OllamaAIServiceTests
     }
 
     [Theory]
-    [InlineData("length")]
     [InlineData("load")]
     [InlineData(null)]
+    // "length" is not here any more: BE-003 reports it as AI_RESPONSE_TOO_LARGE (see OllamaResponseLengthTests).
     public async Task InvalidResponse_WhenDoneReasonIsNotStop(string? doneReason)
     {
         var handler = FakeHandler.Returning(
