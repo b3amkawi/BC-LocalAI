@@ -37,7 +37,7 @@ printf "import test from 'node:test';\nimport assert from 'node:assert/strict';\
 push_trial node "a JavaScript test that fails"
 printf 'import unittest\n\n\nclass CiTrial(unittest.TestCase):\n    def test_fail(self):\n        self.fail("ci-trial")\n' > "$WT/tests/test_ci_trial.py"
 push_trial python "a Python test that fails"
-printf 'api_key = "ci-trial-notarealvalue-7f3a9c1d"\n' > "$WT/docs/ci-trial-secret.txt"
+printf 'api_key = "ci-trial-notarealvalue-7f3a9c1d"\n' > "$WT/docs/ci-trial-secret.txt"  # ci-allow-secret (fake value for the trial)
 push_trial secret-assignment "a fake secret in an assignment"
 printf 'Server=db1;Database=x;Uid=u;%s=CiTrial123x;\n' "Pwd" > "$WT/docs/ci-trial-connection.txt"
 push_trial secret-connection "a fake connection string with a password"
