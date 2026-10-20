@@ -326,3 +326,7 @@ plus a JSON summary (latency percentiles, throughput, success/timeout rate, CPU/
 and are loopback only. See the [test plan](docs/performance/benchmark-plan.md),
 the [performance report](docs/performance/benchmark-report.md) (preliminary results) and the
 [handoff for BE-003/BE-004](docs/performance/benchmark-handoff.md).
+
+## AI failure policy (AI-007)
+
+`scripts/test-ollama-failures.ps1` (PowerShell 7, loopback only) injects ten kinds of failure into a **dedicated** Ollama instance it starts on port 11436 (runner killed, Ollama killed, Ollama not running, model unloaded, model not found, token limit, invalid request, client cancel, abandoned queued request) and records what the client sees and how long Ollama takes to recover. Your normal Ollama on port 11434 is never stopped. Read the [failure policy](docs/ai/ai-failure-policy.md) (retry rules, queue policy, user messages) and the [results](docs/ai/ai-failure-test-results.md). Tests that need no model: `py -3 -m unittest tests.test_ollama_failures -v`.
