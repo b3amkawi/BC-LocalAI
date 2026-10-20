@@ -28,7 +28,7 @@ def dataset():
                 "category": category,
                 "language": language,
                 "prompt": f"safe prompt {category} {number} 😊",
-                "expected_regex": f"^{answer}$",
+                "accepted_answers": [answer],
             })
     return {"version": 1, "api": "POST http://localhost:5290/api/chat", "cases": cases}
 
@@ -154,13 +154,8 @@ class ChatE2EScriptTests(unittest.TestCase):
             PER_CATEGORY + 1: {"body": {**valid, "response": "ตกลง"}},
             PER_CATEGORY * 2 + 1: {"body": {**valid, "response": "43"}},
         }
-        fixture = dataset()
-        for index in failures:
-            # Isolate contract/language guards from factual-answer matching.
-            if index not in (24, PER_CATEGORY * 2 + 1):
-                fixture["cases"][index - 1]["expected_regex"] = "(?s).*"
         result, evidence, requests = self.run_script(
-            lambda index, _: failures.get(index, {}), fixture=fixture
+            lambda index, _: failures.get(index, {})
         )
         self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
         self.assertEqual(len(requests), TOTAL)
@@ -176,22 +171,22 @@ class ChatE2EScriptTests(unittest.TestCase):
             (17, "nested JSON"), (18, "nested JSON"),
             (19, "thinking marker"), (20, "thinking marker"),
             (21, "system details"), (22, "system details"),
-            (23, "language"), (24, "expected_regex"),
+            (23, "language"), (24, "accepted_answers"),
             (PER_CATEGORY + 1, "language"),
-            (PER_CATEGORY * 2 + 1, "expected_regex"),
+            (PER_CATEGORY * 2 + 1, "accepted_answers"),
         ):
             with self.subTest(guard=expected_error, case=index):
                 self.assertIn(expected_error, " ".join(evidence["results"][index - 1]["errors"]))
         failed_warm = len(failures) - 1
         self.assertEqual(evidence["warm_sample_count"], TOTAL - 1 - failed_warm)
 
-    def test_expected_word_inside_contradictory_answers_returns_nonzero(self):
+    def test_expected_word_inside_wrong_or_extra_sentence_returns_nonzero(self):
         fixture = dataset()
-        fixture["cases"][0]["expected_regex"] = "โตเกียว"
-        fixture["cases"][PER_CATEGORY]["expected_regex"] = r"\bTokyo\b"
-        fixture["cases"][PER_CATEGORY + 1]["expected_regex"] = r"\bTokyo\b"
+        fixture["cases"][0]["accepted_answers"] = ["โตเกียว"]
+        for offset in range(5):
+            fixture["cases"][PER_CATEGORY + offset]["accepted_answers"] = ["Tokyo"]
 
-        def contradictory_reply(index, request):
+        def noncanonical_reply(index, request):
             if index == 1:
                 return {
                     "body": {
@@ -213,20 +208,53 @@ class ChatE2EScriptTests(unittest.TestCase):
                         "model": "qwen3:4b",
                     }
                 }
+            if index == PER_CATEGORY + 3:
+                return {
+                    "body": {
+                        "response": "It is false that Tokyo is the capital of Japan; Paris is.",
+                        "model": "qwen3:4b",
+                    }
+                }
+            if index == PER_CATEGORY + 4:
+                return {"body": {"response": "Tokyo? No.", "model": "qwen3:4b"}}
+            if index == PER_CATEGORY + 5:
+                return {"body": {"response": "Tokyo or Paris", "model": "qwen3:4b"}}
             return {}
 
         result, evidence, requests = self.run_script(
-            contradictory_reply, fixture=fixture
+            noncanonical_reply, fixture=fixture
         )
 
         self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
         self.assertEqual(len(requests), TOTAL)
-        self.assertEqual(evidence["failed"], 3)
-        for result_index in (0, PER_CATEGORY, PER_CATEGORY + 1):
+        self.assertEqual(evidence["failed"], 6)
+        for result_index in (0, *range(PER_CATEGORY, PER_CATEGORY + 5)):
             with self.subTest(result_index=result_index):
                 entry = evidence["results"][result_index]
                 self.assertFalse(entry["passed"])
-                self.assertIn("contradicts the expected answer", " ".join(entry["errors"]))
+                self.assertIn("not one of accepted_answers", " ".join(entry["errors"]))
+
+    def test_normalized_complete_answers_pass(self):
+        fixture = dataset()
+        fixture["cases"][PER_CATEGORY]["accepted_answers"] = ["Pacific Ocean"]
+        fixture["cases"][PER_CATEGORY + 1]["accepted_answers"] = ["Tokyo"]
+        fixture["cases"][PER_CATEGORY * 2]["accepted_answers"] = ["-8", "−8"]
+        fixture["cases"][PER_CATEGORY * 2 + 1]["accepted_answers"] = ["-8", "−8"]
+        replies = {
+            PER_CATEGORY + 1: "  pacific\n ocean. ",
+            PER_CATEGORY + 2: "TOKYO!",
+            PER_CATEGORY * 2 + 1: "−8",
+            PER_CATEGORY * 2 + 2: "-8",
+        }
+
+        result, evidence, _ = self.run_script(
+            lambda index, _: {"body": {"response": replies[index], "model": "qwen3:4b"}}
+            if index in replies else {},
+            fixture=fixture,
+        )
+
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(evidence["failed"], 0)
 
     def test_invalid_datasets_fail_before_any_request(self):
         fixtures = {}
@@ -238,8 +266,11 @@ class ChatE2EScriptTests(unittest.TestCase):
             ("empty prompt", "prompt", " "),
             ("unknown category", "category", "other"),
             ("unknown language", "language", "xx"),
-            ("blank regex", "expected_regex", ""),
-            ("invalid regex", "expected_regex", "["),
+            ("missing answers", "accepted_answers", None),
+            ("empty answers", "accepted_answers", []),
+            ("answers not a list", "accepted_answers", "ตกลง"),
+            ("blank answer", "accepted_answers", [" "]),
+            ("non-string answer", "accepted_answers", [42]),
         ):
             fixture = dataset()
             fixture["cases"][0][field] = value

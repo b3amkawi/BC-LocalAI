@@ -23,27 +23,11 @@ function Fail([string]$Message) {
     exit 1
 }
 
-function Test-ExpectedAnswerContradiction(
-    [string]$Answer,
-    [Text.RegularExpressions.Regex]$ExpectedMatcher
-) {
-    foreach ($expectedMatch in $ExpectedMatcher.Matches($Answer)) {
-        if (-not $expectedMatch.Success -or [string]::IsNullOrWhiteSpace($expectedMatch.Value)) { continue }
-        $expected = [regex]::Escape($expectedMatch.Value)
-        $patterns = @(
-            "(?is)\b(?:not|never)\s+(?:the\s+answer\s+is\s+)?$expected(?![\p{L}\p{N}_])",
-            "(?is)(?<![\p{L}\p{N}_])$expected\s+(?:is|are|was|were)\s+(?:not|never|incorrect|wrong)\b",
-            "(?is)\b(?:answer|capital|result)\s+(?:is|was)\s+not\s+$expected(?![\p{L}\p{N}_])",
-            "(?is)(?:คำตอบไม่ใช่|ไม่ใช่|ไม่ถูกต้อง(?:คือ)?)\s*$expected(?![\p{L}\p{N}_])",
-            "(?is)(?<![\p{L}\p{N}_])$expected\s*(?:นั้น)?(?:ไม่ใช่|ไม่ถูกต้อง|ผิด)"
-        )
-        foreach ($pattern in $patterns) {
-            if ([regex]::IsMatch($Answer, $pattern, [Text.RegularExpressions.RegexOptions]::None, [TimeSpan]::FromSeconds(1))) {
-                return $true
-            }
-        }
-    }
-    return $false
+# The complete response must equal one accepted answer; a correct word inside a wrong
+# sentence ("It is false that Tokyo is ...") therefore never passes.
+function ConvertTo-ComparableAnswer([string]$Text) {
+    $normalized = [regex]::Replace($Text.Normalize([Text.NormalizationForm]::FormKC), '\s+', ' ').Trim()
+    return [regex]::Replace($normalized, '[.!。]+$', '').Trim().ToLowerInvariant()
 }
 
 if (-not $BaseUrl.IsAbsoluteUri -or -not $BaseUrl.IsLoopback -or
@@ -70,20 +54,18 @@ try {
             [string]::IsNullOrWhiteSpace($case.id) -or -not $ids.Add($case.id) -or
             $case.category -cnotin @('thai', 'english', 'math', 'edge') -or
             $case.language -cnotin @('th', 'en', 'any') -or $case.prompt -isnot [string] -or
-            [string]::IsNullOrWhiteSpace($case.prompt) -or $case.expected_regex -isnot [string] -or
-            [string]::IsNullOrWhiteSpace($case.expected_regex)) {
-            throw 'Every case needs a unique non-empty id, known category/language, prompt and expected_regex.'
+            [string]::IsNullOrWhiteSpace($case.prompt) -or $case.accepted_answers -isnot [array] -or
+            $case.accepted_answers.Count -eq 0) {
+            throw 'Every case needs a unique non-empty id, known category/language, prompt and accepted_answers.'
+        }
+        foreach ($accepted in $case.accepted_answers) {
+            if ($accepted -isnot [string] -or [string]::IsNullOrEmpty((ConvertTo-ComparableAnswer $accepted))) {
+                throw 'accepted_answers must contain only non-empty strings.'
+            }
         }
         if (($case.category -ceq 'thai' -and $case.language -cne 'th') -or
             ($case.category -ceq 'english' -and $case.language -cne 'en')) {
             throw 'Thai/English categories must declare their corresponding language.'
-        }
-        $null = [regex]::new($case.expected_regex, [Text.RegularExpressions.RegexOptions]::IgnoreCase, [TimeSpan]::FromSeconds(1))
-        if ($case.Contains('forbid_regex')) {
-            if ($case.forbid_regex -isnot [string] -or [string]::IsNullOrWhiteSpace($case.forbid_regex)) {
-                throw 'forbid_regex must be a non-empty regex when supplied.'
-            }
-            $null = [regex]::new($case.forbid_regex, [Text.RegularExpressions.RegexOptions]::IgnoreCase, [TimeSpan]::FromSeconds(1))
         }
     }
     $destination = $ExecutionContext.SessionState.Path.GetUnresolvedProviderPathFromPSPath($OutputPath)
@@ -147,14 +129,9 @@ try {
                 $latinCount = [regex]::Matches($answer, '[A-Za-z]').Count
                 if ($case.language -ceq 'th' -and ($thaiCount -eq 0 -or $thaiCount -lt $latinCount)) { $errors.Add('response language is not predominantly Thai') }
                 if ($case.language -ceq 'en' -and ($thaiCount -gt 0 -or $latinCount -eq 0)) { $errors.Add('response language is not English') }
-                $expectedMatcher = [regex]::new($case.expected_regex, [Text.RegularExpressions.RegexOptions]::IgnoreCase, [TimeSpan]::FromSeconds(1))
-                if (-not $expectedMatcher.IsMatch($answer)) {
-                    $errors.Add("response does not match expected_regex: $($case.expected_regex)")
-                } elseif (Test-ExpectedAnswerContradiction -Answer $answer -ExpectedMatcher $expectedMatcher) {
-                    $errors.Add('response contradicts the expected answer')
-                }
-                if ($case.Contains('forbid_regex') -and [regex]::new($case.forbid_regex, [Text.RegularExpressions.RegexOptions]::IgnoreCase, [TimeSpan]::FromSeconds(1)).IsMatch($answer)) {
-                    $errors.Add("response matches forbid_regex: $($case.forbid_regex)")
+                $comparable = ConvertTo-ComparableAnswer $answer
+                if (-not @($case.accepted_answers | Where-Object { (ConvertTo-ComparableAnswer $_) -ceq $comparable }).Count) {
+                    $errors.Add("response is not one of accepted_answers: $($case.accepted_answers -join ' | ')")
                 }
             }
         } catch { $errors.Add("request failed: $($_.Exception.Message)") }
@@ -168,7 +145,7 @@ try {
         $phase = if ($index -gt 0) { 'warm' } elseif ($ColdStartNote) { 'cold' } else { 'cold_candidate' }
         $results.Add([ordered]@{
             id = $case.id; category = $case.category; language = $case.language; phase = $phase
-            prompt = $case.prompt; expected_regex = $case.expected_regex
+            prompt = $case.prompt; accepted_answers = @($case.accepted_answers)
             http_status = $status; elapsed_ms = $timer.ElapsedMilliseconds
             response = $answer; model = $model; raw_body = $raw; passed = $passed; errors = $errors.ToArray()
         })

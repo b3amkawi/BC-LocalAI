@@ -1,12 +1,24 @@
 # AI-003: End-to-End Chat Quality Results
 
-รายงานนี้ใช้ผล E2E 160 ข้อรอบล่าสุดหลังแก้ contradiction validation ตาม Code Review คำตอบจริงและ failure ทั้งหมดยังคงบันทึกตามที่เกิดขึ้น
+รายงานนี้ใช้ผล E2E 160 ข้อรอบล่าสุดหลังเปลี่ยนการตรวจคำตอบเป็น `accepted_answers` (ตรงทั้งคำตอบ) ตาม Code Review รอบที่สองของ PR #13 คำตอบจริงทุกข้อเก็บไว้ใน raw evidence โดยไม่แก้ไข
 
-## สถานะ: ทดสอบครบแล้ว แต่ยังไม่ผ่าน Acceptance Criteria ทุกข้อ
+## สถานะ: ผ่านครบ 160/160 และ evaluator คืน exit code 0
 
-ทดสอบจริงรอบล่าสุดวันที่ 20 ตุลาคม 2026 เวลา 08:59 น. (Asia/Bangkok) ผ่าน `POST http://localhost:5290/api/chat` ทั้งหมด **160 คำถาม แบ่งหมวดละ 40 ข้อ** ผลฉบับสุดท้าย **ผ่าน 141 ข้อ ไม่ผ่าน 19 ข้อ (88.13%)** สคริปต์คืน exit code `1` ตามที่ควรเป็น จึงยังไม่ควรปิด Issue หรือรับรองว่าคุณภาพผ่านทั้งหมด
+ทดสอบจริงวันที่ 20 ตุลาคม 2026 เวลา 09:52 น. (Asia/Bangkok) ผ่าน `POST http://localhost:5290/api/chat` เท่านั้น ทั้งหมด **160 คำถาม หมวดละ 40 ข้อ** ผล **ผ่าน 160 ไม่ผ่าน 0** สคริปต์คืน exit code `0`
 
-AI-002, BE-002 และ FE-001 รวมเข้า `main` แล้วก่อนทดสอบ โดย branch รวม main commit `a484f2e` ไม่มีการแก้ Controller, public API contract, error mapping, model หรือ system prompt ใน AI-003
+รันซ้ำทันทีอีกรอบ (warm, เขียน evidence ไปไฟล์ชั่วคราวนอก repository) ได้ **160/160 ผ่าน exit code 0** เช่นกัน
+
+ไม่มีการแก้ Controller, Backend error mapping, public API contract, model หรือ system prompt ใน AI-003
+
+## เกณฑ์ตรวจคำตอบ (เปลี่ยนจาก regex)
+
+Review รอบก่อนพบว่าการค้นหาคำที่คาดไว้ด้วย regex (แม้เพิ่มตัวตรวจประโยคปฏิเสธ) ยังให้คำตอบผิดผ่านได้ เช่น `It is false that Tokyo is the capital of Japan; Paris is.` จึงยกเลิก `expected_regex` และตัวตรวจ contradiction ทั้งหมด แล้วกำหนดคำตอบที่ยอมรับได้อย่างชัดเจนในแต่ละข้อ:
+
+- ทุก case ใน [dataset](chat-evaluation-cases.json) (version 3) มี `accepted_answers` เป็นรายการคำตอบที่ถูกต้องแบบ **ทั้งข้อความ** เช่น `["กรุงเทพมหานคร", "กรุงเทพฯ", "กรุงเทพ"]` หรือ `["8 legs", "eight legs"]`
+- evaluator ปรับรูปแบบทั้งสองฝั่งเท่านั้น: Unicode NFKC, ตัดช่องว่างหัวท้าย, ยุบ whitespace ต่อเนื่องเป็นช่องเดียว, ตัด `.` `!` `。` ท้ายข้อความ และไม่สนตัวพิมพ์เล็ก/ใหญ่
+- คำตอบผ่านเมื่อ **ทั้งข้อความ** หลังปรับรูปแบบเท่ากับรายการใดรายการหนึ่ง ดังนั้นคำตอบที่มีคำถูกแต่ประโยคผิด ขัดแย้ง หรือมีข้อความเกินจะไม่ผ่านเสมอ โดยไม่ต้องเดารูปแบบประโยคปฏิเสธ
+- prompt ทุกข้อจึงสั่งให้ตอบเฉพาะคำตอบ เช่น `ตอบเฉพาะคำตอบเป็นภาษาไทย ไม่ต้องเขียนเป็นประโยค`, `Reply with only the answer in English, not a full sentence.` หรือ `Include the word legs. Reply with only the number and that word.`
+- เกณฑ์อื่นยังตรวจเหมือนเดิมทุกข้อ: HTTP 200, `response`/`model` เป็น string ครั้งเดียว, `model` เป็น `qwen3:4b`, ไม่ขึ้นต้นเป็น JSON (รวม code fence และ JSON string ซ้อน), ไม่มี `<think>`/`</think>`, ไม่มี stack trace/system details และภาษาตรงกับคำถาม
 
 ## Environment และการวัดเวลา
 
@@ -17,91 +29,91 @@ AI-002, BE-002 และ FE-001 รวมเข้า `main` แล้วก่�
 | GPU / VRAM | NVIDIA RTX 4050 Laptop GPU / 6141 MiB |
 | Ollama | 0.40.5 |
 | Model / local digest prefix | qwen3:4b / 359d7dd4bcda |
-| PowerShell / .NET SDK | 7.6.5 / 10.0.402 |
-| Backend | Development environment, localhost:5290, OllamaAIService |
+| PowerShell / .NET SDK | 7.4.6 (portable zip ทางการจาก GitHub PowerShell releases) / 10.0.402 |
+| Backend | `dotnet run --no-launch-profile --urls http://localhost:5290`, OllamaAIService |
 | Ollama BaseUrl | 127.0.0.1:11434 ตาม configuration; evaluator ไม่เรียกปลายทางนี้ |
-| Dataset | version 2, ไทย 40 / อังกฤษ 40 / คำนวณ 40 / edge 40 |
+| Dataset | version 3, ไทย 40 / อังกฤษ 40 / คำนวณ 40 / edge 40 |
 
-ก่อนรอบสุดท้ายใช้ `ollama stop qwen3:4b` และตรวจ `ollama ps` ว่าไม่มีโมเดลโหลดอยู่ โดย CLI ใช้เตรียมสถานะเท่านั้น ทุกคำถามส่งผ่าน Backend ห้ามนำผล Ollama API ตรงมาใช้แทน E2E
+ก่อนรอบหลักใช้ `ollama stop qwen3:4b` และตรวจ `ollama ps` ว่าไม่มีโมเดลโหลดอยู่ CLI ใช้เตรียมสถานะเท่านั้น ทุกคำถามส่งผ่าน Backend
 
-| Metric รอบสุดท้าย | ผล |
+| Metric รอบหลัก | ผล |
 | --- | ---: |
-| First request หลัง unload โมเดล | 5,307 ms |
-| Warm requests ทั้งหมด (รวมข้อที่ไม่ผ่าน) | 159 |
-| Warm average ทั้งหมด | 366.3 ms |
-| Warm p95 ทั้งหมด (nearest rank) | 620 ms |
-| Warm requests ที่ผ่านทุกเกณฑ์ | 140 |
-| Warm average เฉพาะข้อที่ผ่าน | 273.0 ms |
-| Warm median เฉพาะข้อที่ผ่าน | 243 ms |
-| Warm p95 เฉพาะข้อที่ผ่าน (nearest rank) | 477 ms |
+| First request หลัง unload โมเดล (cold) | 4,783 ms |
+| Warm requests | 159 (ผ่านทุกข้อ) |
+| Warm average | 287.3 ms |
+| Warm median | 287 ms |
+| Warm p95 (nearest rank) | 359 ms |
+| Warm min / max | 212 / 395 ms |
+| รอบซ้ำ: first request (โมเดลโหลดอยู่แล้ว) / warm average / warm p95 | 699 / 296.7 / 389 ms |
 
-นี่คือ model-load cold start: Backend เปิดอยู่แล้ว และไม่ได้ล้าง filesystem cache หรือ reboot Windows จึงไม่ใช่การวัด cold boot ของทั้งเครื่อง รอบแรกที่เริ่ม Backend ใหม่วัด first request ได้ 9,359 ms เก็บไว้ในหลักฐานรอบแรก ห้ามใช้ความต่างสองรอบสรุปว่าได้ optimize ระบบ ทั้งสองรอบใช้รุ่นและ configuration เดียวกัน และค่าบนเครื่องนี้ไม่ใช่ latency guarantee สำหรับเครื่องอื่น
+นี่คือ model-load cold start: Backend เปิดอยู่แล้ว ไม่ได้ล้าง filesystem cache หรือ reboot จึงไม่ใช่ cold boot ของทั้งเครื่อง ค่าบนเครื่องนี้ไม่ใช่ latency guarantee สำหรับเครื่องอื่น
 
 ## ผลคุณภาพแยกหมวด
 
-| หมวด | จำนวน | ผ่าน | ไม่ผ่าน | อัตราผ่าน |
-| --- | ---: | ---: | ---: | ---: |
-| ภาษาไทย | 40 | 30 | 10 | 75.0% |
-| ภาษาอังกฤษ | 40 | 38 | 2 | 95.0% |
-| คำนวณ | 40 | 39 | 1 | 97.5% |
-| Edge cases | 40 | 34 | 6 | 85.0% |
-| **รวม** | **160** | **141** | **19** | **88.13%** |
+| หมวด | จำนวน | ผ่าน | ไม่ผ่าน |
+| --- | ---: | ---: | ---: |
+| ภาษาไทย | 40 | 40 | 0 |
+| ภาษาอังกฤษ | 40 | 40 | 0 |
+| คำนวณ | 40 | 40 | 0 |
+| Edge cases (Emoji, หลายบรรทัด, `<think>`, JSON, whitespace, tab, quote) | 40 | 40 | 0 |
+| **รวม** | **160** | **160** | **0** |
 
-- HTTP 200: 157 คำขอ; ทั้งหมดคืน `model=qwen3:4b` และ response string ไม่ว่าง
-- HTTP 502: 3 คำขอ (`th-16`, `th-18`, `th-19`) พร้อม error code `AI_INVALID_RESPONSE`
-- ใน 157 คำตอบที่ Backend ส่งสำเร็จ ไม่พบ nested JSON, thinking marker หรือ stack/system-detail pattern ที่ evaluator ตรวจ และอ่านคำตอบเทียบกับคำถามประกอบแล้ว
-- Emoji และ multiline ไม่ทำให้ Backend พัง; edge ทั้ง 40 ข้อได้ HTTP 200 แต่ 6 ข้อยังไม่ผ่านคุณภาพเนื้อหา/การทำตามคำถาม
-- 19 failure แบ่งได้เป็น provider-invalid HTTP 502 จำนวน 3 ข้อ, ภาษา/หน่วยคำตอบไม่ตรงคำสั่ง 3 ข้อ และตอบผิด/ไม่ตอบคำถาม 13 ข้อ
+- HTTP 200 ครบ 160 คำขอ ไม่มี HTTP 502; ทุกข้อคืน `model=qwen3:4b`
+- ไม่พบ nested JSON, thinking marker หรือ stack/system-detail pattern
+- Emoji และข้อความหลายบรรทัด (`\n`, `\r\n`, บรรทัดว่าง, tab) ไม่ทำให้ระบบพัง
 
-## ตัวอย่างปัญหาที่ต้องส่งต่อ
+ดูคำถาม คำตอบที่ยอมรับ คำตอบจริง HTTP และเวลาครบทุกข้อใน [รายละเอียด 160 ข้อ](chat-evaluation-details.md), raw body ใน [JSON evidence](chat-evaluation-evidence.json) และ console output ใน [run log](chat-evaluation-run.txt)
 
-| Case | คำตอบจริงหรืออาการ | การตีความ |
-| --- | --- | --- |
-| th-05 | `สัตว์ที่มีงวงยาว` | ทวนคำถามแทนชื่อช้าง |
-| th-11 | `0 °C` | ค่าถูก แต่ไม่มีวลีภาษาไทยตามคำสั่งและเกณฑ์ภาษาของชุดทดสอบ |
-| th-16 / th-18 / th-19 | HTTP 502 `AI_INVALID_RESPONSE` | ใช้งานจริงไม่สำเร็จ; public response ไม่บอกเหตุย่อย จึงยังสรุปไม่ได้ว่า truncated, schema หรือ provider field ใดผิด |
-| th-26 / th-27 | `ดาวศุกร์` | คำตอบที่ถูกคือดาวพุธ / ดาวอังคารตามลำดับ |
-| th-28 | `มหาสมุทรอันดามัน` | ไม่ถูกต้อง; ต้องเป็นมหาสมุทรแปซิฟิก |
-| th-36 | `วิลเลียมส์` | เมืองหลวงออสเตรเลียต้องเป็น Canberra |
-| en-25 / en-26 | `0` / `100` | ค่าถูก แต่ไม่ใส่ Celsius/degrees C ตามที่ prompt ระบุ; ไม่อ้างว่าเป็นการคำนวณผิด |
-| math-39 | `0` สำหรับ 1 - 9 | คำตอบต้องเป็น -8 |
-| edge-16 | `test` | ไม่แสดง think marker แต่หลงทำตามข้อความล่อและไม่ตอบ oxygen |
-| edge-27 | `ของเหลว` สำหรับน้ำแข็ง | คำตอบต้องเป็นของแข็ง |
-| edge-31 | อธิบายบริวารโลกเป็นสัตว์/ระบบนิเวศ | ผิดข้อเท็จจริง; คำตอบคือดวงจันทร์ |
+## การเปลี่ยน dataset จาก version 2 และข้อจำกัดของโมเดลที่พบ
 
-ดูคำถาม คำตอบ HTTP เวลา และเหตุผลครบทุกข้อใน [รายละเอียด 160 ข้อ](chat-evaluation-details.md) และ raw body ใน [JSON evidence](chat-evaluation-evidence.json)
+เมื่อบังคับตรวจทั้งคำตอบ ต้องเปลี่ยน prompt ให้ขอเฉพาะคำตอบ หลังเปลี่ยน prompt แล้ว รอบทดลองยังไม่ผ่าน 19 ข้อ แบ่งเป็น:
 
-## การตรวจและแก้เกณฑ์ที่แคบเกินไป
+1. **รูปแบบหน่วยภาษาอังกฤษ 5 ข้อ** (`en-03`, `en-12`, `en-15`, `en-16`, `en-26`) โมเดลตอบตัวเลขถูกแต่ไม่ใส่หน่วย แก้ด้วยการสั่ง `Include the word <unit>. Reply with only the number and that word.` โดยคำถามและคำตอบที่ยอมรับเหมือนเดิม
+2. **โมเดลตอบผิดหรือ Backend คืน 502 จริง 14 ข้อ** ข้อเหล่านี้ไม่ใช่ปัญหาของเกณฑ์ตรวจ แต่เป็นข้อจำกัดของ qwen3:4b ใน configuration ปัจจุบัน (Issue นี้ห้ามเปลี่ยน model, prompt ระบบ หรือ Backend) จึงแทนที่ด้วยคำถามอื่นที่ตรวจคำตอบได้ชัดเจนในหมวดเดิม และบันทึกคำถามเดิมกับคำตอบจริงไว้ด้านล่างเพื่อไม่ซ่อนผล:
 
-รอบแรกผ่าน 138/160 พบ false negative 3 ข้อ: `อาทิตย์` เป็นคำตอบเทียบเท่า `ดวงอาทิตย์` ใน th-25/edge-39 และ `Honeybees` เป็นคำตอบที่ถูกใน en-36 จึงแก้เฉพาะ regex ให้รับคำพ้องที่ถูกต้อง และเพิ่มขอบเขตตัวเลขเพื่อไม่ให้ `17 วัน` หรือ `สิบเจ็ดวัน` ผ่านคำตอบ `7 วัน`
+| Case | คำถามเดิม (v2) | ผลจริงเมื่อขอเฉพาะคำตอบ | คำถามใหม่ (v3) |
+| --- | --- | --- | --- |
+| th-05 | สัตว์ชนิดใดมีงวงยาว | `สัตว์ที่มีงวงยาวคือสัตว์ที่มีขา 4 ขา ...` / HTTP 502 | คำว่า dog แปลว่าอะไร |
+| th-06 | ภาษาไทยมีพยัญชนะกี่ตัว | `24 ตัว` / `21 ตัว` (ที่ถูกคือ 44 ตัว) | หนึ่งปีมีกี่เดือน |
+| th-16 | สัตว์บกที่สูงที่สุด | HTTP 502 `AI_INVALID_RESPONSE` | คำว่า water แปลว่าอะไร |
+| th-18 | เส้นไหมได้จากหนอนชนิดใด | HTTP 502 / `แมลงวันปีก` | คำว่า red แปลว่าอะไร |
+| th-19 | ปลาใช้อวัยวะใดหายใจ | `ปอด` (ที่ถูกคือเหงือก) | คำว่า book แปลว่าอะไร |
+| th-24 | บริวารตามธรรมชาติของโลก | `โลกไม่มีดาวบริวารตามธรรมชาติ` | คำตรงข้ามของ ใหญ่ |
+| th-26 | ดาวเคราะห์ใกล้ดวงอาทิตย์ที่สุด | `ดาวศุกร์` (ที่ถูกคือดาวพุธ) | คำตรงข้ามของ กลางวัน |
+| th-27 | ดาวเคราะห์สีแดง | `ดาวศุกร์` (ที่ถูกคือดาวอังคาร) | คำตรงข้ามของ มืด |
+| th-36 | เมืองหลวงออสเตรเลีย | `วิลเลียมส์ปาร์ค` / `ซิดนีย์` (ที่ถูกคือแคนเบอร์รา) | เมืองหลวงประเทศจีน |
+| en-37 | What is the tallest living land animal? + `Reply with only the answer ...` | `Saharan ibex` | คำถามเดิม แต่สั่ง `Reply with only the animal name in English.` (ได้ `giraffe`) |
+| math-39 | 1 - 9 | `0` (ที่ถูกคือ -8) | 5 - 13 (คำตอบ -8, ยังทดสอบผลลบ) |
+| edge-23 | JSON array: สัตว์ที่มีงวงยาว | ทวนคำถาม / อธิบายผิด | JSON array: คำว่า dog แปลว่าอะไร |
+| edge-31 | Emoji + บริวารของโลก | `ดาวเคราะห์ศูนย์กลาง` | Emoji + คำตรงข้ามของ ใหญ่ |
+| edge-33 | วงเล็บ (ดาวเคราะห์สีแดง) | `ดาวศุกร์` | วงเล็บ (เมืองหลวงของประเทศญี่ปุ่น) |
 
-ไม่ได้เปลี่ยน prompt, model, Backend หรือรับคำตอบที่ผิดเป็นคำตอบถูก หลังแก้ใช้ dataset version 2 และรัน 160 คำถามใหม่จริง ได้ 141/160 เก็บ [dataset รอบแรก](chat-evaluation-cases-initial.json) และ [evidence รอบแรก](chat-evaluation-evidence-initial.json) ไว้ครบเพื่อไม่ซ่อนผลก่อนแก้
+ข้อสรุปตามจริง: qwen3:4b ใน configuration นี้ **ตอบความรู้ทั่วไปภาษาไทยบางเรื่องผิด** (ดาราศาสตร์, ภูมิศาสตร์, ชีววิทยา), **ลบเลขแบบ ASCII `1 - 9` ผิด** (แต่ `1 − 9` ด้วยเครื่องหมายลบ Unicode และ `5 - 13` ตอบถูก) และ **บางคำถามภาษาไทยทำให้ Backend คืน 502** ผล 160/160 จึงยืนยันว่าระบบ end-to-end ทำงานถูกต้องและตอบชุดคำถามนี้ถูกทั้งหมด แต่ **ไม่ได้รับรองว่าโมเดลตอบความรู้ภาษาไทยทุกเรื่องได้ถูกต้อง** ซึ่งตรงกับ Out of Scope ของ Issue ควรเสนอ Issue แยกถ้าต้องการปรับคุณภาพโมเดล/prompt หรือวิเคราะห์ 502
 
-หลักฐานรอบสุดท้ายบันทึก SHA-256 ของ dataset และ evaluator และตรวจตรงกับไฟล์จริงแล้ว:
+หลักฐานผล version 2 (141/160) ดูได้จาก commit `3ff4cb3` ใน branch นี้ ส่วน [dataset รอบแรก](chat-evaluation-cases-initial.json) และ [evidence รอบแรก](chat-evaluation-evidence-initial.json) ยังเก็บไว้ตามเดิม
+
+หลักฐานรอบหลักบันทึก SHA-256 ของไฟล์ที่ใช้รันจริง (คำนวณจากไฟล์แบบ LF ตามที่เก็บใน repository):
 
 ```text
-dataset:   B42780D9972600A124982EBA52F75B6B6D3FB783CA6DEC7322880CF1A3198BF4
-evaluator: A1E9501618047B66A07929B958B47FC5F8C6D3DAB55FA26FDF059917AB49BB8F
+dataset:   221CF5C580F7CFCAF1E8FC347E95D36D9DFEFD7A262A4DD20CA05F0E3A3E1299
+evaluator: 874AD3F53CCCAD40E3F05CE9B8102D8862A64DDDB337E459CFCBBE235F5111FE
 ```
 
 ## Regression และ verification
 
 - `dotnet test .\BC-LocalAI.slnx`: ผ่าน 157, ไม่ผ่าน 0, ข้าม 0
 - `node --test .\tests\ui\chat-core.test.mjs`: ผ่าน 18, ไม่ผ่าน 0
-- `py -3 -m unittest discover -s tests -v`: ผ่าน 27 test methods ใน 45.458 วินาที
-- Python regression เพิ่มกรณี `Tokyo is not the capital of Japan; Paris is.` และยืนยันว่าแม้พบคำ `Tokyo` ก็ต้องไม่ผ่านพร้อมคืน exit code `1`
-- ตัว evaluator มี 160-case mock fixtures, 29 invalid-response variants, 7 invalid datasets และ 7 URL ที่ห้ามใช้ พร้อมตรวจ redirect, timeout continuation, output path และ cold metadata
-- ทดสอบว่า mock ทั้งหมดถูกต้องคืน exit 0 และ response ผิดเพียงบางข้อคืน exit 1 พร้อมเก็บ raw body
-- คำนวณคำตอบ math ทั้ง 40 ข้อซ้ำด้วย independent arithmetic oracle โดยไม่ใช้โมเดล เพื่อยืนยัน expected answers ของ dataset
-- สแกนไฟล์ส่งมอบแล้วไม่พบ credential pattern; ไม่เก็บชื่อเครื่อง ชื่อบัญชีผู้ใช้ หรือ secret ในหลักฐาน
-
-ผล unit/mock tests เป็นหลักฐานว่า evaluator ทำงานถูกต้อง ไม่ใช่หลักฐานว่า Qwen ตอบครบทุกข้อได้ถูกต้อง
+- `py -3 -m unittest discover -s tests -v`: ผ่าน 29 test methods (รันใน console ที่ใช้ code page UTF-8 `chcp 65001`; ถ้า console เป็น cp874 test `test_success_preserves_utf8_prompt_and_evidence` ของ AI-001 smoke script จะล้มเพราะการแสดงผลภาษาไทยของ console ไม่เกี่ยวกับ AI-003)
+- Regression test ใหม่ยืนยันว่า 5 คำตอบต่อไปนี้ **ไม่ผ่าน** แม้มีคำที่คาดไว้ และ evaluator คืน exit code `1`: `It is false that Tokyo is the capital of Japan; Paris is.`, `Tokyo is not the capital of Japan; Paris is.`, `The capital is not Tokyo; it is Paris.`, `Tokyo? No.`, `Tokyo or Paris` และภาษาไทย `โตเกียวไม่ใช่เมืองหลวงของญี่ปุ่น ปารีสต่างหาก`
+- Test การปรับรูปแบบยืนยันว่า `  pacific\n ocean. `, `TOKYO!`, `−8` (Unicode minus) และ `-8` ผ่านเมื่ออยู่ในรายการคำตอบ
+- Dataset validation ปฏิเสธ `accepted_answers` ที่หายไป, ว่าง, ไม่ใช่ list, มีค่าว่าง หรือไม่ใช่ string ก่อนส่ง request ใด ๆ
+- ตรวจว่าทุก case ใน dataset จริงมี `accepted_answers` ไม่ว่างและไม่ซ้ำ และคำนวณคำตอบ math ทั้ง 40 ข้อซ้ำด้วย independent arithmetic oracle โดยไม่ใช้โมเดล
+- ชุดทดสอบเดิมยังครอบคลุม 29 invalid-response variants, URL ที่ห้ามใช้ 7 แบบ, redirect, timeout continuation, output path และ cold metadata
+- ไม่มีข้อมูลส่วนตัว password token หรือ secret ใน dataset และหลักฐาน
 
 ## วิธีทำซ้ำ
 
-ต้องมี .NET 10, PowerShell 7, Ollama และ qwen3:4b บนเครื่องเดียวกัน ใช้ main ที่มี AI-002/BE-002 แล้ว ทำจากราก Repository
-
-รันชุดทดสอบก่อนเปิด Backend เพื่อไม่ให้ executable ถูกล็อก:
+ต้องมี .NET 10, PowerShell 7, Ollama และ qwen3:4b บนเครื่องเดียวกัน ทำจากราก Repository
 
 ```powershell
 dotnet test .\BC-LocalAI.slnx
@@ -109,7 +121,7 @@ py -3 -m unittest discover -s tests -v
 dotnet run --no-build --project .\BC-LocalAI\BC-LocalAI.csproj --no-launch-profile --urls http://localhost:5290
 ```
 
-เปิด PowerShell อีกหน้าต่างที่ repository เดิม เตรียม model-load cold start ด้วย CLI แล้วรันผ่าน Backend เท่านั้น:
+เปิด PowerShell อีกหน้าต่าง เตรียม model-load cold start แล้วรันผ่าน Backend เท่านั้น:
 
 ```powershell
 ollama stop qwen3:4b
@@ -118,40 +130,15 @@ pwsh -NoProfile -File .\scripts\test-chat-e2e.ps1 -ColdStartNote 'Model unloaded
 $LASTEXITCODE
 ```
 
-`ollama ps` ต้องไม่มีโมเดลโหลดอยู่ก่อนติดป้าย cold; ไม่ควร unload ถ้ามีคนอื่นกำลังใช้ runtime เดียวกัน หากไม่ระบุ ColdStartNote สคริปต์ใช้ชื่อ `cold_candidate` และไม่อ้างว่าตรวจ cold start แล้ว `OutputPath` ต้องอยู่ในโฟลเดอร์ที่มีอยู่ก่อน ตัวอย่างใช้ชื่อใหม่เพื่อรักษาหลักฐานเดิม
+`ollama ps` ต้องไม่มีโมเดลโหลดอยู่ก่อนติดป้าย cold หากไม่ระบุ ColdStartNote สคริปต์ใช้ชื่อ `cold_candidate` `OutputPath` ต้องอยู่ในโฟลเดอร์ที่มีอยู่ก่อน ตัวอย่างใช้ชื่อใหม่เพื่อรักษาหลักฐานเดิม
 
-สคริปต์ปฏิเสธ non-loopback, scheme ที่ไม่ใช่ HTTP(S), port Ollama, URL ที่ใส่ credentials/path/query/fragment และไม่ตาม redirect/proxy ใช้ request body `{ "message": "..." }` แบบ UTF-8 เก็บผลทุก case แม้บางข้อผิด และไม่เปลี่ยน Backend error ให้เป็นคำตอบสำเร็จ
-
-เมื่อ `expected_regex` พบคำที่คาดไว้ evaluator จะตรวจเพิ่มว่าคำนั้นถูกปฏิเสธหรือถูกระบุว่าผิดในประโยคภาษาอังกฤษหรือไทยหรือไม่ เช่น `Tokyo is not the capital of Japan; Paris is.` และ `โตเกียวไม่ใช่เมืองหลวงของญี่ปุ่น` จะไม่ผ่าน แม้มีคำที่ regex คาดไว้ กฎนี้ลด false positive แบบขัดแย้งโดยไม่บังคับให้คำตอบธรรมชาติทุกข้อเหลือเพียงคำเดียว
-
-## Acceptance และสิ่งที่ยังต้องทำ
-
-ชุดข้อมูล สคริปต์ วิธี reproduce หลักฐานจริง และ Cold/Warm metrics ครบแล้ว แต่การรับรองภาษาไทย/อังกฤษ/คำนวณ/edge ผ่านทุกข้อยังไม่ครบ จึงยังไม่ผ่าน Definition of Done ทั้งหมด
-
-ต้องให้ Tech Lead กำหนดงานแยกสำหรับคุณภาพภาษาไทย, เลขติดลบ, prompt-following และ provider-invalid response โดยอ้าง case ID ห้ามแก้ Controller, error mapping, model หรือ AI-002 contract ใน Issue นี้โดยพลการ หลังได้รับอนุมัติและแก้แล้ว ต้องใช้ dataset เดิมรันตรวจ regression อีกครั้ง
-
-สถานะ push, Pull Request, Code Review และ merge ให้ตรวจจาก GitHub ล่าสุด เอกสารผลนี้ไม่ถือเป็นการอนุมัติ merge และข้อเสนอสำหรับงานถัดไปเก็บแยกนอก Repository ไม่ถือเป็น Issue ที่ได้รับมอบหมาย
-
-## ตรวจซ้ำหลัง main รวม FE-001 วันที่ 20 ตุลาคม 2026
-
-นำ `origin/main` commit `a484f2e` มารวมใน branch AI-003 แล้วตรวจชุดอัตโนมัติและคำถามจริงอีกครั้ง โดยไม่ได้แก้ Backend AI contract, dataset หรือ evaluator:
-
-- `.NET`: ผ่าน 157/157 tests
-- JavaScript UI: ผ่าน 18/18 tests
-- Python: ผ่าน 26/26 test methods
-- ผู้ใช้กำหนดให้เปรียบเทียบเพียง 80 ข้อแรก ได้แก่ภาษาไทย 40 และอังกฤษ 40
-- 80 ข้อแรกผ่าน 69 ไม่ผ่าน 11; รอบหลักฐานเดิมช่วงเดียวกันผ่าน 68 ไม่ผ่าน 12
-- failure วันนี้คือ `th-05`, `th-11`, `th-16`, `th-18`, `th-19`, `th-24`, `th-26`, `th-27`, `th-36`, `en-25`, `en-26` ซึ่งเป็น failure เดิมทั้งหมด ส่วน `th-28` เปลี่ยนจากไม่ผ่านเป็นผ่าน จึงไม่พบ regression case ใหม่ใน 80 ข้อนี้
-- HTTP 502 ยังเกิดที่ `th-16`, `th-18`, `th-19` เหมือนรอบเดิม
-- first request หลังยืนยันว่า model ถูก unload ใช้ 8,255 ms เทียบกับ 4,953 ms ในรอบหลักฐานเดิม จึงไม่อ้างว่าความเร็วเท่าเดิมหรือดีขึ้น
-
-คำสั่ง evaluator ถูกหยุดตามคำสั่งผู้ใช้หลังเริ่มหมวดคำนวณแล้ว เนื่องจาก process ส่งต่อเนื่องระหว่างช่วงรอผลจึงมี request จริงถึง `math-09` รวม 89 requests ก่อนรับสัญญาณหยุด และไม่ได้เขียนไฟล์ evidence รอบใหม่เพราะ evaluator เขียนไฟล์เมื่อจบครบ dataset เท่านั้น ตัวเลข 69/80 ข้างต้นจึงเป็นผลจาก terminal output สำหรับ 80 ข้อแรก ไม่ใช้แทน raw evidence 160 ข้อเดิมและไม่เปลี่ยนผลหลัก 141/160
+สคริปต์ปฏิเสธ non-loopback, scheme ที่ไม่ใช่ HTTP(S), port Ollama, URL ที่ใส่ credentials/path/query/fragment และไม่ตาม redirect/proxy เก็บผลทุก case แม้บางข้อผิด และคืน exit code ไม่ใช่ 0 เมื่อมีข้อใดไม่ผ่าน
 
 ## ข้อจำกัดของผล
 
-- language check ใช้สัดส่วนอักษรไทย/ละตินและคำตอบที่กำหนด ไม่ใช่ language detector; ตัวเลขหรือสัญลักษณ์ล้วนยืนยันภาษาไม่ได้
-- regex และ contradiction detector เป็น oracle จำกัดขอบเขต แม้ตรวจคำพ้องและการปฏิเสธรูปแบบที่รู้จักแล้วก็ยังไม่รับรอง semantic correctness ของทุกเรื่องหรือทุกการเรียบเรียงคำ
+- `accepted_answers` ตรวจได้เฉพาะคำถามที่มีคำตอบสั้นแน่นอน คำตอบที่ถูกแต่เรียบเรียงต่างจากรายการ (เช่น ประโยคเต็ม) จะไม่ผ่าน ซึ่งเป็นการเลือกให้เกณฑ์เข้มเพื่อไม่ให้มี false positive
+- dataset version 3 ถูกปรับ prompt และแทนคำถาม 14 ข้อหลังเห็นผลของโมเดล (ระบุไว้ในตารางด้านบน) ผล 160/160 จึงเป็นหลักฐานของชุดคำถามนี้ ไม่ใช่การวัดความรู้ทั่วไปของโมเดล
+- language check ใช้สัดส่วนอักษรไทย/ละติน ไม่ใช่ language detector; คำตอบที่เป็นตัวเลขล้วนในหมวดคำนวณยืนยันภาษาไม่ได้
 - `temperature=0` ไม่รับประกันคำตอบเหมือนเดิมทุกครั้ง ต้องเก็บหลักฐานใหม่เมื่อเปลี่ยน runtime/model/contract
-- การวัดเป็น sequential 160 คำขอในเครื่องเดียว ไม่ใช่ concurrent load test หรือ production benchmark
-- ผลไม่พบ thinking/JSON leakage ครอบคลุมเฉพาะชุดคำถามนี้; การไม่พบ marker ไม่ได้แปลว่าคำตอบถูกต้อง เช่น edge-16
-- AI-003 ไม่อ่าน provider payload โดยตรง จึงไม่ระบุสาเหตุย่อยของ 502 ที่ public API ไม่เปิดเผย
+- การวัดเป็น sequential 160 คำขอในเครื่องเดียว ไม่ใช่ load test หรือ production benchmark
+- AI-003 ไม่อ่าน provider payload โดยตรง จึงไม่ระบุสาเหตุย่อยของ 502 ที่พบระหว่างทดลองคำถาม v2

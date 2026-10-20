@@ -37,6 +37,17 @@ class ChatDatasetTests(unittest.TestCase):
         for category in ("thai", "english", "math", "edge"):
             self.assertEqual(sum(case["category"] == category for case in cases), 40)
 
+    def test_every_case_lists_complete_accepted_answers(self):
+        cases = json.loads(DATASET.read_text(encoding="utf-8"))["cases"]
+        for case in cases:
+            with self.subTest(case=case["id"]):
+                self.assertNotIn("expected_regex", case)
+                answers = case["accepted_answers"]
+                self.assertIsInstance(answers, list)
+                self.assertTrue(answers)
+                self.assertTrue(all(isinstance(a, str) and a.strip() for a in answers))
+                self.assertEqual(len(answers), len(set(answers)))
+
     def test_math_expected_answers_match_independent_arithmetic(self):
         cases = json.loads(DATASET.read_text(encoding="utf-8"))["cases"]
         for case in (case for case in cases if case["category"] == "math"):
@@ -46,9 +57,8 @@ class ChatDatasetTests(unittest.TestCase):
                 expression = match[1].replace("×", "*").replace("÷", "/").strip()
                 result = calculate(ast.parse(expression, mode="eval"))
                 self.assertEqual(result.denominator, 1)
-                answer = str(result.numerator)
-                self.assertIsNotNone(re.fullmatch(case["expected_regex"], answer))
-                self.assertIsNone(re.fullmatch(case["expected_regex"], str(result.numerator + 1)))
+                accepted = {answer.replace("−", "-") for answer in case["accepted_answers"]}
+                self.assertEqual(accepted, {str(result.numerator)})
 
 
 if __name__ == "__main__":
