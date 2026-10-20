@@ -6,7 +6,8 @@ answered by a local Ollama model (`qwen3:4b`) through `OllamaAIService` (BE-002)
 
 > **Known limitations (read before merging / deploying):** an answer longer than the output limit (`Ollama:MaxOutputTokens`, default 1024 tokens) returns `502 AI_RESPONSE_TOO_LARGE`;
 > Ollama answers one request at a time, so many simultaneous users queue and can receive `504 AI_TIMEOUT`; there is no
-> authentication, rate limit, conversation history or streaming. Details and measurements: [docs/KNOWN-LIMITATIONS.md](docs/KNOWN-LIMITATIONS.md).
+> authentication, rate limit or conversation history. The backend streaming endpoint exists, but the current FE-001 page still uses the
+> non-streaming endpoint until FE-002. Details and measurements: [docs/KNOWN-LIMITATIONS.md](docs/KNOWN-LIMITATIONS.md).
 
 ## Requirements
 
@@ -173,6 +174,33 @@ All errors use `{ "error": { "code": "...", "message": "..." } }` and never incl
 | Answer cut off by the output token limit (`done_reason` = `length`) or response body larger than `MaxResponseBytes` | 502 | `AI_RESPONSE_TOO_LARGE` |
 | Unexpected error | 500 | `INTERNAL_ERROR` |
 
+### Streaming Chat API (BE-004)
+
+`POST /api/chat/stream` accepts the same JSON body and returns Server-Sent Events. A valid stream starts immediately with
+`started`, sends one or more `delta` events containing decoded answer text, and ends with exactly one terminal event:
+`completed` or `error`. The endpoint never forwards Ollama's JSON envelope, thinking field, provider error detail or stack traces.
+
+```text
+event: started
+data: {"model":"qwen3:4b"}
+
+event: delta
+data: {"text":"2"}
+
+event: completed
+data: {"finishReason":"stop","evalCount":7}
+```
+
+The complete contract and error/cancellation behavior are documented in
+[docs/BE-004-SSE-CONTRACT.md](docs/BE-004-SSE-CONTRACT.md).
+
+Review corrections and repeatable live verification: [BE-004 review](docs/BE-004-REVIEW-FIXES.md),
+[verification results](docs/BE-004-VERIFICATION.md). With the backend and Ollama running:
+
+```powershell
+python -I -X utf8 scripts/test-chat-stream.py --base-url http://127.0.0.1:5290 --output "$env:TEMP/be004-stream-results.json"
+```
+
 ### Known limits
 
 See [docs/KNOWN-LIMITATIONS.md](docs/KNOWN-LIMITATIONS.md) for the full list with measurements. In short:
@@ -183,7 +211,7 @@ See [docs/KNOWN-LIMITATIONS.md](docs/KNOWN-LIMITATIONS.md) for the full list wit
 - Ollama handles one request at a time. Under a burst, requests queue and later ones can time out with `504 AI_TIMEOUT`
   (measured on the development laptop: 15 simultaneous 3-sentence answers with a 12 s timeout -> 4 succeeded, 11 got 504,
   and the API recovered immediately).
-- No authentication, rate limit, conversation history or streaming.
+- No authentication, rate limit or conversation history. FE-001 remains non-streaming until FE-002 adopts `/api/chat/stream`.
 
 ### Live smoke test (needs Ollama)
 
@@ -203,6 +231,7 @@ Verification evidence: [`docs/BE-001-evidence.md`](docs/BE-001-evidence.md) (moc
 | `docs/FE-001-REVIEW-CHECKLIST.md` | FE-001 (Chat page) reviewer guide and acceptance criteria table |
 | `docs/FE-001-evidence.md` | FE-001 test results, browser test notes and screenshots (`docs/fe-001/`) |
 | `docs/BE-003-ROOT-CAUSE.md`, `docs/BE-003-CONFIGURATION.md`, `docs/BE-003-VERIFICATION.md` | BE-003 root cause analysis, configuration and timeout policy, before/after verification report |
+| `docs/BE-004-SSE-CONTRACT.md`, `docs/BE-004-CONFIGURATION.md`, `docs/BE-004-VERIFICATION.md` | BE-004 SSE contract, runtime behavior and verification evidence |
 | `docs/KNOWN-LIMITATIONS.md` | Known limitations of the Ollama integration with measured numbers (read before merging) |
 | `docs/BE-002-REVIEW-CHECKLIST.md` | BE-002 (Ollama) reviewer guide and acceptance criteria table |
 | `docs/BE-002-evidence.md` | BE-002 build, test, live smoke test and failure-scenario evidence |
