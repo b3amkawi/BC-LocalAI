@@ -18,8 +18,8 @@ Issue: #16 · Settings live in `BC-LocalAI/appsettings.json` under `Ollama` and 
 **`MaxOutputTokens = 1024`.**
 - Measured answers with the AI-002 system prompt ("answer briefly") need 66 - 247 tokens, even when the user asks for a very long text. The old limit of 256 sat on that edge.
 - 1024 is about 4 times the longest answer measured, so normal long answers finish (`done_reason = "stop"`).
-- Cost: Ollama generates 73 - 77 tokens/s on the test machine, so a runaway answer that uses the whole limit takes about 14 - 17 s (256 tokens: about 3.5 - 4 s;
-  4096 tokens: about 55 - 70 s; 73 - 77 tokens/s measured here, about 60 tokens/s in AI-004). Ollama serves one request at a time, so a higher limit lengthens the queue in the worst case.
+- Cost: on the **reference machine** (RTX 4050 Laptop 6 GB) Ollama generates about 60 tokens/s (AI-004), so a runaway answer that uses the whole limit takes about **17 s**
+  (256 tokens: about 4 s; 4096 tokens: about 70 s). The faster test machine (RTX 4060 Laptop 8 GB, 73 - 77 tokens/s) needs about 13 - 14 s. Ollama serves one request at a time, so a higher limit lengthens the queue in the worst case.
 - 4096 is the upper bound because the model context window (`num_ctx`) is 4096 by default; asking for more output than the context cannot be honoured.
 - Raise it only after checking the queue effect (section 4); lower it to shorten the worst case.
 
@@ -37,7 +37,7 @@ Issue: #16 · Settings live in `BC-LocalAI/appsettings.json` under `Ollama` and 
 
 ## 2a. Review against the AI-004 benchmark (`docs/performance/benchmark-report.md`, branch `pao04_AI`)
 
-AI-004 measured the **pre-BE-003** backend (`num_predict` fixed at 256) on the AI Engineer's machine (RTX 4050 Laptop, 6 GB; the BE-003 measurements were made on an RTX 4060 Laptop, 8 GB, which explains the faster 73 - 77 tokens/s here), 3,156 requests, concurrency 1/2/5/10. What it says about this issue:
+AI-004 measured the **pre-BE-003** backend (`num_predict` fixed at 256) on the **reference machine** (RTX 4050 Laptop, 6 GB; the BE-003 measurements were made on a faster RTX 4060 Laptop, 8 GB, which explains the 73 - 77 tokens/s there), 3,156 requests, concurrency 1/2/5/10. What it says about this issue:
 
 | AI-004 finding | Effect on BE-003 |
 |----------------|------------------|

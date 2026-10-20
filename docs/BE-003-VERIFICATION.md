@@ -1,6 +1,9 @@
 # BE-003 D5 - Verification report (before and after)
 
-Issue: #16 · Date: 2026-10-20 · Branch: `watzapon04_Backend` · Machine: Windows 11, NVIDIA RTX 4060 Laptop GPU (8 GB), Ollama + `qwen3:4b`
+Issue: #16 · Date: 2026-10-20 · Branch: `watzapon04_Backend` · Ollama + `qwen3:4b`, Windows 11
+
+**Reference machine (project spec):** ASUS TUF Gaming F16, Intel Core 5 210H, 16 GB RAM, NVIDIA RTX 4050 Laptop GPU (6 GB). **Measured on:** Acer Predator PHN16-72, Intel Core i7-14700HX, 16 GB RAM, NVIDIA RTX 4060 Laptop GPU (8 GB), which generates faster (73 - 77 tokens/s against ~60 on the reference, AI-004). Pass/fail results and error codes do not depend on the GPU; times on the reference machine are about 25 % longer, and the times that matter are also given for the reference.
+
 Root cause and evidence: [BE-003-ROOT-CAUSE.md](BE-003-ROOT-CAUSE.md) · Settings and policy: [BE-003-CONFIGURATION.md](BE-003-CONFIGURATION.md)
 
 ## 1. What changed
@@ -27,7 +30,7 @@ Root cause and evidence: [BE-003-ROOT-CAUSE.md](BE-003-ROOT-CAUSE.md) · Setting
 | 10 simultaneous 3-sentence answers (no limiter exists) | 26.0 s total, all 200 | 24.3 s total, all 200 |
 | 30 simultaneous short questions | all 200, max 5.6 s | all 200, max 4.6 s |
 | 15 simultaneous with `TimeoutSeconds=12` | 4 x 200, 11 x 504, immediate recovery | 4 x 200, 11 x 504, immediate recovery (0.7 s) |
-| Cost of the larger limit: a generation that uses all 1024 tokens | - | 13.2 s at 77 tokens/s (measured directly on Ollama) |
+| Cost of the larger limit: a generation that uses all 1024 tokens | - 13.2 s at 77 tokens/s on the test machine; **about 17 s on the reference machine** (~60 tokens/s) |
 | Chat page with a too-large answer | generic wrong text for the unknown situation | the new text, no AI bubble, the question is put back in the input (`be-003/ui-response-too-large.jpg`) |
 | Failure categories visible in the log | none | `Reason` for every invalid / too-large response |
 
@@ -138,7 +141,7 @@ Defects found by these runs and fixed (AI scripts, needed for the merged branch 
 
 ## 5d. Cancellation and the 1024-token limit, checked against Ollama's own log and token counts
 
-Both points had only been inferred before (AI-004 handoff item 4; the AI-002 owner's note that answers near 1024 tokens were not tested).
+Times in this section are from the test machine (RTX 4060 Laptop); on the reference machine (RTX 4050 Laptop) expect about 25 % longer. Both points had only been inferred before (AI-004 handoff item 4; the AI-002 owner's note that answers near 1024 tokens were not tested).
 
 | Check | Result |
 |-------|--------|
@@ -150,15 +153,15 @@ Both points had only been inferred before (AI-004 handoff item 4; the AI-002 own
 
 Token needs measured directly on Ollama (`num_predict=4096`, same system prompt and format): numbers 1-150 = 500 tokens, 1-300 = 1,100 tokens, the 77 provinces = 1,077 tokens.
 
-**Open sizing decision:** 1024 fits every answer measured in BE-003 and AI-004 (longest 375 tokens for the AI-004 Thai prompts), but a realistic Thai listing question needs about 5 % more. Raising `Ollama:MaxOutputTokens` (for example to 2048) would let such answers through, at the cost of a longer worst case (~27 s here, ~34 s at the AI-004 speed) and a longer queue for others. Not changed here: 1024 is the value the AI-002 owner has just tested, and the choice belongs to the Tech Lead / AI-002 owner.
+**Open sizing decision:** 1024 fits every answer measured in BE-003 and AI-004 (longest 375 tokens for the AI-004 Thai prompts), but a realistic Thai listing question needs about 5 % more. Raising `Ollama:MaxOutputTokens` (for example to 2048) would let such answers through, at the cost of a longer worst case (about **34 s on the reference machine**, 27 s on the test machine) and a longer queue for others. Not changed here: 1024 is the value the AI-002 owner has just tested, and the choice belongs to the Tech Lead / AI-002 owner.
 
 ## 6. Known limitations that remain
 
 - **AI-004 results were compared afterwards** (`BE-003-CONFIGURATION.md` sections 2a/2b): they give no reason to change `TimeoutSeconds = 180` (no timeout in 3,156 requests, longest 28.7 s). **No concurrency limit / bounded queue was added**: AI-004 recommends one, but it is a contract change that needs approval. Ollama still answers one request at a time. The BE-003 build was **not re-benchmarked** with the AI-004 scripts (they need PowerShell 7).
 - **Contract document to update:** the AI-002 owner tested `num_predict` 1024 live (short answers, section 5c), but `docs/ai/ollama-integration-contract.md` still fixes it at 256. It is now a setting with default 1024 (the root cause). The AI Engineer should update `docs/ai/ollama-integration-contract.md` and re-run the contract tests.
-- A runaway answer can use the whole limit (about 13 s at the speed measured here, about 17 s at the 60 tokens/s AI-004 measured) and lengthens the queue for others; lower `MaxOutputTokens` if that matters more than long answers.
+- A runaway answer can use the whole limit (about 17 s on the reference machine, about 13 s on the faster test machine) and lengthens the queue for others; lower `MaxOutputTokens` if that matters more than long answers.
 - An answer that still needs more than the limit is not shown partially (AI-002 forbids partial answers); streaming (BE-004) is the real solution for very long answers.
-- Measured on one machine (RTX 4060 **Laptop** GPU, 8 GB; earlier versions of these documents wrongly said RTX 4050 6 GB, which is the AI-004 machine). A laptop GPU is slower than the desktop RTX 4060/4070 targets, so absolute numbers are conservative; no real reverse proxy was in the path, so proxy timeouts are documented but untested.
+- Measured on a faster machine than the reference (RTX 4060 Laptop 8 GB against the reference RTX 4050 Laptop 6 GB; earlier versions of these documents wrongly named the test machine RTX 4050). Functional results carry over; times on the reference machine are about 25 % longer (AI-004 measured the reference: ~60 tokens/s, `qwen3:4b` uses 3.2 of 6 GB VRAM); no real reverse proxy was in the path, so proxy timeouts are documented but untested.
 - Request size is not limited by this issue (a 200 KB question was accepted in BE-002 testing).
 - The full AI-004 benchmark (24 scenarios, 125+ requests each) was not repeated after BE-003; only the `long` profile at concurrency 1 (section 5c).
 - The long-answer test proves the API now returns `200` instead of `502`. The *content* the model returns for the "write as long as possible" question is a polite refusal

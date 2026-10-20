@@ -1,6 +1,8 @@
 # BE-003 D1 - Root Cause Analysis
 
-Issue: #16 - Fix Response Length & Timeout Handling · Date: 2026-10-20 · Machine: Windows 11, NVIDIA RTX 4060 Laptop GPU (8 GB), Ollama + `qwen3:4b`
+Issue: #16 - Fix Response Length & Timeout Handling · Date: 2026-10-20 · Ollama + `qwen3:4b`
+
+Reference machine (project spec): ASUS TUF Gaming F16, Intel Core 5 210H, 16 GB RAM, NVIDIA RTX 4050 Laptop GPU (6 GB). Measurements below were made on Acer Predator PHN16-72, Intel Core i7-14700HX, 16 GB RAM, NVIDIA RTX 4060 Laptop GPU (8 GB) (faster: 73 - 77 tokens/s against ~60 on the reference). The root cause (the token limit) does not depend on the machine.
 
 **สรุปสั้น (ไทย):** `AI_INVALID_RESPONSE` เมื่อคำตอบยาวไม่ได้เกิดจาก parser, ขนาด body, Unicode หรือ timeout แต่เกิดจาก
 **ขีดจำกัด output token `num_predict = 256` ที่ฝังตายตัวในโค้ด** ซึ่งอยู่ติดขอบความยาวคำตอบจริง (66-247 token) เมื่อ Ollama ถูกตัดที่ 256
