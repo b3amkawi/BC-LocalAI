@@ -1,12 +1,12 @@
 # AI-003: End-to-End Chat Quality Results
 
-รายงานนี้เก็บผล E2E รอบ 160 ข้อเดิมไว้ตามจริง การปรับ Ollama helper/launcher และผล regression รอบทบทวนใหม่แยกอยู่ใน [คู่มือส่งต่อ 001–003 หัวข้อ 10](ai-001-003-handoff.md) และไม่ได้เปลี่ยนคะแนน E2E นี้
+รายงานนี้ใช้ผล E2E 160 ข้อรอบล่าสุดหลังแก้ contradiction validation ตาม Code Review คำตอบจริงและ failure ทั้งหมดยังคงบันทึกตามที่เกิดขึ้น
 
 ## สถานะ: ทดสอบครบแล้ว แต่ยังไม่ผ่าน Acceptance Criteria ทุกข้อ
 
-ทดสอบจริงวันที่ 19 ตุลาคม 2026 เวลา 19:14 น. (Asia/Bangkok) ผ่าน `POST http://localhost:5290/api/chat` ทั้งหมด **160 คำถาม แบ่งหมวดละ 40 ข้อ** ผลฉบับสุดท้าย **ผ่าน 141 ข้อ ไม่ผ่าน 19 ข้อ (88.13%)** สคริปต์คืน exit code `1` ตามที่ควรเป็น จึงยังไม่ควรปิด Issue หรือรับรองว่าคุณภาพผ่านทั้งหมด
+ทดสอบจริงรอบล่าสุดวันที่ 20 ตุลาคม 2026 เวลา 08:59 น. (Asia/Bangkok) ผ่าน `POST http://localhost:5290/api/chat` ทั้งหมด **160 คำถาม แบ่งหมวดละ 40 ข้อ** ผลฉบับสุดท้าย **ผ่าน 141 ข้อ ไม่ผ่าน 19 ข้อ (88.13%)** สคริปต์คืน exit code `1` ตามที่ควรเป็น จึงยังไม่ควรปิด Issue หรือรับรองว่าคุณภาพผ่านทั้งหมด
 
-AI-002 และ BE-002 รวมเข้า `main` แล้วก่อนทดสอบ โดยใช้ Backend จาก main commit `4f1806bfdaab552aa8365e1bb90a32bd96bc2c45` ไม่มีการแก้ Controller, public API contract, error mapping, model หรือ system prompt ใน AI-003
+AI-002, BE-002 และ FE-001 รวมเข้า `main` แล้วก่อนทดสอบ โดย branch รวม main commit `a484f2e` ไม่มีการแก้ Controller, public API contract, error mapping, model หรือ system prompt ใน AI-003
 
 ## Environment และการวัดเวลา
 
@@ -18,7 +18,7 @@ AI-002 และ BE-002 รวมเข้า `main` แล้วก่อนท
 | Ollama | 0.40.5 |
 | Model / local digest prefix | qwen3:4b / 359d7dd4bcda |
 | PowerShell / .NET SDK | 7.6.5 / 10.0.402 |
-| Backend | Production environment, localhost:5290, OllamaAIService |
+| Backend | Development environment, localhost:5290, OllamaAIService |
 | Ollama BaseUrl | 127.0.0.1:11434 ตาม configuration; evaluator ไม่เรียกปลายทางนี้ |
 | Dataset | version 2, ไทย 40 / อังกฤษ 40 / คำนวณ 40 / edge 40 |
 
@@ -26,14 +26,14 @@ AI-002 และ BE-002 รวมเข้า `main` แล้วก่อนท
 
 | Metric รอบสุดท้าย | ผล |
 | --- | ---: |
-| First request หลัง unload โมเดล | 4,953 ms |
+| First request หลัง unload โมเดล | 5,307 ms |
 | Warm requests ทั้งหมด (รวมข้อที่ไม่ผ่าน) | 159 |
-| Warm average ทั้งหมด | 383.2 ms |
-| Warm p95 ทั้งหมด (nearest rank) | 631 ms |
+| Warm average ทั้งหมด | 366.3 ms |
+| Warm p95 ทั้งหมด (nearest rank) | 620 ms |
 | Warm requests ที่ผ่านทุกเกณฑ์ | 140 |
-| Warm average เฉพาะข้อที่ผ่าน | 284.1 ms |
-| Warm median เฉพาะข้อที่ผ่าน | 253 ms |
-| Warm p95 เฉพาะข้อที่ผ่าน (nearest rank) | 500 ms |
+| Warm average เฉพาะข้อที่ผ่าน | 273.0 ms |
+| Warm median เฉพาะข้อที่ผ่าน | 243 ms |
+| Warm p95 เฉพาะข้อที่ผ่าน (nearest rank) | 477 ms |
 
 นี่คือ model-load cold start: Backend เปิดอยู่แล้ว และไม่ได้ล้าง filesystem cache หรือ reboot Windows จึงไม่ใช่การวัด cold boot ของทั้งเครื่อง รอบแรกที่เริ่ม Backend ใหม่วัด first request ได้ 9,359 ms เก็บไว้ในหลักฐานรอบแรก ห้ามใช้ความต่างสองรอบสรุปว่าได้ optimize ระบบ ทั้งสองรอบใช้รุ่นและ configuration เดียวกัน และค่าบนเครื่องนี้ไม่ใช่ latency guarantee สำหรับเครื่องอื่น
 
@@ -81,13 +81,15 @@ AI-002 และ BE-002 รวมเข้า `main` แล้วก่อนท
 
 ```text
 dataset:   B42780D9972600A124982EBA52F75B6B6D3FB783CA6DEC7322880CF1A3198BF4
-evaluator: C932A6C1E1866358E84923A4CE57F4A6A08BBA81A3AF307804A693794986335C
+evaluator: A1E9501618047B66A07929B958B47FC5F8C6D3DAB55FA26FDF059917AB49BB8F
 ```
 
 ## Regression และ verification
 
-- `dotnet test .\BC-LocalAI.slnx`: ผ่าน 135, ไม่ผ่าน 0, ข้าม 0
-- `py -3 -m unittest discover -s tests -v`: ผ่าน 19 test methods ใน 31.023 วินาที
+- `dotnet test .\BC-LocalAI.slnx`: ผ่าน 157, ไม่ผ่าน 0, ข้าม 0
+- `node --test .\tests\ui\chat-core.test.mjs`: ผ่าน 18, ไม่ผ่าน 0
+- `py -3 -m unittest discover -s tests -v`: ผ่าน 27 test methods ใน 45.458 วินาที
+- Python regression เพิ่มกรณี `Tokyo is not the capital of Japan; Paris is.` และยืนยันว่าแม้พบคำ `Tokyo` ก็ต้องไม่ผ่านพร้อมคืน exit code `1`
 - ตัว evaluator มี 160-case mock fixtures, 29 invalid-response variants, 7 invalid datasets และ 7 URL ที่ห้ามใช้ พร้อมตรวจ redirect, timeout continuation, output path และ cold metadata
 - ทดสอบว่า mock ทั้งหมดถูกต้องคืน exit 0 และ response ผิดเพียงบางข้อคืน exit 1 พร้อมเก็บ raw body
 - คำนวณคำตอบ math ทั้ง 40 ข้อซ้ำด้วย independent arithmetic oracle โดยไม่ใช้โมเดล เพื่อยืนยัน expected answers ของ dataset
@@ -120,6 +122,8 @@ $LASTEXITCODE
 
 สคริปต์ปฏิเสธ non-loopback, scheme ที่ไม่ใช่ HTTP(S), port Ollama, URL ที่ใส่ credentials/path/query/fragment และไม่ตาม redirect/proxy ใช้ request body `{ "message": "..." }` แบบ UTF-8 เก็บผลทุก case แม้บางข้อผิด และไม่เปลี่ยน Backend error ให้เป็นคำตอบสำเร็จ
 
+เมื่อ `expected_regex` พบคำที่คาดไว้ evaluator จะตรวจเพิ่มว่าคำนั้นถูกปฏิเสธหรือถูกระบุว่าผิดในประโยคภาษาอังกฤษหรือไทยหรือไม่ เช่น `Tokyo is not the capital of Japan; Paris is.` และ `โตเกียวไม่ใช่เมืองหลวงของญี่ปุ่น` จะไม่ผ่าน แม้มีคำที่ regex คาดไว้ กฎนี้ลด false positive แบบขัดแย้งโดยไม่บังคับให้คำตอบธรรมชาติทุกข้อเหลือเพียงคำเดียว
+
 ## Acceptance และสิ่งที่ยังต้องทำ
 
 ชุดข้อมูล สคริปต์ วิธี reproduce หลักฐานจริง และ Cold/Warm metrics ครบแล้ว แต่การรับรองภาษาไทย/อังกฤษ/คำนวณ/edge ผ่านทุกข้อยังไม่ครบ จึงยังไม่ผ่าน Definition of Done ทั้งหมด
@@ -146,7 +150,7 @@ $LASTEXITCODE
 ## ข้อจำกัดของผล
 
 - language check ใช้สัดส่วนอักษรไทย/ละตินและคำตอบที่กำหนด ไม่ใช่ language detector; ตัวเลขหรือสัญลักษณ์ล้วนยืนยันภาษาไม่ได้
-- regex เป็น oracle จำกัดขอบเขต แม้เพิ่มคำพ้องและอ่านคำตอบประกอบแล้วก็ไม่รับรอง semantic correctness ของทุกเรื่องหรือทุกการเรียบเรียงคำ
+- regex และ contradiction detector เป็น oracle จำกัดขอบเขต แม้ตรวจคำพ้องและการปฏิเสธรูปแบบที่รู้จักแล้วก็ยังไม่รับรอง semantic correctness ของทุกเรื่องหรือทุกการเรียบเรียงคำ
 - `temperature=0` ไม่รับประกันคำตอบเหมือนเดิมทุกครั้ง ต้องเก็บหลักฐานใหม่เมื่อเปลี่ยน runtime/model/contract
 - การวัดเป็น sequential 160 คำขอในเครื่องเดียว ไม่ใช่ concurrent load test หรือ production benchmark
 - ผลไม่พบ thinking/JSON leakage ครอบคลุมเฉพาะชุดคำถามนี้; การไม่พบ marker ไม่ได้แปลว่าคำตอบถูกต้อง เช่น edge-16

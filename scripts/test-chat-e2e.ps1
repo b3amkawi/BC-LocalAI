@@ -23,6 +23,29 @@ function Fail([string]$Message) {
     exit 1
 }
 
+function Test-ExpectedAnswerContradiction(
+    [string]$Answer,
+    [Text.RegularExpressions.Regex]$ExpectedMatcher
+) {
+    foreach ($expectedMatch in $ExpectedMatcher.Matches($Answer)) {
+        if (-not $expectedMatch.Success -or [string]::IsNullOrWhiteSpace($expectedMatch.Value)) { continue }
+        $expected = [regex]::Escape($expectedMatch.Value)
+        $patterns = @(
+            "(?is)\b(?:not|never)\s+(?:the\s+answer\s+is\s+)?$expected(?![\p{L}\p{N}_])",
+            "(?is)(?<![\p{L}\p{N}_])$expected\s+(?:is|are|was|were)\s+(?:not|never|incorrect|wrong)\b",
+            "(?is)\b(?:answer|capital|result)\s+(?:is|was)\s+not\s+$expected(?![\p{L}\p{N}_])",
+            "(?is)(?:คำตอบไม่ใช่|ไม่ใช่|ไม่ถูกต้อง(?:คือ)?)\s*$expected(?![\p{L}\p{N}_])",
+            "(?is)(?<![\p{L}\p{N}_])$expected\s*(?:นั้น)?(?:ไม่ใช่|ไม่ถูกต้อง|ผิด)"
+        )
+        foreach ($pattern in $patterns) {
+            if ([regex]::IsMatch($Answer, $pattern, [Text.RegularExpressions.RegexOptions]::None, [TimeSpan]::FromSeconds(1))) {
+                return $true
+            }
+        }
+    }
+    return $false
+}
+
 if (-not $BaseUrl.IsAbsoluteUri -or -not $BaseUrl.IsLoopback -or
     $BaseUrl.Scheme -notin @('http', 'https') -or $BaseUrl.Port -eq 11434 -or
     $BaseUrl.UserInfo -or $BaseUrl.Query -or $BaseUrl.Fragment -or $BaseUrl.AbsolutePath -ne '/') {
@@ -124,8 +147,11 @@ try {
                 $latinCount = [regex]::Matches($answer, '[A-Za-z]').Count
                 if ($case.language -ceq 'th' -and ($thaiCount -eq 0 -or $thaiCount -lt $latinCount)) { $errors.Add('response language is not predominantly Thai') }
                 if ($case.language -ceq 'en' -and ($thaiCount -gt 0 -or $latinCount -eq 0)) { $errors.Add('response language is not English') }
-                if (-not [regex]::new($case.expected_regex, [Text.RegularExpressions.RegexOptions]::IgnoreCase, [TimeSpan]::FromSeconds(1)).IsMatch($answer)) {
+                $expectedMatcher = [regex]::new($case.expected_regex, [Text.RegularExpressions.RegexOptions]::IgnoreCase, [TimeSpan]::FromSeconds(1))
+                if (-not $expectedMatcher.IsMatch($answer)) {
                     $errors.Add("response does not match expected_regex: $($case.expected_regex)")
+                } elseif (Test-ExpectedAnswerContradiction -Answer $answer -ExpectedMatcher $expectedMatcher) {
+                    $errors.Add('response contradicts the expected answer')
                 }
                 if ($case.Contains('forbid_regex') -and [regex]::new($case.forbid_regex, [Text.RegularExpressions.RegexOptions]::IgnoreCase, [TimeSpan]::FromSeconds(1)).IsMatch($answer)) {
                     $errors.Add("response matches forbid_regex: $($case.forbid_regex)")

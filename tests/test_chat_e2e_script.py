@@ -185,6 +185,49 @@ class ChatE2EScriptTests(unittest.TestCase):
         failed_warm = len(failures) - 1
         self.assertEqual(evidence["warm_sample_count"], TOTAL - 1 - failed_warm)
 
+    def test_expected_word_inside_contradictory_answers_returns_nonzero(self):
+        fixture = dataset()
+        fixture["cases"][0]["expected_regex"] = "โตเกียว"
+        fixture["cases"][PER_CATEGORY]["expected_regex"] = r"\bTokyo\b"
+        fixture["cases"][PER_CATEGORY + 1]["expected_regex"] = r"\bTokyo\b"
+
+        def contradictory_reply(index, request):
+            if index == 1:
+                return {
+                    "body": {
+                        "response": "โตเกียวไม่ใช่เมืองหลวงของญี่ปุ่น ปารีสต่างหาก",
+                        "model": "qwen3:4b",
+                    }
+                }
+            if index == PER_CATEGORY + 1:
+                return {
+                    "body": {
+                        "response": "Tokyo is not the capital of Japan; Paris is.",
+                        "model": "qwen3:4b",
+                    }
+                }
+            if index == PER_CATEGORY + 2:
+                return {
+                    "body": {
+                        "response": "The capital is not Tokyo; it is Paris.",
+                        "model": "qwen3:4b",
+                    }
+                }
+            return {}
+
+        result, evidence, requests = self.run_script(
+            contradictory_reply, fixture=fixture
+        )
+
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        self.assertEqual(len(requests), TOTAL)
+        self.assertEqual(evidence["failed"], 3)
+        for result_index in (0, PER_CATEGORY, PER_CATEGORY + 1):
+            with self.subTest(result_index=result_index):
+                entry = evidence["results"][result_index]
+                self.assertFalse(entry["passed"])
+                self.assertIn("contradicts the expected answer", " ".join(entry["errors"]))
+
     def test_invalid_datasets_fail_before_any_request(self):
         fixtures = {}
         too_small = dataset()
