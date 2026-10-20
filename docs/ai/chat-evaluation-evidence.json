@@ -1,16 +1,16 @@
 {
-  "tested_at": "2026-10-20T09:52:23.8159150+07:00",
+  "tested_at": "2026-10-20T10:11:19.3546658+07:00",
   "endpoint": "http://localhost:5290/api/chat",
-  "dataset_sha256": "221CF5C580F7CFCAF1E8FC347E95D36D9DFEFD7A262A4DD20CA05F0E3A3E1299",
+  "dataset_sha256": "1EC5604B8460C23D7CE757DEF1CCEF10CADC7FB35C6452A712EB96A82569E7F4",
   "evaluator_sha256": "874AD3F53CCCAD40E3F05CE9B8102D8862A64DDDB337E459CFCBBE235F5111FE",
   "total": 160,
   "passed": 160,
   "failed": 0,
-  "cold_start_note": "Model unloaded with ollama stop; ollama ps empty immediately before the accepted_answers 160-case run; OS cache not cleared.",
-  "cold_candidate_ms": 4783,
+  "cold_start_note": "Model unloaded with ollama stop; ollama ps empty immediately before the prompt-compliant accepted_answers 160-case run; OS cache not cleared.",
+  "cold_candidate_ms": 3959,
   "warm_sample_count": 159,
-  "warm_average_ms": 287.3,
-  "warm_p95_ms": 359,
+  "warm_average_ms": 309.0,
+  "warm_p95_ms": 383,
   "results": [
     {
       "id": "th-01",
@@ -24,7 +24,7 @@
         "กรุงเทพ"
       ],
       "http_status": 200,
-      "elapsed_ms": 4783,
+      "elapsed_ms": 3959,
       "response": "กรุงเทพมหานคร",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"กรุงเทพมหานคร\",\"model\":\"qwen3:4b\"}",
@@ -41,7 +41,7 @@
         "ของแข็ง"
       ],
       "http_status": 200,
-      "elapsed_ms": 312,
+      "elapsed_ms": 333,
       "response": "ของแข็ง",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"ของแข็ง\",\"model\":\"qwen3:4b\"}",
@@ -59,7 +59,7 @@
         "ดาวโลก"
       ],
       "http_status": 200,
-      "elapsed_ms": 227,
+      "elapsed_ms": 265,
       "response": "โลก",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"โลก\",\"model\":\"qwen3:4b\"}",
@@ -77,7 +77,7 @@
         "7วัน"
       ],
       "http_status": 200,
-      "elapsed_ms": 291,
+      "elapsed_ms": 320,
       "response": "7 วัน",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"7 วัน\",\"model\":\"qwen3:4b\"}",
@@ -95,7 +95,7 @@
         "หมา"
       ],
       "http_status": 200,
-      "elapsed_ms": 294,
+      "elapsed_ms": 330,
       "response": "สุนัข",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"สุนัข\",\"model\":\"qwen3:4b\"}",
@@ -113,7 +113,7 @@
         "12เดือน"
       ],
       "http_status": 200,
-      "elapsed_ms": 301,
+      "elapsed_ms": 349,
       "response": "12 เดือน",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"12 เดือน\",\"model\":\"qwen3:4b\"}",
@@ -131,7 +131,7 @@
         "ทิศตะวันออก"
       ],
       "http_status": 200,
-      "elapsed_ms": 287,
+      "elapsed_ms": 324,
       "response": "ตะวันออก",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"ตะวันออก\",\"model\":\"qwen3:4b\"}",
@@ -149,7 +149,7 @@
         "60นาที"
       ],
       "http_status": 200,
-      "elapsed_ms": 322,
+      "elapsed_ms": 357,
       "response": "60 นาที",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"60 นาที\",\"model\":\"qwen3:4b\"}",
@@ -167,7 +167,7 @@
         "24ชั่วโมง"
       ],
       "http_status": 200,
-      "elapsed_ms": 373,
+      "elapsed_ms": 412,
       "response": "24 ชั่วโมง",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"24 ชั่วโมง\",\"model\":\"qwen3:4b\"}",
@@ -182,12 +182,10 @@
       "prompt": "ที่ความดันบรรยากาศมาตรฐาน น้ำบริสุทธิ์เดือดที่กี่องศาเซลเซียส ตอบเฉพาะตัวเลขอารบิกตามด้วยหน่วยเป็นคำภาษาไทย ไม่ต้องเขียนเป็นประโยค",
       "accepted_answers": [
         "100 องศาเซลเซียส",
-        "100องศาเซลเซียส",
-        "100 องศา",
-        "100องศา"
+        "100องศาเซลเซียส"
       ],
       "http_status": 200,
-      "elapsed_ms": 371,
+      "elapsed_ms": 441,
       "response": "100 องศาเซลเซียส",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"100 องศาเซลเซียส\",\"model\":\"qwen3:4b\"}",
@@ -202,12 +200,10 @@
       "prompt": "ที่ความดันบรรยากาศมาตรฐาน น้ำบริสุทธิ์แข็งตัวที่กี่องศาเซลเซียส ตอบเฉพาะตัวเลขอารบิกตามด้วยหน่วยเป็นคำภาษาไทย ไม่ต้องเขียนเป็นประโยค",
       "accepted_answers": [
         "0 องศาเซลเซียส",
-        "0องศาเซลเซียส",
-        "0 องศา",
-        "0องศา"
+        "0องศาเซลเซียส"
       ],
       "http_status": 200,
-      "elapsed_ms": 335,
+      "elapsed_ms": 387,
       "response": "0 องศาเซลเซียส",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"0 องศาเซลเซียส\",\"model\":\"qwen3:4b\"}",
@@ -225,7 +221,7 @@
         "3ด้าน"
       ],
       "http_status": 200,
-      "elapsed_ms": 268,
+      "elapsed_ms": 321,
       "response": "3 ด้าน",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"3 ด้าน\",\"model\":\"qwen3:4b\"}",
@@ -243,7 +239,7 @@
         "4ด้าน"
       ],
       "http_status": 200,
-      "elapsed_ms": 247,
+      "elapsed_ms": 310,
       "response": "4ด้าน",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"4ด้าน\",\"model\":\"qwen3:4b\"}",
@@ -261,7 +257,7 @@
         "8ด้าน"
       ],
       "http_status": 200,
-      "elapsed_ms": 258,
+      "elapsed_ms": 325,
       "response": "8 ด้าน",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"8 ด้าน\",\"model\":\"qwen3:4b\"}",
@@ -278,7 +274,7 @@
         "แมว"
       ],
       "http_status": 200,
-      "elapsed_ms": 229,
+      "elapsed_ms": 286,
       "response": "แมว",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"แมว\",\"model\":\"qwen3:4b\"}",
@@ -295,7 +291,7 @@
         "น้ำ"
       ],
       "http_status": 200,
-      "elapsed_ms": 212,
+      "elapsed_ms": 279,
       "response": "น้ำ",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"น้ำ\",\"model\":\"qwen3:4b\"}",
@@ -312,7 +308,7 @@
         "ผึ้ง"
       ],
       "http_status": 200,
-      "elapsed_ms": 274,
+      "elapsed_ms": 324,
       "response": "ผึ้ง",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"ผึ้ง\",\"model\":\"qwen3:4b\"}",
@@ -330,7 +326,7 @@
         "สีแดง"
       ],
       "http_status": 200,
-      "elapsed_ms": 225,
+      "elapsed_ms": 274,
       "response": "แดง",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"แดง\",\"model\":\"qwen3:4b\"}",
@@ -347,7 +343,7 @@
         "หนังสือ"
       ],
       "http_status": 200,
-      "elapsed_ms": 281,
+      "elapsed_ms": 307,
       "response": "หนังสือ",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"หนังสือ\",\"model\":\"qwen3:4b\"}",
@@ -364,7 +360,7 @@
         "หัวใจ"
       ],
       "http_status": 200,
-      "elapsed_ms": 264,
+      "elapsed_ms": 298,
       "response": "หัวใจ",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"หัวใจ\",\"model\":\"qwen3:4b\"}",
@@ -381,7 +377,7 @@
         "หู"
       ],
       "http_status": 200,
-      "elapsed_ms": 250,
+      "elapsed_ms": 305,
       "response": "หู",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"หู\",\"model\":\"qwen3:4b\"}",
@@ -399,7 +395,7 @@
         "ดวงตา"
       ],
       "http_status": 200,
-      "elapsed_ms": 221,
+      "elapsed_ms": 246,
       "response": "ตา",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"ตา\",\"model\":\"qwen3:4b\"}",
@@ -416,7 +412,7 @@
         "ราก"
       ],
       "http_status": 200,
-      "elapsed_ms": 228,
+      "elapsed_ms": 286,
       "response": "ราก",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"ราก\",\"model\":\"qwen3:4b\"}",
@@ -433,7 +429,7 @@
         "เล็ก"
       ],
       "http_status": 200,
-      "elapsed_ms": 228,
+      "elapsed_ms": 299,
       "response": "เล็ก",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"เล็ก\",\"model\":\"qwen3:4b\"}",
@@ -452,7 +448,7 @@
         "อาทิตย์"
       ],
       "http_status": 200,
-      "elapsed_ms": 259,
+      "elapsed_ms": 328,
       "response": "อาทิตย์",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"อาทิตย์\",\"model\":\"qwen3:4b\"}",
@@ -469,7 +465,7 @@
         "กลางคืน"
       ],
       "http_status": 200,
-      "elapsed_ms": 235,
+      "elapsed_ms": 305,
       "response": "กลางคืน",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"กลางคืน\",\"model\":\"qwen3:4b\"}",
@@ -486,7 +482,7 @@
         "สว่าง"
       ],
       "http_status": 200,
-      "elapsed_ms": 213,
+      "elapsed_ms": 277,
       "response": "สว่าง",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"สว่าง\",\"model\":\"qwen3:4b\"}",
@@ -504,7 +500,7 @@
         "แปซิฟิก"
       ],
       "http_status": 200,
-      "elapsed_ms": 331,
+      "elapsed_ms": 411,
       "response": "มหาสมุทรแปซิฟิก",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"มหาสมุทรแปซิฟิก\",\"model\":\"qwen3:4b\"}",
@@ -522,7 +518,7 @@
         "แก๊สออกซิเจน"
       ],
       "http_status": 200,
-      "elapsed_ms": 274,
+      "elapsed_ms": 332,
       "response": "ออกซิเจน",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"ออกซิเจน\",\"model\":\"qwen3:4b\"}",
@@ -540,7 +536,7 @@
         "แก๊สคาร์บอนไดออกไซด์"
       ],
       "http_status": 200,
-      "elapsed_ms": 338,
+      "elapsed_ms": 415,
       "response": "คาร์บอนไดออกไซด์",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"คาร์บอนไดออกไซด์\",\"model\":\"qwen3:4b\"}",
@@ -558,7 +554,7 @@
         "8ขา"
       ],
       "http_status": 200,
-      "elapsed_ms": 245,
+      "elapsed_ms": 311,
       "response": "8 ขา",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"8 ขา\",\"model\":\"qwen3:4b\"}",
@@ -576,7 +572,7 @@
         "6ขา"
       ],
       "http_status": 200,
-      "elapsed_ms": 247,
+      "elapsed_ms": 293,
       "response": "6ขา",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"6ขา\",\"model\":\"qwen3:4b\"}",
@@ -594,7 +590,7 @@
         "น้ำนม"
       ],
       "http_status": 200,
-      "elapsed_ms": 230,
+      "elapsed_ms": 275,
       "response": "นม",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"นม\",\"model\":\"qwen3:4b\"}",
@@ -611,7 +607,7 @@
         "โตเกียว"
       ],
       "http_status": 200,
-      "elapsed_ms": 287,
+      "elapsed_ms": 293,
       "response": "โตเกียว",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"โตเกียว\",\"model\":\"qwen3:4b\"}",
@@ -628,7 +624,7 @@
         "ปารีส"
       ],
       "http_status": 200,
-      "elapsed_ms": 311,
+      "elapsed_ms": 319,
       "response": "ปารีส",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"ปารีส\",\"model\":\"qwen3:4b\"}",
@@ -645,7 +641,7 @@
         "ปักกิ่ง"
       ],
       "http_status": 200,
-      "elapsed_ms": 317,
+      "elapsed_ms": 361,
       "response": "ปักกิ่ง",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"ปักกิ่ง\",\"model\":\"qwen3:4b\"}",
@@ -663,7 +659,7 @@
         "หนาว"
       ],
       "http_status": 200,
-      "elapsed_ms": 266,
+      "elapsed_ms": 280,
       "response": "เย็น",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"เย็น\",\"model\":\"qwen3:4b\"}",
@@ -680,7 +676,7 @@
         "ลง"
       ],
       "http_status": 200,
-      "elapsed_ms": 257,
+      "elapsed_ms": 261,
       "response": "ลง",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"ลง\",\"model\":\"qwen3:4b\"}",
@@ -698,7 +694,7 @@
         "3ด้าน"
       ],
       "http_status": 200,
-      "elapsed_ms": 319,
+      "elapsed_ms": 321,
       "response": "3 ด้าน",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"3 ด้าน\",\"model\":\"qwen3:4b\"}",
@@ -716,7 +712,7 @@
         "366วัน"
       ],
       "http_status": 200,
-      "elapsed_ms": 359,
+      "elapsed_ms": 353,
       "response": "366 วัน",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"366 วัน\",\"model\":\"qwen3:4b\"}",
@@ -750,7 +746,7 @@
         "Mars"
       ],
       "http_status": 200,
-      "elapsed_ms": 289,
+      "elapsed_ms": 310,
       "response": "Mars",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"Mars\",\"model\":\"qwen3:4b\"}",
@@ -767,7 +763,7 @@
         "366 days"
       ],
       "http_status": 200,
-      "elapsed_ms": 312,
+      "elapsed_ms": 354,
       "response": "366 days",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"366 days\",\"model\":\"qwen3:4b\"}",
@@ -784,7 +780,7 @@
         "oxygen"
       ],
       "http_status": 200,
-      "elapsed_ms": 305,
+      "elapsed_ms": 320,
       "response": "oxygen",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"oxygen\",\"model\":\"qwen3:4b\"}",
@@ -801,7 +797,7 @@
         "water"
       ],
       "http_status": 200,
-      "elapsed_ms": 233,
+      "elapsed_ms": 258,
       "response": "water",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"water\",\"model\":\"qwen3:4b\"}",
@@ -821,7 +817,7 @@
         "the Pacific Ocean"
       ],
       "http_status": 200,
-      "elapsed_ms": 305,
+      "elapsed_ms": 293,
       "response": "Pacific Ocean",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"Pacific Ocean\",\"model\":\"qwen3:4b\"}",
@@ -838,7 +834,7 @@
         "cold"
       ],
       "http_status": 200,
-      "elapsed_ms": 261,
+      "elapsed_ms": 260,
       "response": "cold",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"cold\",\"model\":\"qwen3:4b\"}",
@@ -856,7 +852,7 @@
         "a star"
       ],
       "http_status": 200,
-      "elapsed_ms": 256,
+      "elapsed_ms": 299,
       "response": "star",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"star\",\"model\":\"qwen3:4b\"}",
@@ -873,7 +869,7 @@
         "60 seconds"
       ],
       "http_status": 200,
-      "elapsed_ms": 306,
+      "elapsed_ms": 333,
       "response": "60 seconds",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"60 seconds\",\"model\":\"qwen3:4b\"}",
@@ -888,11 +884,10 @@
       "prompt": "Earth is which planet from the Sun? Use the English ordinal word. Reply with only the answer in English, not a full sentence.",
       "accepted_answers": [
         "third",
-        "the third",
-        "3rd"
+        "the third"
       ],
       "http_status": 200,
-      "elapsed_ms": 254,
+      "elapsed_ms": 288,
       "response": "third",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"third\",\"model\":\"qwen3:4b\"}",
@@ -906,11 +901,10 @@
       "phase": "warm",
       "prompt": "What gas do green plants take in for photosynthesis? Reply with only the answer in English, not a full sentence.",
       "accepted_answers": [
-        "carbon dioxide",
-        "CO2"
+        "carbon dioxide"
       ],
       "http_status": 200,
-      "elapsed_ms": 291,
+      "elapsed_ms": 317,
       "response": "carbon dioxide",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"carbon dioxide\",\"model\":\"qwen3:4b\"}",
@@ -928,7 +922,7 @@
         "eight legs"
       ],
       "http_status": 200,
-      "elapsed_ms": 305,
+      "elapsed_ms": 321,
       "response": "8 legs",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"8 legs\",\"model\":\"qwen3:4b\"}",
@@ -946,7 +940,7 @@
         "six legs"
       ],
       "http_status": 200,
-      "elapsed_ms": 271,
+      "elapsed_ms": 308,
       "response": "6 legs",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"6 legs\",\"model\":\"qwen3:4b\"}",
@@ -963,7 +957,7 @@
         "milk"
       ],
       "http_status": 200,
-      "elapsed_ms": 276,
+      "elapsed_ms": 315,
       "response": "milk",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"milk\",\"model\":\"qwen3:4b\"}",
@@ -981,7 +975,7 @@
         "six sides"
       ],
       "http_status": 200,
-      "elapsed_ms": 301,
+      "elapsed_ms": 321,
       "response": "6 sides",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"6 sides\",\"model\":\"qwen3:4b\"}",
@@ -999,7 +993,7 @@
         "four sides"
       ],
       "http_status": 200,
-      "elapsed_ms": 275,
+      "elapsed_ms": 301,
       "response": "4 sides",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"4 sides\",\"model\":\"qwen3:4b\"}",
@@ -1016,7 +1010,7 @@
         "down"
       ],
       "http_status": 200,
-      "elapsed_ms": 259,
+      "elapsed_ms": 265,
       "response": "down",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"down\",\"model\":\"qwen3:4b\"}",
@@ -1033,7 +1027,7 @@
         "full"
       ],
       "http_status": 200,
-      "elapsed_ms": 227,
+      "elapsed_ms": 257,
       "response": "full",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"full\",\"model\":\"qwen3:4b\"}",
@@ -1053,7 +1047,7 @@
         "the Japanese yen"
       ],
       "http_status": 200,
-      "elapsed_ms": 261,
+      "elapsed_ms": 294,
       "response": "Japanese yen",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"Japanese yen\",\"model\":\"qwen3:4b\"}",
@@ -1070,7 +1064,7 @@
         "Paris"
       ],
       "http_status": 200,
-      "elapsed_ms": 245,
+      "elapsed_ms": 277,
       "response": "Paris",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"Paris\",\"model\":\"qwen3:4b\"}",
@@ -1087,7 +1081,7 @@
         "London"
       ],
       "http_status": 200,
-      "elapsed_ms": 281,
+      "elapsed_ms": 285,
       "response": "London",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"London\",\"model\":\"qwen3:4b\"}",
@@ -1104,7 +1098,7 @@
         "Canberra"
       ],
       "http_status": 200,
-      "elapsed_ms": 296,
+      "elapsed_ms": 301,
       "response": "Canberra",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"Canberra\",\"model\":\"qwen3:4b\"}",
@@ -1121,7 +1115,7 @@
         "Au"
       ],
       "http_status": 200,
-      "elapsed_ms": 259,
+      "elapsed_ms": 283,
       "response": "Au",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"Au\",\"model\":\"qwen3:4b\"}",
@@ -1138,7 +1132,7 @@
         "Na"
       ],
       "http_status": 200,
-      "elapsed_ms": 244,
+      "elapsed_ms": 286,
       "response": "Na",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"Na\",\"model\":\"qwen3:4b\"}",
@@ -1150,16 +1144,13 @@
       "category": "english",
       "language": "en",
       "phase": "warm",
-      "prompt": "At standard atmospheric pressure, at what Celsius temperature does pure water freeze? Include the word degrees Celsius. Reply with only the number and that word.",
+      "prompt": "At standard atmospheric pressure, at what Celsius temperature does pure water freeze? Include the words degrees Celsius. Reply with only the number and those words.",
       "accepted_answers": [
         "0 degrees Celsius",
-        "0 °C",
-        "0°C",
-        "0 degrees",
         "zero degrees Celsius"
       ],
       "http_status": 200,
-      "elapsed_ms": 306,
+      "elapsed_ms": 327,
       "response": "0 degrees Celsius",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"0 degrees Celsius\",\"model\":\"qwen3:4b\"}",
@@ -1171,15 +1162,13 @@
       "category": "english",
       "language": "en",
       "phase": "warm",
-      "prompt": "At standard atmospheric pressure, at what Celsius temperature does pure water boil? Include the word degrees Celsius. Reply with only the number and that word.",
+      "prompt": "At standard atmospheric pressure, at what Celsius temperature does pure water boil? Include the words degrees Celsius. Reply with only the number and those words.",
       "accepted_answers": [
         "100 degrees Celsius",
-        "100 °C",
-        "100°C",
-        "100 degrees"
+        "one hundred degrees Celsius"
       ],
       "http_status": 200,
-      "elapsed_ms": 344,
+      "elapsed_ms": 345,
       "response": "100 degrees Celsius",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"100 degrees Celsius\",\"model\":\"qwen3:4b\"}",
@@ -1197,7 +1186,7 @@
         "the east"
       ],
       "http_status": 200,
-      "elapsed_ms": 295,
+      "elapsed_ms": 291,
       "response": "East",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"East\",\"model\":\"qwen3:4b\"}",
@@ -1212,11 +1201,10 @@
       "prompt": "What is a triangle with all three sides equal called? Reply with only the answer in English, not a full sentence.",
       "accepted_answers": [
         "equilateral triangle",
-        "an equilateral triangle",
-        "equilateral"
+        "an equilateral triangle"
       ],
       "http_status": 200,
-      "elapsed_ms": 307,
+      "elapsed_ms": 327,
       "response": "equilateral triangle",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"equilateral triangle\",\"model\":\"qwen3:4b\"}",
@@ -1234,7 +1222,7 @@
         "the Moon"
       ],
       "http_status": 200,
-      "elapsed_ms": 292,
+      "elapsed_ms": 298,
       "response": "Moon",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"Moon\",\"model\":\"qwen3:4b\"}",
@@ -1252,7 +1240,7 @@
         "seven days"
       ],
       "http_status": 200,
-      "elapsed_ms": 300,
+      "elapsed_ms": 322,
       "response": "7 days",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"7 days\",\"model\":\"qwen3:4b\"}",
@@ -1270,7 +1258,7 @@
         "the heart"
       ],
       "http_status": 200,
-      "elapsed_ms": 300,
+      "elapsed_ms": 298,
       "response": "heart",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"heart\",\"model\":\"qwen3:4b\"}",
@@ -1290,7 +1278,7 @@
         "the ears"
       ],
       "http_status": 200,
-      "elapsed_ms": 279,
+      "elapsed_ms": 316,
       "response": "Ears",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"Ears\",\"model\":\"qwen3:4b\"}",
@@ -1310,7 +1298,7 @@
         "the root"
       ],
       "http_status": 200,
-      "elapsed_ms": 300,
+      "elapsed_ms": 316,
       "response": "Roots",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"Roots\",\"model\":\"qwen3:4b\"}",
@@ -1327,7 +1315,7 @@
         "Mercury"
       ],
       "http_status": 200,
-      "elapsed_ms": 294,
+      "elapsed_ms": 298,
       "response": "Mercury",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"Mercury\",\"model\":\"qwen3:4b\"}",
@@ -1347,7 +1335,7 @@
         "elephants"
       ],
       "http_status": 200,
-      "elapsed_ms": 297,
+      "elapsed_ms": 313,
       "response": "Elephant",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"Elephant\",\"model\":\"qwen3:4b\"}",
@@ -1371,7 +1359,7 @@
         "the honey bee"
       ],
       "http_status": 200,
-      "elapsed_ms": 309,
+      "elapsed_ms": 321,
       "response": "Honey bees",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"Honey bees\",\"model\":\"qwen3:4b\"}",
@@ -1389,7 +1377,7 @@
         "the giraffe"
       ],
       "http_status": 200,
-      "elapsed_ms": 325,
+      "elapsed_ms": 334,
       "response": "giraffe",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"giraffe\",\"model\":\"qwen3:4b\"}",
@@ -1406,7 +1394,7 @@
         "gills"
       ],
       "http_status": 200,
-      "elapsed_ms": 290,
+      "elapsed_ms": 314,
       "response": "gills",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"gills\",\"model\":\"qwen3:4b\"}",
@@ -1424,7 +1412,7 @@
         "twenty-four hours"
       ],
       "http_status": 200,
-      "elapsed_ms": 324,
+      "elapsed_ms": 332,
       "response": "24 hours",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"24 hours\",\"model\":\"qwen3:4b\"}",
@@ -1441,7 +1429,7 @@
         "Jupiter"
       ],
       "http_status": 200,
-      "elapsed_ms": 289,
+      "elapsed_ms": 304,
       "response": "Jupiter",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"Jupiter\",\"model\":\"qwen3:4b\"}",
@@ -1458,7 +1446,7 @@
         "4"
       ],
       "http_status": 200,
-      "elapsed_ms": 227,
+      "elapsed_ms": 267,
       "response": "4",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"4\",\"model\":\"qwen3:4b\"}",
@@ -1475,7 +1463,7 @@
         "7"
       ],
       "http_status": 200,
-      "elapsed_ms": 262,
+      "elapsed_ms": 258,
       "response": "7",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"7\",\"model\":\"qwen3:4b\"}",
@@ -1492,7 +1480,7 @@
         "42"
       ],
       "http_status": 200,
-      "elapsed_ms": 256,
+      "elapsed_ms": 285,
       "response": "42",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"42\",\"model\":\"qwen3:4b\"}",
@@ -1509,7 +1497,7 @@
         "9"
       ],
       "http_status": 200,
-      "elapsed_ms": 276,
+      "elapsed_ms": 296,
       "response": "9",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"9\",\"model\":\"qwen3:4b\"}",
@@ -1526,7 +1514,7 @@
         "42"
       ],
       "http_status": 200,
-      "elapsed_ms": 244,
+      "elapsed_ms": 261,
       "response": "42",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"42\",\"model\":\"qwen3:4b\"}",
@@ -1543,7 +1531,7 @@
         "36"
       ],
       "http_status": 200,
-      "elapsed_ms": 267,
+      "elapsed_ms": 283,
       "response": "36",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"36\",\"model\":\"qwen3:4b\"}",
@@ -1560,7 +1548,7 @@
         "144"
       ],
       "http_status": 200,
-      "elapsed_ms": 260,
+      "elapsed_ms": 285,
       "response": "144",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"144\",\"model\":\"qwen3:4b\"}",
@@ -1577,7 +1565,7 @@
         "13"
       ],
       "http_status": 200,
-      "elapsed_ms": 292,
+      "elapsed_ms": 309,
       "response": "13",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"13\",\"model\":\"qwen3:4b\"}",
@@ -1594,7 +1582,7 @@
         "11"
       ],
       "http_status": 200,
-      "elapsed_ms": 255,
+      "elapsed_ms": 281,
       "response": "11",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"11\",\"model\":\"qwen3:4b\"}",
@@ -1611,7 +1599,7 @@
         "72"
       ],
       "http_status": 200,
-      "elapsed_ms": 278,
+      "elapsed_ms": 305,
       "response": "72",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"72\",\"model\":\"qwen3:4b\"}",
@@ -1628,7 +1616,7 @@
         "8"
       ],
       "http_status": 200,
-      "elapsed_ms": 253,
+      "elapsed_ms": 259,
       "response": "8",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"8\",\"model\":\"qwen3:4b\"}",
@@ -1645,7 +1633,7 @@
         "200"
       ],
       "http_status": 200,
-      "elapsed_ms": 293,
+      "elapsed_ms": 325,
       "response": "200",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"200\",\"model\":\"qwen3:4b\"}",
@@ -1662,7 +1650,7 @@
         "75"
       ],
       "http_status": 200,
-      "elapsed_ms": 271,
+      "elapsed_ms": 277,
       "response": "75",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"75\",\"model\":\"qwen3:4b\"}",
@@ -1679,7 +1667,7 @@
         "81"
       ],
       "http_status": 200,
-      "elapsed_ms": 299,
+      "elapsed_ms": 322,
       "response": "81",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"81\",\"model\":\"qwen3:4b\"}",
@@ -1696,7 +1684,7 @@
         "12"
       ],
       "http_status": 200,
-      "elapsed_ms": 245,
+      "elapsed_ms": 286,
       "response": "12",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"12\",\"model\":\"qwen3:4b\"}",
@@ -1713,7 +1701,7 @@
         "43"
       ],
       "http_status": 200,
-      "elapsed_ms": 292,
+      "elapsed_ms": 317,
       "response": "43",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"43\",\"model\":\"qwen3:4b\"}",
@@ -1730,7 +1718,7 @@
         "43"
       ],
       "http_status": 200,
-      "elapsed_ms": 263,
+      "elapsed_ms": 273,
       "response": "43",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"43\",\"model\":\"qwen3:4b\"}",
@@ -1747,7 +1735,7 @@
         "132"
       ],
       "http_status": 200,
-      "elapsed_ms": 311,
+      "elapsed_ms": 331,
       "response": "132",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"132\",\"model\":\"qwen3:4b\"}",
@@ -1764,7 +1752,7 @@
         "12"
       ],
       "http_status": 200,
-      "elapsed_ms": 250,
+      "elapsed_ms": 280,
       "response": "12",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"12\",\"model\":\"qwen3:4b\"}",
@@ -1781,7 +1769,7 @@
         "100"
       ],
       "http_status": 200,
-      "elapsed_ms": 312,
+      "elapsed_ms": 325,
       "response": "100",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"100\",\"model\":\"qwen3:4b\"}",
@@ -1799,7 +1787,7 @@
         "−5"
       ],
       "http_status": 200,
-      "elapsed_ms": 258,
+      "elapsed_ms": 252,
       "response": "-5",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"-5\",\"model\":\"qwen3:4b\"}",
@@ -1816,7 +1804,7 @@
         "19"
       ],
       "http_status": 200,
-      "elapsed_ms": 309,
+      "elapsed_ms": 306,
       "response": "19",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"19\",\"model\":\"qwen3:4b\"}",
@@ -1833,7 +1821,7 @@
         "0"
       ],
       "http_status": 200,
-      "elapsed_ms": 229,
+      "elapsed_ms": 269,
       "response": "0",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"0\",\"model\":\"qwen3:4b\"}",
@@ -1850,7 +1838,7 @@
         "37"
       ],
       "http_status": 200,
-      "elapsed_ms": 295,
+      "elapsed_ms": 311,
       "response": "37",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"37\",\"model\":\"qwen3:4b\"}",
@@ -1867,7 +1855,7 @@
         "25"
       ],
       "http_status": 200,
-      "elapsed_ms": 274,
+      "elapsed_ms": 289,
       "response": "25",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"25\",\"model\":\"qwen3:4b\"}",
@@ -1884,7 +1872,7 @@
         "27"
       ],
       "http_status": 200,
-      "elapsed_ms": 325,
+      "elapsed_ms": 321,
       "response": "27",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"27\",\"model\":\"qwen3:4b\"}",
@@ -1901,7 +1889,7 @@
         "4"
       ],
       "http_status": 200,
-      "elapsed_ms": 283,
+      "elapsed_ms": 296,
       "response": "4",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"4\",\"model\":\"qwen3:4b\"}",
@@ -1935,7 +1923,7 @@
         "20"
       ],
       "http_status": 200,
-      "elapsed_ms": 329,
+      "elapsed_ms": 283,
       "response": "20",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"20\",\"model\":\"qwen3:4b\"}",
@@ -1952,7 +1940,7 @@
         "999"
       ],
       "http_status": 200,
-      "elapsed_ms": 373,
+      "elapsed_ms": 335,
       "response": "999",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"999\",\"model\":\"qwen3:4b\"}",
@@ -1969,7 +1957,7 @@
         "100"
       ],
       "http_status": 200,
-      "elapsed_ms": 308,
+      "elapsed_ms": 305,
       "response": "100",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"100\",\"model\":\"qwen3:4b\"}",
@@ -1986,7 +1974,7 @@
         "8"
       ],
       "http_status": 200,
-      "elapsed_ms": 317,
+      "elapsed_ms": 315,
       "response": "8",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"8\",\"model\":\"qwen3:4b\"}",
@@ -2003,7 +1991,7 @@
         "56"
       ],
       "http_status": 200,
-      "elapsed_ms": 270,
+      "elapsed_ms": 286,
       "response": "56",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"56\",\"model\":\"qwen3:4b\"}",
@@ -2020,7 +2008,7 @@
         "75"
       ],
       "http_status": 200,
-      "elapsed_ms": 275,
+      "elapsed_ms": 278,
       "response": "75",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"75\",\"model\":\"qwen3:4b\"}",
@@ -2037,7 +2025,7 @@
         "47"
       ],
       "http_status": 200,
-      "elapsed_ms": 258,
+      "elapsed_ms": 270,
       "response": "47",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"47\",\"model\":\"qwen3:4b\"}",
@@ -2054,7 +2042,7 @@
         "60"
       ],
       "http_status": 200,
-      "elapsed_ms": 310,
+      "elapsed_ms": 317,
       "response": "60",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"60\",\"model\":\"qwen3:4b\"}",
@@ -2071,7 +2059,7 @@
         "11"
       ],
       "http_status": 200,
-      "elapsed_ms": 256,
+      "elapsed_ms": 271,
       "response": "11",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"11\",\"model\":\"qwen3:4b\"}",
@@ -2088,7 +2076,7 @@
         "700"
       ],
       "http_status": 200,
-      "elapsed_ms": 306,
+      "elapsed_ms": 334,
       "response": "700",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"700\",\"model\":\"qwen3:4b\"}",
@@ -2106,7 +2094,7 @@
         "−8"
       ],
       "http_status": 200,
-      "elapsed_ms": 256,
+      "elapsed_ms": 274,
       "response": "-8",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"-8\",\"model\":\"qwen3:4b\"}",
@@ -2123,7 +2111,7 @@
         "1000"
       ],
       "http_status": 200,
-      "elapsed_ms": 329,
+      "elapsed_ms": 353,
       "response": "1000",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"1000\",\"model\":\"qwen3:4b\"}",
@@ -2142,7 +2130,7 @@
         "กรุงเทพ"
       ],
       "http_status": 200,
-      "elapsed_ms": 331,
+      "elapsed_ms": 367,
       "response": "กรุงเทพมหานคร",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"กรุงเทพมหานคร\",\"model\":\"qwen3:4b\"}",
@@ -2160,7 +2148,7 @@
         "bye"
       ],
       "http_status": 200,
-      "elapsed_ms": 295,
+      "elapsed_ms": 315,
       "response": "goodbye",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"goodbye\",\"model\":\"qwen3:4b\"}",
@@ -2196,7 +2184,7 @@
         "a cat"
       ],
       "http_status": 200,
-      "elapsed_ms": 355,
+      "elapsed_ms": 299,
       "response": "cat",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"cat\",\"model\":\"qwen3:4b\"}",
@@ -2214,7 +2202,7 @@
         "ดาวโลก"
       ],
       "http_status": 200,
-      "elapsed_ms": 277,
+      "elapsed_ms": 274,
       "response": "โลก",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"โลก\",\"model\":\"qwen3:4b\"}",
@@ -2232,7 +2220,7 @@
         "a star"
       ],
       "http_status": 200,
-      "elapsed_ms": 307,
+      "elapsed_ms": 304,
       "response": "star",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"star\",\"model\":\"qwen3:4b\"}",
@@ -2251,7 +2239,7 @@
         "กรุงเทพ"
       ],
       "http_status": 200,
-      "elapsed_ms": 366,
+      "elapsed_ms": 374,
       "response": "กรุงเทพมหานคร",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"กรุงเทพมหานคร\",\"model\":\"qwen3:4b\"}",
@@ -2268,7 +2256,7 @@
         "cold"
       ],
       "http_status": 200,
-      "elapsed_ms": 253,
+      "elapsed_ms": 268,
       "response": "cold",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"cold\",\"model\":\"qwen3:4b\"}",
@@ -2285,7 +2273,7 @@
         "ราก"
       ],
       "http_status": 200,
-      "elapsed_ms": 271,
+      "elapsed_ms": 307,
       "response": "ราก",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"ราก\",\"model\":\"qwen3:4b\"}",
@@ -2302,7 +2290,7 @@
         "water"
       ],
       "http_status": 200,
-      "elapsed_ms": 239,
+      "elapsed_ms": 266,
       "response": "water",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"water\",\"model\":\"qwen3:4b\"}",
@@ -2319,7 +2307,7 @@
         "ผึ้ง"
       ],
       "http_status": 200,
-      "elapsed_ms": 307,
+      "elapsed_ms": 335,
       "response": "ผึ้ง",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"ผึ้ง\",\"model\":\"qwen3:4b\"}",
@@ -2337,7 +2325,7 @@
         "the Earth"
       ],
       "http_status": 200,
-      "elapsed_ms": 284,
+      "elapsed_ms": 302,
       "response": "Earth",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"Earth\",\"model\":\"qwen3:4b\"}",
@@ -2356,7 +2344,7 @@
         "กรุงเทพ"
       ],
       "http_status": 200,
-      "elapsed_ms": 356,
+      "elapsed_ms": 383,
       "response": "กรุงเทพมหานคร",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"กรุงเทพมหานคร\",\"model\":\"qwen3:4b\"}",
@@ -2373,7 +2361,7 @@
         "Paris"
       ],
       "http_status": 200,
-      "elapsed_ms": 249,
+      "elapsed_ms": 283,
       "response": "Paris",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"Paris\",\"model\":\"qwen3:4b\"}",
@@ -2390,7 +2378,7 @@
         "หัวใจ"
       ],
       "http_status": 200,
-      "elapsed_ms": 297,
+      "elapsed_ms": 321,
       "response": "หัวใจ",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"หัวใจ\",\"model\":\"qwen3:4b\"}",
@@ -2407,7 +2395,7 @@
         "oxygen"
       ],
       "http_status": 200,
-      "elapsed_ms": 281,
+      "elapsed_ms": 291,
       "response": "oxygen",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"oxygen\",\"model\":\"qwen3:4b\"}",
@@ -2425,7 +2413,7 @@
         "ดาวโลก"
       ],
       "http_status": 200,
-      "elapsed_ms": 269,
+      "elapsed_ms": 280,
       "response": "โลก",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"โลก\",\"model\":\"qwen3:4b\"}",
@@ -2442,7 +2430,7 @@
         "cold"
       ],
       "http_status": 200,
-      "elapsed_ms": 270,
+      "elapsed_ms": 305,
       "response": "cold",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"cold\",\"model\":\"qwen3:4b\"}",
@@ -2461,7 +2449,7 @@
         "กรุงเทพ"
       ],
       "http_status": 200,
-      "elapsed_ms": 386,
+      "elapsed_ms": 424,
       "response": "กรุงเทพมหานคร",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"กรุงเทพมหานคร\",\"model\":\"qwen3:4b\"}",
@@ -2478,7 +2466,7 @@
         "Tokyo"
       ],
       "http_status": 200,
-      "elapsed_ms": 270,
+      "elapsed_ms": 288,
       "response": "Tokyo",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"Tokyo\",\"model\":\"qwen3:4b\"}",
@@ -2496,7 +2484,7 @@
         "แปซิฟิก"
       ],
       "http_status": 200,
-      "elapsed_ms": 385,
+      "elapsed_ms": 413,
       "response": "มหาสมุทรแปซิฟิก",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"มหาสมุทรแปซิฟิก\",\"model\":\"qwen3:4b\"}",
@@ -2513,7 +2501,7 @@
         "water"
       ],
       "http_status": 200,
-      "elapsed_ms": 255,
+      "elapsed_ms": 279,
       "response": "Water",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"Water\",\"model\":\"qwen3:4b\"}",
@@ -2531,7 +2519,7 @@
         "หมา"
       ],
       "http_status": 200,
-      "elapsed_ms": 328,
+      "elapsed_ms": 340,
       "response": "สุนัข",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"สุนัข\",\"model\":\"qwen3:4b\"}",
@@ -2548,7 +2536,7 @@
         "Mars"
       ],
       "http_status": 200,
-      "elapsed_ms": 395,
+      "elapsed_ms": 322,
       "response": "Mars",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"Mars\",\"model\":\"qwen3:4b\"}",
@@ -2565,7 +2553,7 @@
         "โตเกียว"
       ],
       "http_status": 200,
-      "elapsed_ms": 295,
+      "elapsed_ms": 309,
       "response": "โตเกียว",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"โตเกียว\",\"model\":\"qwen3:4b\"}",
@@ -2582,7 +2570,7 @@
         "Canberra"
       ],
       "http_status": 200,
-      "elapsed_ms": 332,
+      "elapsed_ms": 307,
       "response": "Canberra",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"Canberra\",\"model\":\"qwen3:4b\"}",
@@ -2599,7 +2587,7 @@
         "ของแข็ง"
       ],
       "http_status": 200,
-      "elapsed_ms": 328,
+      "elapsed_ms": 339,
       "response": "ของแข็ง",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"ของแข็ง\",\"model\":\"qwen3:4b\"}",
@@ -2616,7 +2604,7 @@
         "cold"
       ],
       "http_status": 200,
-      "elapsed_ms": 289,
+      "elapsed_ms": 307,
       "response": "cold",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"cold\",\"model\":\"qwen3:4b\"}",
@@ -2633,7 +2621,7 @@
         "ผึ้ง"
       ],
       "http_status": 200,
-      "elapsed_ms": 353,
+      "elapsed_ms": 326,
       "response": "ผึ้ง",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"ผึ้ง\",\"model\":\"qwen3:4b\"}",
@@ -2653,7 +2641,7 @@
         "the root"
       ],
       "http_status": 200,
-      "elapsed_ms": 281,
+      "elapsed_ms": 289,
       "response": "Roots",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"Roots\",\"model\":\"qwen3:4b\"}",
@@ -2670,7 +2658,7 @@
         "เล็ก"
       ],
       "http_status": 200,
-      "elapsed_ms": 268,
+      "elapsed_ms": 286,
       "response": "เล็ก",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"เล็ก\",\"model\":\"qwen3:4b\"}",
@@ -2690,7 +2678,7 @@
         "the Pacific Ocean"
       ],
       "http_status": 200,
-      "elapsed_ms": 321,
+      "elapsed_ms": 313,
       "response": "Pacific Ocean",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"Pacific Ocean\",\"model\":\"qwen3:4b\"}",
@@ -2707,7 +2695,7 @@
         "โตเกียว"
       ],
       "http_status": 200,
-      "elapsed_ms": 302,
+      "elapsed_ms": 314,
       "response": "โตเกียว",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"โตเกียว\",\"model\":\"qwen3:4b\"}",
@@ -2724,7 +2712,7 @@
         "Mercury"
       ],
       "http_status": 200,
-      "elapsed_ms": 307,
+      "elapsed_ms": 320,
       "response": "Mercury",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"Mercury\",\"model\":\"qwen3:4b\"}",
@@ -2741,7 +2729,7 @@
         "หู"
       ],
       "http_status": 200,
-      "elapsed_ms": 289,
+      "elapsed_ms": 296,
       "response": "หู",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"หู\",\"model\":\"qwen3:4b\"}",
@@ -2759,7 +2747,7 @@
         "the heart"
       ],
       "http_status": 200,
-      "elapsed_ms": 262,
+      "elapsed_ms": 271,
       "response": "heart",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"heart\",\"model\":\"qwen3:4b\"}",
@@ -2777,7 +2765,7 @@
         "หนาว"
       ],
       "http_status": 200,
-      "elapsed_ms": 269,
+      "elapsed_ms": 297,
       "response": "เย็น",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"เย็น\",\"model\":\"qwen3:4b\"}",
@@ -2794,7 +2782,7 @@
         "full"
       ],
       "http_status": 200,
-      "elapsed_ms": 253,
+      "elapsed_ms": 268,
       "response": "full",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"full\",\"model\":\"qwen3:4b\"}",
@@ -2813,7 +2801,7 @@
         "อาทิตย์"
       ],
       "http_status": 200,
-      "elapsed_ms": 287,
+      "elapsed_ms": 335,
       "response": "อาทิตย์",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"อาทิตย์\",\"model\":\"qwen3:4b\"}",
@@ -2830,7 +2818,7 @@
         "Jupiter"
       ],
       "http_status": 200,
-      "elapsed_ms": 307,
+      "elapsed_ms": 321,
       "response": "Jupiter",
       "model": "qwen3:4b",
       "raw_body": "{\"response\":\"Jupiter\",\"model\":\"qwen3:4b\"}",

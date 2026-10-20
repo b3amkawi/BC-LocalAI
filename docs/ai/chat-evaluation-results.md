@@ -1,10 +1,10 @@
 # AI-003: End-to-End Chat Quality Results
 
-รายงานนี้ใช้ผล E2E 160 ข้อรอบล่าสุดหลังเปลี่ยนการตรวจคำตอบเป็น `accepted_answers` (ตรงทั้งคำตอบ) ตาม Code Review รอบที่สองของ PR #13 คำตอบจริงทุกข้อเก็บไว้ใน raw evidence โดยไม่แก้ไข
+รายงานนี้ใช้ผล E2E 160 ข้อรอบล่าสุดหลังเปลี่ยนการตรวจคำตอบเป็น `accepted_answers` (ตรงทั้งคำตอบ) และตัดคำตอบที่ไม่ตรงคำสั่งใน prompt ออกตาม Code Review รอบที่สามของ PR #13 คำตอบจริงทุกข้อเก็บไว้ใน raw evidence โดยไม่แก้ไข
 
 ## สถานะ: ผ่านครบ 160/160 และ evaluator คืน exit code 0
 
-ทดสอบจริงวันที่ 20 ตุลาคม 2026 เวลา 09:52 น. (Asia/Bangkok) ผ่าน `POST http://localhost:5290/api/chat` เท่านั้น ทั้งหมด **160 คำถาม หมวดละ 40 ข้อ** ผล **ผ่าน 160 ไม่ผ่าน 0** สคริปต์คืน exit code `0`
+ทดสอบจริงวันที่ 20 ตุลาคม 2026 เวลา 10:11 น. (Asia/Bangkok) ผ่าน `POST http://localhost:5290/api/chat` เท่านั้น ทั้งหมด **160 คำถาม หมวดละ 40 ข้อ** ผล **ผ่าน 160 ไม่ผ่าน 0** สคริปต์คืน exit code `0`
 
 รันซ้ำทันทีอีกรอบ (warm, เขียน evidence ไปไฟล์ชั่วคราวนอก repository) ได้ **160/160 ผ่าน exit code 0** เช่นกัน
 
@@ -15,6 +15,7 @@
 Review รอบก่อนพบว่าการค้นหาคำที่คาดไว้ด้วย regex (แม้เพิ่มตัวตรวจประโยคปฏิเสธ) ยังให้คำตอบผิดผ่านได้ เช่น `It is false that Tokyo is the capital of Japan; Paris is.` จึงยกเลิก `expected_regex` และตัวตรวจ contradiction ทั้งหมด แล้วกำหนดคำตอบที่ยอมรับได้อย่างชัดเจนในแต่ละข้อ:
 
 - ทุก case ใน [dataset](chat-evaluation-cases.json) (version 3) มี `accepted_answers` เป็นรายการคำตอบที่ถูกต้องแบบ **ทั้งข้อความ** เช่น `["กรุงเทพมหานคร", "กรุงเทพฯ", "กรุงเทพ"]` หรือ `["8 legs", "eight legs"]`
+- คำตอบที่ยอมรับทุกข้อต้องทำตามคำสั่งใน prompt ด้วย เช่น prompt สั่ง `Include the words degrees Celsius` จะยอมรับเฉพาะ `0 degrees Celsius` / `zero degrees Celsius` ไม่ยอมรับ `0 degrees` หรือ `0 °C`; prompt สั่ง ordinal word จะไม่ยอมรับ `3rd`; prompt ภาษาไทยที่ถามกี่องศาเซลเซียสต้องมีหน่วย `องศาเซลเซียส` เต็ม
 - evaluator ปรับรูปแบบทั้งสองฝั่งเท่านั้น: Unicode NFKC, ตัดช่องว่างหัวท้าย, ยุบ whitespace ต่อเนื่องเป็นช่องเดียว, ตัด `.` `!` `。` ท้ายข้อความ และไม่สนตัวพิมพ์เล็ก/ใหญ่
 - คำตอบผ่านเมื่อ **ทั้งข้อความ** หลังปรับรูปแบบเท่ากับรายการใดรายการหนึ่ง ดังนั้นคำตอบที่มีคำถูกแต่ประโยคผิด ขัดแย้ง หรือมีข้อความเกินจะไม่ผ่านเสมอ โดยไม่ต้องเดารูปแบบประโยคปฏิเสธ
 - prompt ทุกข้อจึงสั่งให้ตอบเฉพาะคำตอบ เช่น `ตอบเฉพาะคำตอบเป็นภาษาไทย ไม่ต้องเขียนเป็นประโยค`, `Reply with only the answer in English, not a full sentence.` หรือ `Include the word legs. Reply with only the number and that word.`
@@ -38,13 +39,13 @@ Review รอบก่อนพบว่าการค้นหาคำที�
 
 | Metric รอบหลัก | ผล |
 | --- | ---: |
-| First request หลัง unload โมเดล (cold) | 4,783 ms |
+| First request หลัง unload โมเดล (cold) | 3,959 ms |
 | Warm requests | 159 (ผ่านทุกข้อ) |
-| Warm average | 287.3 ms |
-| Warm median | 287 ms |
-| Warm p95 (nearest rank) | 359 ms |
-| Warm min / max | 212 / 395 ms |
-| รอบซ้ำ: first request (โมเดลโหลดอยู่แล้ว) / warm average / warm p95 | 699 / 296.7 / 389 ms |
+| Warm average | 309.0 ms |
+| Warm median | 307 ms |
+| Warm p95 (nearest rank) | 383 ms |
+| Warm min / max | 246 / 441 ms |
+| รอบซ้ำ: first request (โมเดลโหลดอยู่แล้ว) / warm average / warm p95 | 425 / 297.9 / 363 ms |
 
 นี่คือ model-load cold start: Backend เปิดอยู่แล้ว ไม่ได้ล้าง filesystem cache หรือ reboot จึงไม่ใช่ cold boot ของทั้งเครื่อง ค่าบนเครื่องนี้ไม่ใช่ latency guarantee สำหรับเครื่องอื่น
 
@@ -63,6 +64,27 @@ Review รอบก่อนพบว่าการค้นหาคำที�
 - Emoji และข้อความหลายบรรทัด (`\n`, `\r\n`, บรรทัดว่าง, tab) ไม่ทำให้ระบบพัง
 
 ดูคำถาม คำตอบที่ยอมรับ คำตอบจริง HTTP และเวลาครบทุกข้อใน [รายละเอียด 160 ข้อ](chat-evaluation-details.md), raw body ใน [JSON evidence](chat-evaluation-evidence.json) และ console output ใน [run log](chat-evaluation-run.txt)
+
+## แก้ false positive ตาม Code Review ของ commit `0c30ddc`
+
+Reviewer พบว่า `en-25`/`en-26` ยอมรับ `0 degrees`/`100 degrees` ทั้งที่ prompt สั่งให้มีคำว่า degrees Celsius และ `en-10` ยอมรับ `3rd` ทั้งที่สั่ง ordinal word จึงตรวจทุก case และตัดคำตอบที่ไม่ตรงคำสั่งออกทั้งหมด:
+
+| Case | ตัดออก | คงไว้ |
+| --- | --- | --- |
+| en-25 | `0 degrees`, `0 °C`, `0°C` | `0 degrees Celsius`, `zero degrees Celsius` |
+| en-26 | `100 degrees`, `100 °C`, `100°C` | `100 degrees Celsius`, `one hundred degrees Celsius` |
+| en-10 | `3rd` | `third`, `the third` |
+| th-10 / th-11 | `100 องศา`, `0 องศา` (หน่วยไม่ครบ) | `100 องศาเซลเซียส`, `0 องศาเซลเซียส` (มี/ไม่มีเว้นวรรค) |
+| en-11 | `CO2` (สูตรเคมี ไม่ใช่คำตอบภาษาอังกฤษ) | `carbon dioxide` |
+| en-28 | `equilateral` (ไม่ใช่ชื่อรูปที่ถาม) | `equilateral triangle`, `an equilateral triangle` |
+
+นอกจากนี้แก้ไวยากรณ์ prompt ของ `en-25`/`en-26` เป็น `Include the words degrees Celsius. Reply with only the number and those words.` (เดิมเขียนว่า `the word`) แล้วรัน live ครบ 160 ข้อใหม่
+
+เพิ่ม regression tests:
+
+- `test_accepted_answers_follow_the_prompt_instruction` ตรวจคำตอบที่ยอมรับทุกข้อใน dataset จริงตามคำสั่งของ prompt: ต้องมีหน่วยที่สั่ง (`Include the word(s) ...`, `กี่<หน่วย>`), ordinal ห้ามมีตัวเลข, `one English word` ต้องเป็นคำเดียว, คำถามตัวเลขล้วนต้องเป็นตัวเลข และภาษาตรงกับหมวด เมื่อรันกับ dataset ของ `0c30ddc` test นี้ fail ครบทั้ง 11 คำตอบที่ไม่ตรงคำสั่ง
+- `test_real_dataset_rejects_answers_that_ignore_the_prompt_format` ส่ง dataset จริงเข้า evaluator ผ่าน mock Backend โดยตอบ `0 degrees`, `100 degrees`, `3rd`, `100 องศา`, `0 °C`, `CO2`, `equilateral`, `8`, `เจ็ดวัน`, `four` ต้องไม่ผ่านครบทั้ง 10 ข้อและ exit code `1`
+- `test_real_dataset_first_accepted_answers_return_zero` ยืนยันว่าเมื่อทุกข้อตอบตามคำตอบที่ยอมรับ evaluator คืน exit code `0`
 
 ## การเปลี่ยน dataset จาก version 2 และข้อจำกัดของโมเดลที่พบ
 
@@ -95,7 +117,7 @@ Review รอบก่อนพบว่าการค้นหาคำที�
 หลักฐานรอบหลักบันทึก SHA-256 ของไฟล์ที่ใช้รันจริง (คำนวณจากไฟล์แบบ LF ตามที่เก็บใน repository):
 
 ```text
-dataset:   221CF5C580F7CFCAF1E8FC347E95D36D9DFEFD7A262A4DD20CA05F0E3A3E1299
+dataset:   1EC5604B8460C23D7CE757DEF1CCEF10CADC7FB35C6452A712EB96A82569E7F4
 evaluator: 874AD3F53CCCAD40E3F05CE9B8102D8862A64DDDB337E459CFCBBE235F5111FE
 ```
 
@@ -103,7 +125,7 @@ evaluator: 874AD3F53CCCAD40E3F05CE9B8102D8862A64DDDB337E459CFCBBE235F5111FE
 
 - `dotnet test .\BC-LocalAI.slnx`: ผ่าน 157, ไม่ผ่าน 0, ข้าม 0
 - `node --test .\tests\ui\chat-core.test.mjs`: ผ่าน 18, ไม่ผ่าน 0
-- `py -3 -m unittest discover -s tests -v`: ผ่าน 29 test methods (รันใน console ที่ใช้ code page UTF-8 `chcp 65001`; ถ้า console เป็น cp874 test `test_success_preserves_utf8_prompt_and_evidence` ของ AI-001 smoke script จะล้มเพราะการแสดงผลภาษาไทยของ console ไม่เกี่ยวกับ AI-003)
+- `py -3 -m unittest discover -s tests -v`: ผ่าน 32 test methods (รันใน console ที่ใช้ code page UTF-8 `chcp 65001`; ถ้า console เป็น cp874 test `test_success_preserves_utf8_prompt_and_evidence` ของ AI-001 smoke script จะล้มเพราะการแสดงผลภาษาไทยของ console ไม่เกี่ยวกับ AI-003)
 - Regression test ใหม่ยืนยันว่า 5 คำตอบต่อไปนี้ **ไม่ผ่าน** แม้มีคำที่คาดไว้ และ evaluator คืน exit code `1`: `It is false that Tokyo is the capital of Japan; Paris is.`, `Tokyo is not the capital of Japan; Paris is.`, `The capital is not Tokyo; it is Paris.`, `Tokyo? No.`, `Tokyo or Paris` และภาษาไทย `โตเกียวไม่ใช่เมืองหลวงของญี่ปุ่น ปารีสต่างหาก`
 - Test การปรับรูปแบบยืนยันว่า `  pacific\n ocean. `, `TOKYO!`, `−8` (Unicode minus) และ `-8` ผ่านเมื่ออยู่ในรายการคำตอบ
 - Dataset validation ปฏิเสธ `accepted_answers` ที่หายไป, ว่าง, ไม่ใช่ list, มีค่าว่าง หรือไม่ใช่ string ก่อนส่ง request ใด ๆ

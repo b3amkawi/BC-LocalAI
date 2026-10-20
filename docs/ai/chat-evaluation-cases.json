@@ -100,9 +100,7 @@
       "prompt": "ที่ความดันบรรยากาศมาตรฐาน น้ำบริสุทธิ์เดือดที่กี่องศาเซลเซียส ตอบเฉพาะตัวเลขอารบิกตามด้วยหน่วยเป็นคำภาษาไทย ไม่ต้องเขียนเป็นประโยค",
       "accepted_answers": [
         "100 องศาเซลเซียส",
-        "100องศาเซลเซียส",
-        "100 องศา",
-        "100องศา"
+        "100องศาเซลเซียส"
       ]
     },
     {
@@ -112,9 +110,7 @@
       "prompt": "ที่ความดันบรรยากาศมาตรฐาน น้ำบริสุทธิ์แข็งตัวที่กี่องศาเซลเซียส ตอบเฉพาะตัวเลขอารบิกตามด้วยหน่วยเป็นคำภาษาไทย ไม่ต้องเขียนเป็นประโยค",
       "accepted_answers": [
         "0 องศาเซลเซียส",
-        "0องศาเซลเซียส",
-        "0 องศา",
-        "0องศา"
+        "0องศาเซลเซียส"
       ]
     },
     {
@@ -486,8 +482,7 @@
       "prompt": "Earth is which planet from the Sun? Use the English ordinal word. Reply with only the answer in English, not a full sentence.",
       "accepted_answers": [
         "third",
-        "the third",
-        "3rd"
+        "the third"
       ]
     },
     {
@@ -496,8 +491,7 @@
       "language": "en",
       "prompt": "What gas do green plants take in for photosynthesis? Reply with only the answer in English, not a full sentence.",
       "accepted_answers": [
-        "carbon dioxide",
-        "CO2"
+        "carbon dioxide"
       ]
     },
     {
@@ -628,12 +622,9 @@
       "id": "en-25",
       "category": "english",
       "language": "en",
-      "prompt": "At standard atmospheric pressure, at what Celsius temperature does pure water freeze? Include the word degrees Celsius. Reply with only the number and that word.",
+      "prompt": "At standard atmospheric pressure, at what Celsius temperature does pure water freeze? Include the words degrees Celsius. Reply with only the number and those words.",
       "accepted_answers": [
         "0 degrees Celsius",
-        "0 °C",
-        "0°C",
-        "0 degrees",
         "zero degrees Celsius"
       ]
     },
@@ -641,12 +632,10 @@
       "id": "en-26",
       "category": "english",
       "language": "en",
-      "prompt": "At standard atmospheric pressure, at what Celsius temperature does pure water boil? Include the word degrees Celsius. Reply with only the number and that word.",
+      "prompt": "At standard atmospheric pressure, at what Celsius temperature does pure water boil? Include the words degrees Celsius. Reply with only the number and those words.",
       "accepted_answers": [
         "100 degrees Celsius",
-        "100 °C",
-        "100°C",
-        "100 degrees"
+        "one hundred degrees Celsius"
       ]
     },
     {
@@ -666,8 +655,7 @@
       "prompt": "What is a triangle with all three sides equal called? Reply with only the answer in English, not a full sentence.",
       "accepted_answers": [
         "equilateral triangle",
-        "an equilateral triangle",
-        "equilateral"
+        "an equilateral triangle"
       ]
     },
     {

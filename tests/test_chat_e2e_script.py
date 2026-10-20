@@ -12,6 +12,7 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 
 
 SCRIPT = Path(__file__).resolve().parents[1] / "scripts" / "test-chat-e2e.ps1"
+REAL_DATASET = Path(__file__).resolve().parents[1] / "docs" / "ai" / "chat-evaluation-cases.json"
 PWSH = shutil.which("pwsh")
 PER_CATEGORY = 40
 TOTAL = PER_CATEGORY * 4
@@ -255,6 +256,41 @@ class ChatE2EScriptTests(unittest.TestCase):
 
         self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
         self.assertEqual(evidence["failed"], 0)
+
+    def run_real_dataset(self, overrides):
+        """Answer every real case with its first accepted answer, except the overrides."""
+        fixture = json.loads(REAL_DATASET.read_text(encoding="utf-8"))
+        cases = fixture["cases"]
+
+        def reply(index, _):
+            case = cases[index - 1]
+            answer = overrides.get(case["id"], case["accepted_answers"][0])
+            return {"body": {"response": answer, "model": "qwen3:4b"}}
+
+        return self.run_script(reply, fixture=fixture)
+
+    def test_real_dataset_first_accepted_answers_return_zero(self):
+        result, evidence, _ = self.run_real_dataset({})
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(evidence["passed"], evidence["total"])
+
+    def test_real_dataset_rejects_answers_that_ignore_the_prompt_format(self):
+        overrides = {
+            "en-25": "0 degrees",
+            "en-26": "100 degrees",
+            "en-10": "3rd",
+            "th-10": "100 องศา",
+            "th-11": "0 °C",
+            "en-11": "CO2",
+            "en-28": "equilateral",
+            "en-12": "8",
+            "th-04": "เจ็ดวัน",
+            "math-01": "four",
+        }
+        result, evidence, _ = self.run_real_dataset(overrides)
+        self.assertEqual(result.returncode, 1, result.stdout + result.stderr)
+        failed = {entry["id"] for entry in evidence["results"] if not entry["passed"]}
+        self.assertEqual(failed, set(overrides))
 
     def test_invalid_datasets_fail_before_any_request(self):
         fixtures = {}

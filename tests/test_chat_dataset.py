@@ -48,6 +48,31 @@ class ChatDatasetTests(unittest.TestCase):
                 self.assertTrue(all(isinstance(a, str) and a.strip() for a in answers))
                 self.assertEqual(len(answers), len(set(answers)))
 
+    def test_accepted_answers_follow_the_prompt_instruction(self):
+        """Every accepted answer must itself obey the format the prompt asks for."""
+        cases = json.loads(DATASET.read_text(encoding="utf-8"))["cases"]
+        for case in cases:
+            prompt = case["prompt"]
+            for answer in case["accepted_answers"]:
+                with self.subTest(case=case["id"], answer=answer):
+                    unit = re.search(r"Include the words? (.+?)\. Reply with only the number", prompt)
+                    if unit:
+                        number = r"(?:\d+|[a-z]+(?:[- ][a-z]+)?)"
+                        self.assertRegex(answer, rf"^{number} {re.escape(unit[1])}$")
+                    if "ordinal word" in prompt:
+                        self.assertNotRegex(answer, r"\d")
+                    if "one English word" in prompt:
+                        self.assertRegex(answer, r"^[A-Za-z]+$")
+                    if "ตัวเลขอารบิกตามด้วยหน่วย" in prompt:
+                        thai_unit = re.search(r"กี่(\S+)\s+ตอบ", prompt)[1]
+                        self.assertRegex(answer, rf"^\d+ ?{re.escape(thai_unit)}$")
+                    if "ตอบเฉพาะตัวเลขอารบิกเท่านั้น" in prompt or "Answer with the number only." in prompt:
+                        self.assertRegex(answer, r"^[-−]?\d+$")
+                    if case["language"] == "th":
+                        self.assertNotRegex(answer, r"[A-Za-z]")
+                    if case["language"] == "en":
+                        self.assertRegex(answer, r"^[A-Za-z0-9 '\-]+$")
+
     def test_math_expected_answers_match_independent_arithmetic(self):
         cases = json.loads(DATASET.read_text(encoding="utf-8"))["cases"]
         for case in (case for case in cases if case["category"] == "math"):
