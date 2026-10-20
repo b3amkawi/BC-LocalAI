@@ -18,6 +18,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\BC-LocalAI\BC-LocalAI.csproj" />
+    <None Include="..\database\chat-history\*.sql" Link="ChatHistorySchema\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 
 </Project>

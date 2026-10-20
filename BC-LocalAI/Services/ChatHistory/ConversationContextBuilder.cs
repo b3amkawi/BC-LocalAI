@@ -10,17 +10,16 @@ public interface ITokenEstimator
 }
 
 /// <summary>
-/// Conservative estimate without a tokenizer: one token per 3 UTF-8 bytes, rounded up, plus a small per-message overhead.
-/// Thai characters are 3 bytes, so Thai counts as about one token per character; qwen3:4b measured about 0.6 tokens per Thai
-/// character, so the estimate errs on the safe side (the context is cut earlier, never later). Replace it when AI-004 or the
-/// AI Engineer provides a real tokenizer count.
+/// Heuristic estimate without a tokenizer: one token per 3 UTF-8 bytes plus a per-message overhead.
+/// A sample of Thai text does not establish an upper bound for all prompts or chat-template overhead.
+/// Not a production token-budget guarantee: an approved AI multi-turn/tokenizer contract is required before wiring this in.
 /// </summary>
 public sealed class Utf8TokenEstimator : ITokenEstimator
 {
     public const int PerMessageOverhead = 4;
 
     public int Estimate(string text) =>
-        PerMessageOverhead + (Encoding.UTF8.GetByteCount(text ?? string.Empty) + 2) / 3;
+        PerMessageOverhead + (int)((Encoding.UTF8.GetByteCount(text ?? string.Empty) + 2L) / 3);
 }
 
 /// <summary>Result of <see cref="ConversationContextBuilder.Build"/>.</summary>
@@ -37,8 +36,12 @@ public sealed record ConversationContext(IReadOnlyList<ChatMessage> Messages, in
 /// </list>
 /// How the context is sent to Ollama is not decided yet (the AI-002 contract sends one prompt); that is an open point for the AI Engineer.
 /// </summary>
-public sealed class ConversationContextBuilder(ITokenEstimator estimator)
+public sealed class ConversationContextBuilder
 {
+    private readonly ITokenEstimator _estimator;
+
+    public ConversationContextBuilder(ITokenEstimator estimator) => _estimator = estimator ?? throw new ArgumentNullException(nameof(estimator));
+
     public ConversationContextBuilder() : this(new Utf8TokenEstimator())
     {
     }
@@ -50,7 +53,14 @@ public sealed class ConversationContextBuilder(ITokenEstimator estimator)
         ArgumentNullException.ThrowIfNull(history);
         ArgumentOutOfRangeException.ThrowIfNegative(tokenBudget);
 
-        var completed = history
+        var input = history.ToList();
+        if (input.Select(m => m.ConversationId).Distinct().Skip(1).Any())
+            throw new ArgumentException("Context must belong to one conversation.", nameof(history));
+        if (input.Any(m => m.Sequence <= 0 || !Enum.IsDefined(m.Role) || !Enum.IsDefined(m.Status) || m.Content is null) ||
+            input.Select(m => m.Sequence).Distinct().Count() != input.Count)
+            throw new ArgumentException("History contains invalid message metadata.", nameof(history));
+
+        var completed = input
             .Where(m => m.Status == MessageStatus.Completed)
             .OrderBy(m => m.Sequence)
             .ToList();
@@ -61,13 +71,19 @@ public sealed class ConversationContextBuilder(ITokenEstimator estimator)
 
         for (var i = turns.Count - 1; i >= 0; i--)
         {
-            var cost = turns[i].Sum(m => estimator.Estimate(m.Content));
-            if (used + cost > tokenBudget)
+            long cost = 0;
+            foreach (var message in turns[i])
+            {
+                var estimate = _estimator.Estimate(message.Content);
+                if (estimate < 0) throw new ArgumentException("Token estimates must not be negative.");
+                cost = checked(cost + estimate);
+            }
+            if (cost > tokenBudget - used)
             {
                 break; // older turns are dropped too: the context must stay contiguous
             }
 
-            used += cost;
+            used += (int)cost; // safe: cost <= remaining int budget
             kept.Add(turns[i]);
         }
 
@@ -76,7 +92,7 @@ public sealed class ConversationContextBuilder(ITokenEstimator estimator)
         return new ConversationContext(messages, used, completed.Count - messages.Count);
     }
 
-    /// <summary>A turn is a user question with the assistant answers that follow it; an answer with no question before it is a turn alone.</summary>
+    /// <summary>A turn starts with a user question. Orphan assistant messages are excluded, not attached to another turn.</summary>
     private static List<IReadOnlyList<ChatMessage>> GroupIntoTurns(List<ChatMessage> messages)
     {
         var turns = new List<IReadOnlyList<ChatMessage>>();
@@ -84,12 +100,12 @@ public sealed class ConversationContextBuilder(ITokenEstimator estimator)
 
         foreach (var message in messages)
         {
-            if (message.Role == MessageRole.User || current is null)
+            if (message.Role == MessageRole.User)
             {
                 current = [message];
                 turns.Add(current);
             }
-            else
+            else if (current is not null)
             {
                 current.Add(message);
             }

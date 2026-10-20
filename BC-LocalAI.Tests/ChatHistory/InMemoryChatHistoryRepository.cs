@@ -108,10 +108,7 @@ internal sealed class InMemoryChatHistoryRepository(Func<DateTimeOffset> clock) 
         string userId, Guid conversationId, MessageRole role, string content, CancellationToken cancellationToken = default)
     {
         cancellationToken.ThrowIfCancellationRequested();
-        if (role == MessageRole.User && string.IsNullOrWhiteSpace(content))
-        {
-            throw new ChatHistoryValidationException("INVALID_MESSAGE", "A user message needs content.");
-        }
+        ChatHistoryRules.EnsureValidMessage(role, content);
 
         lock (_gate)
         {
@@ -150,6 +147,11 @@ internal sealed class InMemoryChatHistoryRepository(Func<DateTimeOffset> clock) 
             ChatHistoryRules.EnsureTransition(current, status, content, errorCode);
             var updated = current with { Content = content, Status = status, ErrorCode = errorCode, UpdatedAt = clock() };
             _messages[messageId] = updated;
+            var conversation = _conversations[current.ConversationId];
+            _conversations[current.ConversationId] = conversation with
+            {
+                Conversation = conversation.Conversation with { UpdatedAt = updated.UpdatedAt }
+            };
             return Task.FromResult<ChatMessage?>(updated);
         }
     }

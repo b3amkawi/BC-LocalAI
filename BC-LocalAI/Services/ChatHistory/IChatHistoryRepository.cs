@@ -9,6 +9,12 @@ namespace BC_LocalAI.Services.ChatHistory;
 /// never from the request body. A conversation that does not exist and one that belongs to someone else give the same
 /// result (null / false), so a caller cannot find out which ids exist (IDOR protection).
 /// Deleted conversations behave as if they do not exist.
+/// Implementations must compare opaque user ids exactly (case and trailing spaces matter), without trimming/normalizing them.
+/// SQL predicates must enforce ownership and non-deletion inside the transaction, not only in a preceding read.
+/// UUID ordering/serialization is canonical network byte order, consistent with Guid.CompareTo; timestamps are persisted/read in UTC microseconds.
+/// Add/Update must enforce ChatHistoryRules, bound content/cursors, allocate sequence numbers atomically and update conversation activity.
+/// After a durable commit, cancellation must not be reported as proof that the write was rolled back; reconcile by message id.
+/// This is a draft persistence contract: authentication claims and production API wiring still require BE-005/BE-006 approval.
 /// </summary>
 public interface IChatHistoryRepository
 {

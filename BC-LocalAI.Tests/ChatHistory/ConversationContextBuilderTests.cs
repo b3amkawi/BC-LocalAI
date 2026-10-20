@@ -109,13 +109,14 @@ public sealed class ConversationContextBuilderTests
     }
 
     [Fact]
-    public void AnAnswerWithoutAQuestion_IsItsOwnTurn()
+    public void AnAnswerWithoutAQuestion_IsExcluded()
     {
         var history = new[] { A("greeting"), U("q1"), A("a1") };
 
-        var context = Builder.Build(history, 4);
+        var context = Builder.Build(history, 100);
 
         Assert.Equal(["q1", "a1"], Texts(context));
+        Assert.Equal(1, context.DroppedMessages);
     }
 
     [Fact]
@@ -133,11 +134,11 @@ public sealed class ConversationContextBuilderTests
     [InlineData("abcd", 6)]         // 4 bytes -> 2 tokens (rounded up)
     [InlineData("สวัสดี", 10)]      // 6 Thai characters = 18 bytes -> 6 tokens
     [InlineData("😊", 6)]           // 4 bytes -> 2 tokens
-    public void Utf8Estimator_CountsBytesConservatively(string text, int expected) =>
+    public void Utf8Estimator_ProducesDraftHeuristicEstimates(string text, int expected) =>
         Assert.Equal(expected, new Utf8TokenEstimator().Estimate(text));
 
     [Fact]
-    public void Utf8Estimator_ErrsOnTheSafeSide_ForMeasuredThai()
+    public void Utf8Estimator_OverestimatesOnlyThisThaiSample()
     {
         // Measured with qwen3:4b (BE-003 live run): a 384-character Thai answer used 222 tokens.
         var thai = new string('ก', 384);
