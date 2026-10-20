@@ -1,0 +1,22 @@
+using System.Diagnostics;
+using System.Text.Json.Serialization;
+
+namespace BC_LocalAI.Models.Authentication;
+
+/// <summary>Inbound-only draft DTO. No route consumes it until SEC-001 is approved.</summary>
+[DebuggerDisplay("LoginRequest [REDACTED]")]
+[JsonUnmappedMemberHandling(JsonUnmappedMemberHandling.Disallow)]
+public sealed class LoginRequest
+{
+    [JsonPropertyName("username")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWriting)]
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+    public string? Username { get; init; }
+
+    [JsonPropertyName("password")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWriting)]
+    [DebuggerBrowsable(DebuggerBrowsableState.Never)]
+    public string? Password { get; init; }
+
+    public override string ToString() => "LoginRequest [REDACTED]";
+}
