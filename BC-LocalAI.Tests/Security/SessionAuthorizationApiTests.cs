@@ -282,9 +282,10 @@ public sealed class SessionAuthorizationApiTests(WebApplicationFactory<Program> 
     {
         var host = SecurityHost.Create(factory, registerUserStore: false);
 
-        var error = Assert.Throws<InvalidOperationException>(() => host.Browser());
+        // Refused while the host is built (dependency validation or the explicit startup check), never at the first request.
+        var error = Assert.ThrowsAny<Exception>(() => host.Browser());
 
-        Assert.Contains("IUserSecurityStateSource", error.Message);
+        Assert.Contains("IUserSecurityStateSource", error.ToString());
     }
 
     // ---------------------------------------------------------------- CSRF

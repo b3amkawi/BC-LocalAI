@@ -235,6 +235,19 @@ public sealed class SameSiteRequestGuardTests
     [InlineData("same-origin", "https://evil.example", true)]   // either signal is enough to refuse
     public void CrossSiteDetection(string? fetchSite, string? origin, bool crossSite) =>
         Assert.Equal(crossSite, SameSiteRequestGuard.IsCrossSite(Request(fetchSite, origin)));
+
+    [Theory]
+    [InlineData("localhost:443", "https://localhost", false)]   // default port written on one side only
+    [InlineData("localhost", "https://localhost:443", false)]
+    [InlineData("localhost:8443", "https://localhost", true)]
+    public void DefaultPortSpelling_IsComparedCanonically(string host, string origin, bool crossSite)
+    {
+        var context = new DefaultHttpContext();
+        context.Request.Scheme = "https";
+        context.Request.Host = new HostString(host);
+        context.Request.Headers.Origin = origin;
+        Assert.Equal(crossSite, SameSiteRequestGuard.IsCrossSite(context.Request));
+    }
 }
 
 internal static class TestPaths

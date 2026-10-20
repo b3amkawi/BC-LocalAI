@@ -92,6 +92,15 @@ dotnet build .\BC-LocalAI.slnx
 dotnet test .\BC-LocalAI.slnx
 ```
 
+## Authentication (BE-005, opt-in validation only)
+
+Basic MySQL account authentication is implemented behind `Authentication:Enabled=false` by default.
+Login/Logout/Me use HTTPS, framework Cookie Authentication, antiforgery and a bounded login-attempt limiter.
+See [configuration, API and FE-003/BE-006 handoff](docs/authentication/BE-005-INTEGRATION.md)
+and [verification evidence / remaining gates](docs/authentication/BE-005-IMPLEMENTATION-VERIFICATION.md).
+Sessions, account revalidation and Chat authorization come from BE-006 (below); everything stays off until `Authentication:Enabled=true`.
+No production deployment or account-administration UI/API is included.
+
 ## Continuous integration (DEVOPS-001)
 
 Every pull request to `main` runs `.github/workflows/ci.yml`: build, .NET, JavaScript and Python tests (with PowerShell 7), a test-count gate, a secret scan and a Markdown link check. No job needs Ollama or a GPU. The live suites (AI-003, AI-004, AI-005) are run on a developer machine and their evidence is pasted in the PR. See [CI quality gates](docs/devops/ci-quality-gates.md) and the [live test procedure](docs/devops/live-test-procedure.md).
@@ -171,10 +180,10 @@ The configuration is validated at startup; an invalid value (bad URL, a URL that
 
 ### Sessions and authorization (BE-006)
 
-`appsettings.json` section `Authentication`: `Enabled` (**false** until BE-005 login and FE-003 login page exist), `IdleTimeoutMinutes` (30),
+`appsettings.json` section `Authentication`: `Enabled` (**false** until the FE-003 login page exists), `IdleTimeoutMinutes` (30),
 `AbsoluteLifetimeMinutes` (480). When enabled, `/api/chat` and `/api/chat/stream` need a signed-in User or Admin (401/403 JSON otherwise),
 sessions are checked against the account on every request, and cross-site API posts are refused (`AUTH_CSRF_INVALID`).
-Enabling it without BE-005's user store stops the app at startup on purpose. Details: [docs/security/BE-006-DEVELOPER-GUIDE.md](docs/security/BE-006-DEVELOPER-GUIDE.md),
+BE-005's login signs in through these sessions and the account (status, stamp, role) is read from MySQL on every request. Enabling it without a user store stops the app at startup on purpose. Details: [docs/security/BE-006-DEVELOPER-GUIDE.md](docs/security/BE-006-DEVELOPER-GUIDE.md),
 [authorization matrix](docs/security/BE-006-AUTHORIZATION-MATRIX.md), [verification](docs/security/BE-006-VERIFICATION.md).
 
 ### Error contract

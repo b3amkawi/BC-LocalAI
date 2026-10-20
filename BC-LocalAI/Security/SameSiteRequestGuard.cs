@@ -20,7 +20,7 @@ public sealed class SameSiteRequestGuard(RequestDelegate next, IOptions<BcAuthen
             && IsCrossSite(context.Request))
         {
             SecurityLog.CrossSiteRequestRefused(logger, context.Request.Method, context.Request.Path.Value ?? "");
-            await BcCookieEvents.WriteErrorAsync(context, StatusCodes.Status403Forbidden, "AUTH_CSRF_INVALID", "Request refused");
+            await BcCookieEvents.WriteErrorAsync(context, StatusCodes.Status403Forbidden, "AUTH_CSRF_INVALID", "คำขอไม่ผ่านการตรวจสอบความปลอดภัย");
             return;
         }
 
@@ -43,12 +43,15 @@ public sealed class SameSiteRequestGuard(RequestDelegate next, IOptions<BcAuthen
             return false;
         }
 
-        if (origin == "null" || !Uri.TryCreate(origin, UriKind.Absolute, out var originUri))
+        if (origin == "null"
+            || request.Headers.Origin.Count != 1
+            || !Uri.TryCreate(origin, UriKind.Absolute, out var originUri)
+            || !Uri.TryCreate($"{request.Scheme}://{request.Host.Value}", UriKind.Absolute, out var target))
         {
             return true;
         }
 
-        return !string.Equals(originUri.Scheme, request.Scheme, StringComparison.OrdinalIgnoreCase)
-            || !string.Equals(originUri.Authority, request.Host.Value, StringComparison.OrdinalIgnoreCase);
+        // Canonical scheme://host:port, so "https://localhost" and "localhost:443" are the same site (default port spelling).
+        return !string.Equals(originUri.GetLeftPart(UriPartial.Authority), target.GetLeftPart(UriPartial.Authority), StringComparison.OrdinalIgnoreCase);
     }
 }

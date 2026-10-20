@@ -5,23 +5,45 @@ using Microsoft.Extensions.Options;
 namespace BC_LocalAI.Security;
 
 /// <summary>
-/// Starts and ends sessions. BE-005's login endpoint calls <see cref="SignInAsync"/> after the password is verified;
-/// its logout endpoint calls <see cref="SignOutAsync"/>. Account administration calls <see cref="RevokeAllForUserAsync"/>.
+/// Starts and ends sessions. BE-005's login calls <see cref="SignInAsync(HttpContext, string, IEnumerable{Claim}?, CancellationToken)"/>
+/// after the password is verified; logout calls <see cref="SignOutAsync"/>; account administration calls <see cref="RevokeAllForUserAsync"/>.
 /// </summary>
 public sealed class SessionService(
     ISessionStore store,
+    IUserSecurityStateSource users,
     TimeProvider clock,
     IOptions<BcAuthenticationOptions> options,
     ILogger<SessionService> logger)
 {
+    // Claims that only this service may set: profile claims from the caller can never override identity, role or session.
+    private static readonly HashSet<string> ReservedClaimTypes = [ClaimTypes.NameIdentifier, ClaimTypes.Role, BcClaimTypes.SessionId];
+
+    /// <summary>
+    /// Signs in the account with the given id. Its role and security stamp are read from the user store now, never taken
+    /// from the caller, so the session starts from the account's current state.
+    /// </summary>
+    /// <returns>false when the account does not exist (any more) or may not sign in (inactive, locked, unknown role).</returns>
+    public async Task<bool> SignInAsync(HttpContext httpContext, string userId, IEnumerable<Claim>? profileClaims = null, CancellationToken cancellationToken = default)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(userId);
+        var user = await users.GetAsync(userId, cancellationToken);
+        if (user is null || !CanSignIn(user, clock.GetUtcNow()))
+        {
+            return false;
+        }
+
+        await SignInAsync(httpContext, user, profileClaims, cancellationToken);
+        return true;
+    }
+
     /// <summary>Creates a new server-side session (never reusing an old one) and issues the cookie.</summary>
     /// <exception cref="InvalidOperationException">The account may not sign in (inactive, locked or unknown role).</exception>
-    public async Task SignInAsync(HttpContext httpContext, UserSecurityState user, CancellationToken cancellationToken = default)
+    public async Task SignInAsync(HttpContext httpContext, UserSecurityState user, IEnumerable<Claim>? profileClaims = null, CancellationToken cancellationToken = default)
     {
         ArgumentNullException.ThrowIfNull(httpContext);
         ArgumentNullException.ThrowIfNull(user);
         var now = clock.GetUtcNow();
-        if (!user.IsActive || user.LockoutEnd > now || !BcRoles.IsKnown(user.Role))
+        if (!CanSignIn(user, now))
         {
             throw new InvalidOperationException("This account cannot sign in. The login endpoint must check it before calling SignInAsync.");
         }
@@ -35,8 +57,9 @@ public sealed class SessionService(
                 new Claim(BcClaimTypes.SessionId, session.SessionId)
             ],
             BcAuthentication.Scheme,
-            ClaimTypes.NameIdentifier,
+            ClaimTypes.Name,
             ClaimTypes.Role);
+        identity.AddClaims((profileClaims ?? []).Where(claim => !ReservedClaimTypes.Contains(claim.Type)));
 
         await httpContext.SignInAsync(
             BcAuthentication.Scheme,
@@ -78,4 +101,7 @@ public sealed class SessionService(
         SecurityLog.SessionsRevokedForUser(logger, userId, count);
         return count;
     }
+
+    private static bool CanSignIn(UserSecurityState user, DateTimeOffset now) =>
+        user.IsActive && !(user.LockoutEnd > now) && BcRoles.IsKnown(user.Role) && !string.IsNullOrEmpty(user.SecurityStamp);
 }

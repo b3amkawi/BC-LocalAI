@@ -76,7 +76,8 @@ internal static class TestApp
                 // BE-006: an Authentication__Enabled environment variable must not change unrelated tests.
                 ["Authentication:Enabled"] = "false",
                 ["Authentication:IdleTimeoutMinutes"] = "30",
-                ["Authentication:AbsoluteLifetimeMinutes"] = "480"
+                ["Authentication:AbsoluteLifetimeMinutes"] = "480",
+                ["Authentication:MaxSessions"] = "1024"
             }));
 
     /// <summary>App whose Ollama HttpClient is backed by <paramref name="handler"/>.</summary>

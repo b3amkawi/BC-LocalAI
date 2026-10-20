@@ -1,5 +1,8 @@
 using System.Collections.Concurrent;
 using System.Security.Cryptography;
+using BC_LocalAI.Services.Authentication;
+using Microsoft.Extensions.Options;
+using AuthenticationOptions = BC_LocalAI.Configuration.AuthenticationOptions;
 
 namespace BC_LocalAI.Security;
 
@@ -28,6 +31,34 @@ public interface ISessionStore
 public sealed class InMemorySessionStore : ISessionStore
 {
     private readonly ConcurrentDictionary<string, SessionRecord> _sessions = new(StringComparer.Ordinal);
+    private readonly object _capacityGate = new();
+    private readonly int _maxSessions;
+    private readonly TimeSpan _idleTimeout;
+    private readonly TimeSpan _absoluteLifetime;
+
+    /// <summary>Unbounded store (unit tests).</summary>
+    public InMemorySessionStore()
+        : this(int.MaxValue, TimeSpan.MaxValue, TimeSpan.MaxValue)
+    {
+    }
+
+    /// <summary>
+    /// Store used by the application: at most Authentication:MaxSessions (BE-005 setting) sessions, so memory stays bounded.
+    /// When full, revoked and expired sessions are dropped first; if it is still full, sign-in fails closed (503).
+    /// </summary>
+    public InMemorySessionStore(IOptions<AuthenticationOptions> authentication, IOptions<BcAuthenticationOptions> sessions)
+        : this(authentication.Value.MaxSessions, sessions.Value.IdleTimeout, sessions.Value.AbsoluteLifetime)
+    {
+    }
+
+    private InMemorySessionStore(int maxSessions, TimeSpan idleTimeout, TimeSpan absoluteLifetime)
+    {
+        _maxSessions = maxSessions;
+        _idleTimeout = idleTimeout;
+        _absoluteLifetime = absoluteLifetime;
+    }
+
+    public int Count => _sessions.Count;
 
     /// <summary>256 random bits, URL-safe. Not derived from the user, the time or a counter.</summary>
     public static string NewSessionId() =>
@@ -43,15 +74,37 @@ public sealed class InMemorySessionStore : ISessionStore
             throw new ArgumentException("Unknown role.", nameof(role));
         }
 
-        while (true)
+        lock (_capacityGate)
         {
-            var session = new SessionRecord(NewSessionId(), userId, role, securityStamp, now, now, null);
-            if (_sessions.TryAdd(session.SessionId, session))
+            if (_sessions.Count >= _maxSessions)
             {
-                return Task.FromResult(session);
+                foreach (var stale in _sessions.Values.Where(s => IsDead(s, now)).Select(s => s.SessionId).ToArray())
+                {
+                    _sessions.TryRemove(stale, out _);
+                }
+
+                if (_sessions.Count >= _maxSessions)
+                {
+                    throw new AuthenticationDependencyException(); // login answers 503 AUTH_UNAVAILABLE
+                }
+            }
+
+            while (true)
+            {
+                var session = new SessionRecord(NewSessionId(), userId, role, securityStamp, now, now, null);
+                if (_sessions.TryAdd(session.SessionId, session))
+                {
+                    return Task.FromResult(session);
+                }
             }
         }
     }
+
+    // A dead session can never be valid again: revoked, or past its idle or absolute limit.
+    private bool IsDead(SessionRecord session, DateTimeOffset now) =>
+        session.RevokedAt is not null
+        || (_absoluteLifetime != TimeSpan.MaxValue && now - session.CreatedAt >= _absoluteLifetime)
+        || (_idleTimeout != TimeSpan.MaxValue && now - session.LastSeenAt >= _idleTimeout);
 
     public Task<SessionRecord?> GetAsync(string sessionId, CancellationToken cancellationToken = default)
     {

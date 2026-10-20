@@ -1,3 +1,4 @@
+using BC_LocalAI.Services.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -5,10 +6,15 @@ using Microsoft.Extensions.Options;
 
 namespace BC_LocalAI.Security;
 
-/// <summary>Registration of BE-006: cookie session, server-side session checks, roles and policies.</summary>
+/// <summary>
+/// Registration of BE-006 on top of BE-005: BE-005 registers the cookie scheme, login, antiforgery and rate limits;
+/// BE-006 replaces the cookie's session handling with server-side sessions checked against the account on every request,
+/// and adds roles and policies. Call after <see cref="AuthenticationRegistration.AddLocalAuthentication"/>.
+/// </summary>
 public static class BcAuthentication
 {
-    public const string Scheme = "BcLocalAi";
+    /// <summary>The single authentication scheme of the application (registered by BE-005).</summary>
+    public const string Scheme = AuthenticationRegistration.Scheme;
 
     /// <summary>
     /// __Host- prefix: the browser only accepts it with Secure, Path=/ and no Domain, so a sub-domain cannot set or
@@ -25,11 +31,13 @@ public static class BcAuthentication
 
         services.TryAddSingleton(TimeProvider.System);
         services.TryAddSingleton<ISessionStore, InMemorySessionStore>();
+        services.TryAddScoped<IUserSecurityStateSource, MySqlUserSecurityStateSource>();
         services.AddScoped<SessionService>();
         services.AddScoped<BcCookieEvents>();
 
-        services.AddAuthentication(Scheme)
-            .AddCookie(Scheme, cookie =>
+        // PostConfigure: these settings win over BE-005's cookie configuration, so there is one cookie and one session model.
+        services.AddOptions<CookieAuthenticationOptions>(Scheme)
+            .PostConfigure<IOptions<BcAuthenticationOptions>, TimeProvider>((cookie, settings, clock) =>
             {
                 cookie.Cookie.Name = CookieName;
                 cookie.Cookie.HttpOnly = true;
@@ -39,13 +47,9 @@ public static class BcAuthentication
                 cookie.Cookie.Domain = null;
                 cookie.Cookie.IsEssential = true;
                 cookie.SlidingExpiration = false; // idle and absolute expiry are enforced by the server-side session
-                cookie.EventsType = typeof(BcCookieEvents);
-            });
-        services.AddOptions<CookieAuthenticationOptions>(Scheme)
-            .Configure<IOptions<BcAuthenticationOptions>, TimeProvider>((cookie, settings, clock) =>
-            {
                 cookie.ExpireTimeSpan = settings.Value.AbsoluteLifetime;
                 cookie.TimeProvider = clock;
+                cookie.EventsType = typeof(BcCookieEvents); // replaces any inline events: every request is checked here
             });
 
         services.AddSingleton<IAuthorizationHandler, ChatUserHandler>();
@@ -66,9 +70,9 @@ public static class BcAuthentication
         var registered = app.Services.GetRequiredService<IServiceProviderIsService>();
         if (settings.Enabled && !registered.IsService(typeof(IUserSecurityStateSource)))
         {
-            // Fail at startup instead of refusing every request later: login needs BE-005's user store.
+            // Fail at startup instead of refusing every request later.
             throw new InvalidOperationException(
-                "Authentication:Enabled is true but no IUserSecurityStateSource is registered (provided by BE-005).");
+                "Authentication:Enabled is true but no IUserSecurityStateSource is registered.");
         }
 
         app.UseMiddleware<SameSiteRequestGuard>();

@@ -79,7 +79,7 @@ public sealed class BcCookieEvents(
     }
 
     public override Task RedirectToLogin(RedirectContext<CookieAuthenticationOptions> context) =>
-        WriteErrorAsync(context.HttpContext, StatusCodes.Status401Unauthorized, "AUTH_REQUIRED", "Sign-in required");
+        WriteErrorAsync(context.HttpContext, StatusCodes.Status401Unauthorized, "AUTH_REQUIRED", "กรุณาเข้าสู่ระบบ");
 
     public override Task RedirectToAccessDenied(RedirectContext<CookieAuthenticationOptions> context)
     {
@@ -87,7 +87,7 @@ public sealed class BcCookieEvents(
             logger,
             context.Request.Path.Value ?? "",
             context.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier) ?? "unknown");
-        return WriteErrorAsync(context.HttpContext, StatusCodes.Status403Forbidden, "AUTH_FORBIDDEN", "Access denied");
+        return WriteErrorAsync(context.HttpContext, StatusCodes.Status403Forbidden, "AUTH_FORBIDDEN", "ไม่มีสิทธิ์เข้าถึง");
     }
 
     // The API never redirects to an HTML page: callers get the same JSON error format as every other API error.

@@ -12,8 +12,11 @@ Changed outside `BC-LocalAI/Security/`: `Program.cs` (4 lines: a using, a commen
 (`[Authorize(Policy = ChatUser)]`), `TestSupport.cs` (pins the new settings), `docs/devops/test-baseline.json` (.NET minimum 416 → 511).
 **No change for users while `Authentication:Enabled` is false**: all 437 existing tests pass unchanged and the real app answers as before.
 
-BE-005 (login, MySQL user store) is being written in parallel. BE-006 depends on nothing unmerged from it; the hand-over points are
-`IUserSecurityStateSource` and `SessionService` (guide section 2).
+**Update 2026-10-21 — BE-005 merged into this branch** (`origin/watzapon_BE-005` dc477f7, at the user's request). Integration:
+BE-005's login/logout now go through `SessionService` (one cookie scheme `BC.LocalAI`); BE-005's `BasicAuthenticationTicketStore`
+and its `OnValidatePrincipal` are removed (replaced by BE-006 sessions, which keep BE-005's `MaxSessions` cap); BE-006 adds
+`MySqlUserSecurityStateSource` on BE-005's reader connection; the same-site guard now compares origins canonically (a BE-005 test
+caught `https://localhost` vs `localhost:443`). See section 6.
 
 ## 2. Tests actually run
 
@@ -67,7 +70,7 @@ the settings.
 | Session revocation mechanism | ✅ sign-out, revoke-all, automatic on refusal; copied cookies useless |
 | Disabled account handling | ✅ next request refused, session revoked |
 | Approved role model | ✅ User/Admin (SEC-001 decision) |
-| Role mapping | ⏳ role comes from `UserSecurityState.Role`; BE-005 maps it from the `users.role` column |
+| Role mapping | ✅ from the `users.role` column at sign-in and on every request (tested: backend saying Admin does not make a User an Admin) |
 | Authorization policies | ✅ `ChatUser`, `Admin` |
 | Chat APIs protected by policy | ✅ when enabled (tested); **off by default by decision** until login exists |
 | Anonymous requests refused | ✅ when enabled |
@@ -79,12 +82,31 @@ the settings.
 | Unit / integration tests | ✅ 74 |
 | Authorization matrix | ✅ D5 |
 | Security verification report | ✅ this document |
-| Existing login/logout APIs not regressed | ⏳ they do not exist yet (BE-005) |
+| Existing login/logout APIs not regressed | ✅ all BE-005 API tests pass on BE-006 sessions; live MySQL suite passes |
 
 ## 5. Limitations / remaining
 
 - Sessions in memory: restart signs everyone out; single instance only (MySQL store later through `ISessionStore`).
 - Data Protection keys use ASP.NET Core defaults; must be configured for multi-instance or machine moves.
 - An answer already streaming when the account is disabled finishes (at most the 180 s Ollama deadline); the next request is refused.
-- Not enabled in the real app until BE-005 (user store, login) and FE-003 (login page) exist and HTTPS is used.
+- Not enabled in the real app until FE-003 (login page) exists and HTTPS is used.
 - Login lockout / rate-limit numbers are BE-005.
+
+## 6. Integration with BE-005 (2026-10-21)
+
+| Suite | Result |
+|---|---|
+| `dotnet test` (all, after the merge) Development / Production | **625** passed, 0 warnings (baseline raised 535 → 625) |
+| `dotnet test` with hostile environment (`Authentication__Enabled=true`, idle 999, absolute 1, `MaxSessions=1`) | **625** passed (`MaxSessions` now pinned in `TestSupport.cs` too) |
+| `node --test "tests/ui/*.test.mjs"` / CI secret scan / doc links / `check_test_counts.py` for .NET and Node | 61 passed / clean / OK / pass |
+| `python -m unittest discover -s tests` | 140 of 141: `test_resource_samples_are_attached_to_scenarios` (benchmark script, no auth code) fails on this machine **and on a clean `main` 8bffcc8** — not caused by this branch, not fixed here |
+| New: `LoginIntegrationTests` (real BE-005 login endpoints) | disabled after login → next `/me` 401; role from the account, not the backend; account disabled / missing / unknown role between password check and sign-in → same 401 `AUTH_INVALID_CREDENTIALS`, no cookie |
+| New: `SessionServiceTests` | sign-in refused for missing / inactive / locked / unknown role / no stamp; profile claims cannot override id, role or session id |
+| New: `SessionCapacityTests` | full store fails closed (`AuthenticationDependencyException` → 503); reclaims revoked, idle-expired and 8 h-expired sessions; keeps live ones |
+| Live MySQL (`tests/BE005.MySqlTests`, isolated fixture 127.0.0.1:3318) | BE-005 suite + `Be006LiveSessionTests` (disable / stamp / role changed in MySQL → open session 401 at next request, stays dead after restore, fresh login works); runs serially because tests share fixture accounts |
+
+Mutation check of the integration (each bug made tests fail): inactive account allowed to sign in (2) · reserved profile claims not
+filtered (1) · dead sessions not reclaimed (3) · capacity not enforced (2) · login ignores a refused sign-in (3).
+
+BE-005 files changed in this branch: `AuthenticationController.cs`, `AuthenticationRegistration.cs`, `BasicAuthenticationTicketStore.cs` (removed),
+`AuthenticationApiTests.cs` / `AuthenticationSessionAndLimitTests.cs` (ticket-store tests removed; user store added to the factory).

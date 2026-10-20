@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using BC_LocalAI.Services;
 using BC_LocalAI.Security;
+using BC_LocalAI.Services.Authentication;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,7 +23,10 @@ builder.Services.AddControllersWithViews()
         options.InvalidModelStateResponseFactory = _ => new BadRequestObjectResult(
             new ApiErrorResponse(new ApiError("INVALID_MESSAGE", "Message is required")));
     });
-// BE-006: cookie session, server-side session checks, roles and policies (chat APIs open while Authentication:Enabled is false).
+// BE-005: login against MySQL, antiforgery, rate limits, the authentication cookie scheme.
+builder.Services.AddLocalAuthentication(builder.Configuration);
+// BE-006: server-side sessions checked on every request, roles and policies, on BE-005's cookie scheme
+// (chat APIs open while Authentication:Enabled is false).
 builder.Services.AddBcLocalAiSecurity(builder.Configuration);
 builder.Services.AddSingleton<IValidateOptions<OllamaOptions>, OllamaOptionsValidator>();
 builder.Services.AddOptions<OllamaOptions>()
@@ -70,10 +74,14 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.UseHttpsRedirection();
+// Auth rejects HTTP itself instead of redirecting a submitted password. Other routes retain existing behaviour.
+app.UseWhen(context => !context.Request.Path.StartsWithSegments("/api/auth"), branch => branch.UseHttpsRedirection());
 app.UseRouting();
 
+// Same-site guard for /api and authentication (BE-006).
 app.UseBcLocalAiSecurity();
+// Antiforgery must see the authenticated principal, not an anonymous pre-authentication context.
+app.UseMiddleware<AuthenticationBoundaryMiddleware>();
 app.UseAuthorization();
 
 app.MapStaticAssets();
