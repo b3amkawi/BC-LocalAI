@@ -4,7 +4,7 @@ ASP.NET Core application targeting .NET 10. It serves a Chat web page (FE-001) a
 answered by a local Ollama model (`qwen3:4b`) through `OllamaAIService` (BE-002).
 `MockAIService` (BE-001) is kept for automated tests, so `dotnet test` does not need Ollama.
 
-> **Known limitations (read before merging / deploying):** answers longer than 256 tokens return `502 AI_INVALID_RESPONSE`;
+> **Known limitations (read before merging / deploying):** an answer longer than the output limit (`Ollama:MaxOutputTokens`, default 1024 tokens) returns `502 AI_RESPONSE_TOO_LARGE`;
 > Ollama answers one request at a time, so many simultaneous users queue and can receive `504 AI_TIMEOUT`; there is no
 > authentication, rate limit, conversation history or streaming. Details and measurements: [docs/KNOWN-LIMITATIONS.md](docs/KNOWN-LIMITATIONS.md).
 
@@ -20,6 +20,17 @@ dotnet run --project .\BC-LocalAI\BC-LocalAI.csproj --launch-profile http
 ```
 
 Open <http://localhost:5290> in a browser: this is the Chat page.
+
+The page works in every environment, including `ASPNETCORE_ENVIRONMENT=Production` with `dotnet run`
+(before this fix the CSS and JavaScript arrived empty there; see `docs/BE-003-VERIFICATION.md` section 5b).
+
+A published copy (`dotnet publish -c Release -o <folder>`) must be started **from its own folder**, or with
+`--contentRoot <folder>`: otherwise ASP.NET Core looks for `wwwroot` in the current directory and the page has no style or script.
+
+```powershell
+cd <folder>
+dotnet BC-LocalAI.dll
+```
 
 ## Chat web page (FE-001)
 
@@ -37,6 +48,7 @@ cannot be sent twice. The page works on desktop and on phones, and everything ca
 | `AI_TIMEOUT` | AI ใช้เวลาตอบนานเกินไป กรุณาลองใหม่ |
 | `AI_PROVIDER_ERROR` | AI เกิดข้อผิดพลาด กรุณาลองใหม่ |
 | `AI_INVALID_RESPONSE`, or a successful answer where `response` or `model` is missing, empty or not a string | ได้รับคำตอบที่ไม่สมบูรณ์ กรุณาลองใหม่ |
+| `AI_RESPONSE_TOO_LARGE` | คำตอบยาวเกินกว่าที่ระบบรองรับ กรุณาถามให้สั้นลงหรือแบ่งเป็นหลายคำถาม |
 | `INTERNAL_ERROR` or anything unknown | ระบบเกิดข้อผิดพลาด กรุณาลองใหม่ |
 | The server cannot be reached at all | ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาตรวจการเชื่อมต่อแล้วลองใหม่ |
 
@@ -118,7 +130,7 @@ Invoke-WebRequest `
 ```
 
 There is no silent fallback to `MockAIService`: if Ollama is not reachable the API returns an error (see below).
-No secrets are used. Ollama is reached through loopback only (AI-002 contract): `Ollama:BaseUrl` must be a loopback http/https URL (`127.0.0.1`, `localhost`, `[::1]`); any other host stops the application at startup. Ollama itself must not be exposed to the public internet.
+No secrets are used. Ollama is reached through loopback only (AI-002 contract): `Ollama:BaseUrl` must be a loopback http/https URL (`127.0.0.1`, `localhost`, `[::1]`); any other host stops the application at startup, and so does a URL with a user name / password, path, query or fragment (logs only ever show `scheme://host:port`). Ollama itself must not be exposed to the public internet.
 
 ### Ollama configuration
 
@@ -129,14 +141,23 @@ No secrets are used. Ollama is reached through loopback only (AI-002 contract): 
   "Ollama": {
     "BaseUrl": "http://127.0.0.1:11434",
     "Model": "qwen3:4b",
-    "TimeoutSeconds": 180
+    "TimeoutSeconds": 180,
+    "MaxOutputTokens": 1024,
+    "MaxResponseBytes": 1048576
   }
 }
 ```
 
-`TimeoutSeconds` is 180 by default; AI-002 suggests up to 300 on a machine without a GPU or for the first model load (maximum 600).
+| Setting | Meaning | Allowed |
+|---------|---------|---------|
+| `TimeoutSeconds` | deadline for the whole exchange with Ollama (queue wait, generation, reading the answer); AI-002 suggests up to 300 on a machine without a GPU or for the first model load | 1 - 600 |
+| `MaxOutputTokens` | output token limit sent to Ollama (`num_predict`); longer answers are cut by Ollama and reported as `AI_RESPONSE_TOO_LARGE` | 16 - 4096 |
+| `MaxResponseBytes` | largest response body accepted from Ollama (protects memory) | 4096 - 16777216 |
 
-The configuration is validated at startup; an invalid value (bad URL, a URL that is not loopback, empty model, timeout outside 1-600) stops the app with a clear error.
+Why these defaults, the timeout policy for every level (browser, Kestrel, service, Ollama, reverse proxy) and the log fields:
+[docs/BE-003-CONFIGURATION.md](docs/BE-003-CONFIGURATION.md). Root cause of the old failures: [docs/BE-003-ROOT-CAUSE.md](docs/BE-003-ROOT-CAUSE.md).
+
+The configuration is validated at startup; an invalid value (bad URL, a URL that is not loopback, empty model, a number outside its range) stops the app with a clear error.
 
 ### Error contract
 
@@ -148,15 +169,17 @@ All errors use `{ "error": { "code": "...", "message": "..." } }` and never incl
 | Cannot connect to Ollama | 503 | `AI_UNAVAILABLE` |
 | Ollama timeout | 504 | `AI_TIMEOUT` |
 | Ollama returns an HTTP error | 502 | `AI_PROVIDER_ERROR` |
-| Malformed / incomplete Ollama response (`done` not true, `done_reason` not `stop`, bad or empty `answer`, wrong model) | 502 | `AI_INVALID_RESPONSE` |
+| Malformed / incomplete Ollama response (`done` not true, `done_reason` other than `stop`/`length`, bad or empty `answer`, wrong model) | 502 | `AI_INVALID_RESPONSE` |
+| Answer cut off by the output token limit (`done_reason` = `length`) or response body larger than `MaxResponseBytes` | 502 | `AI_RESPONSE_TOO_LARGE` |
 | Unexpected error | 500 | `INTERNAL_ERROR` |
 
 ### Known limits
 
 See [docs/KNOWN-LIMITATIONS.md](docs/KNOWN-LIMITATIONS.md) for the full list with measurements. In short:
 
-- Answers longer than 256 tokens (`num_predict`, per the Issue #5 contract) are cut off by Ollama and the API returns
-  `502 AI_INVALID_RESPONSE`. Ask for short answers, or raise the limit through a contract change approved by the Tech Lead.
+- An answer that needs more than `Ollama:MaxOutputTokens` (default 1024) is cut off by Ollama and the API returns
+  `502 AI_RESPONSE_TOO_LARGE` (before BE-003 the limit was a fixed 256 and the error was `AI_INVALID_RESPONSE`). The longest answers measured need
+  about 250 tokens, so this is rare; a runaway answer that uses the whole limit takes about 13 s.
 - Ollama handles one request at a time. Under a burst, requests queue and later ones can time out with `504 AI_TIMEOUT`
   (measured on the development laptop: 15 simultaneous 3-sentence answers with a 12 s timeout -> 4 succeeded, 11 got 504,
   and the API recovered immediately).
@@ -179,6 +202,7 @@ Verification evidence: [`docs/BE-001-evidence.md`](docs/BE-001-evidence.md) (moc
 | `docs/BE-001-evidence.md` | BE-001 build, test and API evidence |
 | `docs/FE-001-REVIEW-CHECKLIST.md` | FE-001 (Chat page) reviewer guide and acceptance criteria table |
 | `docs/FE-001-evidence.md` | FE-001 test results, browser test notes and screenshots (`docs/fe-001/`) |
+| `docs/BE-003-ROOT-CAUSE.md`, `docs/BE-003-CONFIGURATION.md`, `docs/BE-003-VERIFICATION.md` | BE-003 root cause analysis, configuration and timeout policy, before/after verification report |
 | `docs/KNOWN-LIMITATIONS.md` | Known limitations of the Ollama integration with measured numbers (read before merging) |
 | `docs/BE-002-REVIEW-CHECKLIST.md` | BE-002 (Ollama) reviewer guide and acceptance criteria table |
 | `docs/BE-002-evidence.md` | BE-002 build, test, live smoke test and failure-scenario evidence |
@@ -251,3 +275,14 @@ For a Thai explanation of AI-001 through AI-003, the tools used, file locations,
 limitations, and questions for team handoff, read the [AI work handoff guide](docs/ai/ai-001-003-handoff.md).
 For a beginner explanation of API/JSON terminology, the request flow, testing,
 timing metrics, PowerShell syntax, and Git workflow, start with the [Thai learning guide](docs/ai/ai-001-003-explained.md).
+
+## Performance benchmark (AI-004)
+
+`scripts/benchmark/ollama-benchmark.ps1` (Ollama `/api/generate`) and
+`scripts/benchmark/backend-benchmark.ps1` (Backend `/api/chat`) send predefined short, medium and
+long prompts (45 fixed prompts) at 1, 2, 5 and 10 concurrent requests and write per-request CSV rows
+plus a JSON summary (latency percentiles, throughput, success/timeout rate, CPU/RAM/GPU/VRAM).
+`scripts/benchmark/cold-start-benchmark.ps1` repeats the cold-start measurement. All need PowerShell 7
+and are loopback only. See the [test plan](docs/performance/benchmark-plan.md),
+the [performance report](docs/performance/benchmark-report.md) (preliminary results) and the
+[handoff for BE-003/BE-004](docs/performance/benchmark-handoff.md).

@@ -26,5 +26,5 @@ public sealed class OllamaGenerateRequest
 public sealed class OllamaGenerateOptions
 {
     [JsonPropertyName("temperature")] public int Temperature { get; init; }
-    [JsonPropertyName("num_predict")] public int NumPredict { get; init; } = 256;
+    [JsonPropertyName("num_predict")] public int NumPredict { get; init; }
 }

@@ -111,7 +111,6 @@ public sealed class OllamaChatApiTests(WebApplicationFactory<Program> factory)
     [Theory]
     [InlineData("not json")]
     [InlineData("{\"model\":\"qwen3:4b\",\"response\":\"{\\\"answer\\\":\\\"2\\\"}\",\"done\":false}")]
-    [InlineData("{\"model\":\"qwen3:4b\",\"response\":\"{\\\"answer\\\":\\\"2\\\"}\",\"done\":true,\"done_reason\":\"length\"}")]
     [InlineData("{\"model\":\"qwen3:4b\",\"response\":\"plain text\",\"done\":true,\"done_reason\":\"stop\"}")]
     [InlineData("{\"model\":\"qwen3:4b\",\"response\":\"{\\\"answer\\\":\\\"\\\"}\",\"done\":true,\"done_reason\":\"stop\"}")]
     public async Task InvalidOrIncompleteProviderResponse_Returns502_InvalidResponse(string providerBody)

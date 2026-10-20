@@ -20,6 +20,8 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
+# Thai answers must survive redirection: on an English Windows the console code page is 437 and turns them into '?'.
+[Console]::OutputEncoding = [System.Text.UTF8Encoding]::new($false)
 # Keep this smoke test on loopback; never expose the Ollama listener.
 $baseUri = "http://127.0.0.1:$Port"
 $stage = 'checking Ollama availability'

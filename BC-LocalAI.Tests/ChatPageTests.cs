@@ -212,6 +212,38 @@ public sealed class ChatPageTests(WebApplicationFactory<Program> factory)
     }
 
     [Fact]
+    public async Task Page_RendersTheServerTimeoutPlusMargin_ForTheBrowserWaitLimit()
+    {
+        // The browser waits a little longer than the server's own deadline, so the server's AI_TIMEOUT arrives first.
+        var html = await GetTextAsync("/");
+
+        Assert.Contains("data-timeout-seconds=\"200\"", html); // default Ollama:TimeoutSeconds 180 + 20
+    }
+
+    [Theory]
+    [InlineData("30", "50")]
+    [InlineData("1", "21")]
+    [InlineData("600", "620")]
+    public async Task Page_FollowsTheConfiguredServerTimeout(string configured, string expectedOnPage)
+    {
+        // The page does not call the AI, so no service override is needed; only the pinned configuration matters.
+        var client = factory.WithWebHostBuilder(builder => builder.PinOllama(timeoutSeconds: configured)).CreateClient();
+
+        var html = await client.GetStringAsync("/");
+
+        Assert.Contains($"data-timeout-seconds=\"{expectedOnPage}\"", html);
+    }
+
+    [Fact]
+    public async Task ChatScript_TakesItsWaitLimitFromThePage_NotFromAFixedNumber()
+    {
+        var js = await GetTextAsync("/js/chat.js");
+
+        Assert.Contains("core.requestTimeoutMs(form.getAttribute('data-timeout-seconds'))", js);
+        Check.NotLeaked(js, "= 200000", "=200000");
+    }
+
+    [Fact]
     public async Task ChatCore_RequiresBothResponseAndModelToBeNonEmptyStrings()
     {
         // API contract: { "response": string, "model": string }. A missing or empty model is an incomplete
@@ -237,6 +269,7 @@ public sealed class ChatPageTests(WebApplicationFactory<Program> factory)
             "AI ใช้เวลาตอบนานเกินไป กรุณาลองใหม่",
             "AI เกิดข้อผิดพลาด กรุณาลองใหม่",
             "ได้รับคำตอบที่ไม่สมบูรณ์ กรุณาลองใหม่",
+            "คำตอบยาวเกินกว่าที่ระบบรองรับ กรุณาถามให้สั้นลงหรือแบ่งเป็นหลายคำถาม", // BE-003: AI_RESPONSE_TOO_LARGE
             "ระบบเกิดข้อผิดพลาด กรุณาลองใหม่"
         })
         {

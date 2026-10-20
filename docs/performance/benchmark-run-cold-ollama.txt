@@ -1,0 +1,26 @@
+﻿cold     short  c=1  r=0 #0: success HTTP 200 5223.7 ms
+measured short  c=1  r=1 #0: success HTTP 200 317.1 ms
+SCENARIO ollama short c=1: 1/1 success, p50=317.1 p95=317.1 ms, 3.153 req/s
+SUMMARY: target=ollama scenarios=1 requests=2 aborted=False
+cold ollama #1: success HTTP 200 5223.7 ms
+cold     short  c=1  r=0 #0: success HTTP 200 4660.9 ms
+measured short  c=1  r=1 #0: success HTTP 200 305.3 ms
+SCENARIO ollama short c=1: 1/1 success, p50=305.3 p95=305.3 ms, 3.276 req/s
+SUMMARY: target=ollama scenarios=1 requests=2 aborted=False
+cold ollama #2: success HTTP 200 4660.9 ms
+cold     short  c=1  r=0 #0: success HTTP 200 4646.9 ms
+measured short  c=1  r=1 #0: success HTTP 200 303.1 ms
+SCENARIO ollama short c=1: 1/1 success, p50=303.1 p95=303.1 ms, 3.3 req/s
+SUMMARY: target=ollama scenarios=1 requests=2 aborted=False
+cold ollama #3: success HTTP 200 4646.9 ms
+cold     short  c=1  r=0 #0: success HTTP 200 4654.5 ms
+measured short  c=1  r=1 #0: success HTTP 200 312.2 ms
+SCENARIO ollama short c=1: 1/1 success, p50=312.2 p95=312.2 ms, 3.204 req/s
+SUMMARY: target=ollama scenarios=1 requests=2 aborted=False
+cold ollama #4: success HTTP 200 4654.5 ms
+cold     short  c=1  r=0 #0: success HTTP 200 4672.5 ms
+measured short  c=1  r=1 #0: success HTTP 200 305.9 ms
+SCENARIO ollama short c=1: 1/1 success, p50=305.9 p95=305.9 ms, 3.269 req/s
+SUMMARY: target=ollama scenarios=1 requests=2 aborted=False
+cold ollama #5: success HTTP 200 4672.5 ms
+SUMMARY: target=ollama repeats=5 success=5 min=4646.9 median=4660.9 max=5223.7 ms
