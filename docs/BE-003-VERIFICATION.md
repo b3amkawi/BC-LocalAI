@@ -37,7 +37,7 @@ Root cause and evidence: [BE-003-ROOT-CAUSE.md](BE-003-ROOT-CAUSE.md) · Setting
 
 | Suite | Before | After |
 |-------|-------:|------:|
-| `dotnet test` (xUnit) | 157 | **321**, all passing, 0 warnings (276 before the PR #19 review round, +45 in `OllamaBaseUrlSecretsTests`) |
+| `dotnet test` (xUnit) | 157 | **357**, all passing, 0 warnings (276 before the PR #19 review rounds, +53 credential/path tests, +28 static asset tests in section 5b) |
 | `node --test "tests/ui/*.test.mjs"` | 18 | **23**, all passing |
 
 Five new .NET test classes (116 tests; the suite grew by 119 in total, the rest are updated or added tests in existing classes): `OllamaResponseLengthTests` (33: length vs malformed, 20,000-character Thai answers in raw and escaped form, emoji / combining marks / surrogates,
@@ -100,6 +100,22 @@ Mutation check: logging the raw URL again (6 tests fail), removing the `@` check
 Round 2 (owner comment 6282466768): `http://127.0.0.1:1/REVIEW-PATH-SECRET` passed validation and the built-in HttpClient log printed `.../REVIEW-PATH-SECRET/api/generate`. Confirmed, fixed as above. New tests: 5 path URLs refused, 4 whole-host cases (path, nested path, query, fragment; validation off) show the framework log line without the secret. Now 329 .NET tests. Mutations: no path check (8 fail), base address keeps path (1 fail), both (9 fail). Real app: the owner's URL stops startup; default config answers 200.
 
 Other review points: (c) `num_predict` 256 -> 1024 still **needs the AI-002 owner's confirmation** (section 6); `docs/ai` was not edited. (d) The PR description now says `Refs #16` instead of `Closes #16`, because the final timeout / concurrency policy depends on the AI-004 benchmark.
+
+## 5b. Pre-merge verification (branch with `main` and `pao04_AI` merged)
+
+Checked from a fresh clone of the pushed branch: build 0 warnings; .NET tests in default, hostile-environment and Production settings; Node tests;
+all 160 AI-003 evaluation cases against the real Ollama (160/160, judged with the same rules as `scripts/test-chat-e2e.ps1`, re-implemented in Python
+because PowerShell 7 is not installed here); live validation, 200 KB input, cancellation, 10 concurrent requests; the Chat page in a browser.
+
+Two defects were found in the web page (both already on `main`, not caused by BE-003) and fixed:
+
+| Defect | Cause | Fix | Regression test |
+|--------|-------|-----|-----------------|
+| With `dotnet run` outside Development the Chat page had **no style and no script**: CSS/JS arrived as empty `200` responses to any browser (browsers send `Accept-Encoding: gzip`) | `MapStaticAssets` answers gzip clients from pre-compressed copies under `obj/`, which are found only through the static web assets manifest, and ASP.NET Core loads that manifest in Development only | `builder.WebHost.UseStaticWebAssets()` in `Program.cs` (documented for running from build output outside Development). A published app has no such manifest and is unchanged (checked with and without the fix) | `StaticAssetsTests` (24 cases: Development/Production x 4 encodings x 3 files, decoded content compared with the file); removing the fix makes 8 fail |
+| The Error page (`_Layout`) linked `~/BC_LocalAI.styles.css` -> **404**; the scoped CSS bundle is named after the assembly, `BC-LocalAI.styles.css` | template name with `_` instead of `-` | link corrected | `EveryLocalLinkOnThePage_Resolves_AndIsNotEmpty` (every local `href`/`src` on `/` and `/Home/Error`, both environments) |
+
+Not changed, documented in `README.md`: a **published** copy started from another directory has no style or script because the content root (where `wwwroot` is looked for)
+is the current directory. Start it from its own folder or pass `--contentRoot`.
 
 ## 6. Known limitations that remain
 

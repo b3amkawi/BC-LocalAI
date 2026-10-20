@@ -7,6 +7,12 @@ using BC_LocalAI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// MapStaticAssets serves pre-compressed copies (chat.css.gz) to browsers. When the app runs from build output (dotnet run)
+// those copies live under obj/ and are found only through the static web assets manifest, which ASP.NET Core loads in
+// Development only; in any other environment the CSS and JavaScript then arrived empty. Loading the manifest in every
+// environment fixes that; a published app has no such manifest and serves its own pre-compressed files, so it is unaffected.
+builder.WebHost.UseStaticWebAssets();
+
 // Add services to the container.
 builder.Services.AddControllersWithViews()
     .ConfigureApiBehaviorOptions(options =>

@@ -21,6 +21,17 @@ dotnet run --project .\BC-LocalAI\BC-LocalAI.csproj --launch-profile http
 
 Open <http://localhost:5290> in a browser: this is the Chat page.
 
+The page works in every environment, including `ASPNETCORE_ENVIRONMENT=Production` with `dotnet run`
+(before this fix the CSS and JavaScript arrived empty there; see `docs/BE-003-VERIFICATION.md` section 5b).
+
+A published copy (`dotnet publish -c Release -o <folder>`) must be started **from its own folder**, or with
+`--contentRoot <folder>`: otherwise ASP.NET Core looks for `wwwroot` in the current directory and the page has no style or script.
+
+```powershell
+cd <folder>
+dotnet BC-LocalAI.dll
+```
+
 ## Chat web page (FE-001)
 
 Type a question and press **Enter** (or the **ส่ง** button) to send it; **Shift+Enter** starts a new line. The answer appears
