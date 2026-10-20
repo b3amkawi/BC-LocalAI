@@ -1,0 +1,17 @@
+Ollama 0.40.5, model qwen3:4b (359d7dd4bcda)
+PASS S00: Cold start: first record after ollama stop
+PASS S01: English streaming (format + think=false)
+PASS S02: Thai streaming (format + think=false)
+PASS S03: Chunk assembly: the answer arrives incrementally
+PASS S04: Unicode and special characters
+PASS S05: Thinking: think=true is separated into a thinking field
+PASS S06: Observation: think=false without format leaks reasoning into response
+PASS S07: Truncation: done_reason=length is not a completion
+PASS S08: HTTP errors before the stream starts
+PASS S09: Empty prompt returns done_reason=load, which is not a completion
+PASS S10: Client cancellation stops generation on the Ollama side
+PASS S11: Total timeout cancels the request and frees Ollama
+PASS S12: Unavailable endpoint
+PASS S13: Latency profile of streaming (warm, 5 requests)
+PASS S14: Interrupted stream: the Ollama model runner is stopped mid-generation (failure injection)
+SUMMARY: scenarios=15, passed=15, failed=0

@@ -276,6 +276,17 @@ limitations, and questions for team handoff, read the [AI work handoff guide](do
 For a beginner explanation of API/JSON terminology, the request flow, testing,
 timing metrics, PowerShell syntax, and Git workflow, start with the [Thai learning guide](docs/ai/ai-001-003-explained.md).
 
+## Ollama streaming contract (AI-005)
+
+`scripts/test-ollama-streaming.ps1` (PowerShell 7, loopback only) tests the Ollama streaming API
+(`stream:true`, NDJSON) with `qwen3:4b`: English/Thai, chunk assembly, Unicode, thinking behaviour,
+truncation, HTTP errors, cancellation, timeouts and an interrupted stream, recording Expected vs Actual
+in `docs/ai/ollama-streaming-evidence.json`. `scripts/OllamaStreaming.psm1` is the tested reference
+reader. Read the [streaming contract](docs/ai/ollama-streaming-contract.md), the
+[test results](docs/ai/ollama-streaming-test-results.md) and the
+[Backend handoff for BE-004/FE-002](docs/ai/ollama-streaming-handoff.md). Tests that need no model:
+`py -3 -m unittest tests.test_ollama_streaming -v`.
+
 ## Performance benchmark (AI-004)
 
 `scripts/benchmark/ollama-benchmark.ps1` (Ollama `/api/generate`) and
