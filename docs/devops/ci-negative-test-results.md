@@ -43,6 +43,23 @@ Issue ต้องการ 3 แบบ (test ล้ม, secret ปลอม, �
 
 run สะอาดสองครั้ง: Windows job 4 นาที 31 วินาที และ 5 นาที 35 วินาที, hygiene job 14 และ 19 วินาที ทำขนานกัน เวลารวม ≈ 4.5 ถึง 5.6 นาที ส่วนใหญ่เป็น Python test (≈ 3 นาที) ถ้า test .NET หรือ JavaScript ล้ม จบใน ≈ 1 นาที 48 วินาที ถ้า secret หรือลิงก์ล้ม งาน hygiene จบใน 6 ถึง 7 วินาที
 
+## รันซ้ำด้วย branch เดียว (`ci-trial/negative`)
+
+หลังรวม branch ทดลองเป็นอันเดียว (`scripts/ci/negative-trials.sh`) รันซ้ำทั้ง 8 ข้อบกพร่องบน base ใหม่ ผลตรงกับตารางด้านบนทุกข้อและแต่ละข้อล้มที่ step ที่คาดไว้เท่านั้น:
+
+| ข้อบกพร่อง | job / step ที่ล้ม |
+| --- | --- |
+| test .NET ล้ม | Build and tests: dotnet build and test, Test count gate |
+| test JavaScript ล้ม | Build and tests: JavaScript tests, Test count gate |
+| test Python ล้ม | Build and tests: Python tests, Test count gate |
+| secret ปลอมในรูป `api_key = "..."` | Secret scan and doc links: Secret scan |
+| connection string ปลอมที่มีรหัสผ่าน | Secret scan and doc links: Secret scan |
+| ลิงก์ Markdown ไปไฟล์ที่ไม่มี | Secret scan and doc links: Markdown links |
+| ลบไฟล์ test ทั้งไฟล์ | Build and tests: Test count gate (อย่างเดียว) |
+| test ที่ถูก skip | Build and tests: Test count gate (อย่างเดียว) |
+
+ครั้งแรกที่ใช้ branch เดียวล้มทุกข้อที่ step Secret scan เพราะตัวสคริปต์ `negative-trials.sh` มีค่าปลอมที่ตัวสแกนจับได้เอง ซึ่งบังผลที่ตั้งใจทดสอบ (ลิงก์เสียก็ไม่ถูกตรวจเพราะ step ก่อนหน้าล้ม) จึงใส่ `ci-allow-secret` ที่บรรทัดนั้นและรันใหม่ ผลข้างบนคือรันใหม่นี้
+
 ## ข้อจำกัด
 - ทดสอบด้วย push ไป branch ไม่ใช่ PR จริง workflow เดียวกันทำงานบน `pull_request` แต่ยังไม่เห็นผลบน PR จริง ซึ่ง Definition of Done ของ Issue ต้องการ
 - branch protection ยังไม่ได้ตั้ง (ต้องให้ Leader อนุมัติ ดู [ci-quality-gates.md](ci-quality-gates.md))
