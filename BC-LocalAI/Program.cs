@@ -37,6 +37,17 @@ builder.Services.AddHttpClient<IAIService, OllamaAIService>((serviceProvider, cl
     // cancellation can be told apart and the body read is covered too; HttpClient's own 100 s default must not cut in first.
     client.Timeout = Timeout.InfiniteTimeSpan;
 });
+builder.Services.AddHttpClient<IStreamingAIService, OllamaStreamingService>((serviceProvider, client) =>
+{
+    var ollama = serviceProvider.GetRequiredService<IOptions<OllamaOptions>>().Value;
+    client.BaseAddress = OllamaOptions.BuildBaseAddress(ollama.BaseUrl);
+    client.Timeout = Timeout.InfiniteTimeSpan;
+})
+.ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler
+{
+    // Never drain a cancelled stream for the default two seconds; close it so Ollama stops generating immediately.
+    MaxResponseDrainSize = 0
+});
 
 var app = builder.Build();
 

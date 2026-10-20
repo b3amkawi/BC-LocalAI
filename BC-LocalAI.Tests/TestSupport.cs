@@ -93,6 +93,21 @@ internal static class TestApp
                     .ConfigurePrimaryHttpMessageHandler(() => handler));
         }).CreateClient();
 
+    public static HttpClient CreateClientWithStreamingOllama(
+        this WebApplicationFactory<Program> factory,
+        HttpMessageHandler handler,
+        string environment = "Development",
+        string timeoutSeconds = "180",
+        string maxResponseBytes = "1048576") =>
+        factory.WithWebHostBuilder(builder =>
+        {
+            builder.UseEnvironment(environment);
+            builder.PinOllama(timeoutSeconds: timeoutSeconds, maxResponseBytes: maxResponseBytes);
+            builder.ConfigureTestServices(services =>
+                services.AddHttpClient<IStreamingAIService, OllamaStreamingService>()
+                    .ConfigurePrimaryHttpMessageHandler(() => handler));
+        }).CreateClient();
+
     /// <summary>App that answers with <see cref="MockAIService"/> (no Ollama involved).</summary>
     public static HttpClient CreateClientWithMock(
         this WebApplicationFactory<Program> factory,

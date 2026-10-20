@@ -269,6 +269,10 @@ public static class InvalidResponseReasons
     public const string AnswerFieldInvalid = "AnswerFieldInvalid";
     public const string AnswerEmpty = "AnswerEmpty";
     public const string ThinkMarker = "ThinkMarker";
+    public const string InvalidStreamingRecord = "InvalidStreamingRecord";
+    public const string UnexpectedDataAfterDone = "UnexpectedDataAfterDone";
+    public const string InvalidUtf8 = "InvalidUtf8";
+    public const string InterruptedStream = "InterruptedStream";
 }
 
 /// <summary>Bounded categories for AI_RESPONSE_TOO_LARGE.</summary>

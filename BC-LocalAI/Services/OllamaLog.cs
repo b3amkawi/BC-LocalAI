@@ -49,4 +49,11 @@ internal static partial class OllamaLog
         Message = "Ollama response is too large. Reason={Reason} EvalTokens={EvalTokens} MaxOutputTokens={MaxOutputTokens} BodyBytes={BodyBytes} MaxResponseBytes={MaxResponseBytes} ElapsedMs={ElapsedMs}")]
     public static partial void ResponseTooLarge(
         ILogger logger, string reason, int? evalTokens, int maxOutputTokens, long bodyBytes, int maxResponseBytes, long elapsedMs);
+
+    [LoggerMessage(
+        EventId = 4008,
+        Level = LogLevel.Information,
+        Message = "Ollama stream completed. Model={Model} ElapsedMs={ElapsedMs} EvalTokens={EvalTokens} BodyBytes={BodyBytes}")]
+    public static partial void StreamAnswered(
+        ILogger logger, string model, long elapsedMs, int? evalTokens, int bodyBytes);
 }

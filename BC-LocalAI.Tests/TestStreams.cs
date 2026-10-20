@@ -225,6 +225,36 @@ internal sealed class DripStream(byte[] data, TimeSpan delay) : Stream
     public override void Write(byte[] buffer, int offset, int count) => throw new NotSupportedException();
 }
 
+/// <summary>Returns predetermined byte counts so UTF-8 code points and NDJSON lines can cross network reads.</summary>
+internal sealed class ChunkedReadStream(byte[] data, params int[] chunkSizes) : Stream
+{
+    private int _position;
+    private int _chunk;
+
+    public override bool CanRead => true;
+    public override bool CanSeek => false;
+    public override bool CanWrite => false;
+    public override long Length => throw new NotSupportedException();
+    public override long Position { get => throw new NotSupportedException(); set => throw new NotSupportedException(); }
+    public override int Read(byte[] buffer, int offset, int count) => throw new NotSupportedException();
+
+    public override ValueTask<int> ReadAsync(Memory<byte> buffer, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        if (_position >= data.Length) return ValueTask.FromResult(0);
+        var requested = chunkSizes.Length == 0 ? 1 : chunkSizes[_chunk++ % chunkSizes.Length];
+        var count = Math.Min(Math.Min(requested, buffer.Length), data.Length - _position);
+        data.AsMemory(_position, count).CopyTo(buffer);
+        _position += count;
+        return ValueTask.FromResult(count);
+    }
+
+    public override void Flush() { }
+    public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();
+    public override void SetLength(long value) => throw new NotSupportedException();
+    public override void Write(byte[] buffer, int offset, int count) => throw new NotSupportedException();
+}
+
 internal static class OllamaBodies
 {
     private static readonly JsonSerializerOptions Relaxed = new() { Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping };
