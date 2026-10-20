@@ -264,3 +264,14 @@ For a Thai explanation of AI-001 through AI-003, the tools used, file locations,
 limitations, and questions for team handoff, read the [AI work handoff guide](docs/ai/ai-001-003-handoff.md).
 For a beginner explanation of API/JSON terminology, the request flow, testing,
 timing metrics, PowerShell syntax, and Git workflow, start with the [Thai learning guide](docs/ai/ai-001-003-explained.md).
+
+## Performance benchmark (AI-004)
+
+`scripts/benchmark/ollama-benchmark.ps1` (Ollama `/api/generate`) and
+`scripts/benchmark/backend-benchmark.ps1` (Backend `/api/chat`) send predefined short, medium and
+long prompts (45 fixed prompts) at 1, 2, 5 and 10 concurrent requests and write per-request CSV rows
+plus a JSON summary (latency percentiles, throughput, success/timeout rate, CPU/RAM/GPU/VRAM).
+`scripts/benchmark/cold-start-benchmark.ps1` repeats the cold-start measurement. All need PowerShell 7
+and are loopback only. See the [test plan](docs/performance/benchmark-plan.md),
+the [performance report](docs/performance/benchmark-report.md) (preliminary results) and the
+[handoff for BE-003/BE-004](docs/performance/benchmark-handoff.md).
