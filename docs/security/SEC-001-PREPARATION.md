@@ -1,6 +1,7 @@
 # SEC-001 - Preparation (before the legacy login code is available)
 
-Issue: #20 · Status: **preparation only. This is not the security review.**
+Issue: #20 · Status: **superseded.** The project owner decided (2026-10-20) to use MySQL with BC-LocalAI's own accounts; no company
+login system or data will be provided. The checklist below is kept only for the case that a legacy system is offered later.
 
 > อัปเดต 2026-10-20: ผู้ใช้อนุญาตให้สร้าง MySQL/บัญชีพัฒนาใหม่เองเมื่อยังไม่มีข้อมูล Legacy
 > และเลือก native MySQL บน Windows ไม่ใช้ Docker/WSL ดู [ผลตรวจและขอบเขตใหม่](legacy-auth-review.md)

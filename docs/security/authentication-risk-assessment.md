@@ -8,8 +8,8 @@ Boundaries: browser→API, service→MySQL, server session→cookie, API→Ollam
 
 | ID | Threat / severity | Mitigation / verification | สถานะ/ผู้รับผิดชอบ |
 |---|---|---|---|
-| R01 | Legacy algorithm/encoding unknown — High | Source + authorized vectors + review ก่อนใช้ | Blocked; SEC-001/company owner |
-| R02 | ใช้ local fixture แทนบัญชีบริษัทโดยไม่ได้อนุมัติ — High | แยกฐาน/โหมด ไม่ fallback และต้องอนุมัติ revised scope | Local preparation authorized; production not approved |
+| R01 | Legacy algorithm/encoding unknown — High | — | **N/A**: ไม่มีระบบ Legacy (การตัดสินใจของเจ้าของโปรเจกต์ 2026-10-20) |
+| R02 | ใช้บัญชีของ BC-LocalAI แทนบัญชีบริษัทโดยไม่ได้อนุมัติ — High | ได้คำสั่งให้ใช้ MySQL ของ BC-LocalAI | **ปิดแล้ว** (เจ้าของโปรเจกต์ตัดสิน); ที่เหลือคือการดูแลบัญชี = R14 |
 | R03 | Offline password cracking — High | framework IdentityV3, random salt, 220k iterations สำหรับ fixture; benchmark policy ก่อนจริง | Local tests; BE-005 production pending |
 | R04 | SQL injection / excessive DB grants — High | parameterized values, read-only user lookup, schema-specific grants, no root in app | Reader grant tested locally; API integration pending |
 | R05 | Enumeration / brute force / hash CPU exhaustion — High | generic errors, dummy hash, bounded rate/concurrency, reviewed per-user/IP lockout | BE-005 not implemented |
@@ -25,7 +25,7 @@ Boundaries: browser→API, service→MySQL, server session→cookie, API→Ollam
 
 ## Risks that must not be accepted silently
 
-R01 prevents claiming Legacy compatibility. R02/R05–R09/R14 prevent using this preparation as production Authentication.
+R01 is N/A (no legacy system) and R02 is closed by the owner's decision. R05–R09/R14 still prevent using this preparation as production Authentication until BE-005/006 implement and test them.
 No reviewer sign-off has been obtained; all residual risk acceptance belongs to the named Leader/security owner, not the author/tool.
 Local root/admin credential is only for this datadir. Do not copy fixture credentials or private option files into the application.
 

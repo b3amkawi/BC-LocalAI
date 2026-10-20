@@ -1,14 +1,14 @@
 # SEC-001 — Authentication Architecture (Proposed)
 
-วันที่: 2026-10-20 · **ออกแบบสำหรับบัญชีใหม่ใน local development; ยังไม่ implement/approve ในแอป**
+วันที่: 2026-10-20 · **สถาปัตยกรรมที่เลือก: บัญชีของ BC-LocalAI บน MySQL (การตัดสินใจของเจ้าของโปรเจกต์ (2026-10-20, ส่งต่อผ่าน watzapon)); ยังไม่ implement ในแอป (BE-005/006); รอ security sign-off**
 ข้อเท็จจริง/การเปลี่ยนขอบเขต: [Review report](legacy-auth-review.md)
 
 ## 1. ทางเลือกและข้อเสนอ
 
 | ทางเลือก | ข้อดี | ข้อจำกัด/สถานะ |
 |---|---|---|
-| เชื่อม Legacy ผ่าน adapter | บัญชีบริษัทเดิม ไม่ต้องดูแลบัญชีซ้ำ | ยังไม่มี Source/Schema; ยังอนุมัติไม่ได้ |
-| บัญชี BC-LocalAI แยก + framework PasswordHasher | เตรียมพัฒนาได้ ไม่สร้าง custom crypto | ผู้ใช้อนุญาต local fixture แล้ว; ใช้แทนบัญชีจริงต้องให้ Leader อนุมัติ |
+| เชื่อม Legacy ผ่าน adapter | บัญชีบริษัทเดิม ไม่ต้องดูแลบัญชีซ้ำ | **ไม่ใช้** — เจ้าของโปรเจกต์ยืนยันว่าไม่มีระบบ/ข้อมูลบริษัทให้ |
+| **บัญชี BC-LocalAI แยกบน MySQL + framework PasswordHasher** | ไม่สร้าง custom crypto; ควบคุม schema/สิทธิ์เองได้ | **เลือกแล้ว** (เจ้าของโปรเจกต์สั่งให้ใช้ MySQL); ต้องมีขั้นตอนดูแลบัญชี (ข้อ 5 ใน review) |
 | SSO/Identity Provider ของบริษัท | ลดการอ่าน password hash | ยังไม่ทราบว่ามี provider; ไม่เพิ่มระบบนี้เอง |
 
 ใช้ modular monolith เดิม ไม่สร้าง authentication microservice หรือ JWT แบบทำเอง
@@ -56,7 +56,8 @@ Schema ใหม่จริง: [schema.sql](../../database/sec001/schema.sql)
 instance พัฒนาแยก `127.0.0.1:3307` database `bc_localai_sec001`; MySQL80 เดิมที่ 3306 ไม่ถูกแก้
 admin local ใช้เฉพาะ provisioning; `bc_auth_reader` ได้ SELECT เฉพาะ users ไม่ได้แก้บัญชี
 เมื่อเชื่อม DB จริงต้องใช้ TLS และตรวจ certificate/hostname ตาม CA ที่อนุมัติ; ไม่คัดลอก self-signed local defaults หรือปิด certificate validation ไป production
-BE-005 เดิมกำหนด Company DB read-only: ห้ามเพิ่ม write เพื่อทำ lockout/rehash โดยไม่อนุมัติ
+ฐานนี้เป็นของ BC-LocalAI เอง ข้อกำหนด "Company DB read-only" ใน BE-005 จึงหมายถึง: บัญชีที่ใช้ตรวจรหัสผ่าน (`bc_auth_reader`) อ่านอย่างเดียว
+ส่วนการเขียน lockout/attempt counters ให้ BE-005/006 สร้างบัญชี writer แยกที่แก้ได้เฉพาะคอลัมน์ที่จำเป็น ไม่ใช้ admin/root ในแอป
 BE-006 ต้องมี application session/attempt store พร้อมสิทธิ์เฉพาะของมัน ไม่ใช้ MySQL root
 ไม่มี ChatHistory/schema บริษัท migration ในงานนี้
 

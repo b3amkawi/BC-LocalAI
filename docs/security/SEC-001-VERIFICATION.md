@@ -5,7 +5,7 @@
 อัปเดต main อีกครั้งหลัง FE-002 merge: `91916ea0daf71c22d2abb10e36f97088f3bea63a`, local pull merge `d22bd5b`
 Implementation commit: `f0b54c1`; ผล regression สุดท้ายด้านล่างเป็นหลัง pull รอบใหม่นี้
 
-**Local database/tooling tested. Original Legacy review and production Authentication approval remain incomplete.**
+**Local database/tooling tested. ขอบเขต: ใช้บัญชีของ BC-LocalAI บน MySQL ตามที่เจ้าของโปรเจกต์สั่ง (ไม่มีระบบ Legacy ให้ตรวจ); security sign-off ของ design ยังรออยู่**
 
 ## 1. สิ่งที่ทำจริง
 
@@ -119,7 +119,7 @@ MySQL Workbench: สร้าง connection ชื่อ **BC-LocalAI SEC-001 (l
 
 ## 5. ข้อจำกัด / approval
 
-- ไม่ได้รัน Legacy Login/Company MySQL tests เพราะไม่มี inputs; ไม่ได้ยืนยันว่าบริษัทไม่มีระบบเดิม
+- ไม่มี Legacy Login/Company MySQL tests เพราะเจ้าของโปรเจกต์ยืนยันว่าไม่มีระบบ/ข้อมูลบริษัทให้ (N/A ตามการตัดสินใจ)
 - Auth API/session/CSRF/authorization/rate limit/ownership ยัง Not Run: implementation อยู่ BE-005/006/007/FE-003
 - ไม่ได้รัน Python/live Ollama ในรอบนี้ เพราะไม่ได้แก้ AI scripts หรือ application runtime
 - ไม่ได้สแกน Git history หรือระบบ MySQL80 เดิมทั้งระบบ ไม่อ้างว่าไม่มี secret/ช่องโหว่ทั่ว repository

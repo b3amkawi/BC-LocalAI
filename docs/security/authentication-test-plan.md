@@ -57,12 +57,12 @@ logs/temporary root password/generated SQL/hash ทั้งหมดอยู�
 
 | Original AC | Evidence / current disposition |
 |---|---|
-| Existing Login Source reviewed | Blocked — source not supplied |
-| Identify Custom Hash algorithm | Blocked — IdentityV3 fixture is not legacy algorithm |
-| Salt/iterations/encoding/compare reviewed | Blocked for Legacy; framework fixtures verified separately |
-| Company MySQL Schema reviewed | Blocked — new local schema is not company schema |
-| Account status handling reviewed | Local data states only; real Login logic Not Run |
-| Legacy Adapter Design | Conceptual boundary in Architecture; implementation-specific details blocked |
+| Existing Login Source reviewed | **N/A** — owner decision: no company login system; BC-LocalAI uses its own MySQL accounts |
+| Identify Custom Hash algorithm | **N/A** for legacy; the chosen algorithm is documented and tested instead (IdentityV3 PBKDF2-HMAC-SHA512, 220k: F02) |
+| Salt/iterations/encoding/compare reviewed | Done for the chosen hasher (F02/F03, D06); N/A for legacy |
+| Company MySQL Schema reviewed | Replaced by BC-LocalAI's own schema `database/sec001/schema.sql` (D01–D05) |
+| Account status handling reviewed | Data states tested (D01); Login enforcement is BE-005 (section 3) |
+| Legacy Adapter Design | **N/A** — no adapter; the verifier is the framework `PasswordHasher` |
 | Authentication Flow Diagram | Proposed in Architecture |
 | Session Design | Proposed; policy approval pending |
 | Authorization Model | Proposed; no enforcement implemented |
@@ -79,7 +79,7 @@ logs/temporary root password/generated SQL/hash ทั้งหมดอยู�
 
 ## 6. Handoff / approval gate
 
-Do not mark original SEC-001 Done or unlock company authentication based on synthetic data alone.
-Leader must confirm revised local-account scope vs Legacy integration and approve security design/API/policies.
-BE-005 must resolve the existing read-only requirement versus new-account lifecycle/lockout writes explicitly.
+Scope decided by the owner (2026-10-20): BC-LocalAI's own accounts on MySQL, no legacy integration.
+Still open before production: security sign-off of design/API/policies and the account lifecycle owner (create/disable/reset).
+BE-005 uses `bc_auth_reader` for lookups and a separate least-privilege writer for lockout/attempts (Architecture section 3).
 Full automated Authentication Integration Tests belong to BE-005/006; this issue supplies plan and local evidence only.

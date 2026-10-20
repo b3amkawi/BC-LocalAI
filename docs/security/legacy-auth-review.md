@@ -2,7 +2,11 @@
 
 วันที่: 2026-10-20 · Issue: [SEC-001 #20](https://github.com/b3amkawi/BC-LocalAI/issues/20)
 
-**สถานะ: Partial / Legacy review blocked / New local design proposed — ไม่ใช่ Security Review ที่อนุมัติแล้ว**
+**สถานะ: ขอบเขตชัดเจนแล้ว — ไม่มีระบบ Legacy ให้ตรวจ; BC-LocalAI ใช้บัญชีของตัวเองบน MySQL · Security design ยังรอผู้อนุมัติ sign-off**
+
+> **การตัดสินใจของเจ้าของโปรเจกต์ (2026-10-20, ส่งต่อผ่าน watzapon):** ให้ใช้ **MySQL** และ **ไม่มีข้อมูล/ระบบ Login ของบริษัทให้** จึงสร้างระบบบัญชีของ BC-LocalAI เอง
+> ส่วนที่ Issue #20 ขอให้ตรวจ Source/Hash/Schema ของบริษัทจึงเป็น **N/A (ไม่ใช้ตามการตัดสินใจ)** ไม่ใช่ "รอข้อมูล"
+> หากวันหนึ่งบริษัทส่งระบบเดิมมาให้เชื่อม ให้เปิดงานใหม่ตามข้อ 4 และ [SEC-001-PREPARATION.md](SEC-001-PREPARATION.md)
 
 ## 1. ข้อเท็จจริงและคำสั่งเพิ่มเติม
 
@@ -15,20 +19,20 @@
 - **ไม่พบใน repo ไม่ได้แปลว่าบริษัทไม่มีระบบเดิม** และไม่ได้รับอนุญาตให้ค้นข้อมูลลับที่อื่น
 - เครื่องมี MySQL Community Server **8.0.46**, MySQL80 service และ Workbench อยู่แล้ว
 
-ผู้ใช้สั่งในแชตว่า หากไม่มีข้อมูลเดิมให้สร้างเอง และอนุญาตให้ดำเนินการด้วย MySQL Windows โดยตรง
-จึงเพิ่มเฉพาะ **ฐานบัญชีสมมติแยกสำหรับพัฒนา** และเอกสารออกแบบ ยังไม่เขียน Login API/Cookie/UI
-ไม่เปลี่ยน Issue บน GitHub ไม่ปิด Issue และไม่อ้างว่า Leader อนุมัติการแทนระบบพนักงานจริง
+เจ้าของโปรเจกต์สั่งให้ใช้ MySQL โดยไม่มีข้อมูลบริษัท จึงใช้ **ระบบบัญชีของ BC-LocalAI เอง** (schema `database/sec001/schema.sql`)
+งานนี้ส่งมอบฐานพัฒนาแยก + บัญชีสมมติ + เอกสารออกแบบ ยังไม่เขียน Login API/Cookie/UI (อยู่ใน BE-005/006/FE-003)
+ไม่แก้ข้อความ Issue บน GitHub; การ sign-off ด้าน security ของ design ยังต้องมีผู้อนุมัติ (ข้อ 5)
 
-## 2. ผลตรวจ Legacy ตาม Scope 4.1–4.3
+## 2. Scope 4.1–4.3 (ตรวจระบบเดิม): N/A ตามการตัดสินใจ — ตารางนี้เก็บไว้เป็นบันทึกว่าไม่มีอะไรให้ตรวจ
 
-| รายการ | ผลจากหลักฐาน | การดำเนินการ |
+| รายการ | ผลจากหลักฐาน | สิ่งที่ใช้แทน |
 |---|---|---|
-| Login request / user lookup / SQL / error handling | ไม่มี Source ให้ตรวจ | Blocked — ขอ Source ที่อนุญาตก่อน |
-| Algorithm / salt / iterations / encoding / format / compare | ไม่ทราบ | ห้ามเดาหรือสร้างของใหม่แล้วอ้างว่าเข้ากันได้ |
-| Empty/null password และ hash compatibility | ยังไม่ได้ทดสอบกับ Legacy | ขอ synthetic vectors จากเจ้าของระบบ |
-| MySQL user fields / stable ID / roles / account status | ไม่มี Company DDL | Schema ใหม่ใน `database/sec001/schema.sql` เป็นคนละระบบ |
-| Session / failed login / audit | ไม่มี implementation เดิม | ไม่สามารถยืนยันว่าปลอดภัยหรือมีช่องโหว่ |
-| ส่วนเดิมที่ reuse ได้ / ไม่ควร reuse | ยังตัดสินไม่ได้ | ไม่คัดลอก Authentication Logic |
+| Login request / user lookup / SQL / error handling | ไม่มีระบบเดิม (N/A) | ออกแบบใหม่ใน [Architecture](authentication-architecture.md) ข้อ 2 และ [API Contract](authentication-api-contract.md); implement ใน BE-005 |
+| Algorithm / salt / iterations / encoding / format / compare | ไม่มีระบบเดิม (N/A) | `PasswordHasher` IdentityV3 (ข้อ 3) ทดสอบแล้ว; ไม่มีการอ้างว่าเข้ากันได้กับระบบอื่น |
+| Empty/null password และ hash compatibility | ไม่มีระบบเดิม (N/A) | BE-005 ต้องปฏิเสธ empty/null/oversize password (Test plan ข้อ 3) |
+| MySQL user fields / stable ID / roles / account status | ไม่มี Company DDL (N/A) | Schema ของ BC-LocalAI `database/sec001/schema.sql` |
+| Session / failed login / audit | ไม่มี implementation เดิม (N/A) | ออกแบบใน Architecture ข้อ 4; implement ใน BE-005/006 |
+| ส่วนเดิมที่ reuse ได้ / ไม่ควร reuse | ไม่มีระบบเดิม (N/A) | ไม่มี Authentication Logic ของบริษัทถูกคัดลอกมา |
 
 ## 3. การตรวจ Hash ของข้อมูลใหม่ (ไม่ใช่ Legacy)
 
@@ -50,12 +54,17 @@ Salt/format/verification ใช้ framework; Tests ตรวจ header ว่�
 ห้าม rehash, reset password, เพิ่ม DB write grant หรือยอมรับ weak format เงียบ ๆ ภายใต้ SEC-001
 ไม่มีหลักฐานว่าระบบบริษัทใช้ weak hash ในรอบนี้
 
-## 5. สิ่งที่รอการตัดสินใจ
+## 5. การตัดสินใจ: ที่ได้แล้ว และที่ยังรอ
 
-1. Leader/เจ้าของระบบยืนยันว่าจะใช้บัญชี BC-LocalAI แยกจริง หรือรอเชื่อมบัญชีบริษัท และปรับ Issue #20/#21 ให้ตรงกัน
-2. ระบุผู้อนุมัติ Security Review, ผู้รับผิดชอบสร้าง/ปิดบัญชี และ Password Reset (ไม่มี self-registration ในข้อเสนอนี้)
-3. อนุมัติอายุ Session/lockout/rate limit, roles, ขอบเขต DB write และการจัดเก็บ audit/retention
-4. หากยังใช้ Legacy ต้องส่ง Source, DDL, บัญชีทดสอบที่อนุญาต และ security requirements ผ่านช่องทางปลอดภัย
+| # | เรื่อง | สถานะ |
+|---|---|---|
+| 1 | ใช้บัญชี BC-LocalAI แยกบน MySQL หรือเชื่อมบัญชีบริษัท | **ตัดสินแล้ว: ใช้บัญชีของ BC-LocalAI บน MySQL** (ไม่มีระบบบริษัท) |
+| 2 | ใครสร้าง/ปิด/reset บัญชีพนักงาน (ไม่มี self-registration) และใครเป็นผู้ sign-off ด้าน security | **รอเจ้าของโปรเจกต์** |
+| 3 | อายุ Session (เสนอ idle 30 นาที / absolute 8 ชั่วโมง), lockout/rate limit, roles (เสนอ User/Admin), audit/retention | **รอเจ้าของโปรเจกต์** — ใช้ค่าที่เสนอเป็นค่าเริ่มต้นใน BE-005/006 ได้ จนกว่าจะมีคำสั่งเปลี่ยน |
+| 4 | ข้อมูลระบบ Legacy | **N/A** — ไม่มีให้ (เปิดงานใหม่ถ้ามีภายหลัง) |
+
+ผลต่อ BE-005 (#21): Issue เขียนว่า "Company MySQL" — ให้หมายถึง **ฐาน MySQL ของ BC-LocalAI** (`bc_localai_sec001` / schema นี้)
+และ verifier คือ `PasswordHasher` มาตรฐาน ไม่มี Legacy adapter
 
 เอกสารต่อเนื่อง: [Architecture](authentication-architecture.md), [API Contract](authentication-api-contract.md),
 [Risk assessment](authentication-risk-assessment.md), [Test plan / handoff](authentication-test-plan.md)
