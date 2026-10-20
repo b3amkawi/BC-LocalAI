@@ -46,3 +46,8 @@ mock timeout ยืนยันการตรวจจับและ exit beha
 ## Reproduce
 
 ดูคำสั่ง request ทั้งสามกลุ่ม, unavailable endpoint และ regression suite ใน [Integration Contract](ollama-integration-contract.md) หลักฐานไม่มี secret, token หรือข้อมูลส่วนตัว และบันทึกเฉพาะ prompt ทดสอบทั่วไปกับ response ของโมเดล
+
+
+## Follow-up: num_predict 1024
+
+ผลทดสอบเพิ่มเติมวันที่ 20 ตุลาคม 2026 ด้วย PowerShell 7.6.5 ผ่าน live smoke test 3/3 กรณี โดย request ส่ง num_predict=1024 จริง ดู [รายงานและ raw evidence](evidence/ai002-num-predict-1024/README.md) ผลนี้ไม่ใช่การทดสอบคำตอบยาวถึงเพดาน 1024 tokens และไม่ได้เปลี่ยน default contract 256
