@@ -20,16 +20,25 @@ param(
 )
 $ErrorActionPreference = 'Stop'
 
-if ([Uri]$OllamaUrl -and -not ([Uri]$OllamaUrl).IsLoopback) {
+if (-not ([Uri]$OllamaUrl).IsLoopback) {
     throw "Refusing to query a non-loopback Ollama address: $OllamaUrl"
 }
 
 $lines = [System.Collections.Generic.List[string]]::new()
 $lines.Add("Date (UTC): $([DateTime]::UtcNow.ToString('yyyy-MM-dd HH:mm'))")
-$os = Get-CimInstance Win32_OperatingSystem -ErrorAction SilentlyContinue
-if ($os) { $lines.Add("OS: $($os.Caption) $($os.Version)") }
-$gpu = & nvidia-smi --query-gpu=name,memory.total --format=csv,noheader 2>$null
-if ($gpu) { $lines.Add("GPU: $gpu") } else { $lines.Add('GPU: not detected') }
+# Works on any OS: Windows-only and NVIDIA-only commands are used only when they exist.
+if (Get-Command Get-CimInstance -ErrorAction SilentlyContinue) {
+    $os = Get-CimInstance Win32_OperatingSystem
+    $lines.Add("OS: $($os.Caption) $($os.Version)")
+} else {
+    $lines.Add("OS: $([System.Runtime.InteropServices.RuntimeInformation]::OSDescription)")
+}
+if (Get-Command nvidia-smi -ErrorAction SilentlyContinue) {
+    $gpu = & nvidia-smi --query-gpu=name,memory.total --format=csv,noheader 2>$null
+    $lines.Add("GPU: $gpu")
+} else {
+    $lines.Add('GPU: not detected')
+}
 
 try {
     $version = (Invoke-RestMethod -Uri "$OllamaUrl/api/version" -TimeoutSec 5).version
