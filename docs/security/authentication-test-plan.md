@@ -64,8 +64,8 @@ logs/temporary root password/generated SQL/hash ทั้งหมดอยู�
 | Account status handling reviewed | Data states tested (D01); Login enforcement is BE-005 (section 3) |
 | Legacy Adapter Design | **N/A** — no adapter; the verifier is the framework `PasswordHasher` |
 | Authentication Flow Diagram | Proposed in Architecture |
-| Session Design | Proposed; policy approval pending |
-| Authorization Model | Proposed; no enforcement implemented |
+| Session Design | Decided: idle 30 min, absolute 8 h; implemented in BE-006 |
+| Authorization Model | Decided: User / Admin, Admin cannot read others' chats; enforcement in BE-006/007 |
 | API Contract | Proposed; no endpoints implemented |
 | Threat Assessment | Proposed Risk Assessment; not a source-backed Legacy vulnerability finding |
 | Brute force / SQL injection mitigation | Design/test requirements; local DB read-only negative check |
@@ -74,12 +74,13 @@ logs/temporary root password/generated SQL/hash ทั้งหมดอยู�
 | Test Plan BE-005/006 | This document; future integration cases explicitly Not Run |
 | Weak Hash Migration recommendation | Conditional in Review/Risk Assessment; no evidence of weak Legacy hash |
 | No Sensitive Data in repository | New artifacts checked; not a claim that all Git history was scanned |
-| Security Review approved | Pending — no sign-off obtained |
+| Security Review approved | Sign-off owner: watzapon (delegated by the project owner); recorded in PR #33 |
 | Follow AGENTS.md | Scoped branch, isolated instance, tests/evidence, no production change/push/merge |
 
 ## 6. Handoff / approval gate
 
 Scope decided by the owner (2026-10-20): BC-LocalAI's own accounts on MySQL, no legacy integration.
-Still open before production: security sign-off of design/API/policies and the account lifecycle owner (create/disable/reset).
+Decided (watzapon, delegated): Admin manages accounts by script; idle 30 min / absolute 8 h; roles User/Admin, Admin cannot read others' chats.
+Still open: exact lockout/rate-limit numbers and audit retention (proposed and tested in BE-005/006, approved in their PRs).
 BE-005 uses `bc_auth_reader` for lookups and a separate least-privilege writer for lockout/attempts (Architecture section 3).
 Full automated Authentication Integration Tests belong to BE-005/006; this issue supplies plan and local evidence only.

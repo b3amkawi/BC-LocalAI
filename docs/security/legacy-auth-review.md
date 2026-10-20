@@ -59,9 +59,14 @@ Salt/format/verification ใช้ framework; Tests ตรวจ header ว่�
 | # | เรื่อง | สถานะ |
 |---|---|---|
 | 1 | ใช้บัญชี BC-LocalAI แยกบน MySQL หรือเชื่อมบัญชีบริษัท | **ตัดสินแล้ว: ใช้บัญชีของ BC-LocalAI บน MySQL** (ไม่มีระบบบริษัท) |
-| 2 | ใครสร้าง/ปิด/reset บัญชีพนักงาน (ไม่มี self-registration) และใครเป็นผู้ sign-off ด้าน security | **รอเจ้าของโปรเจกต์** |
-| 3 | อายุ Session (เสนอ idle 30 นาที / absolute 8 ชั่วโมง), lockout/rate limit, roles (เสนอ User/Admin), audit/retention | **รอเจ้าของโปรเจกต์** — ใช้ค่าที่เสนอเป็นค่าเริ่มต้นใน BE-005/006 ได้ จนกว่าจะมีคำสั่งเปลี่ยน |
+| 2 | ใครสร้าง/ปิด/reset บัญชีพนักงาน และใครเป็นผู้ sign-off ด้าน security | **ตัดสินแล้ว:** ผู้มี role **Admin** สร้าง/ปิด/reset บัญชีผ่าน**สคริปต์** (ไม่มี self-registration; ตัวสคริปต์ทำใน BE-005/006) · ผู้ sign-off ด้าน security คือ **watzapon (เติ้ฬ)** |
+| 3 | อายุ Session, roles | **ตัดสินแล้ว:** idle **30 นาที**, absolute **8 ชั่วโมง** (renewal ไม่เกิน absolute) · roles **User / Admin**; **Admin ไม่มีสิทธิ์อ่านแชตของคนอื่น** |
+| 3b | จำนวนครั้งของ lockout/rate limit, audit/retention | ยังไม่กำหนดตัวเลข — BE-005/006 เสนอพร้อมเหตุผลและเทสต์ ให้ผู้ sign-off อนุมัติใน PR ของ BE-005 |
 | 4 | ข้อมูลระบบ Legacy | **N/A** — ไม่มีให้ (เปิดงานใหม่ถ้ามีภายหลัง) |
+| 5 | BE-005 ใช้ฐานไหน | **ตัดสินแล้ว:** MySQL ของ BC-LocalAI เอง; บัญชี **reader** (อ่านอย่างเดียว) สำหรับตรวจ login และบัญชี **writer แยก** ที่แก้ได้เฉพาะคอลัมน์ lockout/attempt |
+| 6 | instance เดิมที่ port 3307 (สร้างก่อนแก้สคริปต์) | **ตัดสินแล้ว:** ลบ `private/bootstrap.sql` (ทำแล้ว ดู Verification ข้อ 3b) |
+
+ผู้ตัดสินข้อ 2, 3, 5, 6: watzapon (เติ้ฬ) ตามที่เจ้าของโปรเจกต์มอบสิทธิ์ให้ตัดสิน, 2026-10-20.
 
 ผลต่อ BE-005 (#21): Issue เขียนว่า "Company MySQL" — ให้หมายถึง **ฐาน MySQL ของ BC-LocalAI** (`bc_localai_sec001` / schema นี้)
 และ verifier คือ `PasswordHasher` มาตรฐาน ไม่มี Legacy adapter

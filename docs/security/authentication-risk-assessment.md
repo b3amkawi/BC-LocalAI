@@ -21,12 +21,13 @@ Boundaries: browser→API, service→MySQL, server session→cookie, API→Ollam
 | R11 | MySQL exposed to network — High | new instance bind 127.0.0.1, port3307, mysqlx off; no firewall opening | Local verification; existing3306 service untouched/not audited |
 | R12 | Unsafe AI HTML/XSS steals browser actions — High | text rendering/CSP, no unsafe innerHTML; HttpOnly alone does not stop CSRF-like actions from XSS | FE-002/FE-003 tests separate |
 | R13 | Lost keys/DB/restart leaves orphan sessions — Medium | backup/restore, durable session store, defined expiration, fail closed on store loss | Production recovery policy pending |
-| R14 | New account lifecycle has no owner/reset process — High | designate account admins, approved creation/reset/offboarding/audit procedures | Leader decision before real employees |
+| R14 | New account lifecycle has no owner/reset process — High | Admin role creates/disables/resets accounts through a script; audit of those actions | **Owner decided** (Admin via script); the script and its audit are BE-005/006 work |
 
 ## Risks that must not be accepted silently
 
 R01 is N/A (no legacy system) and R02 is closed by the owner's decision. R05–R09/R14 still prevent using this preparation as production Authentication until BE-005/006 implement and test them.
-No reviewer sign-off has been obtained; all residual risk acceptance belongs to the named Leader/security owner, not the author/tool.
+Security sign-off owner: **watzapon (เติ้ฬ)**, delegated by the project owner (2026-10-20). Residual risk acceptance belongs to that person, not to the author/tool.
+Sign-off of this design is recorded in PR #33; implementation (BE-005/006) needs its own review and sign-off.
 Local root/admin credential is only for this datadir. Do not copy fixture credentials or private option files into the application.
 
 ## Conditional migration recommendation

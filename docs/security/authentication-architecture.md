@@ -48,7 +48,7 @@ Schema ใหม่จริง: [schema.sql](../../database/sec001/schema.sql)
 | display_name | แสดงผล Unicode; UI ต้อง escape |
 | password_hash | IdentityV3 Base64 เท่านั้นใน local fixture; ไม่ส่งให้ Client |
 | is_active | default false; ตรวจฝั่ง server |
-| role | User/Admin เป็นข้อเสนอ; fixtures ทุกบัญชีเป็น User ไม่แจก Admin อัตโนมัติ |
+| role | **User / Admin (ตัดสินแล้ว)**; fixtures ทุกบัญชีเป็น User ไม่แจก Admin อัตโนมัติ |
 | security_stamp | เปลี่ยนเมื่อรหัสผ่าน/สถานะ/สิทธิ์เปลี่ยน; ไม่ใช่ secret สำหรับใช้แทน session |
 | access_failed_count / lockout_end_utc | เตรียม field; ยังไม่มี login/lockout persistence implementation |
 | updated_at_utc | UTC; writer ต้องอัปเดตเอง ไม่ถือว่า trigger ทำให้อัตโนมัติ |
@@ -67,13 +67,14 @@ BE-006 ต้องมี application session/attempt store พร้อมส�
 - ใช้ HTTPS รวม localhost เมื่อเชื่อม Auth จริง; ไม่ลด Secure flag เพื่อให้เว็บ HTTP เดิม Login ได้
 - cookie ป้องกันด้วย Data Protection keys นอก web root/จำกัด ACL; วาง key backup/rotation ก่อนใช้หลาย instance
 - session ID ใหม่หลัง Login; เก็บ server-side session ID, stable user ID, stamp/version, created/expiry/revoked timestamps
-- ค่าเสนอเพื่อรีวิว: idle 30 นาที, absolute 8 ชั่วโมง, renewal ไม่ขยายเลย absolute; ยังไม่ใช่ข้อกำหนดบริษัท
+- **ตัดสินแล้ว:** idle 30 นาที, absolute 8 ชั่วโมง, renewal ไม่ขยายเลย absolute
 - Logout revoke session ฝั่ง server และ clear cookie; cookie ที่ถูกขโมย/เก่าต้องใช้ซ้ำไม่ได้
 - ตรวจ active/role/stamp ทุก protected request ก่อนเรียก AI; DB/session store ล่มต้อง fail closed
 - สำหรับ SSE ที่เปิดอยู่: BE-006 ต้องกำหนด bounded revalidation และ cancel upstream เมื่อ revoke/expire; ไม่อ้างว่าป้องกันได้จากเช็กก่อนเปิดอย่างเดียว
 - `/api/chat` และ `/api/chat/stream` ต้อง authenticated; auth/CSRF rejection ก่อน SSE headers; คง AI event contract เดิม
-- role ไม่ให้สิทธิ์อ่านประวัติคนอื่นเอง; ทุก conversation route ต้องเช็ก ownership จาก server principal
-- session lifetime/การ revoke ระหว่าง stream/สิทธิ์ Admin ต้อง Leader และเจ้าของ security requirements อนุมัติ
+- role ไม่ให้สิทธิ์อ่านประวัติคนอื่น — **รวมถึง Admin (ตัดสินแล้ว)**; ทุก conversation route ต้องเช็ก ownership จาก server principal
+- Admin ทำได้: สร้าง/ปิด/reset บัญชีผ่านสคริปต์ (ทำใน BE-005/006); ไม่มีหน้าจอหรือ API สำหรับอ่านข้อมูลผู้ใช้อื่น
+- กรอบเวลาที่ต้องตัด SSE ที่เปิดอยู่เมื่อ session ถูก revoke และตัวเลข lockout/rate limit: BE-006 เสนอพร้อมเทสต์ ให้ผู้ sign-off (watzapon) อนุมัติ
 
 ## 5. Recovery / handoff
 
