@@ -112,6 +112,33 @@ class TestCountGate(unittest.TestCase):
         self.assertEqual(check_test_counts.parse_dotnet(text)["total"], 24)
 
 
+class TestNamedSkips(unittest.TestCase):
+    BASE = {"allowed_skipped": 0, "allowed_skips": {"python": ["test_codex_only"]},
+            "min_tests": {"dotnet": 10, "node": 5, "python": 20}}
+    LOG = ("test_codex_only (m.C.test_codex_only) ... skipped 'Codex bundled PowerShell is not installed'\n"
+           "test_other (m.C.test_other) ... ok\n\nRan 25 tests in 1.2s\n\nOK (skipped=1)\n")
+
+    def gate(self, python_log, baseline=None):
+        return TestCountGate().run_gate(python=python_log, baseline=baseline or self.BASE)
+
+    def test_the_named_skip_is_allowed(self):
+        self.assertEqual(self.gate(self.LOG), 0)
+
+    def test_a_different_skipped_test_fails(self):
+        log = self.LOG.replace("test_codex_only (m.C.test_codex_only)", "test_new_one (m.C.test_new_one)")
+        self.assertEqual(self.gate(log), 1)
+
+    def test_an_extra_skipped_test_fails_even_with_the_allowed_one(self):
+        log = self.LOG.replace("Ran 25", "test_x (m.C.test_x) ... skipped 'no reason'\nRan 25").replace("skipped=1", "skipped=2")
+        self.assertEqual(self.gate(log), 1)
+
+    def test_without_the_allowance_the_same_log_fails(self):
+        self.assertEqual(self.gate(self.LOG, baseline=BASELINE), 1)
+
+    def test_the_skipped_names_are_parsed(self):
+        self.assertEqual(check_test_counts.parse_python(self.LOG)["skipped_tests"], ["test_codex_only"])
+
+
 class TestSecretScan(unittest.TestCase):
     def scan(self, files: dict) -> int:
         with tempfile.TemporaryDirectory() as tmp:

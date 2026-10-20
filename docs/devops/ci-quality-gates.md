@@ -39,7 +39,7 @@
 PR จะ merge ได้เมื่อ **ทุกข้อ** ผ่าน:
 
 1. build และทุก test ผ่าน (.NET, JavaScript, Python)
-2. ไม่มี test ถูกข้าม (`allowed_skipped = 0`) กัน test ที่ "ผ่าน" เพราะข้าม เช่นเมื่อไม่มี `pwsh` ซึ่งเคยข้ามไป 68 ข้อ
+2. ไม่มี test ถูกข้าม กัน test ที่ "ผ่าน" เพราะข้าม เช่นเมื่อไม่มี `pwsh` ซึ่งเคยข้ามไป 68 ข้อ ข้อยกเว้นเดียวคือ test ที่ระบุชื่อใน `allowed_skips` ของ `docs/devops/test-baseline.json` (ตอนนี้มี `test_bundled_runtime_preserves_child_exit_code` ที่ต้องใช้ PowerShell ที่มากับ Codex จึงถูกข้ามบนทุกเครื่องที่ไม่มี รวมถึง CI) การข้ามอื่นทุกตัวทำให้ gate ล้ม
 3. จำนวน test ที่รัน **ไม่น้อยกว่า** ค่าใน `docs/devops/test-baseline.json` ถ้าต้องลดจำนวน ต้องแก้ไฟล์นี้ใน PR เดียวกัน การลดจึงเห็นใน diff และต้องอธิบายใน PR
 4. สแกน secret ไม่พบ (`scripts/ci/scan_secrets.py`)
 5. ลิงก์ relative ในไฟล์ `.md` ทุกลิงก์ชี้ไปยังไฟล์ที่มีอยู่ (`scripts/ci/check_doc_links.py`)

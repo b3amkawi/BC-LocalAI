@@ -30,6 +30,7 @@ NODE_RE = {
 }
 PY_RAN = re.compile(r"^Ran (\d+) tests? in ", re.M)
 PY_RESULT = re.compile(r"^(OK|FAILED)(?: \(([^)]*)\))?\s*$", re.M)
+PY_SKIP = re.compile(r"^(\w+) \([^)]*\) \.\.\. skipped ", re.M)
 
 
 class ParseError(Exception):
@@ -76,7 +77,10 @@ def parse_python(text: str) -> dict:
     failed = counts.get("failures", 0) + counts.get("errors", 0)
     if status == "FAILED" and failed == 0:
         failed = 1
-    return {"total": int(ran[-1]), "failed": failed, "skipped": counts.get("skipped", 0)}
+    return {
+        "total": int(ran[-1]), "failed": failed, "skipped": counts.get("skipped", 0),
+        "skipped_tests": PY_SKIP.findall(text),  # names, available when the log is verbose (-v)
+    }
 
 
 PARSERS = {"dotnet": parse_dotnet, "node": parse_node, "python": parse_python}
@@ -86,6 +90,7 @@ def evaluate(baseline: dict, results: dict) -> tuple[list[str], list[str]]:
     """Return (failures, table_rows)."""
     failures, rows = [], []
     allowed_skipped = baseline.get("allowed_skipped", 0)
+    named_skips = baseline.get("allowed_skips", {})   # suite -> test names that may be skipped on a clean machine
     for name in ("dotnet", "node", "python"):
         minimum = baseline["min_tests"][name]
         res = results.get(name)
@@ -98,8 +103,13 @@ def evaluate(baseline: dict, results: dict) -> tuple[list[str], list[str]]:
             problems.append(f"{res['failed']} failed")
         if res["total"] < minimum:
             problems.append(f"only {res['total']} tests ran, baseline is {minimum}")
-        if res["skipped"] > allowed_skipped:
-            problems.append(f"{res['skipped']} skipped (allowed {allowed_skipped})")
+        allowed_names = set(named_skips.get(name, []))
+        if allowed_names and res.get("skipped_tests") is not None and res["skipped"] == len(res["skipped_tests"]):
+            unexpected = [t for t in res["skipped_tests"] if t not in allowed_names]
+            if unexpected:
+                problems.append(f"unexpected skipped test(s): {', '.join(unexpected)}")
+        elif res["skipped"] > allowed_skipped + len(allowed_names):
+            problems.append(f"{res['skipped']} skipped (allowed {allowed_skipped + len(allowed_names)})")
         verdict = "FAIL" if problems else "pass"
         rows.append(f"| {name} | {res['total']} | {minimum} | {res['failed']} | {res['skipped']} | {verdict} |")
         for p in problems:
