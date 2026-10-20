@@ -2,6 +2,11 @@
 
 Issue: #20 · Status: **preparation only. This is not the security review.**
 
+> อัปเดต 2026-10-20: ผู้ใช้อนุญาตให้สร้าง MySQL/บัญชีพัฒนาใหม่เองเมื่อยังไม่มีข้อมูล Legacy
+> และเลือก native MySQL บน Windows ไม่ใช้ Docker/WSL ดู [ผลตรวจและขอบเขตใหม่](legacy-auth-review.md)
+> และ [วิธีใช้งาน/หลักฐาน](SEC-001-VERIFICATION.md) ข้อมูลใหม่นี้ไม่ใช่หลักฐานตรวจระบบบริษัท
+> Acceptance Criteria ด้าน Legacy และการอนุมัติ Security Review ใน Issue #20 ยังไม่ผ่าน
+
 SEC-001 has to review the company's real login source code, the custom password hash and the MySQL user schema. None of these are in
 this repository, so the review itself cannot start yet. This document lists what is needed, how to hand it over safely, and the checklist the
 review will follow, so the work can start as soon as the inputs arrive. Nothing here describes the real company system.
@@ -63,11 +68,12 @@ comments or in screenshots (issue section 8). Test vectors in documents must be 
 ## 4. Deliverables that will follow (issue section 8 file structure)
 
 `docs/security/legacy-auth-review.md`, `authentication-architecture.md`, `authentication-api-contract.md`,
-`authentication-risk-assessment.md`, `authentication-test-plan.md`: written **after** the inputs in section 1 are received and reviewed.
+`authentication-risk-assessment.md`, `authentication-test-plan.md`: now contain a clearly labelled **new local-account proposal**
+under the user's subsequent authorization. They do not claim the missing legacy inputs have been received or reviewed.
 
 ## 5. What can already be stated without the legacy code
 
-- BC-LocalAI will use the ASP.NET Core cookie authentication handler (no hand-made tokens), `HttpOnly`, `Secure`, `SameSite`, Data Protection keys
+- Proposed: BC-LocalAI will use the ASP.NET Core cookie authentication handler (no hand-made tokens), `HttpOnly`, `Secure`, `SameSite`, Data Protection keys
   stored outside the web root (BE-005/006 requirements).
 - The legacy adapter is isolated behind an interface, so BE-005 can be unit-tested with test vectors and no database.
 - The authentication cookie is never forwarded to Ollama (BE-006); Ollama stays loopback-only (AI-002 / BE-003).
