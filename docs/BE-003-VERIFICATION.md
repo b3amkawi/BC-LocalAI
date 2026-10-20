@@ -88,14 +88,16 @@ Finding: event 4004 logged `Ollama:BaseUrl` as written, and the validator accept
 
 | Fix | Where |
 |-----|-------|
-| `BaseUrl` containing `@`, `?` or `#` (user info, query, fragment) is refused at startup; the message states the rule and never repeats the value | `OllamaOptionsValidator` |
+| `BaseUrl` with user info, a path other than `/`, a query or a fragment is refused at startup (checked on the parsed `Uri`; round 2 of the review added the path rule); the message states the rule and never repeats the value | `OllamaOptionsValidator` |
 | Logs use `Endpoint=scheme://host:port` (`OllamaOptions.DescribeEndpoint`; unparsable value -> `invalid`); the field `BaseUrl` no longer exists in event 4004 | `OllamaLog`, `OllamaAIService` |
-| The `HttpClient` base address is built without user info, query or fragment (`OllamaOptions.BuildBaseAddress`) | `Program.cs` |
+| The `HttpClient` base address is scheme + host + port only (`OllamaOptions.BuildBaseAddress`), so the framework's own request log cannot print a path secret even if validation were off | `Program.cs` |
 
 Regression tests (`OllamaBaseUrlSecretsTests`, 45 cases): the validator refuses 7 credential-bearing URLs and 4 query/fragment URLs and still accepts 6 clean loopback URLs; the failure message and the startup
 exception never contain the user name or password; `DescribeEndpoint` keeps only scheme, host and port (8 cases); a real failed connection with a credential URL logs only `Endpoint` and no log entry, field or exception text contains the secret;
 the whole host (validation switched off on purpose, framework request logging included) never logs the secret. `OllamaLoggingTests` now asserts the `Endpoint` field.
 Mutation check: logging the raw URL again (6 tests fail), removing the `@` check (21 fail), a `DescribeEndpoint` that keeps user info (11 fail).
+
+Round 2 (owner comment 6282466768): `http://127.0.0.1:1/REVIEW-PATH-SECRET` passed validation and the built-in HttpClient log printed `.../REVIEW-PATH-SECRET/api/generate`. Confirmed, fixed as above. New tests: 5 path URLs refused, 4 whole-host cases (path, nested path, query, fragment; validation off) show the framework log line without the secret. Now 329 .NET tests. Mutations: no path check (8 fail), base address keeps path (1 fail), both (9 fail). Real app: the owner's URL stops startup; default config answers 200.
 
 Other review points: (c) `num_predict` 256 -> 1024 still **needs the AI-002 owner's confirmation** (section 6); `docs/ai` was not edited. (d) The PR description now says `Refs #16` instead of `Closes #16`, because the final timeout / concurrency policy depends on the AI-004 benchmark.
 

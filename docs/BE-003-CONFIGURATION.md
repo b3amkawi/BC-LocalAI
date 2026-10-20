@@ -7,7 +7,7 @@ Issue: #16 · Settings live in `BC-LocalAI/appsettings.json` under `Ollama` and 
 
 | Setting | Default | Allowed | What it controls |
 |---------|--------:|---------|------------------|
-| `Ollama:BaseUrl` | `http://127.0.0.1:11434` | loopback `http`/`https` only; **no user name / password (`@`), query (`?`) or fragment (`#`)** - such a value stops the application at startup | where Ollama is reached (AI-002: loopback only). Logs describe it only as `scheme://host:port` |
+| `Ollama:BaseUrl` | `http://127.0.0.1:11434` | loopback `http`/`https`, **`scheme://host:port` only: no user name / password, path (must be `/`), query or fragment** (checked on the parsed `Uri`) - such a value stops the application at startup | where Ollama is reached (AI-002: loopback only). Logs describe it only as `scheme://host:port` |
 | `Ollama:Model` | `qwen3:4b` | non-empty | model name sent to Ollama and expected back |
 | `Ollama:TimeoutSeconds` | `180` | 1 - 600 | **deadline for the whole exchange** with Ollama: connecting, waiting in Ollama's queue, generating and reading the answer |
 | `Ollama:MaxOutputTokens` | `1024` | 16 - 4096 | output token limit sent to Ollama as `num_predict` (was a fixed `256` in the code) |

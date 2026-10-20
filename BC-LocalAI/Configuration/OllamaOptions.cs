@@ -27,14 +27,13 @@ public sealed class OllamaOptions
     public static string DescribeEndpoint(string? baseUrl) =>
         TryParseHttpUrl(baseUrl, out var uri) ? $"{uri.Scheme}://{uri.Host}:{uri.Port}" : "invalid";
 
-    /// <summary>Address for the HttpClient: the configured URL without credentials, query or fragment, ending with '/'.</summary>
+    /// <summary>Address for the HttpClient: scheme, host and port only (root path); nothing else of the configured URL is kept.</summary>
     public static Uri BuildBaseAddress(string baseUrl)
     {
         var uri = TryParseHttpUrl(baseUrl, out var parsed)
             ? parsed
             : throw new ArgumentException("Ollama:BaseUrl is not a valid http or https URL.", nameof(baseUrl));
-        var builder = new UriBuilder(uri.Scheme, uri.Host, uri.Port, uri.AbsolutePath.TrimEnd('/') + "/");
-        return builder.Uri;
+        return new UriBuilder(uri.Scheme, uri.Host, uri.Port, "/").Uri;
     }
 
     private static bool TryParseHttpUrl(string? value, out Uri uri)
@@ -71,12 +70,13 @@ public sealed class OllamaOptionsValidator : IValidateOptions<OllamaOptions>
             failures.Add("Ollama:BaseUrl must be an absolute loopback http or https URL.");
         }
 
-        // Review of PR #19: a user name or password in the URL would end up in logs and error messages. Authentication
-        // is not part of the loopback contract, so such a URL is refused (the message never repeats the value).
-        if (options.BaseUrl is not null
-            && (options.BaseUrl.Contains('@') || options.BaseUrl.Contains('?') || options.BaseUrl.Contains('#')))
+        // Review of PR #19: a user name, password, path, query or fragment in the URL could end up in logs (the framework's
+        // own HttpClient log prints the request URL). Ollama is addressed as scheme://host:port only; the message never
+        // repeats the value.
+        if (Uri.TryCreate(options.BaseUrl, UriKind.Absolute, out var parts)
+            && (parts.UserInfo.Length > 0 || parts.Query.Length > 0 || parts.Fragment.Length > 0 || parts.AbsolutePath != "/"))
         {
-            failures.Add("Ollama:BaseUrl must not contain credentials, a query string or a fragment.");
+            failures.Add("Ollama:BaseUrl must be only scheme, host and port (no credentials, path, query string or fragment).");
         }
 
         if (string.IsNullOrWhiteSpace(options.Model))

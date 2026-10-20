@@ -70,10 +70,17 @@ public sealed class OllamaBaseUrlSecretsTests(WebApplicationFactory<Program> fac
     public void Validator_RejectsABaseUrlWithCredentials(string url) => Assert.False(IsValid(url));
 
     [Theory]
+    [InlineData("http://127.0.0.1:1/REVIEW-PATH-SECRET")]
+    [InlineData("http://127.0.0.1:11434/ollama")]
+    [InlineData("http://127.0.0.1:11434/ollama/")]
+    [InlineData("http://localhost:11434/a/b/c")]
+    [InlineData("http://[::1]:11434/REVIEW-PATH-SECRET")]
+    public void Validator_RejectsAPath(string url) => Assert.False(IsValid(url));
+
+    [Theory]
     [InlineData("http://127.0.0.1:11434?token=abc")]
     [InlineData("http://127.0.0.1:11434/?key=abc")]
     [InlineData("http://127.0.0.1:11434/#fragment")]
-    [InlineData("http://127.0.0.1:11434?")]
     public void Validator_RejectsAQueryOrFragment(string url) => Assert.False(IsValid(url));
 
     [Theory]
@@ -82,7 +89,6 @@ public sealed class OllamaBaseUrlSecretsTests(WebApplicationFactory<Program> fac
     [InlineData("http://localhost:11434")]
     [InlineData("http://[::1]:11434")]
     [InlineData("https://127.0.0.1:11434")]
-    [InlineData("http://127.0.0.1:11434/ollama")]
     public void Validator_StillAcceptsCleanLoopbackUrls(string url) => Assert.True(IsValid(url));
 
     [Theory]
@@ -92,7 +98,7 @@ public sealed class OllamaBaseUrlSecretsTests(WebApplicationFactory<Program> fac
         var result = new OllamaOptionsValidator().Validate(null, new OllamaOptions { BaseUrl = url });
 
         Assert.True(result.Failed);
-        Assert.Contains("Ollama:BaseUrl must not contain credentials, a query string or a fragment.", result.Failures);
+        Assert.Contains("Ollama:BaseUrl must be only scheme, host and port (no credentials, path, query string or fragment).", result.Failures);
         foreach (var failure in result.Failures!)
         {
             Check.NotLeaked(failure, Secret, User);
@@ -125,6 +131,7 @@ public sealed class OllamaBaseUrlSecretsTests(WebApplicationFactory<Program> fac
     [InlineData("http://127.0.0.1:11434", "http://127.0.0.1:11434")]
     [InlineData("http://user:pw@127.0.0.1:11434/api?x=1#y", "http://127.0.0.1:11434")]
     [InlineData("https://u@localhost:8443/path/", "https://localhost:8443")]
+    [InlineData("http://127.0.0.1:1/REVIEW-PATH-SECRET", "http://127.0.0.1:1")]
     [InlineData("http://u:p@[::1]:11434", "http://[::1]:11434")]
     [InlineData("http://127.0.0.1", "http://127.0.0.1:80")]
     [InlineData("not a url", "invalid")]
@@ -154,6 +161,37 @@ public sealed class OllamaBaseUrlSecretsTests(WebApplicationFactory<Program> fac
         Assert.False(entry.Fields.ContainsKey("BaseUrl"));
         AssertNoSecrets(logs);
         Check.NotLeaked(failure.ToString(), Secret, User);
+    }
+
+    [Theory]
+    [InlineData("http://127.0.0.1:59999/REVIEW-PATH-SECRET")]
+    [InlineData("http://127.0.0.1:59999/a/REVIEW-PATH-SECRET/b/")]
+    [InlineData("http://127.0.0.1:59999/?key=REVIEW-PATH-SECRET")]
+    [InlineData("http://127.0.0.1:59999/#REVIEW-PATH-SECRET")]
+    public async Task TheWholeHost_NeverLogsASecretInThePathQueryOrFragment_EvenWhenTheValidationIsSwitchedOff(string url)
+    {
+        var logs = new CapturingLoggerProvider();
+        var host = factory.WithWebHostBuilder(builder =>
+        {
+            builder.PinOllama(baseUrl: url);
+            builder.ConfigureLogging(logging => logging.AddProvider(logs));
+            builder.ConfigureTestServices(services => services.RemoveAll<IValidateOptions<OllamaOptions>>());
+        });
+
+        using var client = host.CreateClient();
+        var response = await client.PostAsync(
+            "/api/chat",
+            new StringContent("""{"message":"hi"}""", System.Text.Encoding.UTF8, "application/json"));
+
+        Check.NotLeaked(await response.Content.ReadAsStringAsync(), "REVIEW-PATH-SECRET");
+        Assert.NotEmpty(logs.Entries);
+        Assert.Contains(logs.Entries, e => e.Message.Contains("http://127.0.0.1:59999/api/generate")); // the framework log is there, without the secret
+        foreach (var entry in logs.Entries)
+        {
+            Check.NotLeaked(entry.Message, "REVIEW-PATH-SECRET");
+            foreach (var value in entry.Fields.Values) Check.NotLeaked(value?.ToString() ?? "", "REVIEW-PATH-SECRET");
+            if (entry.Exception is not null) Check.NotLeaked(entry.Exception.ToString(), "REVIEW-PATH-SECRET");
+        }
     }
 
     [Theory]
