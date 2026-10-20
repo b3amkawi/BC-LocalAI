@@ -68,7 +68,7 @@ Open <http://localhost:5290>. Try (about 5 minutes):
 
 - Tested in Chromium only and with emulated phone sizes; no screen reader run.
 - No history, streaming, Markdown, login or database (out of scope). The conversation is lost on reload.
-- BE-002 limits apply: answers over 256 tokens give an error; many simultaneous users queue.
+- BE-002 limits apply: an answer over the output limit gives an error (`AI_RESPONSE_TOO_LARGE` since BE-003, limit 1024 tokens; it was 256 and `AI_INVALID_RESPONSE`); many simultaneous users queue.
 
 ## 6. Reviewer sign-off
 

@@ -8,15 +8,24 @@ namespace BC_LocalAI.Services;
 /// </summary>
 public sealed class AiServiceException : Exception
 {
-    public AiServiceException(string code, string message, HttpStatusCode statusCode, Exception? inner = null)
+    public AiServiceException(
+        string code,
+        string message,
+        HttpStatusCode statusCode,
+        Exception? inner = null,
+        string? reason = null)
         : base(message, inner)
     {
         Code = code;
         StatusCode = statusCode;
+        Reason = reason;
     }
 
     public string Code { get; }
     public HttpStatusCode StatusCode { get; }
+
+    /// <summary>Internal, bounded diagnostic category for logs and tests. Never sent to API callers.</summary>
+    public string? Reason { get; }
 
     public static AiServiceException Unavailable(Exception? inner = null) =>
         new("AI_UNAVAILABLE", "AI service is unavailable", HttpStatusCode.ServiceUnavailable, inner);
@@ -27,6 +36,10 @@ public sealed class AiServiceException : Exception
     public static AiServiceException ProviderError(Exception? inner = null) =>
         new("AI_PROVIDER_ERROR", "AI service returned an error", HttpStatusCode.BadGateway, inner);
 
-    public static AiServiceException InvalidResponse(Exception? inner = null) =>
-        new("AI_INVALID_RESPONSE", "AI service returned an invalid response", HttpStatusCode.BadGateway, inner);
+    public static AiServiceException InvalidResponse(string? reason = null, Exception? inner = null) =>
+        new("AI_INVALID_RESPONSE", "AI service returned an invalid response", HttpStatusCode.BadGateway, inner, reason);
+
+    /// <summary>The answer is larger than the configured limits (output tokens or response bytes).</summary>
+    public static AiServiceException ResponseTooLarge(string reason) =>
+        new("AI_RESPONSE_TOO_LARGE", "AI response was too large", HttpStatusCode.BadGateway, null, reason);
 }

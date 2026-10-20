@@ -44,7 +44,7 @@ function Test-Answer([string]$name, [string]$message, [string[]]$mustContainAny)
     $ok = ($r.Status -eq 200) -and $json -and ($json.model -eq $ExpectedModel) `
         -and ($answer.Trim().Length -gt 0) -and (-not $answer.TrimStart().StartsWith("{")) `
         -and (-not $answer.Contains("<think>")) -and (-not $answer.Contains("</think>")) `
-        -and (@($mustContainAny | Where-Object { $answer.Contains($_) }).Count -gt 0)
+        -and ($mustContainAny.Count -eq 0 -or @($mustContainAny | Where-Object { $answer.Contains($_) }).Count -gt 0)
     Check $name $ok "-> $($r.Status) $($r.Text)"
 }
 
@@ -52,6 +52,8 @@ try {
     Test-Answer "thai calculation"    "หนึ่งบวกหนึ่งได้เท่าไร ตอบสั้น ๆ" @("2", "สอง")
     Test-Answer "english calculation" "What is 2 + 3? Answer briefly."    @("5", "five")
     Test-Answer "thai question"       "เมืองหลวงของประเทศไทยคืออะไร ตอบสั้น ๆ" @("กรุงเทพ", "Bangkok")
+    # BE-003: a question that makes the model write a lot used to fail with 502 AI_INVALID_RESPONSE (output limit 256).
+    Test-Answer "long answer (BE-003)" "ตอบให้ยาวที่สุดเท่าที่จะทำได้ อธิบายประวัติศาสตร์กรุงเทพมหานครทุกยุคทุกสมัยอย่างละเอียดมาก แบ่งเป็นหัวข้อย่อย อย่างน้อย 20 หัวข้อ" @()
 
     $empty = Send-Chat ""
     $emptyOk = $empty.Status -eq 400 -and ($empty.Text | ConvertFrom-Json).error.code -eq "INVALID_MESSAGE"

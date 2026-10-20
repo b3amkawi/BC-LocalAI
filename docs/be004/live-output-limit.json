@@ -1,0 +1,51 @@
+{
+  "base_url": "http://127.0.0.1:5294",
+  "passed": true,
+  "checks": 1,
+  "results": [
+    {
+      "message": "List the integers from 1 to 500, separated by commas.",
+      "answer": "1,2",
+      "events": [
+        {
+          "event": "started",
+          "data": {
+            "model": "qwen3:4b"
+          },
+          "elapsed_ms": 94.4
+        },
+        {
+          "event": "delta",
+          "data": {
+            "text": "1"
+          },
+          "elapsed_ms": 774.3
+        },
+        {
+          "event": "delta",
+          "data": {
+            "text": ","
+          },
+          "elapsed_ms": 796.6
+        },
+        {
+          "event": "delta",
+          "data": {
+            "text": "2"
+          },
+          "elapsed_ms": 818
+        },
+        {
+          "event": "error",
+          "data": {
+            "code": "AI_RESPONSE_TOO_LARGE",
+            "message": "AI response was too large",
+            "partial": true
+          },
+          "elapsed_ms": 830.3
+        }
+      ],
+      "cancelled_by_client": false
+    }
+  ]
+}

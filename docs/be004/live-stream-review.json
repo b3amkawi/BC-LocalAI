@@ -1,0 +1,236 @@
+{
+  "base_url": "http://127.0.0.1:5290",
+  "passed": true,
+  "checks": 8,
+  "results": [
+    {
+      "message": "หนึ่งบวกหนึ่งเท่ากับเท่าไร ตอบสั้น ๆ เป็นภาษาไทย",
+      "answer": "2",
+      "events": [
+        {
+          "event": "started",
+          "data": {
+            "model": "qwen3:4b"
+          },
+          "elapsed_ms": 89.1
+        },
+        {
+          "event": "delta",
+          "data": {
+            "text": "2"
+          },
+          "elapsed_ms": 750.4
+        },
+        {
+          "event": "completed",
+          "data": {
+            "finishReason": "stop",
+            "evalCount": 7
+          },
+          "elapsed_ms": 756.4
+        }
+      ],
+      "cancelled_by_client": false
+    },
+    {
+      "message": "What is the capital of Japan? Answer briefly in English.",
+      "answer": "Tokyo",
+      "events": [
+        {
+          "event": "started",
+          "data": {
+            "model": "qwen3:4b"
+          },
+          "elapsed_ms": 21.8
+        },
+        {
+          "event": "delta",
+          "data": {
+            "text": "Tokyo"
+          },
+          "elapsed_ms": 365
+        },
+        {
+          "event": "completed",
+          "data": {
+            "finishReason": "stop",
+            "evalCount": 11
+          },
+          "elapsed_ms": 365.2
+        }
+      ],
+      "cancelled_by_client": false
+    },
+    {
+      "message": "สวัสดี 😀\nช่วยทักทายสั้น ๆ เป็นภาษาไทย",
+      "answer": "สวัสดีครับ! 😊",
+      "events": [
+        {
+          "event": "started",
+          "data": {
+            "model": "qwen3:4b"
+          },
+          "elapsed_ms": 26.7
+        },
+        {
+          "event": "delta",
+          "data": {
+            "text": "ส"
+          },
+          "elapsed_ms": 291.3
+        },
+        {
+          "event": "delta",
+          "data": {
+            "text": "วั"
+          },
+          "elapsed_ms": 314.1
+        },
+        {
+          "event": "delta",
+          "data": {
+            "text": "ส"
+          },
+          "elapsed_ms": 335.2
+        },
+        {
+          "event": "delta",
+          "data": {
+            "text": "ดีค"
+          },
+          "elapsed_ms": 383.4
+        },
+        {
+          "event": "delta",
+          "data": {
+            "text": "รับ! 😊"
+          },
+          "elapsed_ms": 453.6
+        },
+        {
+          "event": "completed",
+          "data": {
+            "finishReason": "stop",
+            "evalCount": 15
+          },
+          "elapsed_ms": 453.6
+        }
+      ],
+      "cancelled_by_client": false
+    },
+    {
+      "message": "Compute 2 + 3. Answer only the number.",
+      "answer": "5",
+      "events": [
+        {
+          "event": "started",
+          "data": {
+            "model": "qwen3:4b"
+          },
+          "elapsed_ms": 2.2
+        },
+        {
+          "event": "delta",
+          "data": {
+            "text": "5"
+          },
+          "elapsed_ms": 627.1
+        },
+        {
+          "event": "completed",
+          "data": {
+            "finishReason": "stop",
+            "evalCount": 10
+          },
+          "elapsed_ms": 627.1
+        }
+      ],
+      "cancelled_by_client": false
+    },
+    {
+      "message": "Compute 4 + 5. Answer only the number.",
+      "answer": "9",
+      "events": [
+        {
+          "event": "started",
+          "data": {
+            "model": "qwen3:4b"
+          },
+          "elapsed_ms": 2.7
+        },
+        {
+          "event": "delta",
+          "data": {
+            "text": "9"
+          },
+          "elapsed_ms": 342.5
+        },
+        {
+          "event": "completed",
+          "data": {
+            "finishReason": "stop",
+            "evalCount": 10
+          },
+          "elapsed_ms": 342.5
+        }
+      ],
+      "cancelled_by_client": false
+    },
+    {
+      "message": "List the integers from 1 to 500, separated by commas.",
+      "answer": "1",
+      "events": [
+        {
+          "event": "started",
+          "data": {
+            "model": "qwen3:4b"
+          },
+          "elapsed_ms": 1
+        },
+        {
+          "event": "delta",
+          "data": {
+            "text": "1"
+          },
+          "elapsed_ms": 373.3
+        }
+      ],
+      "cancelled_by_client": true
+    },
+    {
+      "message": "Compute 3 + 4. Answer only the number.",
+      "answer": "7",
+      "events": [
+        {
+          "event": "started",
+          "data": {
+            "model": "qwen3:4b"
+          },
+          "elapsed_ms": 1.1
+        },
+        {
+          "event": "delta",
+          "data": {
+            "text": "7"
+          },
+          "elapsed_ms": 308
+        },
+        {
+          "event": "completed",
+          "data": {
+            "finishReason": "stop",
+            "evalCount": 10
+          },
+          "elapsed_ms": 308
+        }
+      ],
+      "cancelled_by_client": false
+    },
+    {
+      "non_streaming": {
+        "response": "2",
+        "model": "qwen3:4b"
+      }
+    }
+  ]
+}

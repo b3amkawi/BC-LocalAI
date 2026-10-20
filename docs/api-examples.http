@@ -37,3 +37,10 @@ POST {{host}}/api/chat
 Content-Type: application/json
 
 { "message": 123 }
+
+### 7) Streaming message -> SSE started, delta(s), completed (needs Ollama running)
+POST {{host}}/api/chat/stream
+Content-Type: application/json
+Accept: text/event-stream
+
+{ "message": "หนึ่งบวกหนึ่งเท่ากับเท่าไร ตอบสั้น ๆ เป็นภาษาไทย" }

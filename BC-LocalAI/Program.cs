@@ -7,6 +7,12 @@ using BC_LocalAI.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// MapStaticAssets serves pre-compressed copies (chat.css.gz) to browsers. When the app runs from build output (dotnet run)
+// those copies live under obj/ and are found only through the static web assets manifest, which ASP.NET Core loads in
+// Development only; in any other environment the CSS and JavaScript then arrived empty. Loading the manifest in every
+// environment fixes that; a published app has no such manifest and serves its own pre-compressed files, so it is unaffected.
+builder.WebHost.UseStaticWebAssets();
+
 // Add services to the container.
 builder.Services.AddControllersWithViews()
     .ConfigureApiBehaviorOptions(options =>
@@ -25,8 +31,24 @@ builder.Services.AddOptions<OllamaOptions>()
 builder.Services.AddHttpClient<IAIService, OllamaAIService>((serviceProvider, client) =>
 {
     var ollama = serviceProvider.GetRequiredService<IOptions<OllamaOptions>>().Value;
-    client.BaseAddress = new Uri(ollama.BaseUrl.TrimEnd('/') + "/");
-    client.Timeout = TimeSpan.FromSeconds(ollama.TimeoutSeconds);
+    // Built without any user info, query or fragment (the validator already refuses them; this keeps them out of the client).
+    client.BaseAddress = OllamaOptions.BuildBaseAddress(ollama.BaseUrl);
+    // The deadline is enforced by OllamaAIService (Ollama:TimeoutSeconds, validated 1-600) so that a timeout and a client
+    // cancellation can be told apart and the body read is covered too; HttpClient's own 100 s default must not cut in first.
+    client.Timeout = Timeout.InfiniteTimeSpan;
+});
+builder.Services.AddHttpClient<IStreamingAIService, OllamaStreamingService>((serviceProvider, client) =>
+{
+    var ollama = serviceProvider.GetRequiredService<IOptions<OllamaOptions>>().Value;
+    client.BaseAddress = OllamaOptions.BuildBaseAddress(ollama.BaseUrl);
+    client.Timeout = Timeout.InfiniteTimeSpan;
+})
+.ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler
+{
+    // Never drain a cancelled stream for the default two seconds; close it so Ollama stops generating immediately.
+    MaxResponseDrainSize = 0,
+    AllowAutoRedirect = false,
+    UseProxy = false
 });
 
 var app = builder.Build();
