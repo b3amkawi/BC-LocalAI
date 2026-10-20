@@ -240,3 +240,27 @@ py -3 -m unittest discover -s tests -v
 ```
 
 Python is only needed for these developer tests, not for running Ollama or the smoke script.
+
+## Chat quality evaluation (AI-003)
+
+The [evaluation dataset](docs/ai/chat-evaluation-cases.json) contains 160 questions:
+40 Thai, 40 English, 40 arithmetic, and 40 edge cases. Each case lists its complete
+`accepted_answers`; after light normalization (NFKC, whitespace, trailing `.`/`!`, case),
+the whole response must equal one of them, so a correct word inside a wrong sentence fails.
+Start the Backend and run:
+
+```powershell
+pwsh -NoProfile -File .\scripts\test-chat-e2e.ps1
+$LASTEXITCODE
+```
+
+The evaluator calls only the loopback Backend `POST /api/chat`; it does not query
+Ollama directly. Exit 0 means every case passed. Any failed case returns exit 1
+and remains in the JSON evidence with the actual Backend body and failure reasons.
+See [evaluation results and reproduction steps](docs/ai/chat-evaluation-results.md)
+for the measured cold/warm timings, environment, the latest 160/160 result, and limitations.
+
+For a Thai explanation of AI-001 through AI-003, the tools used, file locations,
+limitations, and questions for team handoff, read the [AI work handoff guide](docs/ai/ai-001-003-handoff.md).
+For a beginner explanation of API/JSON terminology, the request flow, testing,
+timing metrics, PowerShell syntax, and Git workflow, start with the [Thai learning guide](docs/ai/ai-001-003-explained.md).

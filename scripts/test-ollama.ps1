@@ -10,7 +10,7 @@ pwsh -NoProfile -File .\scripts\test-ollama.ps1
 .EXAMPLE
 pwsh -NoProfile -File .\scripts\test-ollama.ps1 -Port 11435
 #>
-#requires -Version 5.1
+#requires -Version 7.0
 [CmdletBinding()]
 param(
     [ValidateRange(1, 65535)][int]$Port = 11434,
@@ -25,7 +25,7 @@ $baseUri = "http://127.0.0.1:$Port"
 $stage = 'checking Ollama availability'
 $hint = 'Start Ollama and check GET /api/version on the selected port.'
 try {
-    $version = Invoke-RestMethod -Uri "$baseUri/api/version" -TimeoutSec ([Math]::Min(10, $TimeoutSec))
+    $version = Invoke-RestMethod -Uri "$baseUri/api/version" -NoProxy -MaximumRedirection 0 -TimeoutSec ([Math]::Min(10, $TimeoutSec))
     if ($version.version -isnot [string] -or [string]::IsNullOrWhiteSpace($version.version)) {
         throw 'The endpoint did not return a valid Ollama version.'
     }
@@ -45,26 +45,44 @@ try {
     $timer = [Diagnostics.Stopwatch]::StartNew()
     $http = Invoke-WebRequest -UseBasicParsing -Uri "$baseUri/api/generate" -Method Post `
         -ContentType 'application/json; charset=utf-8' -Body ([Text.Encoding]::UTF8.GetBytes($payload)) `
-        -TimeoutSec $TimeoutSec
+        -NoProxy -MaximumRedirection 0 -TimeoutSec $TimeoutSec
     $timer.Stop()
     $stage = 'validating a response'
     $hint = 'The model response must finish with done_reason=stop and contain JSON with one non-empty string field: answer. Inspect runtime/model compatibility; truncated output is not a PASS.'
+    # JsonDocument retains duplicate keys; ConvertFrom-Json alone collapses them.
+    $document = [Text.Json.JsonDocument]::Parse([string]$http.Content)
+    try {
+        if ($http.StatusCode -ne 200 -or $document.RootElement.ValueKind -ne [Text.Json.JsonValueKind]::Object) {
+            throw 'Expected HTTP 200 and a JSON object.'
+        }
+        $properties = @($document.RootElement.EnumerateObject())
+        $fields = @{}
+        foreach ($name in 'model', 'done', 'done_reason', 'response') {
+            $matchingProperties = @($properties | Where-Object { $_.Name -ceq $name })
+            if ($matchingProperties.Count -ne 1) { throw "Expected exactly one '$name' field." }
+            $fields[$name] = $matchingProperties[0].Value
+        }
+        if ($fields.model.ValueKind -ne [Text.Json.JsonValueKind]::String -or $fields.model.GetString() -cne 'qwen3:4b' -or
+            $fields.done.ValueKind -ne [Text.Json.JsonValueKind]::True -or
+            $fields.done_reason.ValueKind -ne [Text.Json.JsonValueKind]::String -or $fields.done_reason.GetString() -cne 'stop' -or
+            $fields.response.ValueKind -ne [Text.Json.JsonValueKind]::String -or [string]::IsNullOrWhiteSpace($fields.response.GetString())) {
+            throw 'Unexpected or truncated response: expected model qwen3:4b, done=true, done_reason=stop and a non-empty response string.'
+        }
+        $inner = [Text.Json.JsonDocument]::Parse($fields.response.GetString())
+        try {
+            if ($inner.RootElement.ValueKind -ne [Text.Json.JsonValueKind]::Object) { throw 'Expected an answer object.' }
+            $answerProperties = @($inner.RootElement.EnumerateObject())
+            if ($answerProperties.Count -ne 1 -or $answerProperties[0].Name -cne 'answer' -or
+                $answerProperties[0].Value.ValueKind -ne [Text.Json.JsonValueKind]::String) {
+                throw 'Expected exactly one string field named answer.'
+            }
+            $answerText = $answerProperties[0].Value.GetString()
+            if ([string]::IsNullOrWhiteSpace($answerText) -or $answerText -match '</?think>') {
+                throw 'Expected a non-empty final answer without thinking markers.'
+            }
+        } finally { $inner.Dispose() }
+    } finally { $document.Dispose() }
     $result = $http.Content | ConvertFrom-Json
-    if ($http.StatusCode -ne 200 -or -not $http.Content.TrimStart().StartsWith('{') -or
-        $result -isnot [pscustomobject] -or $result.done -isnot [bool] -or $result.done -ne $true -or
-        $result.response -isnot [string] -or [string]::IsNullOrWhiteSpace($result.response) -or
-        $result.model -isnot [string] -or $result.model -cne 'qwen3:4b' -or
-        $result.done_reason -isnot [string] -or $result.done_reason -cne 'stop') {
-        throw 'Unexpected or truncated response: expected HTTP 200, model qwen3:4b, done=true, done_reason=stop and a non-empty response.'
-    }
-    $answer = $result.response | ConvertFrom-Json
-    if (-not $result.response.TrimStart().StartsWith('{') -or
-        $answer -isnot [pscustomobject] -or @($answer.PSObject.Properties).Count -ne 1 -or
-        @($answer.PSObject.Properties.Name)[0] -cne 'answer' -or
-        $answer.answer -isnot [string] -or [string]::IsNullOrWhiteSpace($answer.answer) -or
-        $answer.answer -match '</?think>') {
-        throw 'Expected structured JSON with a non-empty final answer and no thinking markers.'
-    }
     $evidence = [ordered]@{
         tested_at = [DateTimeOffset]::Now.ToString('o')
         endpoint = "$baseUri/api/generate"
@@ -92,7 +110,7 @@ try {
         }
     }
     Write-Output "PASS: HTTP 200; qwen3:4b; done=true; done_reason=stop; $($timer.ElapsedMilliseconds) ms"
-    Write-Output $answer.answer
+    Write-Output $answerText
     exit 0
 } catch {
     [Console]::Error.WriteLine("FAIL while ${stage} at ${baseUri}: $($_.Exception.Message)")

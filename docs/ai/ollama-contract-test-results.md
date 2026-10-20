@@ -2,6 +2,8 @@
 
 ทดสอบวันที่ 19 ตุลาคม 2026 (Asia/Bangkok) บน Windows 11, Ollama `0.40.5`, `qwen3:4b`, PowerShell 7.6.5 และ NVIDIA RTX 4050 Laptop GPU 6141 MiB VRAM Reviewer ยืนยันแล้วว่าผล RTX 4050 ใช้รับ AI-002 ได้ เพราะ Issue นี้ตรวจ Integration Contract และไม่ได้วัดประสิทธิภาพ GPU
 
+AI-002 ส่งเป็น [PR #8](https://github.com/b3amkawi/BC-LocalAI/pull/8) และ merge เข้า `main` แล้วที่ merge commit `b4ee48c` ตามประวัติ `origin/main` ที่ตรวจได้ในเครื่อง ผลและจำนวน tests ในเอกสารนี้เป็นหลักฐานตอนส่งมอบ AI-002 ไม่ใช่ผลล่าสุดของ AI-003 และไม่ได้รับรองว่าคำตอบจริงจาก Backend ถูกต้องครบทุกคำถาม
+
 ## Live API
 
 ใช้ `scripts/test-ollama.ps1` เรียก `http://127.0.0.1:11434/api/generate` ผ่าน loopback เท่านั้น ทุกกรณีผ่าน HTTP 200, model `qwen3:4b`, boolean `done=true`, `done_reason=stop`, parse JSON ชั้นในได้, มี `answer` string ที่ไม่ว่างเพียง field เดียว และไม่มี think marker
@@ -12,7 +14,7 @@
 | ภาษาอังกฤษ | `What is the capital of Thailand? Answer briefly.` | `Bangkok` | 249 ms | [JSON](ollama-contract-english.json) |
 | คำนวณพื้นฐาน | `หนึ่งบวกหนึ่งได้เท่าไร ตอบสั้น ๆ` | `2` | 200 ms | [JSON](ollama-contract-math.json) |
 
-คำถามแรกหลังเริ่ม runtime ช้ากว่าคำถามถัดไปเพราะมี model load/warm-up จึงไม่ใช้เวลารอบหลังเป็นค่ารับประกัน production
+คำถามแรกใช้เวลามากกว่าคำถามถัดไป โดยอาจรวม model load/warm-up แต่ชุด AI-002 นี้ไม่ได้ควบคุมหรือยืนยันการ unload โมเดลก่อนเริ่ม จึงไม่ใช้ตัวเลขนี้เป็นค่า Cold Start ที่ยืนยันแล้วหรือค่ารับประกัน production
 
 ## Unavailable endpoint
 
@@ -26,7 +28,7 @@
 py -3 -m unittest discover -s tests -v
 ```
 
-ผลล่าสุดหลังแก้ Contract ตาม Review คือ `Ran 9 tests in 19.539s`, `OK` โดย test method แบบ subtest ครอบคลุม 21 scenarios และใช้ mock HTTP เฉพาะ `127.0.0.1`:
+ผลที่บันทึกหลังแก้ Contract ตาม Review คือ `Ran 9 tests in 19.539s`, `OK` โดย test method แบบ subtest ครอบคลุม 21 scenarios และใช้ mock HTTP เฉพาะ `127.0.0.1` จำนวนนี้เป็นผลตอนส่งมอบ AI-002; การรัน `discover` ในรุ่นใหม่อาจรวม tests ที่เพิ่มภายหลัง:
 
 - success, UTF-8 prompt, request contract และ evidence output
 - `done=false`, `done` เป็น string และ `done_reason=length`
