@@ -4,6 +4,7 @@ using BC_LocalAI.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using BC_LocalAI.Services;
+using BC_LocalAI.Security;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,6 +22,8 @@ builder.Services.AddControllersWithViews()
         options.InvalidModelStateResponseFactory = _ => new BadRequestObjectResult(
             new ApiErrorResponse(new ApiError("INVALID_MESSAGE", "Message is required")));
     });
+// BE-006: cookie session, server-side session checks, roles and policies (chat APIs open while Authentication:Enabled is false).
+builder.Services.AddBcLocalAiSecurity(builder.Configuration);
 builder.Services.AddSingleton<IValidateOptions<OllamaOptions>, OllamaOptionsValidator>();
 builder.Services.AddOptions<OllamaOptions>()
     .Bind(builder.Configuration.GetSection(OllamaOptions.SectionName))
@@ -70,6 +73,7 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseRouting();
 
+app.UseBcLocalAiSecurity();
 app.UseAuthorization();
 
 app.MapStaticAssets();

@@ -169,6 +169,14 @@ Why these defaults, the timeout policy for every level (browser, Kestrel, servic
 
 The configuration is validated at startup; an invalid value (bad URL, a URL that is not loopback, empty model, a number outside its range) stops the app with a clear error.
 
+### Sessions and authorization (BE-006)
+
+`appsettings.json` section `Authentication`: `Enabled` (**false** until BE-005 login and FE-003 login page exist), `IdleTimeoutMinutes` (30),
+`AbsoluteLifetimeMinutes` (480). When enabled, `/api/chat` and `/api/chat/stream` need a signed-in User or Admin (401/403 JSON otherwise),
+sessions are checked against the account on every request, and cross-site API posts are refused (`AUTH_CSRF_INVALID`).
+Enabling it without BE-005's user store stops the app at startup on purpose. Details: [docs/security/BE-006-DEVELOPER-GUIDE.md](docs/security/BE-006-DEVELOPER-GUIDE.md),
+[authorization matrix](docs/security/BE-006-AUTHORIZATION-MATRIX.md), [verification](docs/security/BE-006-VERIFICATION.md).
+
 ### Error contract
 
 All errors use `{ "error": { "code": "...", "message": "..." } }` and never include exceptions, stack traces or provider details.

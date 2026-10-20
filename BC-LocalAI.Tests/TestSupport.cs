@@ -72,7 +72,11 @@ internal static class TestApp
                 ["Ollama:Model"] = model,
                 ["Ollama:TimeoutSeconds"] = timeoutSeconds,
                 ["Ollama:MaxOutputTokens"] = maxOutputTokens,
-                ["Ollama:MaxResponseBytes"] = maxResponseBytes
+                ["Ollama:MaxResponseBytes"] = maxResponseBytes,
+                // BE-006: an Authentication__Enabled environment variable must not change unrelated tests.
+                ["Authentication:Enabled"] = "false",
+                ["Authentication:IdleTimeoutMinutes"] = "30",
+                ["Authentication:AbsoluteLifetimeMinutes"] = "480"
             }));
 
     /// <summary>App whose Ollama HttpClient is backed by <paramref name="handler"/>.</summary>

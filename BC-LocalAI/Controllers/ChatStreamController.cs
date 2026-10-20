@@ -3,6 +3,8 @@ using BC_LocalAI.Models;
 using BC_LocalAI.Models.Streaming;
 using BC_LocalAI.Services;
 using BC_LocalAI.Configuration;
+using BC_LocalAI.Security;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.Options;
@@ -11,6 +13,7 @@ namespace BC_LocalAI.Controllers;
 
 [ApiController]
 [Route("api/chat/stream")]
+[Authorize(Policy = BcPolicies.ChatUser)] // checked before any SSE header is written
 public sealed class ChatStreamController(
     IStreamingAIService streamingService,
     IOptions<OllamaOptions> options,

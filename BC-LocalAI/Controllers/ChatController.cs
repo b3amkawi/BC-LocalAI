@@ -1,11 +1,14 @@
 using BC_LocalAI.Models;
 using BC_LocalAI.Services;
+using BC_LocalAI.Security;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BC_LocalAI.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
+[Authorize(Policy = BcPolicies.ChatUser)]
 public sealed class ChatController(IAIService aiService) : ControllerBase
 {
     [HttpPost]
