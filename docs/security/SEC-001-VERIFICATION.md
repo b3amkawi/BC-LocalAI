@@ -71,6 +71,34 @@ normalized username unique constraint denied1062, stored hash verification
    ไม่ถือ directory รอบแรกที่แยกไฟล์ระหว่างทางเป็น backup ที่ restore-tested; ฐานปัจจุบันคือ **v2** เท่านั้น
    ไม่ลบ/reset อัตโนมัติ ทดสอบ Stop→Start ของ v2 สำเร็จแล้ว
 
+## 3b. รอบรีวิวโค้ด (Claude, 2026-10-20) — ข้อบกพร่องที่พบและแก้
+
+ตรวจโค้ด/สคริปต์ทั้งหมดของ SEC-001 อีกรอบ พบ 3 จุดและแก้แล้ว:
+
+| # | ปัญหา | ผลกระทบ | การแก้ |
+|---|---|---|---|
+| 1 | `private/bootstrap.sql` ค้างอยู่หลัง Initialize | เก็บรหัสผ่าน DB ทุกบัญชีเป็น plaintext ไว้บนดิสก์โดยไม่จำเป็น (ใช้แค่ครั้งแรกกับ `--init-file`) | `local-mysql.ps1` ลบทิ้งใน `finally` หลังการ start ครั้งแรก ไม่ว่าสำเร็จหรือล้มเหลว |
+| 2 | `bc_sec001_admin` ใช้รหัสผ่านเดียวกับ `root` | ใครได้ `admin.cnf` ก็ได้รหัส root ด้วย ผิดหลัก least privilege | แต่ละบัญชีมี secret ของตัวเอง (`DatabaseSecrets`) และไม่เก็บ root secret เลย (root@localhost ต่อผ่าน TCP ไม่ได้อยู่แล้วภายใต้ skip-name-resolve; admin พอสำหรับทุกขั้น lifecycle; กู้ instance พัฒนา = Initialize ใหม่) |
+| 3 | เทสต์ชื่อ "...NoAdmin" แต่ไม่ได้ตรวจ role | ชื่อเทสต์อ้างสิ่งที่ไม่ได้ทดสอบ | เพิ่มการตรวจว่า INSERT ไม่กำหนด role (ใช้ค่า default `User`) |
+
+เพิ่มเติม: แยกการสร้าง bootstrap SQL ไปที่ `BootstrapScript` เพื่อให้ทดสอบได้ และเพิ่ม `-Port` (ค่าเดิม 3307) ให้รัน instance ที่สองข้างกันได้โดยไม่แตะ instance เดิม
+
+เทสต์ใหม่ (`Sec001FixtureTests` จาก 5 เป็น 9): secret ของ root/admin/reader ต่างกันทั้งหมด, reader ได้แค่ `SELECT` บนตาราง users, ไม่มี `GRANT ALL ... ON *.*`,
+รหัสผ่านผู้ใช้ไม่อยู่ใน bootstrap, ปฏิเสธ secret ซ้ำหรือ secret ที่ไม่ได้สร้างจาก generator, option file ใช้ 127.0.0.1/TCP/port ที่กำหนด
+Mutation check: admin ใช้ secret ซ้ำ root, ยอมให้ secret ซ้ำ, reader ได้ทุกตาราง, admin ได้ `ALL ON *.*`, fixture ได้ role Admin → ทุกกรณีมีเทสต์ล้ม
+
+ทดสอบจริงบน instance ใหม่ที่ port **3317** (instance เดิม 3307 ไม่ถูกแตะ):
+`Initialize` → ไม่มี `bootstrap.sql` เหลือ, มีแค่ `admin.cnf`/`reader.cnf`/`test-accounts.json`, secret ต่างกัน → `Verify` **11/11** →
+admin สร้าง user ไม่ได้ (1227) และอ่าน `mysql.user` ไม่ได้ (1142) → `Stop` → `Start` → `Verify` 11/11 → `Stop`; `Initialize` ซ้ำถูกปฏิเสธ
+
+ผลรวมหลังแก้: `dotnet test` **437** passed (0 warnings), Node **61** passed, PowerShell parser ผ่าน, `BC-LocalAI/` ไม่ต่างจาก main
+Python (PowerShell 7): ผ่าน 72/72 ใน 3 จาก 4 รอบเต็ม; 1 รอบมี `test_chat_e2e_script.test_timeout_fails_one_case_and_continues` ล้ม
+(เทสต์ของ AI-003 ที่ตั้ง timeout 1 วินาทีกับ mock 160 คำขอ; SEC-001 ไม่ได้แตะไฟล์นี้) ทำซ้ำไม่ได้อีกใน 11 รอบเดี่ยวและ 2 รอบเต็ม
+ไม่ได้ข้อความ error ของรอบที่ล้มจึงยังยืนยันสาเหตุไม่ได้ ไม่ได้แก้ค่า timeout ของเทสต์เพื่อกลบอาการ — แจ้งเจ้าของ AI-003
+
+**instance เดิมที่ 3307 (สร้างก่อนแก้) ยังมี `bootstrap.sql` และ admin/root ใช้ secret เดียวกันอยู่** ควรลบ `private/bootstrap.sql` ของ instance นั้น
+หรือสร้าง instance ใหม่ด้วยสคริปต์ที่แก้แล้ว (ต้องให้เจ้าของ instance ตัดสินใจ ผู้รีวิวไม่ได้แก้ไฟล์ในโฟลเดอร์นั้น)
+
 ## 4. วิธีใช้งาน
 
 ```powershell
@@ -85,7 +113,7 @@ script ใช้ executable จาก `C:\Program Files\MySQL\MySQL Server 8.0\b
 
 MySQL Workbench: สร้าง connection ชื่อ **BC-LocalAI SEC-001 (local)**, TCP/IP, host127.0.0.1, port3307
 ใช้ `bc_auth_reader` สำหรับดูข้อมูล หรือ `bc_sec001_admin` เฉพาะจัดการฐานพัฒนา
-รหัสผ่านเก็บใน `private/reader.cnf` / `private/admin.cnf` ภายใน local instance directory
+รหัสผ่านเก็บใน `private/reader.cnf` / `private/admin.cnf` ภายใน local instance directory (รหัส root ไม่ถูกเก็บ ดูข้อ 3b)
 เปิดดูเฉพาะใน editor บนเครื่องเมื่อจำเป็น ห้ามวางในแชต/Issue/ภาพ/PR ห้ามใช้บัญชี admin เป็น app credential
 รหัสผ่านผู้ใช้สมมติอยู่ `private/test-accounts.json` ไม่ใช่รหัสผ่าน DB และยังใช้ Login หน้าเว็บไม่ได้
 

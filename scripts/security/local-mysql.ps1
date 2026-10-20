@@ -2,7 +2,9 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory)][ValidateSet('Initialize', 'Start', 'Stop', 'Verify')][string]$Action,
-    [string]$MySqlBin = 'C:\Program Files\MySQL\MySQL Server 8.0\bin'
+    [string]$MySqlBin = 'C:\Program Files\MySQL\MySQL Server 8.0\bin',
+    # Loopback port of this isolated instance. Another port lets a second checkout run its own instance side by side.
+    [ValidateRange(1025, 65535)][int]$Port = 3307
 )
 $ErrorActionPreference = 'Stop'
 $repo = (Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
@@ -30,11 +32,11 @@ function Confirm-OwnInstance {
     if ($actual -ine $data.Replace('\', '/').TrimEnd('/')) { throw 'Wrong instance: data directory does not match. Refusing action.' }
 }
 function Start-OwnServer([bool]$Bootstrap) {
-    if (Get-NetTCPConnection -State Listen -LocalPort 3307 -ErrorAction SilentlyContinue) {
-        throw 'Port 3307 is already occupied. No existing service has been changed.'
+    if (Get-NetTCPConnection -State Listen -LocalPort $Port -ErrorAction SilentlyContinue) {
+        throw "Port $Port is already occupied. No existing service has been changed."
     }
     $arguments = @('--no-defaults', "--basedir=`"$((Split-Path $MySqlBin).Replace('\','/'))`"",
-        "--datadir=`"$($data.Replace('\','/'))`"", '--port=3307', '--bind-address=127.0.0.1',
+        "--datadir=`"$($data.Replace('\','/'))`"", "--port=$Port", '--bind-address=127.0.0.1',
         '--mysqlx=OFF', '--skip-log-bin', '--skip-name-resolve', '--secure-file-priv=NULL',
         "--log-error=`"$((Join-Path $instance 'server.log').Replace('\','/'))`"",
         "--pid-file=`"$((Join-Path $instance 'server.pid').Replace('\','/'))`"")
@@ -54,7 +56,7 @@ function Start-OwnServer([bool]$Bootstrap) {
 switch ($Action) {
     'Initialize' {
         if (Test-Path -LiteralPath $instance) { throw 'Instance directory already exists. Use Start/Verify; never reset automatically.' }
-        if (Get-NetTCPConnection -State Listen -LocalPort 3307 -ErrorAction SilentlyContinue) { throw 'Port 3307 is occupied.' }
+        if (Get-NetTCPConnection -State Listen -LocalPort $Port -ErrorAction SilentlyContinue) { throw "Port $Port is occupied." }
         New-Item -ItemType Directory -Path $instance -Force | Out-Null
         # Remove inherited access before writing any credentials; only the current Windows identity and SYSTEM.
         $acl = Get-Acl -LiteralPath $instance
@@ -66,21 +68,26 @@ switch ($Action) {
         }
         Set-Acl -LiteralPath $instance -AclObject $acl
         New-Item -ItemType Directory -Path $private, $data | Out-Null
-        & dotnet run --project (Join-Path $repo 'tools/Sec001Fixtures/Sec001Fixtures.csproj') -c Release -- $private (Join-Path $repo 'database/sec001/schema.sql')
+        & dotnet run --project (Join-Path $repo 'tools/Sec001Fixtures/Sec001Fixtures.csproj') -c Release -- $private (Join-Path $repo 'database/sec001/schema.sql') $Port
         if ($LASTEXITCODE -ne 0) { throw 'Fixture generation failed. No database initialization attempted.' }
         & $server --no-defaults --initialize "--basedir=$(Split-Path $MySqlBin)" "--datadir=$data" "--log-error=$(Join-Path $instance 'initialize.log')"
         if ($LASTEXITCODE -ne 0) { throw 'MySQL initialization failed; inspect private local log. No existing database was changed.' }
-        Start-OwnServer $true
+        try {
+            Start-OwnServer $true
+        } finally {
+            # bootstrap.sql holds every account secret in plain text and is only needed for this first start.
+            Remove-Item -LiteralPath (Join-Path $private 'bootstrap.sql') -Force -ErrorAction SilentlyContinue
+        }
         # Marker is local state, never a substitute for the data-directory identity check.
         [IO.File]::WriteAllText($ready, 'SEC-001 isolated development instance')
         Confirm-OwnInstance
-        Write-Output 'Created isolated MySQL at 127.0.0.1:3307, database bc_localai_sec001, 3 synthetic accounts.'
+        Write-Output "Created isolated MySQL at 127.0.0.1:$Port, database bc_localai_sec001, 3 synthetic accounts."
     }
     'Start' {
         if (-not (Test-Path -LiteralPath $ready)) { throw 'Initialize successfully before Start. Partial initialization is never reset.' }
         Start-OwnServer $false
         Confirm-OwnInstance
-        Write-Output 'SEC-001 instance started on loopback port 3307.'
+        Write-Output "SEC-001 instance started on loopback port $Port."
     }
     'Stop' {
         Confirm-OwnInstance

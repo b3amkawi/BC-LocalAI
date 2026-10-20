@@ -48,3 +48,46 @@ internal static class FixtureFactory
 
 internal sealed record Fixture(string Id, string Username, string Password, string PasswordHash,
     string SecurityStamp, string State);
+
+/// <summary>One secret per database account: knowing one never gives another.</summary>
+internal sealed record DatabaseSecrets(string Root, string Admin, string Reader)
+{
+    internal static DatabaseSecrets Create() =>
+        new(FixtureFactory.RandomSecret(), FixtureFactory.RandomSecret(), FixtureFactory.RandomSecret());
+}
+
+internal static class BootstrapScript
+{
+    /// <summary>
+    /// SQL run once by mysqld --init-file. Root, admin and reader get different random secrets;
+    /// the admin account is limited to the SEC-001 schema (plus SHUTDOWN for Stop) and the reader may only SELECT users.
+    /// </summary>
+    internal static List<string> Create(DatabaseSecrets secrets, string schemaSql, IEnumerable<Fixture> fixtures)
+    {
+        foreach (var secret in new[] { secrets.Root, secrets.Admin, secrets.Reader })
+        {
+            if (secret.Length != 64 || !secret.All(Uri.IsHexDigit))
+                throw new ArgumentException("Only generated secrets may be used.");
+        }
+
+        if (new[] { secrets.Root, secrets.Admin, secrets.Reader }.Distinct().Count() != 3)
+            throw new ArgumentException("Each database account needs its own secret.");
+
+        var script = new List<string>
+        {
+            $"ALTER USER 'root'@'localhost' IDENTIFIED BY '{secrets.Root}';",
+            schemaSql
+        };
+        script.AddRange(fixtures.Select(FixtureFactory.InsertSql));
+        script.Add($"CREATE USER 'bc_sec001_admin'@'127.0.0.1' IDENTIFIED BY '{secrets.Admin}';");
+        script.Add("GRANT ALL PRIVILEGES ON bc_localai_sec001.* TO 'bc_sec001_admin'@'127.0.0.1';");
+        script.Add("GRANT SHUTDOWN ON *.* TO 'bc_sec001_admin'@'127.0.0.1';");
+        script.Add($"CREATE USER 'bc_auth_reader'@'127.0.0.1' IDENTIFIED BY '{secrets.Reader}';");
+        script.Add("GRANT SELECT ON bc_localai_sec001.users TO 'bc_auth_reader'@'127.0.0.1';");
+        return script;
+    }
+
+    /// <summary>MySQL client option file for one account (kept in the ACL-protected private folder).</summary>
+    internal static string OptionFile(string user, string password, int port) =>
+        $"[client]\nuser={user}\npassword={password}\nhost=127.0.0.1\nport={port}\nprotocol=TCP\ndefault-character-set=utf8mb4\n";
+}
