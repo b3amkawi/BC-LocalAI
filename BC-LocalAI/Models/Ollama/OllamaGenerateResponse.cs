@@ -9,4 +9,5 @@ public sealed class OllamaGenerateResponse
     [JsonPropertyName("response")] public string? Response { get; init; }
     [JsonPropertyName("done")] public bool? Done { get; init; }
     [JsonPropertyName("done_reason")] public string? DoneReason { get; init; }
+    [JsonPropertyName("eval_count")] public int? EvalCount { get; init; }
 }

@@ -62,13 +62,17 @@ internal static class TestApp
         this IWebHostBuilder builder,
         string baseUrl = "http://127.0.0.1:11434",
         string model = "qwen3:4b",
-        string timeoutSeconds = "180") =>
+        string timeoutSeconds = "180",
+        string maxOutputTokens = "1024",
+        string maxResponseBytes = "1048576") =>
         builder.ConfigureAppConfiguration((_, configuration) =>
             configuration.AddInMemoryCollection(new Dictionary<string, string?>
             {
                 ["Ollama:BaseUrl"] = baseUrl,
                 ["Ollama:Model"] = model,
-                ["Ollama:TimeoutSeconds"] = timeoutSeconds
+                ["Ollama:TimeoutSeconds"] = timeoutSeconds,
+                ["Ollama:MaxOutputTokens"] = maxOutputTokens,
+                ["Ollama:MaxResponseBytes"] = maxResponseBytes
             }));
 
     /// <summary>App whose Ollama HttpClient is backed by <paramref name="handler"/>.</summary>

@@ -122,7 +122,7 @@ Ollama-down used a closed port; the others used a small fake provider on loopbac
 | Client disconnects after 1 s during a long generation | handled quietly (information log "Request was cancelled by the client", no error); the next request answered normally (`{"response":"2","model":"qwen3:4b"}`) |
 | Ollama listener | `127.0.0.1:11434` only (checked with `Get-NetTCPConnection`); no `OLLAMA_HOST` override set |
 
-Known limit found here: answers longer than 256 tokens cannot be returned (see README "Known limits").
+Known limit found here: answers longer than 256 tokens cannot be returned (see README "Known limits"). **Superseded by BE-003 (Issue #16):** the limit is now the setting `Ollama:MaxOutputTokens` (default 1024) and the error is `AI_RESPONSE_TOO_LARGE`; see `docs/BE-003-ROOT-CAUSE.md`.
 Testing note: send Thai text as UTF-8 (`Invoke-RestMethod` with UTF-8 bytes or `curl --data-binary @file`);
 Git Bash `curl -d` on Windows turns Thai into `?`, which makes Ollama answer about question marks.
 

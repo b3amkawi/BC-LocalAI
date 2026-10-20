@@ -22,8 +22,9 @@
     }
 
     var CHAT_URL = '/api/chat';
-    // The API answers (or reports a timeout) within its own limit; this only guards a request that never ends.
-    var REQUEST_TIMEOUT_MS = 200000;
+    // The server renders its own deadline plus a margin into the form, so its AI_TIMEOUT arrives first;
+    // this only guards a request that never ends.
+    var REQUEST_TIMEOUT_MS = core.requestTimeoutMs(form.getAttribute('data-timeout-seconds'));
     var MAX_INPUT_HEIGHT_PX = 200;
     var sending = false;
 
