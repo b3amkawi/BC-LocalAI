@@ -4,6 +4,7 @@ using BC_LocalAI.Models;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using BC_LocalAI.Services;
+using BC_LocalAI.Services.Authentication;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,6 +22,7 @@ builder.Services.AddControllersWithViews()
         options.InvalidModelStateResponseFactory = _ => new BadRequestObjectResult(
             new ApiErrorResponse(new ApiError("INVALID_MESSAGE", "Message is required")));
     });
+builder.Services.AddLocalAuthentication(builder.Configuration);
 builder.Services.AddSingleton<IValidateOptions<OllamaOptions>, OllamaOptionsValidator>();
 builder.Services.AddOptions<OllamaOptions>()
     .Bind(builder.Configuration.GetSection(OllamaOptions.SectionName))
@@ -67,9 +69,13 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-app.UseHttpsRedirection();
+// Auth rejects HTTP itself instead of redirecting a submitted password. Other routes retain existing behaviour.
+app.UseWhen(context => !context.Request.Path.StartsWithSegments("/api/auth"), branch => branch.UseHttpsRedirection());
 app.UseRouting();
 
+app.UseAuthentication();
+// Antiforgery must see the authenticated principal, not an anonymous pre-authentication context.
+app.UseMiddleware<AuthenticationBoundaryMiddleware>();
 app.UseAuthorization();
 
 app.MapStaticAssets();

@@ -1,5 +1,8 @@
 # BE-005 — Test Plan / Handoff
 
+> Historical preparation plan. Current cases/results/remaining gates: [Implementation verification](BE-005-IMPLEMENTATION-VERIFICATION.md).
+> Use the [SEC-001 API contract](../security/authentication-api-contract.md), not the earlier draft DTO shapes below.
+
 วันที่ 2026-10-20 · Expected outcomes สำหรับเตรียม implementation; Actual execution อยู่ [Verification](BE-005-VERIFICATION.md)
 
 ## 1. Executable preparation tests

@@ -39,12 +39,12 @@ public sealed class AuthenticationContractTests
     [Fact]
     public void SuccessfulPublicDtosContainOnlyTheAgreedDraftProjection()
     {
-        var user = new AuthenticatedUser("synthetic-id", "ผู้ใช้สมมติ");
+        var user = new AuthenticatedUser("synthetic-id", "ผู้ใช้สมมติ", "synthetic", ["User"]);
         using var login = JsonDocument.Parse(JsonSerializer.Serialize(user, WebJson));
-        Assert.Equal(["displayName", "userId"], login.RootElement.EnumerateObject().Select(p => p.Name).Order());
+        Assert.Equal(["displayName", "id", "roles", "username"], login.RootElement.EnumerateObject().Select(p => p.Name).Order());
         using var me = JsonDocument.Parse(JsonSerializer.Serialize(new CurrentUserResponse(user), WebJson));
-        Assert.True(me.RootElement.GetProperty("authenticated").GetBoolean());
-        Assert.Equal("synthetic-id", me.RootElement.GetProperty("user").GetProperty("userId").GetString());
+        Assert.Single(me.RootElement.EnumerateObject());
+        Assert.Equal("synthetic-id", me.RootElement.GetProperty("user").GetProperty("id").GetString());
         Assert.DoesNotContain("synthetic-id", user.ToString());
     }
 

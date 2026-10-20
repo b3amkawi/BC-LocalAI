@@ -3,8 +3,8 @@ using BC_LocalAI.Models.Authentication;
 namespace BC_LocalAI.Services.Authentication;
 
 /// <summary>
-/// Draft boundary for the SEC-001-reviewed authentication adapter, not an implementation.
-/// No production implementation, DI registration, MySQL query or password verifier is supplied here.
+/// Boundary for the SEC-001 local MySQL account architecture. Enabled explicitly by configuration.
+/// Credentials and persistence fields never leave the verifier/service boundary.
 /// </summary>
 public interface IAuthenticationBackend
 {

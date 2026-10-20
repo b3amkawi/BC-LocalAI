@@ -1,5 +1,9 @@
 # BE-005 — Preparation while SEC-001 is being reviewed
 
+> Historical preparation snapshot, superseded by SEC-001 main `8bffcc8`.
+> Current behaviour: [Configuration and integration](BE-005-INTEGRATION.md), [Implementation verification](BE-005-IMPLEMENTATION-VERIFICATION.md).
+> The remaining text records the earlier preparation stage, not the current API contract/status.
+
 วันที่ 2026-10-20 · [Issue #21](https://github.com/b3amkawi/BC-LocalAI/issues/21)
 **Draft / preparation only. Not an enabled authentication feature and not approved SEC-001 output.**
 

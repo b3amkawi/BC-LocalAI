@@ -5,22 +5,21 @@ using BC_LocalAI.Services.Authentication;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
-using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace BC_LocalAI.Tests.Authentication;
 
-// Preparation-stage gate. Replace only after approved SEC-001 + complete session/CSRF integration.
+// Configuration gate: adding implementations or a test stub must never activate Authentication by default.
 public sealed class AuthenticationPreparationBoundaryTests
 {
     [Theory]
     [InlineData("Development")]
     [InlineData("Production")]
-    public async Task PreparationDoesNotExposeAuthRoutesOrRegisterARealBackend(string environment)
+    public async Task DisabledConfigurationBlocksEveryAuthEndpointWithoutCookies(string environment)
     {
         await using var factory = Factory(environment);
         using var client = factory.CreateClient();
-        Assert.Null(factory.Services.GetService<IAuthenticationBackend>());
+        Assert.False(factory.Services.GetRequiredService<Microsoft.Extensions.Options.IOptions<BC_LocalAI.Configuration.AuthenticationOptions>>().Value.Enabled);
         Assert.Equal(HttpStatusCode.NotFound, (await client.GetAsync("/api/auth/me")).StatusCode);
         using var login = await client.PostAsync("/api/auth/login", new StringContent("{}", Encoding.UTF8, "application/json"));
         using var logout = await client.PostAsync("/api/auth/logout", new StringContent("{}", Encoding.UTF8, "application/json"));
@@ -28,7 +27,6 @@ public sealed class AuthenticationPreparationBoundaryTests
         AssertRejected(logout.StatusCode);
         Assert.False(login.Headers.Contains("Set-Cookie"));
         Assert.False(logout.Headers.Contains("Set-Cookie"));
-        AssertNoAuthRoute(factory);
     }
 
     [Fact]
@@ -42,7 +40,6 @@ public sealed class AuthenticationPreparationBoundaryTests
         AssertRejected(response.StatusCode);
         Assert.False(response.Headers.Contains("Set-Cookie"));
         Assert.Equal(0, stub.Calls);
-        AssertNoAuthRoute(factory);
     }
 
     private static WebApplicationFactory<Program> Factory(string environment) =>
@@ -55,7 +52,4 @@ public sealed class AuthenticationPreparationBoundaryTests
     private static void AssertRejected(HttpStatusCode status) =>
         Assert.Contains(status, new[] { HttpStatusCode.NotFound, HttpStatusCode.MethodNotAllowed });
 
-    private static void AssertNoAuthRoute(WebApplicationFactory<Program> factory) =>
-        Assert.DoesNotContain(factory.Services.GetRequiredService<EndpointDataSource>().Endpoints.OfType<RouteEndpoint>(),
-            endpoint => (endpoint.RoutePattern.RawText ?? "").TrimStart('/').StartsWith("api/auth", StringComparison.OrdinalIgnoreCase));
 }

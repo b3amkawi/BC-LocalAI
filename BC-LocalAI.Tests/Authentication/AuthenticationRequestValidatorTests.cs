@@ -40,10 +40,10 @@ public sealed class AuthenticationRequestValidatorTests
     }
 
     [Fact]
-    public void UsernameIsNotSilentlyNormalizedWithoutTheReviewedAccountContract()
+    public void UsernameMustFollowSec001AsciiPolicyWithoutSilentlyTrimming()
     {
         var input = Request(" Synthetic.User ");
-        Assert.Null(AuthenticationRequestValidator.Validate(input));
+        Assert.NotNull(AuthenticationRequestValidator.Validate(input));
         Assert.Equal(" Synthetic.User ", input.Username);
     }
 
@@ -86,7 +86,7 @@ public sealed class AuthenticationRequestValidatorTests
     public void ResourceGuardIsNotPresentedAsSqlInjectionProtection()
     {
         // A legitimate password/username can contain SQL-like text. The future DAL must parameterize, not concatenate.
-        var input = Request("synthetic' OR 1=1 --", "synthetic' OR 1=1 --");
+        var input = Request("synthetic", "synthetic' OR 1=1 --");
         Assert.Null(AuthenticationRequestValidator.Validate(input));
     }
 }

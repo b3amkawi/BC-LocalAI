@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace BC_LocalAI.Models.Authentication;
 
-/// <summary>Inbound-only draft DTO. No route consumes it until SEC-001 is approved.</summary>
+/// <summary>Inbound-only credentials; never serialize/log/destructure this object.</summary>
 [DebuggerDisplay("LoginRequest [REDACTED]")]
 [JsonUnmappedMemberHandling(JsonUnmappedMemberHandling.Disallow)]
 public sealed class LoginRequest

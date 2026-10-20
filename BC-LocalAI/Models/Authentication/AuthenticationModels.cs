@@ -4,13 +4,15 @@ namespace BC_LocalAI.Models.Authentication;
 
 /// <summary>Safe public projection only; never add hash/salt/database/security-stamp fields here.</summary>
 public sealed record AuthenticatedUser(
-    [property: JsonPropertyName("userId")] string UserId,
-    [property: JsonPropertyName("displayName")] string DisplayName)
+    [property: JsonPropertyName("id")] string UserId,
+    [property: JsonPropertyName("displayName")] string DisplayName,
+    [property: JsonPropertyName("username")] string Username = "",
+    [property: JsonPropertyName("roles")] IReadOnlyList<string>? Roles = null)
 {
     public override string ToString() => "AuthenticatedUser [REDACTED]";
 }
 
-/// <summary>Draft success response for GET /api/auth/me. Anonymous behaviour still needs SEC-001 approval.</summary>
+/// <summary>SEC-001 envelope shared by successful Login and Me. Anonymous requests receive 401.</summary>
 public sealed class CurrentUserResponse
 {
     public CurrentUserResponse(AuthenticatedUser user)
@@ -19,9 +21,6 @@ public sealed class CurrentUserResponse
         if (string.IsNullOrWhiteSpace(user.UserId)) throw new ArgumentException("A stable user id is required.", nameof(user));
         User = user;
     }
-
-    [JsonPropertyName("authenticated")]
-    public bool Authenticated => true;
 
     [JsonPropertyName("user")]
     public AuthenticatedUser User { get; }

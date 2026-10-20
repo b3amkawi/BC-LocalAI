@@ -1,5 +1,7 @@
 # BE-005 — Preparation Verification
 
+Historical result before SEC-001 was merged. Current implementation/results: [BE-005 implementation verification](BE-005-IMPLEMENTATION-VERIFICATION.md).
+
 วันที่ 2026-10-20 (Asia/Bangkok) · [Issue #21](https://github.com/b3amkawi/BC-LocalAI/issues/21)
 Branch `watzapon_BE-005`, worktree `BC_BE005`
 Baseline main: `665df8c909a5558764218ca5c2d09c57262a973c` (pull ก่อนแก้ Source)

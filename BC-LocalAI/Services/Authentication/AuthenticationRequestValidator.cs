@@ -24,7 +24,7 @@ public static class AuthenticationRequestValidator
 
         if (request is null || string.IsNullOrWhiteSpace(request.Username) || string.IsNullOrEmpty(request.Password) ||
             request.Username.Length > limits.MaxUsernameCharacters || request.Password.Length > limits.MaxPasswordCharacters ||
-            request.Username.Any(char.IsControl))
+            request.Username.Any(c => !char.IsAsciiLetterOrDigit(c) && c is not ('.' or '_' or '-')))
             return Invalid();
 
         try
