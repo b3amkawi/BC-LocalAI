@@ -51,7 +51,7 @@ AI-004 recommendations for BE-003 and their status:
 
 | # | AI-004 recommendation | Status in this branch |
 |---|-----------------------|-----------------------|
-| 1 | Handle answers cut at the token limit (raise `num_predict` or flag it) instead of a 502 invalid response | **Done**: `MaxOutputTokens` 1024 and `502 AI_RESPONSE_TOO_LARGE`. Needs the Tech Lead / AI-002 owner to approve the contract change. Not yet re-measured with the AI-004 scripts (they need PowerShell 7, not installed on this machine) |
+| 1 | Handle answers cut at the token limit (raise `num_predict` or flag it) instead of a 502 invalid response | **Done**: `MaxOutputTokens` 1024 and `502 AI_RESPONSE_TOO_LARGE`. Tested live by the AI-002 owner with 1024 (short answers); the contract document still says 256. Re-measured with the AI-004 script for the `long` profile: 15/15 instead of 80 % (`BE-003-VERIFICATION.md` section 5c) |
 | 2 | Limit concurrent requests to Ollama with a semaphore and a bounded queue; answer 429/503 at once when the queue is full | **Not done.** It adds a new error code and configuration, so it is a contract change that AI-004 says needs approval. See section 2b |
 | 3 | Queue size from throughput (about 20 queued medium requests for a 30 s wait; an estimate) | Not done (depends on 2) |
 | 4 | Pass the cancellation to Ollama so abandoned requests do not take queue time | **Done and tested** (service tests + real runs: after clients left during a long generation, the next request was answered in 0.3 - 0.5 s). Inferred from latency; Ollama's own log was not inspected |

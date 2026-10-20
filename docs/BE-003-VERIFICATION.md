@@ -105,7 +105,7 @@ Other review points: (c) `num_predict` 256 -> 1024 still **needs the AI-002 owne
 
 Checked from a fresh clone of the pushed branch: build 0 warnings; .NET tests in default, hostile-environment and Production settings; Node tests;
 all 160 AI-003 evaluation cases against the real Ollama (160/160, judged with the same rules as `scripts/test-chat-e2e.ps1`, re-implemented in Python
-because PowerShell 7 is not installed here); live validation, 200 KB input, cancellation, 10 concurrent requests; the Chat page in a browser.
+because PowerShell 7 was not installed at that point; the real script was run later, section 5c); live validation, 200 KB input, cancellation, 10 concurrent requests; the Chat page in a browser.
 
 Two defects were found in the web page (both already on `main`, not caused by BE-003) and fixed:
 
@@ -117,14 +117,33 @@ Two defects were found in the web page (both already on `main`, not caused by BE
 Not changed, documented in `README.md`: a **published** copy started from another directory has no style or script because the content root (where `wwwroot` is looked for)
 is the current directory. Start it from its own folder or pass `--contentRoot`.
 
+## 5c. With PowerShell 7 installed (scripts of AI-002, AI-003 and AI-004 run for real)
+
+| Check | Result |
+|-------|--------|
+| Python tests (`tests/`, need `pwsh`) | first run **40/45**, 41 of which had been skipped before; after the fixes below **45/45**, nothing skipped |
+| AI-002 `scripts/test-ollama.ps1`, 3 contract prompts + unavailable port | 3 x exit 0 (`done_reason=stop`); port 11435 -> exit 1, as the contract requires |
+| AI-002 owner's evidence `codex/ai002-1024-evidence` (merged) and its `test-ollama-1024.ps1`, re-run here | 3 x exit 0, requests carry `num_predict=1024` |
+| AI-003 `scripts/test-chat-e2e.ps1` against the Backend (Production) | **160/160**, warm average 349 ms, P95 434 ms |
+| AI-004 benchmark, profile `long`, concurrency 1, 15 rounds (after BE-003) | Ollama direct **15/15** and Backend **15/15** (baseline before BE-003: 80 %). The three Thai prompts that were cut at 256 tokens 105/105 times now need **282 - 375 tokens** and end with `stop`; P50 ~2.9 s, P95 ~6.5 s, 0.28 req/s (unchanged throughput). Not a full re-run of all 24 scenarios |
+
+Defects found by these runs and fixed (AI scripts, needed for the merged branch to be consistent):
+
+| Defect | Fix |
+|--------|-----|
+| `ollama-benchmark.ps1` still sent `num_predict=256` while the Backend now sends `Ollama:MaxOutputTokens` (1024), so "Direct vs Backend" compared different requests; its test read the value from C# source that BE-003 changed | the script reads `Ollama:MaxOutputTokens` from `appsettings.json` (`-NumPredict` overrides); the test compares with the configured value and checks the override |
+| Thai text became `?` when a script's output is redirected on an English Windows (console code page 437): `test-ollama.ps1` output and the prompt-pool test | UTF-8 console output in `test-ollama.ps1` and in that test |
+
+**AI-002 `num_predict`:** the AI-002 owner tested 1024 live (3/3, evidence in `docs/ai/evidence/ai002-num-predict-1024/`). That evidence covers short answers only; the contract document still states 256 and is the owner's to update.
+
 ## 6. Known limitations that remain
 
 - **AI-004 results were compared afterwards** (`BE-003-CONFIGURATION.md` sections 2a/2b): they give no reason to change `TimeoutSeconds = 180` (no timeout in 3,156 requests, longest 28.7 s). **No concurrency limit / bounded queue was added**: AI-004 recommends one, but it is a contract change that needs approval. Ollama still answers one request at a time. The BE-003 build was **not re-benchmarked** with the AI-004 scripts (they need PowerShell 7).
-- **Contract change to confirm:** AI-002 fixes `num_predict` at 256. It is now a setting with default 1024 (the root cause). The AI Engineer should update `docs/ai/ollama-integration-contract.md` and re-run the contract tests.
+- **Contract document to update:** the AI-002 owner tested `num_predict` 1024 live (short answers, section 5c), but `docs/ai/ollama-integration-contract.md` still fixes it at 256. It is now a setting with default 1024 (the root cause). The AI Engineer should update `docs/ai/ollama-integration-contract.md` and re-run the contract tests.
 - A runaway answer can use the whole limit (about 13 s at the speed measured here, about 17 s at the 60 tokens/s AI-004 measured) and lengthens the queue for others; lower `MaxOutputTokens` if that matters more than long answers.
 - An answer that still needs more than the limit is not shown partially (AI-002 forbids partial answers); streaming (BE-004) is the real solution for very long answers.
 - Measured on one machine (RTX 4050 6 GB), not the target RTX 4060/4070; no real reverse proxy was in the path, so proxy timeouts are documented but untested.
 - Request size is not limited by this issue (a 200 KB question was accepted in BE-002 testing).
-- The Python tests of AI-002 were not run (no PowerShell 7 on this machine).
+- The full AI-004 benchmark (24 scenarios, 125+ requests each) was not repeated after BE-003; only the `long` profile at concurrency 1 (section 5c).
 - The long-answer test proves the API now returns `200` instead of `502`. The *content* the model returns for the "write as long as possible" question is a polite refusal
   (the AI-002 system prompt asks for brief answers), so very long answers are not produced in practice. That is answer quality (AI-003) and the system prompt, not the backend.
