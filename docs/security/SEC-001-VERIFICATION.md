@@ -2,6 +2,8 @@
 
 วันที่: 2026-10-20 (Asia/Bangkok) · branch `watzapon_SEC-001`
 ฐาน main: `a983b800d2b9b536f229a736f2699c9099eeff64`, pull merge: `c2b000b`
+อัปเดต main อีกครั้งหลัง FE-002 merge: `91916ea0daf71c22d2abb10e36f97088f3bea63a`, local pull merge `d22bd5b`
+Implementation commit: `f0b54c1`; ผล regression สุดท้ายด้านล่างเป็นหลัง pull รอบใหม่นี้
 
 **Local database/tooling tested. Original Legacy review and production Authentication approval remain incomplete.**
 
@@ -19,6 +21,7 @@
 ## 2. คำสั่งที่รันและผลจริง
 
 รันจาก worktree SEC-001; ไม่มีรหัสผ่านอยู่ในคำสั่ง
+ผลตารางแรกเป็นก่อนรวม FE-002; ผลล่าสุดอยู่ตารางถัดไป ไม่รวมจำนวนเทสต์ข้ามรอบเข้าด้วยกัน
 
 | Command / check | Actual result |
 |---|---|
@@ -30,6 +33,22 @@
 | `pwsh -NoProfile -File scripts/security/local-mysql.ps1 -Action Initialize` (fixed version, clean v2 datadir) | exit0, 3 fixtures created |
 | `pwsh -NoProfile -File scripts/security/local-mysql.ps1 -Action Verify` | **11/11 passed** |
 | `Stop` → `Start` → `Verify` | exit0 ทุกขั้น; 11/11 passed หลัง restart, users ยัง3 |
+
+ผลสุดท้ายหลังรวม `main` ที่มี FE-002 แล้ว:
+
+| Command / check | Actual result |
+|---|---|
+| `dotnet build BC-LocalAI.Tests/BC-LocalAI.Tests.csproj -c Release --no-restore` | **0 warnings, 0 errors** |
+| `dotnet test BC-LocalAI.Tests/BC-LocalAI.Tests.csproj -c Release --no-build` | **433 passed, 0 failed, 0 skipped** |
+| `node --test 'tests/ui/*.test.mjs'` | **61 passed, 0 failed, 0 skipped** |
+| local MySQL `Verify` | **11/11 passed** อีกครั้งหลัง pull |
+| `Initialize` ซ้ำ | rejected; checksum ของ local credentials ก่อน/หลังเท่าเดิม (ไม่เผยแพร่ checksum/secret) |
+| `Start` เมื่อ instance ยังทำงาน | rejected; PID เดิมไม่ถูกเปลี่ยน |
+| Windows ACL | protected ACL, 2 explicit principals, no inherited rules |
+| Git ignore / tracked files | private credentials/data ignored; `git ls-files .local` ไม่มีไฟล์ |
+| PowerShell parser / Markdown local links | parser ผ่าน, local links 14 รายการมีปลายทางจริง |
+| `git diff --quiet origin/main -- BC-LocalAI` | exit0 หลังรวม FE-002: แอปไม่มีการแก้เพิ่มในงาน SEC-001 |
+| MySQL80 เดิม | Running ที่3306; instance ใหม่127.0.0.1:3307 |
 
 Verification อ่าน Hash จาก DB ผ่านบัญชี reader แล้วส่งผ่าน process memory/stdin ให้ framework verifier
 ยืนยัน correct password **3/3** และ reject wrong password **3/3** โดยไม่พิมพ์ password/hash

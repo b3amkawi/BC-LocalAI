@@ -55,6 +55,7 @@ Schema ใหม่จริง: [schema.sql](../../database/sec001/schema.sql)
 
 instance พัฒนาแยก `127.0.0.1:3307` database `bc_localai_sec001`; MySQL80 เดิมที่ 3306 ไม่ถูกแก้
 admin local ใช้เฉพาะ provisioning; `bc_auth_reader` ได้ SELECT เฉพาะ users ไม่ได้แก้บัญชี
+เมื่อเชื่อม DB จริงต้องใช้ TLS และตรวจ certificate/hostname ตาม CA ที่อนุมัติ; ไม่คัดลอก self-signed local defaults หรือปิด certificate validation ไป production
 BE-005 เดิมกำหนด Company DB read-only: ห้ามเพิ่ม write เพื่อทำ lockout/rehash โดยไม่อนุมัติ
 BE-006 ต้องมี application session/attempt store พร้อมสิทธิ์เฉพาะของมัน ไม่ใช้ MySQL root
 ไม่มี ChatHistory/schema บริษัท migration ในงานนี้

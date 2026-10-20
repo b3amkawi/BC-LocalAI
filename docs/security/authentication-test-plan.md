@@ -25,6 +25,7 @@ logs/temporary root password/generated SQL/hash ทั้งหมดอยู�
 | D03 | reader SELECT ได้, UPDATE no-op ไม่ได้ (1142) | least-privilege negative test |
 | D04 | unknown username ไม่มีข้อมูล, duplicate key rejected (1062) | lookup + isolated transaction |
 | D05 | instance bind loopback และ mysqlx disabled | server variables/plugins |
+| D06 | Hash ที่อ่านจากฐานจริงยืนยันรหัสสุ่ม3บัญชีได้ และปฏิเสธรหัสผิดทั้ง3 | ส่ง hash ผ่าน memory/stdin ให้ framework verifier ไม่ print |
 | L01 | Stop→Start ไม่ reset/seed ซ้ำ; countยัง3 | local instance lifecycle |
 | L02 | Initialize ซ้ำต้อง fail ไม่ overwrite datadir/secret | fail-safe negative test |
 | S01 | .local ถูก ignore, ACL ไม่มี inherited broad access | git check-ignore + Windows ACL metadata |
