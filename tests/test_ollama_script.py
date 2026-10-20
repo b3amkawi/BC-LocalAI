@@ -33,7 +33,8 @@ class SmokeScriptTests(unittest.TestCase):
         )
 
     def run_endpoint(self, result=None, version=None, status=200, delay=0,
-                     invalid_path=False, timeout=5, prior_evidence=None):
+                     invalid_path=False, timeout=5, prior_evidence=None,
+                     raw_result=None, redirect_stage=None):
         requests = []
         result = VALID if result is None else result
         version = {"version": "contract-test"} if version is None else version
@@ -51,13 +52,35 @@ class SmokeScriptTests(unittest.TestCase):
                     pass  # Expected when testing a client timeout.
 
             def do_GET(self):
+                if self.path == "/redirect-target":
+                    requests.append((self.path, {}))
+                if redirect_stage == "version" and self.path == "/api/version":
+                    self.send_redirect()
+                    return
                 self.send_json(version)
+
+            def send_redirect(self):
+                self.send_response(307)
+                self.send_header("Location", f"http://127.0.0.1:{self.server.server_port}/redirect-target")
+                self.send_header("Content-Length", "0")
+                self.end_headers()
 
             def do_POST(self):
                 body = self.rfile.read(int(self.headers["Content-Length"]))
                 requests.append((self.path, json.loads(body.decode("utf-8"))))
+                if redirect_stage == "generate" and self.path == "/api/generate":
+                    self.send_redirect()
+                    return
                 time.sleep(delay)
-                self.send_json(result, status)
+                if raw_result is None:
+                    self.send_json(result, status)
+                else:
+                    data = raw_result.encode("utf-8")
+                    self.send_response(status)
+                    self.send_header("Content-Type", "application/json; charset=utf-8")
+                    self.send_header("Content-Length", str(len(data)))
+                    self.end_headers()
+                    self.wfile.write(data)
 
             def log_message(self, *args):
                 pass
@@ -125,11 +148,29 @@ class SmokeScriptTests(unittest.TestCase):
             "empty_answer": {**VALID, "response": '{"answer":" "}'},
             "missing_answer": {**VALID, "response": '{}'},
             "thinking_marker": {**VALID, "response": '{"answer":"<think>trace</think>ok"}'},
+            "duplicate_answer": {**VALID, "response": '{"answer":"one","answer":"two"}'},
         }
         for name, result in cases.items():
             with self.subTest(name=name):
                 outcome, evidence, _ = self.run_endpoint(result=result)
                 self.assert_failure(outcome, evidence, "validating a response")
+
+    def test_rejects_duplicate_outer_contract_fields(self):
+        for name, value in (("model", "qwen3:4b"), ("done", True),
+                            ("done_reason", "stop"), ("response", VALID["response"])):
+            with self.subTest(field=name):
+                raw = json.dumps(VALID, ensure_ascii=False)
+                raw = raw[:-1] + "," + json.dumps(name) + ":" + json.dumps(value) + "}"
+                outcome, evidence, _ = self.run_endpoint(raw_result=raw)
+                self.assert_failure(outcome, evidence, "validating a response")
+
+    def test_redirects_are_not_followed(self):
+        for stage in ("version", "generate"):
+            with self.subTest(stage=stage):
+                outcome, evidence, requests = self.run_endpoint(redirect_stage=stage)
+                expected_stage = "checking Ollama availability" if stage == "version" else "generating a response"
+                self.assert_failure(outcome, evidence, expected_stage)
+                self.assertFalse(any(path == "/redirect-target" for path, _ in requests))
 
     def test_invalid_version_is_not_treated_as_ollama(self):
         outcome, evidence, requests = self.run_endpoint(version={"unrelated": "service"})

@@ -114,7 +114,7 @@ Ollama response ชั้นนอก:
 | ต่อ `127.0.0.1:11434` ไม่ได้ | connection refused/DNS/socket exception ก่อนมี HTTP response | `Provider unavailable` |
 | Ollama ตอบไม่ทันเวลาที่กำหนด | provider timeout ที่หมดเวลาก่อนผู้ใช้ยกเลิก | `Provider timeout` |
 | ผู้ใช้ยกเลิก request หรือปิดการเชื่อมต่อ | request cancellation token ถูกยกเลิก | `Request cancelled` |
-| Ollama ตอบ HTTP non-2xx | HTTP status ไม่ใช่ 200 | `Provider error` |
+| Ollama ตอบ HTTP status ที่ไม่ใช่ 200 | HTTP status ไม่ใช่ 200 | `Provider error` |
 | `done=false` หรือชนิดไม่ใช่ boolean | outer validation | `Invalid/incomplete response` |
 | `done_reason=length` | outer validation | `Truncated response` |
 | `model` ไม่ตรงหรือชนิดผิด | outer validation | `Invalid response` |
