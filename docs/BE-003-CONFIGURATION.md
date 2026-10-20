@@ -18,8 +18,8 @@ Issue: #16 · Settings live in `BC-LocalAI/appsettings.json` under `Ollama` and 
 **`MaxOutputTokens = 1024`.**
 - Measured answers with the AI-002 system prompt ("answer briefly") need 66 - 247 tokens, even when the user asks for a very long text. The old limit of 256 sat on that edge.
 - 1024 is about 4 times the longest answer measured, so normal long answers finish (`done_reason = "stop"`).
-- Cost: Ollama generates 73 - 77 tokens/s on the test machine, so a runaway answer that uses the whole limit takes about 14 s (256 tokens: about 3.5 s;
-  4096 tokens: about 55 s). Ollama serves one request at a time, so a higher limit lengthens the queue in the worst case.
+- Cost: Ollama generates 73 - 77 tokens/s on the test machine, so a runaway answer that uses the whole limit takes about 14 - 17 s (256 tokens: about 3.5 - 4 s;
+  4096 tokens: about 55 - 70 s; 73 - 77 tokens/s measured here, about 60 tokens/s in AI-004). Ollama serves one request at a time, so a higher limit lengthens the queue in the worst case.
 - 4096 is the upper bound because the model context window (`num_ctx`) is 4096 by default; asking for more output than the context cannot be honoured.
 - Raise it only after checking the queue effect (section 4); lower it to shorten the worst case.
 
@@ -30,10 +30,38 @@ Issue: #16 · Settings live in `BC-LocalAI/appsettings.json` under `Ollama` and 
 - The limit is the limit of the **body**, not of the answer; the answer is bounded by `MaxOutputTokens`.
 
 **`TimeoutSeconds = 180`** (unchanged).
-- No benchmark (AI-004) exists yet, so the default was not changed. At the measured speed one request takes 0.5 - 15 s, so 180 s covers a queue of about 12 worst-case
+- The AI-004 benchmark (see section 2a) did not give a reason to change the default. At the speed measured here one request takes 0.5 - 15 s, so 180 s covers a queue of about 12 worst-case
   answers or about 70 typical 3-sentence answers in front of a request.
 - The value must not be unlimited and is capped at 600 s.
-- **Provisional:** the final value and any concurrency limit must be reviewed when AI-004 results are available (the issue says so).
+- **Reviewed against AI-004 (section 2a):** 180 s stays as the ceiling for one request. A queue limit is recommended by AI-004 but not implemented (needs approval).
+
+## 2a. Review against the AI-004 benchmark (`docs/performance/benchmark-report.md`, branch `pao04_AI`)
+
+AI-004 measured the **pre-BE-003** backend (`num_predict` fixed at 256) on the same kind of machine (RTX 4050 6 GB), 3,156 requests, concurrency 1/2/5/10. What it says about this issue:
+
+| AI-004 finding | Effect on BE-003 |
+|----------------|------------------|
+| 105 of 105 long Thai prompts were cut at 256 tokens and answered `502 AI_INVALID_RESPONSE`; 12 English prompts needed 119 - 196 tokens and always finished | Confirms the root cause found independently in `BE-003-ROOT-CAUSE.md`; the fix (`MaxOutputTokens`, `AI_RESPONSE_TOO_LARGE`) addresses exactly this |
+| Ollama serves one request at a time: throughput is constant at 1 or 10 concurrent (short ~4.3, medium ~0.7, long ~0.29 req/s); only the waiting time grows (medium P50 1.3 s -> 7.8 s) | Matches our measurement (10 concurrent short answers ~24 s in total). Sending requests to Ollama in parallel gains nothing |
+| No timeout ever happened; the longest request took 28.7 s | No evidence for changing `TimeoutSeconds = 180`; it remains a ceiling, not a target |
+| Generation speed ~60 tokens/s (AI-004) vs 73 - 77 measured earlier here | Use the slower figure: a runaway answer of 1024 tokens takes up to about **17 s**, not the 13 s written earlier, and lengthens the queue for others |
+| Backend overhead over direct Ollama is small (medium/long within ~6 %); short is 11 - 20 % higher but AI-004 itself says that is within run-to-run noise | No optimisation of the backend layer is needed |
+
+AI-004 recommendations for BE-003 and their status:
+
+| # | AI-004 recommendation | Status in this branch |
+|---|-----------------------|-----------------------|
+| 1 | Handle answers cut at the token limit (raise `num_predict` or flag it) instead of a 502 invalid response | **Done**: `MaxOutputTokens` 1024 and `502 AI_RESPONSE_TOO_LARGE`. Needs the Tech Lead / AI-002 owner to approve the contract change. Not yet re-measured with the AI-004 scripts (they need PowerShell 7, not installed on this machine) |
+| 2 | Limit concurrent requests to Ollama with a semaphore and a bounded queue; answer 429/503 at once when the queue is full | **Not done.** It adds a new error code and configuration, so it is a contract change that AI-004 says needs approval. See section 2b |
+| 3 | Queue size from throughput (about 20 queued medium requests for a 30 s wait; an estimate) | Not done (depends on 2) |
+| 4 | Pass the cancellation to Ollama so abandoned requests do not take queue time | **Done and tested** (service tests + real runs: after clients left during a long generation, the next request was answered in 0.3 - 0.5 s). Inferred from latency; Ollama's own log was not inspected |
+| 5 | Keep 180 s as a per-request ceiling and give queue waiting its own timeout | Partly: 180 s kept; **queue wait and generation share one deadline** (cause and effect cannot be separated in a 504) |
+
+## 2b. Open decision: a bounded queue in front of Ollama
+
+Why it might be worth doing: with one request at a time, a burst of N users makes the last wait N x (answer time). With the 180 s ceiling, AI-004 estimates ~124 medium or ~52 long requests can queue before the last one gets a 504; a user will not wait that long. A semaphore (1 request at a time) plus a queue of, say, 20 and an immediate `503`/`429` when full would turn "wait up to 3 minutes then fail" into "told at once to try again".
+
+Why it was not done here: it changes the API contract (new status and code, new settings, UI text), the issue does not list it as a deliverable, AI-004 states that it needs the Tech Lead's approval, and the queue size must come from a re-measurement on the target machine. Recommendation: approve it as a small follow-up issue (or as part of BE-004, which has to decide the same for streaming).
 
 ## 3. Timeout policy (what happens at each level)
 

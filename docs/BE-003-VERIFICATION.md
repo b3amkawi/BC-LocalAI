@@ -103,9 +103,9 @@ Other review points: (c) `num_predict` 256 -> 1024 still **needs the AI-002 owne
 
 ## 6. Known limitations that remain
 
-- **AI-004 (benchmark) was not available**, so `TimeoutSeconds` stays 180 and no concurrency limit was added. Ollama still answers one request at a time; the numbers are in `docs/KNOWN-LIMITATIONS.md`. The final policy must be reviewed with AI-004.
+- **AI-004 results were compared afterwards** (`BE-003-CONFIGURATION.md` sections 2a/2b): they give no reason to change `TimeoutSeconds = 180` (no timeout in 3,156 requests, longest 28.7 s). **No concurrency limit / bounded queue was added**: AI-004 recommends one, but it is a contract change that needs approval. Ollama still answers one request at a time. The BE-003 build was **not re-benchmarked** with the AI-004 scripts (they need PowerShell 7).
 - **Contract change to confirm:** AI-002 fixes `num_predict` at 256. It is now a setting with default 1024 (the root cause). The AI Engineer should update `docs/ai/ollama-integration-contract.md` and re-run the contract tests.
-- A runaway answer can use the whole limit (about 13 s at the measured speed) and lengthens the queue for others; lower `MaxOutputTokens` if that matters more than long answers.
+- A runaway answer can use the whole limit (about 13 s at the speed measured here, about 17 s at the 60 tokens/s AI-004 measured) and lengthens the queue for others; lower `MaxOutputTokens` if that matters more than long answers.
 - An answer that still needs more than the limit is not shown partially (AI-002 forbids partial answers); streaming (BE-004) is the real solution for very long answers.
 - Measured on one machine (RTX 4050 6 GB), not the target RTX 4060/4070; no real reverse proxy was in the path, so proxy timeouts are documented but untested.
 - Request size is not limited by this issue (a 200 KB question was accepted in BE-002 testing).

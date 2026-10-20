@@ -76,6 +76,6 @@ What this shows:
 
 ## 6. Concurrency
 
-No concurrency limit exists and none is added: the issue states there is not enough evidence to choose one and AI-004 (benchmark) is not available yet
-(no branch or document in the repository at the time of this work). The measured behaviour is in `docs/KNOWN-LIMITATIONS.md`. The final timeout and concurrency policy
-must be reviewed when AI-004 results exist.
+No concurrency limit exists and none is added. When this analysis was written AI-004 was not available; its results are now on `pao04_AI`
+(`docs/performance/benchmark-report.md`) and were compared with this work in `docs/BE-003-CONFIGURATION.md` sections 2a and 2b: they confirm the root cause (105/105 long Thai
+prompts cut at 256 tokens), confirm that Ollama answers one request at a time, and recommend a bounded queue, which is **not implemented** and waits for approval.
