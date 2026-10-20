@@ -28,8 +28,8 @@ internal static partial class OllamaLog
     [LoggerMessage(
         EventId = 4004,
         Level = LogLevel.Warning,
-        Message = "Ollama is unavailable. BaseUrl={BaseUrl} ElapsedMs={ElapsedMs}")]
-    public static partial void Unavailable(ILogger logger, Exception exception, string baseUrl, long elapsedMs);
+        Message = "Ollama is unavailable. Endpoint={Endpoint} ElapsedMs={ElapsedMs}")]
+    public static partial void Unavailable(ILogger logger, Exception exception, string endpoint, long elapsedMs);
 
     [LoggerMessage(
         EventId = 4005,

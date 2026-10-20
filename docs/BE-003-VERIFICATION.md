@@ -37,7 +37,7 @@ Root cause and evidence: [BE-003-ROOT-CAUSE.md](BE-003-ROOT-CAUSE.md) · Setting
 
 | Suite | Before | After |
 |-------|-------:|------:|
-| `dotnet test` (xUnit) | 157 | **276**, all passing, 0 warnings |
+| `dotnet test` (xUnit) | 157 | **321**, all passing, 0 warnings (276 before the PR #19 review round, +45 in `OllamaBaseUrlSecretsTests`) |
 | `node --test "tests/ui/*.test.mjs"` | 18 | **23**, all passing |
 
 Five new .NET test classes (116 tests; the suite grew by 119 in total, the rest are updated or added tests in existing classes): `OllamaResponseLengthTests` (33: length vs malformed, 20,000-character Thai answers in raw and escaped form, emoji / combining marks / surrogates,
@@ -81,6 +81,23 @@ Weak spots found this way were fixed (a test that hung instead of failing when t
 | Verification before and after | section 2 |
 | No breaking change without approval | one additive code (`AI_RESPONSE_TOO_LARGE`, status 502) was **requested by the issue**; the AI-002 `num_predict` default moved from 256 to 1024: **needs the owner's confirmation** |
 | No production configuration change | only repository defaults changed; nothing deployed |
+
+## 5a. Review of PR #19 (owner comment): credentials in `Ollama:BaseUrl`
+
+Finding: event 4004 logged `Ollama:BaseUrl` as written, and the validator accepted `http://user:password@127.0.0.1:11434`, so credentials could reach the application log when Ollama was down. Confirmed as a real defect.
+
+| Fix | Where |
+|-----|-------|
+| `BaseUrl` containing `@`, `?` or `#` (user info, query, fragment) is refused at startup; the message states the rule and never repeats the value | `OllamaOptionsValidator` |
+| Logs use `Endpoint=scheme://host:port` (`OllamaOptions.DescribeEndpoint`; unparsable value -> `invalid`); the field `BaseUrl` no longer exists in event 4004 | `OllamaLog`, `OllamaAIService` |
+| The `HttpClient` base address is built without user info, query or fragment (`OllamaOptions.BuildBaseAddress`) | `Program.cs` |
+
+Regression tests (`OllamaBaseUrlSecretsTests`, 45 cases): the validator refuses 7 credential-bearing URLs and 4 query/fragment URLs and still accepts 6 clean loopback URLs; the failure message and the startup
+exception never contain the user name or password; `DescribeEndpoint` keeps only scheme, host and port (8 cases); a real failed connection with a credential URL logs only `Endpoint` and no log entry, field or exception text contains the secret;
+the whole host (validation switched off on purpose, framework request logging included) never logs the secret. `OllamaLoggingTests` now asserts the `Endpoint` field.
+Mutation check: logging the raw URL again (6 tests fail), removing the `@` check (21 fail), a `DescribeEndpoint` that keeps user info (11 fail).
+
+Other review points: (c) `num_predict` 256 -> 1024 still **needs the AI-002 owner's confirmation** (section 6); `docs/ai` was not edited. (d) The PR description now says `Refs #16` instead of `Closes #16`, because the final timeout / concurrency policy depends on the AI-004 benchmark.
 
 ## 6. Known limitations that remain
 

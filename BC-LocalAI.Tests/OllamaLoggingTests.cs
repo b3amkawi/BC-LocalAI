@@ -125,7 +125,7 @@ public sealed class OllamaLoggingTests
 
         var entry = Single(logs);
         Assert.Equal(4004, entry.EventId.Id);
-        Assert.Equal("http://127.0.0.1:11434", entry.Fields["BaseUrl"]);
+        Assert.Equal("http://127.0.0.1:11434", entry.Fields["Endpoint"]);
         Assert.IsType<HttpRequestException>(entry.Exception);
     }
 

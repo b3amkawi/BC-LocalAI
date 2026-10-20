@@ -119,7 +119,7 @@ Invoke-WebRequest `
 ```
 
 There is no silent fallback to `MockAIService`: if Ollama is not reachable the API returns an error (see below).
-No secrets are used. Ollama is reached through loopback only (AI-002 contract): `Ollama:BaseUrl` must be a loopback http/https URL (`127.0.0.1`, `localhost`, `[::1]`); any other host stops the application at startup. Ollama itself must not be exposed to the public internet.
+No secrets are used. Ollama is reached through loopback only (AI-002 contract): `Ollama:BaseUrl` must be a loopback http/https URL (`127.0.0.1`, `localhost`, `[::1]`); any other host stops the application at startup, and so does a URL with a user name / password, query or fragment (logs only ever show `scheme://host:port`). Ollama itself must not be exposed to the public internet.
 
 ### Ollama configuration
 

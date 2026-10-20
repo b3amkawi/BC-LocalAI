@@ -7,7 +7,7 @@ Issue: #16 · Settings live in `BC-LocalAI/appsettings.json` under `Ollama` and 
 
 | Setting | Default | Allowed | What it controls |
 |---------|--------:|---------|------------------|
-| `Ollama:BaseUrl` | `http://127.0.0.1:11434` | loopback `http`/`https` only | where Ollama is reached (AI-002: loopback only) |
+| `Ollama:BaseUrl` | `http://127.0.0.1:11434` | loopback `http`/`https` only; **no user name / password (`@`), query (`?`) or fragment (`#`)** - such a value stops the application at startup | where Ollama is reached (AI-002: loopback only). Logs describe it only as `scheme://host:port` |
 | `Ollama:Model` | `qwen3:4b` | non-empty | model name sent to Ollama and expected back |
 | `Ollama:TimeoutSeconds` | `180` | 1 - 600 | **deadline for the whole exchange** with Ollama: connecting, waiting in Ollama's queue, generating and reading the answer |
 | `Ollama:MaxOutputTokens` | `1024` | 16 - 4096 | output token limit sent to Ollama as `num_predict` (was a fixed `256` in the code) |
@@ -73,7 +73,7 @@ Each outcome writes one structured entry (event ids 4001 - 4007, `BC-LocalAI/Ser
 | 4001 | Information | answered |
 | 4002 | Warning | deadline elapsed |
 | 4003 | Information | the caller cancelled; the Ollama call was stopped |
-| 4004 | Warning | Ollama unreachable (exception attached for diagnosis, server side only) |
+| 4004 | Warning | Ollama unreachable; field `Endpoint` = `scheme://host:port` only (never the configured URL as written); exception attached for diagnosis, server side only |
 | 4005 | Warning | Ollama returned an HTTP error |
 | 4006 | Warning | invalid response (with `Reason`) |
 | 4007 | Warning | response too large (`OutputTokenLimit` or `BodySizeLimit`) |

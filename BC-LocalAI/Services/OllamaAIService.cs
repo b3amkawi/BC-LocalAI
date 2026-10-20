@@ -86,7 +86,7 @@ public sealed class OllamaAIService(
         }
         catch (Exception exception) when (exception is HttpRequestException or IOException)
         {
-            OllamaLog.Unavailable(logger, exception, _options.BaseUrl, ElapsedMs(started));
+            OllamaLog.Unavailable(logger, exception, OllamaOptions.DescribeEndpoint(_options.BaseUrl), ElapsedMs(started));
             throw AiServiceException.Unavailable(exception);
         }
     }

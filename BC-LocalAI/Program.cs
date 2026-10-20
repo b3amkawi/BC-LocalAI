@@ -25,7 +25,8 @@ builder.Services.AddOptions<OllamaOptions>()
 builder.Services.AddHttpClient<IAIService, OllamaAIService>((serviceProvider, client) =>
 {
     var ollama = serviceProvider.GetRequiredService<IOptions<OllamaOptions>>().Value;
-    client.BaseAddress = new Uri(ollama.BaseUrl.TrimEnd('/') + "/");
+    // Built without any user info, query or fragment (the validator already refuses them; this keeps them out of the client).
+    client.BaseAddress = OllamaOptions.BuildBaseAddress(ollama.BaseUrl);
     // The deadline is enforced by OllamaAIService (Ollama:TimeoutSeconds, validated 1-600) so that a timeout and a client
     // cancellation can be told apart and the body read is covered too; HttpClient's own 100 s default must not cut in first.
     client.Timeout = Timeout.InfiniteTimeSpan;

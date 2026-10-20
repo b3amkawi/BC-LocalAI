@@ -19,6 +19,36 @@ public sealed class OllamaOptions
 
     /// <summary>Largest response body accepted from Ollama. Protects memory from a misbehaving provider.</summary>
     public int MaxResponseBytes { get; set; } = 1_048_576;
+
+    /// <summary>
+    /// The only description of the Ollama address that may be written to a log: scheme://host:port. A user name,
+    /// password, path, query or fragment that may have been written in BaseUrl is never part of it.
+    /// </summary>
+    public static string DescribeEndpoint(string? baseUrl) =>
+        TryParseHttpUrl(baseUrl, out var uri) ? $"{uri.Scheme}://{uri.Host}:{uri.Port}" : "invalid";
+
+    /// <summary>Address for the HttpClient: the configured URL without credentials, query or fragment, ending with '/'.</summary>
+    public static Uri BuildBaseAddress(string baseUrl)
+    {
+        var uri = TryParseHttpUrl(baseUrl, out var parsed)
+            ? parsed
+            : throw new ArgumentException("Ollama:BaseUrl is not a valid http or https URL.", nameof(baseUrl));
+        var builder = new UriBuilder(uri.Scheme, uri.Host, uri.Port, uri.AbsolutePath.TrimEnd('/') + "/");
+        return builder.Uri;
+    }
+
+    private static bool TryParseHttpUrl(string? value, out Uri uri)
+    {
+        if (Uri.TryCreate(value, UriKind.Absolute, out var parsed)
+            && (parsed.Scheme == Uri.UriSchemeHttp || parsed.Scheme == Uri.UriSchemeHttps))
+        {
+            uri = parsed;
+            return true;
+        }
+
+        uri = null!;
+        return false;
+    }
 }
 
 public sealed class OllamaOptionsValidator : IValidateOptions<OllamaOptions>
@@ -39,6 +69,14 @@ public sealed class OllamaOptionsValidator : IValidateOptions<OllamaOptions>
             || !uri.IsLoopback)
         {
             failures.Add("Ollama:BaseUrl must be an absolute loopback http or https URL.");
+        }
+
+        // Review of PR #19: a user name or password in the URL would end up in logs and error messages. Authentication
+        // is not part of the loopback contract, so such a URL is refused (the message never repeats the value).
+        if (options.BaseUrl is not null
+            && (options.BaseUrl.Contains('@') || options.BaseUrl.Contains('?') || options.BaseUrl.Contains('#')))
+        {
+            failures.Add("Ollama:BaseUrl must not contain credentials, a query string or a fragment.");
         }
 
         if (string.IsNullOrWhiteSpace(options.Model))
