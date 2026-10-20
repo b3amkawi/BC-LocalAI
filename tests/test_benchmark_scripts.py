@@ -177,6 +177,8 @@ class BenchmarkScriptTests(unittest.TestCase):
         source = (ROOT / "scripts" / "benchmark" / "BenchmarkCommon.psm1").read_text(encoding="utf-8")
         result = subprocess.run(
             [PWSH, "-NoProfile", "-Command",
+             # UTF-8 output: the default console code page (437 on English Windows) would turn the Thai prompts into '?'.
+             "[Console]::OutputEncoding = [Text.UTF8Encoding]::new($false); "
              f"Import-Module '{ROOT / 'scripts' / 'benchmark' / 'BenchmarkCommon.psm1'}'; Get-BenchmarkPrompts | ConvertTo-Json -Depth 3"],
             capture_output=True, encoding="utf-8", timeout=60)
         self.assertEqual(result.returncode, 0, result.stderr)
@@ -192,7 +194,9 @@ class BenchmarkScriptTests(unittest.TestCase):
     def test_ollama_request_body_matches_the_backend_contract(self):
         source = CONTRACT.read_text(encoding="utf-8")
         system_prompt = re.search(r'SystemPrompt =\s*"([^"]+)"', source)[1]
-        num_predict = int(re.search(r'NumPredict \{ get; init; \} = (\d+);', source)[1])
+        # BE-003: the Backend sends num_predict = Ollama:MaxOutputTokens from appsettings.json.
+        settings = json.loads((ROOT / "BC-LocalAI" / "appsettings.json").read_text(encoding="utf-8-sig"))
+        num_predict = settings["Ollama"]["MaxOutputTokens"]
         with MockServer(ollama_ok) as server:
             result, _, _ = self.run_script(OLLAMA_SCRIPT, server.url, "-Concurrency", "1", "-Profiles", "short",
                                            "-Rounds", "1", "-WarmupRequests", "0", "-ResourceIntervalMs", "0")
@@ -204,6 +208,12 @@ class BenchmarkScriptTests(unittest.TestCase):
         self.assertIs(body["think"], False)
         self.assertIs(body["stream"], False)
         self.assertEqual(body["format"]["required"], ["answer"])
+        with MockServer(ollama_ok) as server:
+            result, _, _ = self.run_script(OLLAMA_SCRIPT, server.url, "-Concurrency", "1", "-Profiles", "short",
+                                           "-Rounds", "1", "-WarmupRequests", "0", "-ResourceIntervalMs", "0",
+                                           "-NumPredict", "256")
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(server.posts()[0]["options"]["num_predict"], 256)
 
     def test_ollama_outcomes_are_classified_and_kept_as_data(self):
         def reply(body):

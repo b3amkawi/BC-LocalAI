@@ -6,7 +6,8 @@ Requires PowerShell 7. Loopback only. Sends predefined short/medium/long prompts
 concurrency level for the given number of rounds, after warm-up requests, and writes one CSV
 row per request plus a JSON summary (latency percentiles, throughput, success/timeout rate,
 tokens/s, CPU/RAM/GPU/VRAM). The request body mirrors the AI-002 contract used by
-OllamaAIService (system prompt, JSON schema, think=false, temperature=0, num_predict=256),
+OllamaAIService (system prompt, JSON schema, think=false, temperature=0, and num_predict =
+Ollama:MaxOutputTokens from the Backend's appsettings.json, as the Backend sends since BE-003),
 so results are comparable with backend-benchmark.ps1.
 
 Exit 0 when the run finished and results were written (failed requests are data, not a script
@@ -32,7 +33,10 @@ param(
     [string]$ColdStartNote = '',
     [string]$OutputCsv = (Join-Path $PSScriptRoot '..\..\docs\performance\benchmark-results.csv'),
     [switch]$AppendCsv,
-    [string]$OutputJson = (Join-Path $PSScriptRoot '..\..\docs\performance\benchmark-summary-ollama.json')
+    [string]$OutputJson = (Join-Path $PSScriptRoot '..\..\docs\performance\benchmark-summary-ollama.json'),
+    # Backend settings to mirror; -NumPredict overrides (use it when the Backend runs with Ollama__MaxOutputTokens set).
+    [string]$SettingsPath = (Join-Path $PSScriptRoot '..\..\BC-LocalAI\appsettings.json'),
+    [ValidateRange(0, 4096)][int]$NumPredict = 0
 )
 
 $ErrorActionPreference = 'Stop'
@@ -41,7 +45,15 @@ Import-Module (Join-Path $PSScriptRoot 'BenchmarkCommon.psm1') -Force
 $model = 'qwen3:4b'
 # Mirrors BC-LocalAI/Models/Ollama/OllamaGenerateRequest.cs (AI-002 contract); a unit test guards drift.
 $systemPrompt = 'Answer the user briefly in the same language as the user. Return a JSON object containing only an answer field with the final answer.'
-$numPredict = 256
+# BE-003: OllamaAIService sends num_predict = Ollama:MaxOutputTokens (the AI-002 contract fixed it at 256 before).
+# PowerShell names are case-insensitive: $numPredict below is the -NumPredict parameter itself.
+if ($NumPredict -le 0) {
+    $NumPredict = 256
+    if (Test-Path -LiteralPath $SettingsPath) {
+        $configured = (Get-Content -Raw -LiteralPath $SettingsPath | ConvertFrom-Json).Ollama.MaxOutputTokens
+        if ($null -ne $configured) { $NumPredict = [int]$configured }
+    }
+}
 
 try {
     Assert-LoopbackBaseUrl $BaseUrl
