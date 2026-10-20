@@ -1,0 +1,4514 @@
+{
+  "generated_utc": "2026-10-20 11:53:45",
+  "repeats": 2,
+  "cases": 74,
+  "case_runs": 147,
+  "passed_cases": 74,
+  "failed_cases": [],
+  "blocked": [
+    {
+      "id": "QA1-U-stop",
+      "group": "3.3",
+      "title": "ปุ่ม Stop Generating",
+      "owner": "UI",
+      "waiting_for": "FE-002"
+    },
+    {
+      "id": "QA1-U-close-tab",
+      "group": "3.3",
+      "title": "ปิดแท็บระหว่างสตรีม",
+      "owner": "UI",
+      "waiting_for": "FE-002"
+    },
+    {
+      "id": "QA1-U-navigate",
+      "group": "3.3",
+      "title": "เปลี่ยนหน้าระหว่างสตรีม",
+      "owner": "UI",
+      "waiting_for": "FE-002"
+    },
+    {
+      "id": "QA1-U-render-html",
+      "group": "3.4",
+      "title": "คำตอบที่มี HTML/script แสดงเป็นข้อความในหน้าแชต",
+      "owner": "UI",
+      "waiting_for": "FE-002"
+    },
+    {
+      "id": "QA1-U-queue-indicator",
+      "group": "3.5",
+      "title": "UI แสดงสถานะรอคิว",
+      "owner": "UI",
+      "waiting_for": "FE-002"
+    },
+    {
+      "id": "QA1-U-partial-display",
+      "group": "3.2",
+      "title": "UI แสดงข้อความบางส่วนก่อน error",
+      "owner": "UI",
+      "waiting_for": "FE-002"
+    }
+  ],
+  "duration_s": 100.4,
+  "results": [
+    {
+      "id": "QA1-N-n_thai",
+      "group": "3.1",
+      "title": "ภาษาไทย (ตัวอักษรแบ่งกลางชิ้นข้อมูล)",
+      "owner": "Backend",
+      "expected": "completed ครั้งเดียว ข้อความตรงกับคำตอบ ไม่มีเศษ JSON/ความคิด",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta"
+            ],
+            "terminal": [
+              [
+                "completed",
+                {
+                  "finishReason": "stop",
+                  "evalCount": 7
+                }
+              ]
+            ],
+            "text_preview": "สวัสดีครับ ยินดีต้อนรับสู่ระบบ AI ภายในบริษัท CANARY-ANSWER-4c0d3f",
+            "transport_error": null
+          },
+          "elapsed_s": 0.28
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta"
+            ],
+            "terminal": [
+              [
+                "completed",
+                {
+                  "finishReason": "stop",
+                  "evalCount": 7
+                }
+              ]
+            ],
+            "text_preview": "สวัสดีครับ ยินดีต้อนรับสู่ระบบ AI ภายในบริษัท CANARY-ANSWER-4c0d3f",
+            "transport_error": null
+          },
+          "elapsed_s": 0.02
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "QA1-N-n_thai_b",
+      "group": "3.1",
+      "title": "ภาษาไทยมีวรรณยุกต์ (ทีละอักขระ)",
+      "owner": "Backend",
+      "expected": "completed ครั้งเดียว ข้อความตรงกับคำตอบ ไม่มีเศษ JSON/ความคิด",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta"
+            ],
+            "terminal": [
+              [
+                "completed",
+                {
+                  "finishReason": "stop",
+                  "evalCount": 7
+                }
+              ]
+            ],
+            "text_preview": "ทดสอบข้อความภาษาไทยที่มีวรรณยุกต์ ก่อ ก๊อ กี้ CANARY-ANSWER-4c0d3f",
+            "transport_error": null
+          },
+          "elapsed_s": 0.02
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta"
+            ],
+            "terminal": [
+              [
+                "completed",
+                {
+                  "finishReason": "stop",
+                  "evalCount": 7
+                }
+              ]
+            ],
+            "text_preview": "ทดสอบข้อความภาษาไทยที่มีวรรณยุกต์ ก่อ ก๊อ กี้ CANARY-ANSWER-4c0d3f",
+            "transport_error": null
+          },
+          "elapsed_s": 0.03
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "QA1-N-n_english",
+      "group": "3.1",
+      "title": "ภาษาอังกฤษ",
+      "owner": "Backend",
+      "expected": "completed ครั้งเดียว ข้อความตรงกับคำตอบ ไม่มีเศษ JSON/ความคิด",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta"
+            ],
+            "terminal": [
+              [
+                "completed",
+                {
+                  "finishReason": "stop",
+                  "evalCount": 7
+                }
+              ]
+            ],
+            "text_preview": "Hello, this is an internal AI answer. CANARY-ANSWER-4c0d3f",
+            "transport_error": null
+          },
+          "elapsed_s": 0.02
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta"
+            ],
+            "terminal": [
+              [
+                "completed",
+                {
+                  "finishReason": "stop",
+                  "evalCount": 7
+                }
+              ]
+            ],
+            "text_preview": "Hello, this is an internal AI answer. CANARY-ANSWER-4c0d3f",
+            "transport_error": null
+          },
+          "elapsed_s": 0.0
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "QA1-N-n_english_b",
+      "group": "3.1",
+      "title": "ภาษาอังกฤษมีเครื่องหมายวรรคตอน",
+      "owner": "Backend",
+      "expected": "completed ครั้งเดียว ข้อความตรงกับคำตอบ ไม่มีเศษ JSON/ความคิด",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta"
+            ],
+            "terminal": [
+              [
+                "completed",
+                {
+                  "finishReason": "stop",
+                  "evalCount": 7
+                }
+              ]
+            ],
+            "text_preview": "A second English answer with punctuation; commas, and a colon: ok.",
+            "transport_error": null
+          },
+          "elapsed_s": 0.03
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta"
+            ],
+            "terminal": [
+              [
+                "completed",
+                {
+                  "finishReason": "stop",
+                  "evalCount": 7
+                }
+              ]
+            ],
+            "text_preview": "A second English answer with punctuation; commas, and a colon: ok.",
+            "transport_error": null
+          },
+          "elapsed_s": 0.0
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "QA1-N-n_emoji",
+      "group": "3.1",
+      "title": "emoji (คู่ surrogate แบ่งทีละอักขระ)",
+      "owner": "Backend",
+      "expected": "completed ครั้งเดียว ข้อความตรงกับคำตอบ ไม่มีเศษ JSON/ความคิด",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta"
+            ],
+            "terminal": [
+              [
+                "completed",
+                {
+                  "finishReason": "stop",
+                  "evalCount": 7
+                }
+              ]
+            ],
+            "text_preview": "Done 😀 🚀 ok CANARY-ANSWER-4c0d3f",
+            "transport_error": null
+          },
+          "elapsed_s": 0.05
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta"
+            ],
+            "terminal": [
+              [
+                "completed",
+                {
+                  "finishReason": "stop",
+                  "evalCount": 7
+                }
+              ]
+            ],
+            "text_preview": "Done 😀 🚀 ok CANARY-ANSWER-4c0d3f",
+            "transport_error": null
+          },
+          "elapsed_s": 0.03
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "QA1-N-n_emoji_escaped",
+      "group": "3.1",
+      "title": "emoji ที่มาเป็น \\uXXXX",
+      "owner": "Backend",
+      "expected": "completed ครั้งเดียว ข้อความตรงกับคำตอบ ไม่มีเศษ JSON/ความคิด",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "completed"
+            ],
+            "terminal": [
+              [
+                "completed",
+                {
+                  "finishReason": "stop",
+                  "evalCount": 7
+                }
+              ]
+            ],
+            "text_preview": "Escaped 😀 pair",
+            "transport_error": null
+          },
+          "elapsed_s": 0.0
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "completed"
+            ],
+            "terminal": [
+              [
+                "completed",
+                {
+                  "finishReason": "stop",
+                  "evalCount": 7
+                }
+              ]
+            ],
+            "text_preview": "Escaped 😀 pair",
+            "transport_error": null
+          },
+          "elapsed_s": 0.02
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "QA1-N-n_multiline",
+      "group": "3.1",
+      "title": "หลายบรรทัดและบรรทัดว่าง",
+      "owner": "Backend",
+      "expected": "completed ครั้งเดียว ข้อความตรงกับคำตอบ ไม่มีเศษ JSON/ความคิด",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "completed"
+            ],
+            "terminal": [
+              [
+                "completed",
+                {
+                  "finishReason": "stop",
+                  "evalCount": 7
+                }
+              ]
+            ],
+            "text_preview": "line one\nline two\n\nline four",
+            "transport_error": null
+          },
+          "elapsed_s": 0.0
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "completed"
+            ],
+            "terminal": [
+              [
+                "completed",
+                {
+                  "finishReason": "stop",
+                  "evalCount": 7
+                }
+              ]
+            ],
+            "text_preview": "line one\nline two\n\nline four",
+            "transport_error": null
+          },
+          "elapsed_s": 0.02
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "QA1-N-n_multiline_b",
+      "group": "3.1",
+      "title": "CRLF และ tab",
+      "owner": "Backend",
+      "expected": "completed ครั้งเดียว ข้อความตรงกับคำตอบ ไม่มีเศษ JSON/ความคิด",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "delta",
+              "delta",
+              "completed"
+            ],
+            "terminal": [
+              [
+                "completed",
+                {
+                  "finishReason": "stop",
+                  "evalCount": 7
+                }
+              ]
+            ],
+            "text_preview": "a\r\nb\tc\nd",
+            "transport_error": null
+          },
+          "elapsed_s": 0.02
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "delta",
+              "delta",
+              "completed"
+            ],
+            "terminal": [
+              [
+                "completed",
+                {
+                  "finishReason": "stop",
+                  "evalCount": 7
+                }
+              ]
+            ],
+            "text_preview": "a\r\nb\tc\nd",
+            "transport_error": null
+          },
+          "elapsed_s": 0.0
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "QA1-N-n_special",
+      "group": "3.1",
+      "title": "อักขระพิเศษ \" < & \\",
+      "owner": "Backend",
+      "expected": "completed ครั้งเดียว ข้อความตรงกับคำตอบ ไม่มีเศษ JSON/ความคิด",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta"
+            ],
+            "terminal": [
+              [
+                "completed",
+                {
+                  "finishReason": "stop",
+                  "evalCount": 7
+                }
+              ]
+            ],
+            "text_preview": "quote \" less < amp & backslash \\ end",
+            "transport_error": null
+          },
+          "elapsed_s": 0.0
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta"
+            ],
+            "terminal": [
+              [
+                "completed",
+                {
+                  "finishReason": "stop",
+                  "evalCount": 7
+                }
+              ]
+            ],
+            "text_preview": "quote \" less < amp & backslash \\ end",
+            "transport_error": null
+          },
+          "elapsed_s": 0.0
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "QA1-N-n_special_b",
+      "group": "3.1",
+      "title": "แท็ก HTML และ entity เป็นข้อความ",
+      "owner": "Backend",
+      "expected": "completed ครั้งเดียว ข้อความตรงกับคำตอบ ไม่มีเศษ JSON/ความคิด",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta"
+            ],
+            "terminal": [
+              [
+                "completed",
+                {
+                  "finishReason": "stop",
+                  "evalCount": 7
+                }
+              ]
+            ],
+            "text_preview": "tag <b>bold</b> & entity &amp; slash / end",
+            "transport_error": null
+          },
+          "elapsed_s": 0.02
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta"
+            ],
+            "terminal": [
+              [
+                "completed",
+                {
+                  "finishReason": "stop",
+                  "evalCount": 7
+                }
+              ]
+            ],
+            "text_preview": "tag <b>bold</b> & entity &amp; slash / end",
+            "transport_error": null
+          },
+          "elapsed_s": 0.0
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "QA1-N-n_short",
+      "group": "3.1",
+      "title": "คำตอบสั้นมาก",
+      "owner": "Backend",
+      "expected": "completed ครั้งเดียว ข้อความตรงกับคำตอบ ไม่มีเศษ JSON/ความคิด",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "delta",
+              "completed"
+            ],
+            "terminal": [
+              [
+                "completed",
+                {
+                  "finishReason": "stop",
+                  "evalCount": 7
+                }
+              ]
+            ],
+            "text_preview": "4",
+            "transport_error": null
+          },
+          "elapsed_s": 0.0
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "delta",
+              "completed"
+            ],
+            "terminal": [
+              [
+                "completed",
+                {
+                  "finishReason": "stop",
+                  "evalCount": 7
+                }
+              ]
+            ],
+            "text_preview": "4",
+            "transport_error": null
+          },
+          "elapsed_s": 0.0
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "QA1-N-n_short_b",
+      "group": "3.1",
+      "title": "คำตอบสั้น 2 ตัวอักษร",
+      "owner": "Backend",
+      "expected": "completed ครั้งเดียว ข้อความตรงกับคำตอบ ไม่มีเศษ JSON/ความคิด",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "delta",
+              "completed"
+            ],
+            "terminal": [
+              [
+                "completed",
+                {
+                  "finishReason": "stop",
+                  "evalCount": 7
+                }
+              ]
+            ],
+            "text_preview": "ok",
+            "transport_error": null
+          },
+          "elapsed_s": 0.0
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "delta",
+              "completed"
+            ],
+            "terminal": [
+              [
+                "completed",
+                {
+                  "finishReason": "stop",
+                  "evalCount": 7
+                }
+              ]
+            ],
+            "text_preview": "ok",
+            "transport_error": null
+          },
+          "elapsed_s": 0.02
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "QA1-N-n_medium",
+      "group": "3.1",
+      "title": "คำตอบขนาดกลาง",
+      "owner": "Backend",
+      "expected": "completed ครั้งเดียว ข้อความตรงกับคำตอบ ไม่มีเศษ JSON/ความคิด",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta"
+            ],
+            "terminal": [
+              [
+                "completed",
+                {
+                  "finishReason": "stop",
+                  "evalCount": 7
+                }
+              ]
+            ],
+            "text_preview": "word word word word word word word word word word word word word word word word ",
+            "transport_error": null
+          },
+          "elapsed_s": 0.0
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta"
+            ],
+            "terminal": [
+              [
+                "completed",
+                {
+                  "finishReason": "stop",
+                  "evalCount": 7
+                }
+              ]
+            ],
+            "text_preview": "word word word word word word word word word word word word word word word word ",
+            "transport_error": null
+          },
+          "elapsed_s": 0.03
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "QA1-N-n_medium_b",
+      "group": "3.1",
+      "title": "คำตอบขนาดกลางภาษาไทย",
+      "owner": "Backend",
+      "expected": "completed ครั้งเดียว ข้อความตรงกับคำตอบ ไม่มีเศษ JSON/ความคิด",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta"
+            ],
+            "terminal": [
+              [
+                "completed",
+                {
+                  "finishReason": "stop",
+                  "evalCount": 7
+                }
+              ]
+            ],
+            "text_preview": "ข้อความปานกลาง ข้อความปานกลาง ข้อความปานกลาง ข้อความปานกลาง ข้อความปานกลาง ข้อคว",
+            "transport_error": null
+          },
+          "elapsed_s": 0.02
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta"
+            ],
+            "terminal": [
+              [
+                "completed",
+                {
+                  "finishReason": "stop",
+                  "evalCount": 7
+                }
+              ]
+            ],
+            "text_preview": "ข้อความปานกลาง ข้อความปานกลาง ข้อความปานกลาง ข้อความปานกลาง ข้อความปานกลาง ข้อคว",
+            "transport_error": null
+          },
+          "elapsed_s": 0.0
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "QA1-N-n_long",
+      "group": "3.1",
+      "title": "คำตอบยาว (ภาษาไทย)",
+      "owner": "Backend",
+      "expected": "completed ครั้งเดียว ข้อความตรงกับคำตอบ ไม่มีเศษ JSON/ความคิด",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta"
+            ],
+            "terminal": [
+              [
+                "completed",
+                {
+                  "finishReason": "stop",
+                  "evalCount": 7
+                }
+              ]
+            ],
+            "text_preview": "ประโยคที่ยาวมากเพื่อทดสอบการแบ่งข้อมูลหลายชิ้น ประโยคที่ยาวมากเพื่อทดสอบการแบ่งข",
+            "transport_error": null
+          },
+          "elapsed_s": 0.03
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta"
+            ],
+            "terminal": [
+              [
+                "completed",
+                {
+                  "finishReason": "stop",
+                  "evalCount": 7
+                }
+              ]
+            ],
+            "text_preview": "ประโยคที่ยาวมากเพื่อทดสอบการแบ่งข้อมูลหลายชิ้น ประโยคที่ยาวมากเพื่อทดสอบการแบ่งข",
+            "transport_error": null
+          },
+          "elapsed_s": 0.03
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "QA1-N-n_long_b",
+      "group": "3.1",
+      "title": "คำตอบยาว (ภาษาอังกฤษ)",
+      "owner": "Backend",
+      "expected": "completed ครั้งเดียว ข้อความตรงกับคำตอบ ไม่มีเศษ JSON/ความคิด",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta"
+            ],
+            "terminal": [
+              [
+                "completed",
+                {
+                  "finishReason": "stop",
+                  "evalCount": 7
+                }
+              ]
+            ],
+            "text_preview": "long english sentence long english sentence long english sentence long english s",
+            "transport_error": null
+          },
+          "elapsed_s": 0.02
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta"
+            ],
+            "terminal": [
+              [
+                "completed",
+                {
+                  "finishReason": "stop",
+                  "evalCount": 7
+                }
+              ]
+            ],
+            "text_preview": "long english sentence long english sentence long english sentence long english s",
+            "transport_error": null
+          },
+          "elapsed_s": 0.02
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "QA1-N-n_thinking_field",
+      "group": "3.1",
+      "title": "ฟิลด์ thinking ต้องไม่ถึงผู้ใช้",
+      "owner": "Backend",
+      "expected": "completed ครั้งเดียว ข้อความตรงกับคำตอบ ไม่มีเศษ JSON/ความคิด",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "completed"
+            ],
+            "terminal": [
+              [
+                "completed",
+                {
+                  "finishReason": "stop",
+                  "evalCount": 7
+                }
+              ]
+            ],
+            "text_preview": "visible answer only",
+            "transport_error": null
+          },
+          "elapsed_s": 0.0
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "completed"
+            ],
+            "terminal": [
+              [
+                "completed",
+                {
+                  "finishReason": "stop",
+                  "evalCount": 7
+                }
+              ]
+            ],
+            "text_preview": "visible answer only",
+            "transport_error": null
+          },
+          "elapsed_s": 0.0
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "QA1-N-n_thinking_field_b",
+      "group": "3.1",
+      "title": "ฟิลด์ thinking กับภาษาไทย",
+      "owner": "Backend",
+      "expected": "completed ครั้งเดียว ข้อความตรงกับคำตอบ ไม่มีเศษ JSON/ความคิด",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "completed"
+            ],
+            "terminal": [
+              [
+                "completed",
+                {
+                  "finishReason": "stop",
+                  "evalCount": 7
+                }
+              ]
+            ],
+            "text_preview": "คำตอบที่เห็นได้เท่านั้น",
+            "transport_error": null
+          },
+          "elapsed_s": 0.0
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "completed"
+            ],
+            "terminal": [
+              [
+                "completed",
+                {
+                  "finishReason": "stop",
+                  "evalCount": 7
+                }
+              ]
+            ],
+            "text_preview": "คำตอบที่เห็นได้เท่านั้น",
+            "transport_error": null
+          },
+          "elapsed_s": 0.02
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "QA1-N-cold",
+      "group": "3.1",
+      "title": "cold start: started ถึงก่อน record แรกของ Ollama",
+      "owner": "Backend",
+      "expected": "started ≤ 1 วินาที ทั้งที่ Ollama ตอบช้า 2 วินาที",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "started_s": 0.02,
+            "first_delta_s": 2.02
+          },
+          "elapsed_s": 2.02
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "started_s": 0.0,
+            "first_delta_s": 2.0
+          },
+          "elapsed_s": 2.0
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "QA1-N-cold-b",
+      "group": "3.1",
+      "title": "cold start ภาษาไทย",
+      "owner": "Backend",
+      "expected": "completed และข้อความตรง",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "completed"
+            ],
+            "terminal": [
+              [
+                "completed",
+                {
+                  "finishReason": "stop",
+                  "evalCount": 7
+                }
+              ]
+            ],
+            "text_preview": "ตอบหลังโหลดโมเดล",
+            "transport_error": null
+          },
+          "elapsed_s": 1.5
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "completed"
+            ],
+            "terminal": [
+              [
+                "completed",
+                {
+                  "finishReason": "stop",
+                  "evalCount": 7
+                }
+              ]
+            ],
+            "text_preview": "ตอบหลังโหลดโมเดล",
+            "transport_error": null
+          },
+          "elapsed_s": 1.5
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "QA1-N-headers",
+      "group": "3.1",
+      "title": "header ของสตรีม",
+      "owner": "Backend",
+      "expected": "text/event-stream, no-cache, X-Accel-Buffering: no",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "headers": {
+              "content-type": "text/event-stream; charset=utf-8",
+              "cache-control": "no-cache",
+              "x-accel-buffering": "no"
+            }
+          },
+          "elapsed_s": 0.0
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "headers": {
+              "content-type": "text/event-stream; charset=utf-8",
+              "cache-control": "no-cache",
+              "x-accel-buffering": "no"
+            }
+          },
+          "elapsed_s": 0.02
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "QA1-N-validation",
+      "group": "3.1",
+      "title": "ข้อความว่าง/ไม่มี/ผิดชนิด",
+      "owner": "Backend",
+      "expected": "400 INVALID_MESSAGE ก่อนเริ่มสตรีม",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "responses": [
+              [
+                "blank",
+                400
+              ],
+              [
+                "missing",
+                400
+              ],
+              [
+                "wrong type",
+                400
+              ]
+            ]
+          },
+          "elapsed_s": 0.05
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "responses": [
+              [
+                "blank",
+                400
+              ],
+              [
+                "missing",
+                400
+              ],
+              [
+                "wrong type",
+                400
+              ]
+            ]
+          },
+          "elapsed_s": 0.02
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "QA1-E-e_down",
+      "group": "3.2",
+      "title": "Ollama ไม่ทำงาน",
+      "owner": "Backend",
+      "expected": "error ครั้งเดียว code=AI_UNAVAILABLE partial=false ไม่มี completed ไม่มีรายละเอียดภายใน",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "error"
+            ],
+            "terminal": [
+              [
+                "error",
+                {
+                  "code": "AI_UNAVAILABLE",
+                  "message": "AI service is unavailable",
+                  "partial": false
+                }
+              ]
+            ],
+            "text_preview": "",
+            "transport_error": null
+          },
+          "elapsed_s": 2.28
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "error"
+            ],
+            "terminal": [
+              [
+                "error",
+                {
+                  "code": "AI_UNAVAILABLE",
+                  "message": "AI service is unavailable",
+                  "partial": false
+                }
+              ]
+            ],
+            "text_preview": "",
+            "transport_error": null
+          },
+          "elapsed_s": 2.05
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "QA1-E-e_http500",
+      "group": "3.2",
+      "title": "Ollama ตอบ HTTP 500",
+      "owner": "Backend",
+      "expected": "error ครั้งเดียว code=AI_PROVIDER_ERROR partial=false ไม่มี completed ไม่มีรายละเอียดภายใน",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "error"
+            ],
+            "terminal": [
+              [
+                "error",
+                {
+                  "code": "AI_PROVIDER_ERROR",
+                  "message": "AI service returned an error",
+                  "partial": false
+                }
+              ]
+            ],
+            "text_preview": "",
+            "transport_error": null
+          },
+          "elapsed_s": 0.02
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "error"
+            ],
+            "terminal": [
+              [
+                "error",
+                {
+                  "code": "AI_PROVIDER_ERROR",
+                  "message": "AI service returned an error",
+                  "partial": false
+                }
+              ]
+            ],
+            "text_preview": "",
+            "transport_error": null
+          },
+          "elapsed_s": 0.0
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "QA1-E-e_http500_b",
+      "group": "3.2",
+      "title": "Ollama ตอบ HTTP 500 (ซ้ำ)",
+      "owner": "Backend",
+      "expected": "error ครั้งเดียว code=AI_PROVIDER_ERROR partial=false ไม่มี completed ไม่มีรายละเอียดภายใน",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "error"
+            ],
+            "terminal": [
+              [
+                "error",
+                {
+                  "code": "AI_PROVIDER_ERROR",
+                  "message": "AI service returned an error",
+                  "partial": false
+                }
+              ]
+            ],
+            "text_preview": "",
+            "transport_error": null
+          },
+          "elapsed_s": 0.0
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "error"
+            ],
+            "terminal": [
+              [
+                "error",
+                {
+                  "code": "AI_PROVIDER_ERROR",
+                  "message": "AI service returned an error",
+                  "partial": false
+                }
+              ]
+            ],
+            "text_preview": "",
+            "transport_error": null
+          },
+          "elapsed_s": 0.02
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "QA1-E-e_crash",
+      "group": "3.2",
+      "title": "runner ล้มก่อนมีข้อความถึงผู้ใช้",
+      "owner": "Backend",
+      "expected": "error ครั้งเดียว code=AI_INVALID_RESPONSE partial=false ไม่มี completed ไม่มีรายละเอียดภายใน",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "error"
+            ],
+            "terminal": [
+              [
+                "error",
+                {
+                  "code": "AI_INVALID_RESPONSE",
+                  "message": "AI service returned an invalid response",
+                  "partial": false
+                }
+              ]
+            ],
+            "text_preview": "",
+            "transport_error": null
+          },
+          "elapsed_s": 0.02
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "error"
+            ],
+            "terminal": [
+              [
+                "error",
+                {
+                  "code": "AI_INVALID_RESPONSE",
+                  "message": "AI service returned an invalid response",
+                  "partial": false
+                }
+              ]
+            ],
+            "text_preview": "",
+            "transport_error": null
+          },
+          "elapsed_s": 0.0
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "QA1-E-e_crash_b",
+      "group": "3.2",
+      "title": "runner ล้มหลังส่งข้อความไปแล้ว",
+      "owner": "Backend",
+      "expected": "error ครั้งเดียว code=AI_INVALID_RESPONSE partial=true ไม่มี completed ไม่มีรายละเอียดภายใน",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "error"
+            ],
+            "terminal": [
+              [
+                "error",
+                {
+                  "code": "AI_INVALID_RESPONSE",
+                  "message": "AI service returned an invalid response",
+                  "partial": true
+                }
+              ]
+            ],
+            "text_preview": "partial answer then the",
+            "transport_error": null
+          },
+          "elapsed_s": 0.03
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "error"
+            ],
+            "terminal": [
+              [
+                "error",
+                {
+                  "code": "AI_INVALID_RESPONSE",
+                  "message": "AI service returned an invalid response",
+                  "partial": true
+                }
+              ]
+            ],
+            "text_preview": "partial answer then the",
+            "transport_error": null
+          },
+          "elapsed_s": 0.0
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "QA1-E-e_length",
+      "group": "3.2",
+      "title": "คำตอบถูกตัด (length)",
+      "owner": "Backend",
+      "expected": "error ครั้งเดียว code=AI_RESPONSE_TOO_LARGE partial=true ไม่มี completed ไม่มีรายละเอียดภายใน",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta"
+            ],
+            "terminal": [
+              [
+                "error",
+                {
+                  "code": "AI_RESPONSE_TOO_LARGE",
+                  "message": "AI response was too large",
+                  "partial": true
+                }
+              ]
+            ],
+            "text_preview": "answer cut by the token limit answer cut by the token limit answer cut by the to",
+            "transport_error": null
+          },
+          "elapsed_s": 0.0
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta"
+            ],
+            "terminal": [
+              [
+                "error",
+                {
+                  "code": "AI_RESPONSE_TOO_LARGE",
+                  "message": "AI response was too large",
+                  "partial": true
+                }
+              ]
+            ],
+            "text_preview": "answer cut by the token limit answer cut by the token limit answer cut by the to",
+            "transport_error": null
+          },
+          "elapsed_s": 0.03
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "QA1-E-e_length_b",
+      "group": "3.2",
+      "title": "คำตอบถูกตัดภาษาไทย",
+      "owner": "Backend",
+      "expected": "error ครั้งเดียว code=AI_RESPONSE_TOO_LARGE partial=true ไม่มี completed ไม่มีรายละเอียดภายใน",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta"
+            ],
+            "terminal": [
+              [
+                "error",
+                {
+                  "code": "AI_RESPONSE_TOO_LARGE",
+                  "message": "AI response was too large",
+                  "partial": true
+                }
+              ]
+            ],
+            "text_preview": "คำตอบถูกตัดเพราะเกินขีดจำกัด คำตอบถูกตัดเพราะเกินขีดจำกัด คำตอบถูกตัดเพราะเกินขี",
+            "transport_error": null
+          },
+          "elapsed_s": 0.0
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta"
+            ],
+            "terminal": [
+              [
+                "error",
+                {
+                  "code": "AI_RESPONSE_TOO_LARGE",
+                  "message": "AI response was too large",
+                  "partial": true
+                }
+              ]
+            ],
+            "text_preview": "คำตอบถูกตัดเพราะเกินขีดจำกัด คำตอบถูกตัดเพราะเกินขีดจำกัด คำตอบถูกตัดเพราะเกินขี",
+            "transport_error": null
+          },
+          "elapsed_s": 0.03
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "QA1-E-e_invalid_json",
+      "group": "3.2",
+      "title": "บรรทัดที่ไม่ใช่ JSON",
+      "owner": "Backend",
+      "expected": "error ครั้งเดียว code=AI_INVALID_RESPONSE partial=false ไม่มี completed ไม่มีรายละเอียดภายใน",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "error"
+            ],
+            "terminal": [
+              [
+                "error",
+                {
+                  "code": "AI_INVALID_RESPONSE",
+                  "message": "AI service returned an invalid response",
+                  "partial": false
+                }
+              ]
+            ],
+            "text_preview": "",
+            "transport_error": null
+          },
+          "elapsed_s": 0.02
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "error"
+            ],
+            "terminal": [
+              [
+                "error",
+                {
+                  "code": "AI_INVALID_RESPONSE",
+                  "message": "AI service returned an invalid response",
+                  "partial": false
+                }
+              ]
+            ],
+            "text_preview": "",
+            "transport_error": null
+          },
+          "elapsed_s": 0.0
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "QA1-E-e_invalid_json_b",
+      "group": "3.2",
+      "title": "บรรทัดที่ไม่ใช่ JSON (ซ้ำ)",
+      "owner": "Backend",
+      "expected": "error ครั้งเดียว code=AI_INVALID_RESPONSE partial=false ไม่มี completed ไม่มีรายละเอียดภายใน",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "error"
+            ],
+            "terminal": [
+              [
+                "error",
+                {
+                  "code": "AI_INVALID_RESPONSE",
+                  "message": "AI service returned an invalid response",
+                  "partial": false
+                }
+              ]
+            ],
+            "text_preview": "",
+            "transport_error": null
+          },
+          "elapsed_s": 0.0
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "error"
+            ],
+            "terminal": [
+              [
+                "error",
+                {
+                  "code": "AI_INVALID_RESPONSE",
+                  "message": "AI service returned an invalid response",
+                  "partial": false
+                }
+              ]
+            ],
+            "text_preview": "",
+            "transport_error": null
+          },
+          "elapsed_s": 0.03
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "QA1-E-e_wrong_model",
+      "group": "3.2",
+      "title": "โมเดลในตอบไม่ตรง",
+      "owner": "Backend",
+      "expected": "error ครั้งเดียว code=AI_INVALID_RESPONSE partial=false ไม่มี completed ไม่มีรายละเอียดภายใน",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "error"
+            ],
+            "terminal": [
+              [
+                "error",
+                {
+                  "code": "AI_INVALID_RESPONSE",
+                  "message": "AI service returned an invalid response",
+                  "partial": false
+                }
+              ]
+            ],
+            "text_preview": "",
+            "transport_error": null
+          },
+          "elapsed_s": 0.02
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "error"
+            ],
+            "terminal": [
+              [
+                "error",
+                {
+                  "code": "AI_INVALID_RESPONSE",
+                  "message": "AI service returned an invalid response",
+                  "partial": false
+                }
+              ]
+            ],
+            "text_preview": "",
+            "transport_error": null
+          },
+          "elapsed_s": 0.0
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "QA1-E-e_wrong_model_b",
+      "group": "3.2",
+      "title": "โมเดลไม่ตรง (ซ้ำ)",
+      "owner": "Backend",
+      "expected": "error ครั้งเดียว code=AI_INVALID_RESPONSE partial=false ไม่มี completed ไม่มีรายละเอียดภายใน",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "error"
+            ],
+            "terminal": [
+              [
+                "error",
+                {
+                  "code": "AI_INVALID_RESPONSE",
+                  "message": "AI service returned an invalid response",
+                  "partial": false
+                }
+              ]
+            ],
+            "text_preview": "",
+            "transport_error": null
+          },
+          "elapsed_s": 0.02
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "error"
+            ],
+            "terminal": [
+              [
+                "error",
+                {
+                  "code": "AI_INVALID_RESPONSE",
+                  "message": "AI service returned an invalid response",
+                  "partial": false
+                }
+              ]
+            ],
+            "text_preview": "",
+            "transport_error": null
+          },
+          "elapsed_s": 0.02
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "QA1-E-e_no_done",
+      "group": "3.2",
+      "title": "สตรีมจบโดยไม่มี done ก่อนมีข้อความ",
+      "owner": "Backend",
+      "expected": "error ครั้งเดียว code=AI_INVALID_RESPONSE partial=false ไม่มี completed ไม่มีรายละเอียดภายใน",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "error"
+            ],
+            "terminal": [
+              [
+                "error",
+                {
+                  "code": "AI_INVALID_RESPONSE",
+                  "message": "AI service returned an invalid response",
+                  "partial": false
+                }
+              ]
+            ],
+            "text_preview": "",
+            "transport_error": null
+          },
+          "elapsed_s": 0.0
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "error"
+            ],
+            "terminal": [
+              [
+                "error",
+                {
+                  "code": "AI_INVALID_RESPONSE",
+                  "message": "AI service returned an invalid response",
+                  "partial": false
+                }
+              ]
+            ],
+            "text_preview": "",
+            "transport_error": null
+          },
+          "elapsed_s": 0.0
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "QA1-E-e_no_done_b",
+      "group": "3.2",
+      "title": "สตรีมจบโดยไม่มี done หลังส่งข้อความ",
+      "owner": "Backend",
+      "expected": "error ครั้งเดียว code=AI_INVALID_RESPONSE partial=true ไม่มี completed ไม่มีรายละเอียดภายใน",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "error"
+            ],
+            "terminal": [
+              [
+                "error",
+                {
+                  "code": "AI_INVALID_RESPONSE",
+                  "message": "AI service returned an invalid response",
+                  "partial": true
+                }
+              ]
+            ],
+            "text_preview": "stream ends without don",
+            "transport_error": null
+          },
+          "elapsed_s": 0.0
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "error"
+            ],
+            "terminal": [
+              [
+                "error",
+                {
+                  "code": "AI_INVALID_RESPONSE",
+                  "message": "AI service returned an invalid response",
+                  "partial": true
+                }
+              ]
+            ],
+            "text_preview": "stream ends without don",
+            "transport_error": null
+          },
+          "elapsed_s": 0.0
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "QA1-E-e_error_record",
+      "group": "3.2",
+      "title": "record error ก่อนมีข้อความ (มีรายละเอียดภายใน)",
+      "owner": "Backend",
+      "expected": "error ครั้งเดียว code=AI_PROVIDER_ERROR partial=false ไม่มี completed ไม่มีรายละเอียดภายใน",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "error"
+            ],
+            "terminal": [
+              [
+                "error",
+                {
+                  "code": "AI_PROVIDER_ERROR",
+                  "message": "AI service returned an error",
+                  "partial": false
+                }
+              ]
+            ],
+            "text_preview": "",
+            "transport_error": null
+          },
+          "elapsed_s": 0.03
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "error"
+            ],
+            "terminal": [
+              [
+                "error",
+                {
+                  "code": "AI_PROVIDER_ERROR",
+                  "message": "AI service returned an error",
+                  "partial": false
+                }
+              ]
+            ],
+            "text_preview": "",
+            "transport_error": null
+          },
+          "elapsed_s": 0.0
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "QA1-E-e_error_record_b",
+      "group": "3.2",
+      "title": "record error หลังส่งข้อความ",
+      "owner": "Backend",
+      "expected": "error ครั้งเดียว code=AI_PROVIDER_ERROR partial=true ไม่มี completed ไม่มีรายละเอียดภายใน",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "delta",
+              "error"
+            ],
+            "terminal": [
+              [
+                "error",
+                {
+                  "code": "AI_PROVIDER_ERROR",
+                  "message": "AI service returned an error",
+                  "partial": true
+                }
+              ]
+            ],
+            "text_preview": "the start of an answer that is long enough to ",
+            "transport_error": null
+          },
+          "elapsed_s": 0.02
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "delta",
+              "error"
+            ],
+            "terminal": [
+              [
+                "error",
+                {
+                  "code": "AI_PROVIDER_ERROR",
+                  "message": "AI service returned an error",
+                  "partial": true
+                }
+              ]
+            ],
+            "text_preview": "the start of an answer that is long enough to ",
+            "transport_error": null
+          },
+          "elapsed_s": 0.0
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "QA1-E-e_bad_ct",
+      "group": "3.2",
+      "title": "Content-Type ไม่ใช่ ndjson",
+      "owner": "Backend",
+      "expected": "error ครั้งเดียว code=AI_INVALID_RESPONSE partial=false ไม่มี completed ไม่มีรายละเอียดภายใน",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "error"
+            ],
+            "terminal": [
+              [
+                "error",
+                {
+                  "code": "AI_INVALID_RESPONSE",
+                  "message": "AI service returned an invalid response",
+                  "partial": false
+                }
+              ]
+            ],
+            "text_preview": "",
+            "transport_error": null
+          },
+          "elapsed_s": 0.02
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "error"
+            ],
+            "terminal": [
+              [
+                "error",
+                {
+                  "code": "AI_INVALID_RESPONSE",
+                  "message": "AI service returned an invalid response",
+                  "partial": false
+                }
+              ]
+            ],
+            "text_preview": "",
+            "transport_error": null
+          },
+          "elapsed_s": 0.02
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "QA1-E-e_bad_ct_b",
+      "group": "3.2",
+      "title": "Content-Type ผิด (ซ้ำ)",
+      "owner": "Backend",
+      "expected": "error ครั้งเดียว code=AI_INVALID_RESPONSE partial=false ไม่มี completed ไม่มีรายละเอียดภายใน",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "error"
+            ],
+            "terminal": [
+              [
+                "error",
+                {
+                  "code": "AI_INVALID_RESPONSE",
+                  "message": "AI service returned an invalid response",
+                  "partial": false
+                }
+              ]
+            ],
+            "text_preview": "",
+            "transport_error": null
+          },
+          "elapsed_s": 0.02
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "error"
+            ],
+            "terminal": [
+              [
+                "error",
+                {
+                  "code": "AI_INVALID_RESPONSE",
+                  "message": "AI service returned an invalid response",
+                  "partial": false
+                }
+              ]
+            ],
+            "text_preview": "",
+            "transport_error": null
+          },
+          "elapsed_s": 0.02
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "QA1-E-e_oversize",
+      "group": "3.2",
+      "title": "ข้อมูลเกิน MaxResponseBytes",
+      "owner": "Backend",
+      "expected": "error ครั้งเดียว code=AI_RESPONSE_TOO_LARGE ไม่มี completed ไม่มีรายละเอียดภายใน",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "error"
+            ],
+            "terminal": [
+              [
+                "error",
+                {
+                  "code": "AI_RESPONSE_TOO_LARGE",
+                  "message": "AI response was too large",
+                  "partial": false
+                }
+              ]
+            ],
+            "text_preview": "",
+            "transport_error": null
+          },
+          "elapsed_s": 0.25
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "error"
+            ],
+            "terminal": [
+              [
+                "error",
+                {
+                  "code": "AI_RESPONSE_TOO_LARGE",
+                  "message": "AI response was too large",
+                  "partial": false
+                }
+              ]
+            ],
+            "text_preview": "",
+            "transport_error": null
+          },
+          "elapsed_s": 0.0
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "QA1-E-e_oversize_b",
+      "group": "3.2",
+      "title": "ข้อมูลเกินขนาด (ซ้ำ)",
+      "owner": "Backend",
+      "expected": "error ครั้งเดียว code=AI_RESPONSE_TOO_LARGE ไม่มี completed ไม่มีรายละเอียดภายใน",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "error"
+            ],
+            "terminal": [
+              [
+                "error",
+                {
+                  "code": "AI_RESPONSE_TOO_LARGE",
+                  "message": "AI response was too large",
+                  "partial": false
+                }
+              ]
+            ],
+            "text_preview": "",
+            "transport_error": null
+          },
+          "elapsed_s": 0.02
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "error"
+            ],
+            "terminal": [
+              [
+                "error",
+                {
+                  "code": "AI_RESPONSE_TOO_LARGE",
+                  "message": "AI response was too large",
+                  "partial": false
+                }
+              ]
+            ],
+            "text_preview": "",
+            "transport_error": null
+          },
+          "elapsed_s": 0.0
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "QA1-E-e_think_leak",
+      "group": "3.2",
+      "title": "<think> ในคำตอบ",
+      "owner": "Backend",
+      "expected": "error ครั้งเดียว code=AI_INVALID_RESPONSE ไม่มี completed ไม่มีรายละเอียดภายใน",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "delta",
+              "delta",
+              "error"
+            ],
+            "terminal": [
+              [
+                "error",
+                {
+                  "code": "AI_INVALID_RESPONSE",
+                  "message": "AI service returned an invalid response",
+                  "partial": true
+                }
+              ]
+            ],
+            "text_preview": "visib",
+            "transport_error": null
+          },
+          "elapsed_s": 0.0
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "delta",
+              "delta",
+              "error"
+            ],
+            "terminal": [
+              [
+                "error",
+                {
+                  "code": "AI_INVALID_RESPONSE",
+                  "message": "AI service returned an invalid response",
+                  "partial": true
+                }
+              ]
+            ],
+            "text_preview": "visib",
+            "transport_error": null
+          },
+          "elapsed_s": 0.0
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "QA1-E-e_think_leak_b",
+      "group": "3.2",
+      "title": "<think> ภาษาไทย",
+      "owner": "Backend",
+      "expected": "error ครั้งเดียว code=AI_INVALID_RESPONSE ไม่มี completed ไม่มีรายละเอียดภายใน",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "delta",
+              "error"
+            ],
+            "terminal": [
+              [
+                "error",
+                {
+                  "code": "AI_INVALID_RESPONSE",
+                  "message": "AI service returned an invalid response",
+                  "partial": true
+                }
+              ]
+            ],
+            "text_preview": "ก่",
+            "transport_error": null
+          },
+          "elapsed_s": 0.0
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "delta",
+              "error"
+            ],
+            "terminal": [
+              [
+                "error",
+                {
+                  "code": "AI_INVALID_RESPONSE",
+                  "message": "AI service returned an invalid response",
+                  "partial": true
+                }
+              ]
+            ],
+            "text_preview": "ก่",
+            "transport_error": null
+          },
+          "elapsed_s": 0.02
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "QA1-E-e_timeout_first",
+      "group": "3.2",
+      "title": "timeout: รอ record แรก",
+      "owner": "Backend",
+      "expected": "error ครั้งเดียว code=AI_TIMEOUT partial=false ไม่มี completed ไม่มีรายละเอียดภายใน",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "error"
+            ],
+            "terminal": [
+              [
+                "error",
+                {
+                  "code": "AI_TIMEOUT",
+                  "message": "AI service timed out",
+                  "partial": false
+                }
+              ]
+            ],
+            "text_preview": "",
+            "transport_error": null
+          },
+          "elapsed_s": 3.19
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "error"
+            ],
+            "terminal": [
+              [
+                "error",
+                {
+                  "code": "AI_TIMEOUT",
+                  "message": "AI service timed out",
+                  "partial": false
+                }
+              ]
+            ],
+            "text_preview": "",
+            "transport_error": null
+          },
+          "elapsed_s": 3.05
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "QA1-E-e_timeout_first_b",
+      "group": "3.2",
+      "title": "timeout รอ record แรก (ซ้ำ)",
+      "owner": "Backend",
+      "expected": "error ครั้งเดียว code=AI_TIMEOUT partial=false ไม่มี completed ไม่มีรายละเอียดภายใน",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "error"
+            ],
+            "terminal": [
+              [
+                "error",
+                {
+                  "code": "AI_TIMEOUT",
+                  "message": "AI service timed out",
+                  "partial": false
+                }
+              ]
+            ],
+            "text_preview": "",
+            "transport_error": null
+          },
+          "elapsed_s": 3.02
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "error"
+            ],
+            "terminal": [
+              [
+                "error",
+                {
+                  "code": "AI_TIMEOUT",
+                  "message": "AI service timed out",
+                  "partial": false
+                }
+              ]
+            ],
+            "text_preview": "",
+            "transport_error": null
+          },
+          "elapsed_s": 3.0
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "QA1-E-e_timeout_gap",
+      "group": "3.2",
+      "title": "timeout: ช่องว่างก่อนมีข้อความ",
+      "owner": "Backend",
+      "expected": "error ครั้งเดียว code=AI_TIMEOUT partial=false ไม่มี completed ไม่มีรายละเอียดภายใน",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "error"
+            ],
+            "terminal": [
+              [
+                "error",
+                {
+                  "code": "AI_TIMEOUT",
+                  "message": "AI service timed out",
+                  "partial": false
+                }
+              ]
+            ],
+            "text_preview": "",
+            "transport_error": null
+          },
+          "elapsed_s": 3.0
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "error"
+            ],
+            "terminal": [
+              [
+                "error",
+                {
+                  "code": "AI_TIMEOUT",
+                  "message": "AI service timed out",
+                  "partial": false
+                }
+              ]
+            ],
+            "text_preview": "",
+            "transport_error": null
+          },
+          "elapsed_s": 3.02
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "QA1-E-e_timeout_gap_b",
+      "group": "3.2",
+      "title": "timeout: ช่องว่างหลังส่งข้อความ",
+      "owner": "Backend",
+      "expected": "error ครั้งเดียว code=AI_TIMEOUT partial=true ไม่มี completed ไม่มีรายละเอียดภายใน",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "error"
+            ],
+            "terminal": [
+              [
+                "error",
+                {
+                  "code": "AI_TIMEOUT",
+                  "message": "AI service timed out",
+                  "partial": true
+                }
+              ]
+            ],
+            "text_preview": "some words before the s",
+            "transport_error": null
+          },
+          "elapsed_s": 3.02
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "error"
+            ],
+            "terminal": [
+              [
+                "error",
+                {
+                  "code": "AI_TIMEOUT",
+                  "message": "AI service timed out",
+                  "partial": true
+                }
+              ]
+            ],
+            "text_preview": "some words before the s",
+            "transport_error": null
+          },
+          "elapsed_s": 3.02
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "QA1-E-e_timeout_total",
+      "group": "3.2",
+      "title": "timeout: เวลารวม (หยดช้า)",
+      "owner": "Backend",
+      "expected": "error ครั้งเดียว code=AI_TIMEOUT partial=true ไม่มี completed ไม่มีรายละเอียดภายใน",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "error"
+            ],
+            "terminal": [
+              [
+                "error",
+                {
+                  "code": "AI_TIMEOUT",
+                  "message": "AI service timed out",
+                  "partial": true
+                }
+              ]
+            ],
+            "text_preview": "xxxxxxxxxxx",
+            "transport_error": null
+          },
+          "elapsed_s": 3.0
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "error"
+            ],
+            "terminal": [
+              [
+                "error",
+                {
+                  "code": "AI_TIMEOUT",
+                  "message": "AI service timed out",
+                  "partial": true
+                }
+              ]
+            ],
+            "text_preview": "xxxxxxxxxxxxx",
+            "transport_error": null
+          },
+          "elapsed_s": 3.03
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "QA1-E-e_timeout_total_b",
+      "group": "3.2",
+      "title": "timeout เวลารวม (ซ้ำ)",
+      "owner": "Backend",
+      "expected": "error ครั้งเดียว code=AI_TIMEOUT partial=true ไม่มี completed ไม่มีรายละเอียดภายใน",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "error"
+            ],
+            "terminal": [
+              [
+                "error",
+                {
+                  "code": "AI_TIMEOUT",
+                  "message": "AI service timed out",
+                  "partial": true
+                }
+              ]
+            ],
+            "text_preview": "xxxxxxx",
+            "transport_error": null
+          },
+          "elapsed_s": 3.02
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "delta",
+              "delta",
+              "delta",
+              "error"
+            ],
+            "terminal": [
+              [
+                "error",
+                {
+                  "code": "AI_TIMEOUT",
+                  "message": "AI service timed out",
+                  "partial": true
+                }
+              ]
+            ],
+            "text_preview": "xxxxx",
+            "transport_error": null
+          },
+          "elapsed_s": 3.02
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "QA1-E-queue-full",
+      "group": "3.2",
+      "title": "คิวเต็ม: คำขอที่รอเกิน timeout",
+      "owner": "Backend",
+      "expected": "คำขอที่สองได้ AI_TIMEOUT partial=false ไม่มีข้อความ",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "second_terminal": [
+              [
+                "error",
+                {
+                  "code": "AI_TIMEOUT",
+                  "message": "AI service timed out",
+                  "partial": false
+                }
+              ]
+            ],
+            "second_elapsed_s": 3.0
+          },
+          "elapsed_s": 5.02
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "second_terminal": [
+              [
+                "error",
+                {
+                  "code": "AI_TIMEOUT",
+                  "message": "AI service timed out",
+                  "partial": false
+                }
+              ]
+            ],
+            "second_elapsed_s": 3.0
+          },
+          "elapsed_s": 5.03
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "QA1-C-first_delta",
+      "group": "3.3",
+      "title": "ตัด connection หลัง delta แรก",
+      "owner": "Backend",
+      "expected": "Ollama หยุด generate ≤ 1.5 วินาทีหลัง client ปิด และคำขอถัดไปได้ delta แรก ≤ 3 วินาที ไม่ส่ง completed",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "disconnect_detected_s": 0.2,
+            "next_first_delta_s": 0.02
+          },
+          "elapsed_s": 0.44
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "disconnect_detected_s": 0.2,
+            "next_first_delta_s": 0.02
+          },
+          "elapsed_s": 0.44
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "QA1-C-first_delta-b",
+      "group": "3.3",
+      "title": "ตัด connection หลัง delta แรก",
+      "owner": "Backend",
+      "expected": "Ollama หยุด generate ≤ 1.5 วินาทีหลัง client ปิด และคำขอถัดไปได้ delta แรก ≤ 3 วินาที ไม่ส่ง completed",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "disconnect_detected_s": 0.19,
+            "next_first_delta_s": 0.02
+          },
+          "elapsed_s": 0.42
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "disconnect_detected_s": 0.19,
+            "next_first_delta_s": 0.02
+          },
+          "elapsed_s": 0.42
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "QA1-C-started",
+      "group": "3.3",
+      "title": "ตัด connection หลัง started ระหว่างรอ Ollama",
+      "owner": "Backend",
+      "expected": "Ollama หยุด generate ≤ 1.5 วินาทีหลัง client ปิด และคำขอถัดไปได้ delta แรก ≤ 3 วินาที ไม่ส่ง completed",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "disconnect_detected_s": 0.0,
+            "next_first_delta_s": 0.0
+          },
+          "elapsed_s": 0.06
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "disconnect_detected_s": 0.0,
+            "next_first_delta_s": 0.0
+          },
+          "elapsed_s": 0.05
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "QA1-C-started-b",
+      "group": "3.3",
+      "title": "ตัด connection หลัง started ระหว่างรอ Ollama",
+      "owner": "Backend",
+      "expected": "Ollama หยุด generate ≤ 1.5 วินาทีหลัง client ปิด และคำขอถัดไปได้ delta แรก ≤ 3 วินาที ไม่ส่ง completed",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "disconnect_detected_s": 0.11,
+            "next_first_delta_s": 0.0
+          },
+          "elapsed_s": 0.12
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "disconnect_detected_s": 0.09,
+            "next_first_delta_s": 0.03
+          },
+          "elapsed_s": 0.14
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "QA1-C-0.8",
+      "group": "3.3",
+      "title": "ตัด connection ที่ 0.8 วินาที",
+      "owner": "Backend",
+      "expected": "Ollama หยุด generate ≤ 1.5 วินาทีหลัง client ปิด และคำขอถัดไปได้ delta แรก ≤ 3 วินาที ไม่ส่ง completed",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "disconnect_detected_s": 0.19,
+            "next_first_delta_s": 0.02
+          },
+          "elapsed_s": 1.03
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "disconnect_detected_s": 0.2,
+            "next_first_delta_s": 0.02
+          },
+          "elapsed_s": 1.03
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "QA1-C-0.8-b",
+      "group": "3.3",
+      "title": "ตัด connection ที่ 0.8 วินาที",
+      "owner": "Backend",
+      "expected": "Ollama หยุด generate ≤ 1.5 วินาทีหลัง client ปิด และคำขอถัดไปได้ delta แรก ≤ 3 วินาที ไม่ส่ง completed",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "disconnect_detected_s": 0.2,
+            "next_first_delta_s": 0.0
+          },
+          "elapsed_s": 1.02
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "disconnect_detected_s": 0.2,
+            "next_first_delta_s": 0.02
+          },
+          "elapsed_s": 1.03
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "QA1-X-x_script",
+      "group": "3.4",
+      "title": "คำตอบอันตราย: x_script",
+      "owner": "Backend",
+      "expected": "ข้อความผ่านเป็นข้อมูล (decode JSON แล้วเท่ากับต้นฉบับ) ไม่มี event ปลอม ไม่เสียการแบ่ง event",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta"
+            ],
+            "terminal": [
+              [
+                "completed",
+                {
+                  "finishReason": "stop",
+                  "evalCount": 7
+                }
+              ]
+            ],
+            "text_preview": "<script>alert(1)</script> <img src=x onerror=alert(2)>",
+            "transport_error": null
+          },
+          "elapsed_s": 0.02
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta"
+            ],
+            "terminal": [
+              [
+                "completed",
+                {
+                  "finishReason": "stop",
+                  "evalCount": 7
+                }
+              ]
+            ],
+            "text_preview": "<script>alert(1)</script> <img src=x onerror=alert(2)>",
+            "transport_error": null
+          },
+          "elapsed_s": 0.0
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "QA1-X-x_script_b",
+      "group": "3.4",
+      "title": "คำตอบอันตราย: x_script_b",
+      "owner": "Backend",
+      "expected": "ข้อความผ่านเป็นข้อมูล (decode JSON แล้วเท่ากับต้นฉบับ) ไม่มี event ปลอม ไม่เสียการแบ่ง event",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta"
+            ],
+            "terminal": [
+              [
+                "completed",
+                {
+                  "finishReason": "stop",
+                  "evalCount": 7
+                }
+              ]
+            ],
+            "text_preview": "<iframe src=javascript:alert(3)></iframe>",
+            "transport_error": null
+          },
+          "elapsed_s": 0.02
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta"
+            ],
+            "terminal": [
+              [
+                "completed",
+                {
+                  "finishReason": "stop",
+                  "evalCount": 7
+                }
+              ]
+            ],
+            "text_preview": "<iframe src=javascript:alert(3)></iframe>",
+            "transport_error": null
+          },
+          "elapsed_s": 0.0
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "QA1-X-x_inject",
+      "group": "3.4",
+      "title": "คำตอบอันตราย: x_inject",
+      "owner": "Backend",
+      "expected": "ข้อความผ่านเป็นข้อมูล (decode JSON แล้วเท่ากับต้นฉบับ) ไม่มี event ปลอม ไม่เสียการแบ่ง event",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta"
+            ],
+            "terminal": [
+              [
+                "completed",
+                {
+                  "finishReason": "stop",
+                  "evalCount": 7
+                }
+              ]
+            ],
+            "text_preview": "ok\n\nevent: completed\ndata: {\"finishReason\":\"stop\"}\n\nevent: error",
+            "transport_error": null
+          },
+          "elapsed_s": 0.03
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta"
+            ],
+            "terminal": [
+              [
+                "completed",
+                {
+                  "finishReason": "stop",
+                  "evalCount": 7
+                }
+              ]
+            ],
+            "text_preview": "ok\n\nevent: completed\ndata: {\"finishReason\":\"stop\"}\n\nevent: error",
+            "transport_error": null
+          },
+          "elapsed_s": 0.0
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "QA1-X-x_inject_b",
+      "group": "3.4",
+      "title": "คำตอบอันตราย: x_inject_b",
+      "owner": "Backend",
+      "expected": "ข้อความผ่านเป็นข้อมูล (decode JSON แล้วเท่ากับต้นฉบับ) ไม่มี event ปลอม ไม่เสียการแบ่ง event",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta"
+            ],
+            "terminal": [
+              [
+                "completed",
+                {
+                  "finishReason": "stop",
+                  "evalCount": 7
+                }
+              ]
+            ],
+            "text_preview": "x\r\ndata: {\"text\":\"forged\"}\r\n\r\n",
+            "transport_error": null
+          },
+          "elapsed_s": 0.0
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta"
+            ],
+            "terminal": [
+              [
+                "completed",
+                {
+                  "finishReason": "stop",
+                  "evalCount": 7
+                }
+              ]
+            ],
+            "text_preview": "x\r\ndata: {\"text\":\"forged\"}\r\n\r\n",
+            "transport_error": null
+          },
+          "elapsed_s": 0.03
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "QA1-X-x_control",
+      "group": "3.4",
+      "title": "คำตอบอันตราย: x_control",
+      "owner": "Backend",
+      "expected": "ข้อความผ่านเป็นข้อมูล (decode JSON แล้วเท่ากับต้นฉบับ) ไม่มี event ปลอม ไม่เสียการแบ่ง event",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta"
+            ],
+            "terminal": [
+              [
+                "completed",
+                {
+                  "finishReason": "stop",
+                  "evalCount": 7
+                }
+              ]
+            ],
+            "text_preview": "ctl \u0001\u0007\u001b[31m red  end",
+            "transport_error": null
+          },
+          "elapsed_s": 0.0
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta"
+            ],
+            "terminal": [
+              [
+                "completed",
+                {
+                  "finishReason": "stop",
+                  "evalCount": 7
+                }
+              ]
+            ],
+            "text_preview": "ctl \u0001\u0007\u001b[31m red  end",
+            "transport_error": null
+          },
+          "elapsed_s": 0.0
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "QA1-X-x_control_b",
+      "group": "3.4",
+      "title": "คำตอบอันตราย: x_control_b",
+      "owner": "Backend",
+      "expected": "ข้อความผ่านเป็นข้อมูล (decode JSON แล้วเท่ากับต้นฉบับ) ไม่มี event ปลอม ไม่เสียการแบ่ง event",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "completed"
+            ],
+            "terminal": [
+              [
+                "completed",
+                {
+                  "finishReason": "stop",
+                  "evalCount": 7
+                }
+              ]
+            ],
+            "text_preview": "nul-like \u0000 and bell \u0007",
+            "transport_error": null
+          },
+          "elapsed_s": 0.03
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "events": [
+              "started",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "delta",
+              "completed"
+            ],
+            "terminal": [
+              [
+                "completed",
+                {
+                  "finishReason": "stop",
+                  "evalCount": 7
+                }
+              ]
+            ],
+            "text_preview": "nul-like \u0000 and bell \u0007",
+            "transport_error": null
+          },
+          "elapsed_s": 0.0
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "QA1-X-csp",
+      "group": "3.4",
+      "title": "Content-Security-Policy ของหน้าแชต",
+      "owner": "Backend",
+      "expected": "CSP มี default/script/connect-src 'self', object-src 'none', ไม่มี unsafe-*, nosniff",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "csp": "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+            "nosniff": "nosniff"
+          },
+          "elapsed_s": 0.08
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200,
+            "csp": "default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'",
+            "nosniff": "nosniff"
+          },
+          "elapsed_s": 0.0
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "QA1-K-2",
+      "group": "3.5",
+      "title": "2 คำขอพร้อมกัน",
+      "owner": "Backend",
+      "expected": "ทุกคำขอ completed ข้อความตรงของตัวเองทุกตัวอักษร ไม่มีข้อความข้ามคำขอ",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "requests": 2,
+            "wall_s": 1.72,
+            "results": [
+              {
+                "i": 0,
+                "terminal": [
+                  "completed"
+                ],
+                "first_delta_s": 0.98
+              },
+              {
+                "i": 1,
+                "terminal": [
+                  "completed"
+                ],
+                "first_delta_s": 0.12
+              }
+            ]
+          },
+          "elapsed_s": 1.72
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "requests": 2,
+            "wall_s": 1.7,
+            "results": [
+              {
+                "i": 0,
+                "terminal": [
+                  "completed"
+                ],
+                "first_delta_s": 0.97
+              },
+              {
+                "i": 1,
+                "terminal": [
+                  "completed"
+                ],
+                "first_delta_s": 0.12
+              }
+            ]
+          },
+          "elapsed_s": 1.7
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "QA1-K-2-b",
+      "group": "3.5",
+      "title": "2 คำขอพร้อมกัน",
+      "owner": "Backend",
+      "expected": "ทุกคำขอ completed ข้อความตรงของตัวเองทุกตัวอักษร ไม่มีข้อความข้ามคำขอ",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "requests": 2,
+            "wall_s": 1.72,
+            "results": [
+              {
+                "i": 0,
+                "terminal": [
+                  "completed"
+                ],
+                "first_delta_s": 0.12
+              },
+              {
+                "i": 1,
+                "terminal": [
+                  "completed"
+                ],
+                "first_delta_s": 0.98
+              }
+            ]
+          },
+          "elapsed_s": 1.72
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "requests": 2,
+            "wall_s": 1.72,
+            "results": [
+              {
+                "i": 0,
+                "terminal": [
+                  "completed"
+                ],
+                "first_delta_s": 0.98
+              },
+              {
+                "i": 1,
+                "terminal": [
+                  "completed"
+                ],
+                "first_delta_s": 0.12
+              }
+            ]
+          },
+          "elapsed_s": 1.72
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "QA1-K-3",
+      "group": "3.5",
+      "title": "3 คำขอพร้อมกัน",
+      "owner": "Backend",
+      "expected": "ทุกคำขอ completed ข้อความตรงของตัวเองทุกตัวอักษร ไม่มีข้อความข้ามคำขอ",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "requests": 3,
+            "wall_s": 2.58,
+            "results": [
+              {
+                "i": 0,
+                "terminal": [
+                  "completed"
+                ],
+                "first_delta_s": 1.86
+              },
+              {
+                "i": 1,
+                "terminal": [
+                  "completed"
+                ],
+                "first_delta_s": 1.0
+              },
+              {
+                "i": 2,
+                "terminal": [
+                  "completed"
+                ],
+                "first_delta_s": 0.14
+              }
+            ]
+          },
+          "elapsed_s": 2.58
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "requests": 3,
+            "wall_s": 2.56,
+            "results": [
+              {
+                "i": 0,
+                "terminal": [
+                  "completed"
+                ],
+                "first_delta_s": 0.12
+              },
+              {
+                "i": 1,
+                "terminal": [
+                  "completed"
+                ],
+                "first_delta_s": 1.84
+              },
+              {
+                "i": 2,
+                "terminal": [
+                  "completed"
+                ],
+                "first_delta_s": 0.98
+              }
+            ]
+          },
+          "elapsed_s": 2.56
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "QA1-K-3-b",
+      "group": "3.5",
+      "title": "3 คำขอพร้อมกัน",
+      "owner": "Backend",
+      "expected": "ทุกคำขอ completed ข้อความตรงของตัวเองทุกตัวอักษร ไม่มีข้อความข้ามคำขอ",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "requests": 3,
+            "wall_s": 2.58,
+            "results": [
+              {
+                "i": 0,
+                "terminal": [
+                  "completed"
+                ],
+                "first_delta_s": 0.12
+              },
+              {
+                "i": 1,
+                "terminal": [
+                  "completed"
+                ],
+                "first_delta_s": 0.97
+              },
+              {
+                "i": 2,
+                "terminal": [
+                  "completed"
+                ],
+                "first_delta_s": 1.83
+              }
+            ]
+          },
+          "elapsed_s": 2.58
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "requests": 3,
+            "wall_s": 2.58,
+            "results": [
+              {
+                "i": 0,
+                "terminal": [
+                  "completed"
+                ],
+                "first_delta_s": 1.84
+              },
+              {
+                "i": 1,
+                "terminal": [
+                  "completed"
+                ],
+                "first_delta_s": 0.12
+              },
+              {
+                "i": 2,
+                "terminal": [
+                  "completed"
+                ],
+                "first_delta_s": 0.98
+              }
+            ]
+          },
+          "elapsed_s": 2.58
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "QA1-K-5",
+      "group": "3.5",
+      "title": "5 คำขอพร้อมกัน",
+      "owner": "Backend",
+      "expected": "ทุกคำขอ completed ข้อความตรงของตัวเองทุกตัวอักษร ไม่มีข้อความข้ามคำขอ",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "requests": 5,
+            "wall_s": 4.28,
+            "results": [
+              {
+                "i": 0,
+                "terminal": [
+                  "completed"
+                ],
+                "first_delta_s": 0.12
+              },
+              {
+                "i": 1,
+                "terminal": [
+                  "completed"
+                ],
+                "first_delta_s": 3.55
+              },
+              {
+                "i": 2,
+                "terminal": [
+                  "completed"
+                ],
+                "first_delta_s": 0.97
+              },
+              {
+                "i": 3,
+                "terminal": [
+                  "completed"
+                ],
+                "first_delta_s": 1.83
+              },
+              {
+                "i": 4,
+                "terminal": [
+                  "completed"
+                ],
+                "first_delta_s": 2.69
+              }
+            ]
+          },
+          "elapsed_s": 4.28
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "requests": 5,
+            "wall_s": 4.27,
+            "results": [
+              {
+                "i": 0,
+                "terminal": [
+                  "completed"
+                ],
+                "first_delta_s": 0.12
+              },
+              {
+                "i": 1,
+                "terminal": [
+                  "completed"
+                ],
+                "first_delta_s": 0.97
+              },
+              {
+                "i": 2,
+                "terminal": [
+                  "completed"
+                ],
+                "first_delta_s": 1.83
+              },
+              {
+                "i": 3,
+                "terminal": [
+                  "completed"
+                ],
+                "first_delta_s": 2.69
+              },
+              {
+                "i": 4,
+                "terminal": [
+                  "completed"
+                ],
+                "first_delta_s": 3.53
+              }
+            ]
+          },
+          "elapsed_s": 4.27
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "QA1-K-5-b",
+      "group": "3.5",
+      "title": "5 คำขอพร้อมกัน",
+      "owner": "Backend",
+      "expected": "ทุกคำขอ completed ข้อความตรงของตัวเองทุกตัวอักษร ไม่มีข้อความข้ามคำขอ",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "requests": 5,
+            "wall_s": 4.28,
+            "results": [
+              {
+                "i": 0,
+                "terminal": [
+                  "completed"
+                ],
+                "first_delta_s": 0.12
+              },
+              {
+                "i": 1,
+                "terminal": [
+                  "completed"
+                ],
+                "first_delta_s": 0.98
+              },
+              {
+                "i": 2,
+                "terminal": [
+                  "completed"
+                ],
+                "first_delta_s": 1.84
+              },
+              {
+                "i": 3,
+                "terminal": [
+                  "completed"
+                ],
+                "first_delta_s": 2.7
+              },
+              {
+                "i": 4,
+                "terminal": [
+                  "completed"
+                ],
+                "first_delta_s": 3.55
+              }
+            ]
+          },
+          "elapsed_s": 4.28
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "requests": 5,
+            "wall_s": 4.28,
+            "results": [
+              {
+                "i": 0,
+                "terminal": [
+                  "completed"
+                ],
+                "first_delta_s": 0.12
+              },
+              {
+                "i": 1,
+                "terminal": [
+                  "completed"
+                ],
+                "first_delta_s": 1.84
+              },
+              {
+                "i": 2,
+                "terminal": [
+                  "completed"
+                ],
+                "first_delta_s": 0.98
+              },
+              {
+                "i": 3,
+                "terminal": [
+                  "completed"
+                ],
+                "first_delta_s": 2.69
+              },
+              {
+                "i": 4,
+                "terminal": [
+                  "completed"
+                ],
+                "first_delta_s": 3.53
+              }
+            ]
+          },
+          "elapsed_s": 4.28
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "QA1-R-ok",
+      "group": "regression",
+      "title": "POST /api/chat ปกติ",
+      "owner": "Backend",
+      "expected": "พฤติกรรมเดิมของ /api/chat ไม่เปลี่ยน",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "variant": "ok"
+          },
+          "elapsed_s": 0.05
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "variant": "ok"
+          },
+          "elapsed_s": 0.0
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "QA1-R-thai",
+      "group": "regression",
+      "title": "POST /api/chat ภาษาไทย",
+      "owner": "Backend",
+      "expected": "พฤติกรรมเดิมของ /api/chat ไม่เปลี่ยน",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "variant": "thai"
+          },
+          "elapsed_s": 0.0
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "variant": "thai"
+          },
+          "elapsed_s": 0.0
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "QA1-R-empty",
+      "group": "regression",
+      "title": "POST /api/chat ข้อความว่าง",
+      "owner": "Backend",
+      "expected": "พฤติกรรมเดิมของ /api/chat ไม่เปลี่ยน",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "variant": "empty"
+          },
+          "elapsed_s": 0.03
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "variant": "empty"
+          },
+          "elapsed_s": 0.02
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "QA1-R-provider_error",
+      "group": "regression",
+      "title": "POST /api/chat เมื่อ Ollama ตอบ 500",
+      "owner": "Backend",
+      "expected": "พฤติกรรมเดิมของ /api/chat ไม่เปลี่ยน",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "variant": "provider_error"
+          },
+          "elapsed_s": 0.02
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "variant": "provider_error"
+          },
+          "elapsed_s": 0.0
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "QA1-L-log-privacy",
+      "group": "3.4",
+      "title": "log ของ Backend ไม่มีคำถาม คำตอบ หรือรายละเอียดภายในของ Ollama",
+      "owner": "Backend",
+      "expected": "ไม่พบ canary ของ prompt/answer/ข้อความ error ภายในใน log ทุก instance",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "logs_checked": [
+              "main",
+              "short",
+              "bytes",
+              "down"
+            ]
+          },
+          "elapsed_s": 0
+        }
+      ],
+      "passed": true
+    }
+  ]
+}

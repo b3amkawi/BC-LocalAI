@@ -92,6 +92,10 @@ dotnet build .\BC-LocalAI.slnx
 dotnet test .\BC-LocalAI.slnx
 ```
 
+## Continuous integration (DEVOPS-001)
+
+Every pull request to `main` runs `.github/workflows/ci.yml`: build, .NET, JavaScript and Python tests (with PowerShell 7), a test-count gate, a secret scan and a Markdown link check. No job needs Ollama or a GPU. The live suites (AI-003, AI-004, AI-005) are run on a developer machine and their evidence is pasted in the PR. See [CI quality gates](docs/devops/ci-quality-gates.md) and the [live test procedure](docs/devops/live-test-procedure.md).
+
 ## Chat API
 
 Start the application, then send a valid request:
@@ -331,3 +335,7 @@ plus a JSON summary (latency percentiles, throughput, success/timeout rate, CPU/
 and are loopback only. See the [test plan](docs/performance/benchmark-plan.md),
 the [performance report](docs/performance/benchmark-report.md) (preliminary results) and the
 [handoff for BE-003/BE-004](docs/performance/benchmark-handoff.md).
+
+## AI failure policy (AI-007)
+
+`scripts/test-ollama-failures.ps1` (PowerShell 7, loopback only) injects ten kinds of failure into a **dedicated** Ollama instance it starts on port 11436 (runner killed, Ollama killed, Ollama not running, model unloaded, model not found, token limit, invalid request, client cancel, abandoned queued request) and records what the client sees and how long Ollama takes to recover. Your normal Ollama on port 11434 is never stopped. Read the [failure policy](docs/ai/ai-failure-policy.md) (retry rules, queue policy, user messages) and the [results](docs/ai/ai-failure-test-results.md). Tests that need no model: `py -3 -m unittest tests.test_ollama_failures -v`.
