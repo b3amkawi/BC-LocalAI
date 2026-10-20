@@ -41,4 +41,5 @@ Open <http://localhost:5290>.
 
 - Ollama hung once after a cancellation (verification section 4); not reproducible, recovered with `ollama stop qwen3:4b`. A first-record/idle
   timeout for streaming (AI-005 proposal) would be a backend decision.
-- Only Chromium was tested; say if Firefox / Safari / Edge must be checked as well.
+- Chromium and Firefox 158 were tested (Firefox automatically: `node scripts/firefox-ui-check/run.mjs scripts/firefox-ui-check/scenarios.mjs <folder>`
+  with the app on port 5290). Safari was not tested.

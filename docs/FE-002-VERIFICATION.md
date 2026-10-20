@@ -2,7 +2,7 @@
 
 Issue: #18 · Date: 2026-10-20 · Branch: `watzapon_FE-002` (from `main` a983b80, which contains BE-004)
 Reference machine (project spec): ASUS TUF Gaming F16, Core 5 210H, 16 GB, RTX 4050 Laptop 6 GB. Measured on: Acer Predator PHN16-72,
-i7-14700HX, 16 GB, RTX 4060 Laptop 8 GB (faster). Browser: Chromium (built-in browser of the Claude desktop app), desktop and 375 x 812 phone emulation.
+i7-14700HX, 16 GB, RTX 4060 Laptop 8 GB (faster). Browsers: Chromium (built-in browser of the Claude desktop app) and **Firefox 158** (headless, driven over WebDriver BiDi), desktop and 375 x 812 phone size.
 Ollama + `qwen3:4b`, backend run as `ASPNETCORE_ENVIRONMENT=Production`.
 
 ## 1. Automated tests
@@ -66,12 +66,30 @@ ends (1) · not stopping at the outcome while the server keeps the connection op
 | Reader scrolls up while text arrives | the view stays where the reader is; at the bottom it follows the new text |
 | Request sent | `POST /api/chat/stream`, body `{"message": …}` |
 
+## 3b. Firefox 158 (real backend and Ollama, plus the same mock cases)
+
+Run with `node scripts/firefox-ui-check/run.mjs scripts/firefox-ui-check/scenarios.mjs <folder>` (no packages: Node 22 WebSocket +
+Firefox's built-in WebDriver BiDi). Run twice (scratch copy and the committed copy), same results.
+
+| Scenario | Result |
+|----------|--------|
+| Real Thai answer | states connecting -> streaming -> completed -> idle; text grew in one bubble in 140 steps; Stop only while streaming; status line removed; model chip set (`firefox-streaming-completed.png`) |
+| Real Stop button / real **Esc** mid-answer | `cancelled`, text so far kept, "หยุดการสร้างคำตอบแล้ว", Send back, no error (`firefox-stopped.png`) |
+| Mock: markup in the answer | shown as text; no `img` / `script` element; nothing executed |
+| Mock: interrupted, partial `AI_RESPONSE_TOO_LARGE`, network failure, non-SSE | same Thai texts and markings as in Chromium; question put back |
+| Mock: two answers in a row | "A" and "B" in separate bubbles |
+| Mock: Thai, emoji and a combining accent delivered **one byte at a time** | text intact (`ภาษาไทย 😊 é ok`) |
+| Enter on a blank input / Shift+Enter | hint "กรุณาพิมพ์ข้อความก่อนส่ง", nothing sent / not sent (new line) |
+| Phone width 375 px while streaming | Stop visible and inside the screen, no horizontal scroll, answer completes (`firefox-mobile.png`) |
+
+No Firefox-specific defect was found, so no code change was needed for Firefox.
+
 ## 4. Finding outside FE-002: Ollama hung once after a cancellation
 
 After a Stop and then an Esc 3 s into the next request, Ollama logged `aborting completion request due to client closing the connection`
 and then stopped answering **every** request, including direct calls to `:11434` without the app (two direct calls timed out after 20-25 s).
 `ollama stop qwen3:4b` (unload) brought it back. The UI behaved correctly (backend `AI_TIMEOUT` after 180 s).
-It could **not be reproduced** in 7 further attempts (3 direct `curl` cancellations, 4 through `/api/chat/stream`, different timings).
+It could **not be reproduced** in 11 further cancellations (3 direct `curl`, 4 through `/api/chat/stream` with different timings, 4 real Stop/Esc in the two Firefox runs); Ollama stayed healthy after each.
 Recorded for the AI team (Ollama 0.40.5). AI-005 proposed a first-record / idle timeout for streaming that BE-004 did not add; it would
 end such a wait sooner than 180 s - a backend decision, not part of FE-002.
 
@@ -92,15 +110,15 @@ end such a wait sooner than 180 s - a backend decision, not part of FE-002.
 | No "completed" when the stream is incomplete | end without outcome, cut-off `completed`, empty `completed` -> never completed (tests + mutations) |
 | Auto scroll that does not disturb | follows only within 48 px of the bottom (browser check) |
 | XSS protection | text nodes / `textContent` only; markup test in Node and browser; page checks forbid `innerHTML` etc. |
-| Browsers in scope | Chromium desktop and phone emulation; others not tested (section 6) |
+| Browsers in scope | Chromium and Firefox 158, desktop and phone size (sections 2, 3, 3b); Safari not tested (section 6) |
 | Automated tests | section 1 |
 | UI verification report | this document |
 | Existing chat features still work | Enter / Shift+Enter, empty-message hint, Thai error texts, question put back, model chip, CSP, no storage: FE-001 page tests unchanged or updated to the same intent, all passing |
 
 ## 6. Limitations
 
-- Tested in Chromium only (desktop and phone emulation). Firefox and Safari were not tested; the code uses only standard `fetch`,
-  `ReadableStream`, `TextDecoder` and `AbortController`.
+- Tested in Chromium and Firefox 158. Safari was not tested (needs a Mac); the code uses only standard `fetch`, `ReadableStream`,
+  `TextDecoder` and `AbortController`, which Safari supports. Edge and Chrome use the same engine as the tested Chromium.
 - A server `cancelled` event is handled but rarely seen: after Stop the browser has already closed the connection (BE-004 contract).
 - Time to first text was not measured as a benchmark.
 - The browser time limit is the server deadline + 20 s (FE-001/BE-003); there is no separate "no new text for N seconds" limit (see section 4).
