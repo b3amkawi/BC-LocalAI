@@ -1,0 +1,386 @@
+/* Chat UI (FE-001). Theme colors come from the BetterCode logo supplied with the issue. */
+:root {
+    --navy: #16386a;
+    --navy-deep: #0f2a52;
+    --yellow: #f9cb00;
+    --yellow-hover: #e3b800;
+    --red: #ed1c24;
+    --white: #ffffff;
+
+    --ink: #0f2a52;
+    --ink-muted: #475a78;
+    --surface: #ffffff;
+    --surface-soft: #f1f4f9;
+    --border: #c5d0e2;
+    --error-bg: #fdecee;
+    --error-ink: #8f0f17;
+    --disabled-bg: #d8dfeb;
+
+    --radius: 16px;
+    color-scheme: light;
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    height: 100%;
+}
+
+body {
+    margin: 0;
+    background: var(--navy);
+    color: var(--ink);
+    font-family: system-ui, -apple-system, "Segoe UI", "Leelawadee UI", "Noto Sans Thai", Tahoma, sans-serif;
+    font-size: 1rem;
+    line-height: 1.55;
+    -webkit-text-size-adjust: 100%;
+}
+
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* ---------- Layout: full screen on mobile, a centered card on desktop ---------- */
+.app {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    height: 100dvh;
+    max-width: 880px;
+    margin: 0 auto;
+    background: var(--surface-soft);
+}
+
+/* The gap around the card is padding on body (not a margin on the card), so the page never scrolls as a whole. */
+@media (min-width: 720px) {
+    body {
+        padding: 24px;
+    }
+
+    .app {
+        height: 100%;
+        border-radius: var(--radius);
+        overflow: hidden;
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+    }
+}
+
+/* ---------- Header ---------- */
+.app__header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    padding-top: max(14px, env(safe-area-inset-top));
+    background: var(--navy);
+    color: var(--white);
+    border-bottom: 4px solid var(--yellow);
+}
+
+.app__mark {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 10px;
+    background: var(--yellow);
+    color: var(--navy-deep);
+    font-weight: 800;
+    letter-spacing: 0.02em;
+}
+
+.app__titles {
+    flex: 1;
+    min-width: 0;
+}
+
+.app__title {
+    margin: 0;
+    font-size: 1.15rem;
+    line-height: 1.25;
+}
+
+.app__subtitle {
+    margin: 0;
+    font-size: 0.85rem;
+    color: #d6e0f2;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.chip {
+    flex: none;
+    padding: 4px 10px;
+    border: 1px solid var(--yellow);
+    border-radius: 999px;
+    color: var(--yellow);
+    font-size: 0.8rem;
+    white-space: nowrap;
+}
+
+/* ---------- Conversation ---------- */
+.conversation {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 16px;
+    overscroll-behavior: contain;
+}
+
+.messages {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.empty {
+    margin: 12vh auto 0;
+    text-align: center;
+    color: var(--ink-muted);
+}
+
+.empty__title {
+    margin: 0 0 4px;
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: var(--ink);
+}
+
+.empty__text {
+    margin: 0;
+}
+
+.message {
+    max-width: 85%;
+    padding: 10px 14px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--ink);
+    overflow-wrap: anywhere;
+}
+
+@media (min-width: 720px) {
+    .message {
+        max-width: 75%;
+    }
+}
+
+.message__meta {
+    margin-bottom: 2px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--ink-muted);
+}
+
+.message__text {
+    white-space: pre-wrap;
+}
+
+.message--user {
+    align-self: flex-end;
+    background: var(--yellow);
+    border-color: var(--yellow-hover);
+    border-bottom-right-radius: 4px;
+}
+
+.message--user .message__meta {
+    color: var(--navy-deep);
+}
+
+.message--ai {
+    align-self: flex-start;
+    border-bottom-left-radius: 4px;
+}
+
+.message--error {
+    align-self: flex-start;
+    background: var(--error-bg);
+    border-color: var(--red);
+    border-left-width: 5px;
+    color: var(--error-ink);
+}
+
+.message--error .message__meta {
+    color: var(--error-ink);
+}
+
+.message--pending {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    color: var(--ink-muted);
+}
+
+.dots {
+    display: inline-flex;
+    gap: 4px;
+}
+
+.dots i {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--navy);
+    animation: pulse 1.2s infinite ease-in-out;
+}
+
+.dots i:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.dots i:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes pulse {
+    0%, 80%, 100% {
+        opacity: 0.25;
+        transform: scale(0.8);
+    }
+
+    40% {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .dots i {
+        animation: none;
+        opacity: 0.7;
+    }
+}
+
+.noscript {
+    margin: 0;
+    padding: 12px 14px;
+    border: 1px solid var(--red);
+    border-radius: 8px;
+    background: var(--error-bg);
+    color: var(--error-ink);
+}
+
+/* ---------- Composer ---------- */
+.composer {
+    padding: 10px 16px 12px;
+    padding-bottom: max(12px, env(safe-area-inset-bottom));
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+}
+
+.composer__hint {
+    min-height: 1.5em;
+    margin: 0 0 4px;
+    color: var(--error-ink);
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.composer__row {
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+}
+
+/* 16px text prevents mobile browsers from zooming into the field. */
+.composer__input {
+    flex: 1;
+    min-width: 0;
+    min-height: 48px;
+    max-height: 200px;
+    padding: 11px 14px;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    background: var(--white);
+    color: var(--ink);
+    font: inherit;
+    font-size: 1rem;
+    resize: none;
+}
+
+.composer__input::placeholder {
+    color: var(--ink-muted);
+}
+
+.composer__send {
+    flex: none;
+    min-width: 76px;
+    min-height: 48px;
+    padding: 0 20px;
+    border: 0;
+    border-radius: 12px;
+    background: var(--yellow);
+    color: var(--navy-deep);
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.composer__send:hover:not(:disabled) {
+    background: var(--yellow-hover);
+}
+
+.composer__send:disabled {
+    background: var(--disabled-bg);
+    color: var(--ink-muted);
+    cursor: not-allowed;
+}
+
+.composer__keys {
+    margin: 6px 0 0;
+    color: var(--ink-muted);
+    font-size: 0.8rem;
+}
+
+/* ---------- Keyboard focus ---------- */
+.composer__input:focus-visible,
+.composer__send:focus-visible {
+    outline: 3px solid var(--navy);
+    outline-offset: 2px;
+}
+
+/* The message area scrolls, so a keyboard user must be able to focus it and scroll with the arrow keys. */
+.conversation:focus-visible {
+    outline: 3px solid var(--navy);
+    outline-offset: -3px;
+}
+
+.composer__input:focus-visible {
+    border-color: var(--navy);
+}
+
+/* ---------- Small phones ---------- */
+@media (max-width: 420px) {
+    .app__subtitle {
+        display: none;
+    }
+
+    .conversation,
+    .composer {
+        padding-left: 12px;
+        padding-right: 12px;
+    }
+
+    .composer__keys {
+        display: none;
+    }
+}
