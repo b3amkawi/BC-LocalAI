@@ -15,7 +15,9 @@ permissions:
   contents: read
 
 concurrency:
-  group: ci-${{ github.ref }}
+  # One run per ref, except on ci-trial/** where every pushed commit keeps its own run, so one
+  # throwaway branch can be pushed several times in a row to try several defects.
+  group: ci-${{ startsWith(github.ref, 'refs/heads/ci-trial/') && github.sha || github.ref }}
   cancel-in-progress: true
 
 jobs:

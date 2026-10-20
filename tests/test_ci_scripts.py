@@ -297,6 +297,9 @@ class TestWorkflowFile(unittest.TestCase):
         self.assertNotRegex(self.TEXT, r"\$\{\{\s*secrets\.")
         self.assertIn("contents: read", self.TEXT)
 
+    def test_trial_branch_pushes_do_not_cancel_each_other(self):
+        self.assertIn("startsWith(github.ref, 'refs/heads/ci-trial/') && github.sha", self.TEXT)
+
     def test_does_not_require_ollama(self):
         self.assertNotIn("ollama serve", self.TEXT.lower())
         self.assertNotIn("11434", self.TEXT)

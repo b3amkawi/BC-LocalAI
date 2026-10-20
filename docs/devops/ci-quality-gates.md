@@ -100,3 +100,15 @@ python scripts/ci/check_test_counts.py --baseline docs/devops/test-baseline.json
 - ความถูกต้องของคำตอบ AI: test ใน CI ใช้ mock ไม่ได้พิสูจน์คุณภาพโมเดล
 - ลิงก์ภายนอกและ anchor ในเอกสาร
 - ถ้า GitHub Actions ปิดหรือไม่ทำงาน gate ทั้งหมดจะไม่ทำงาน ผู้รีวิวต้องไม่ merge โดยไม่มีผลของ check
+
+## 8. วิธีพิสูจน์ว่า gate ยังจับได้ (ทดสอบเชิงลบ)
+
+ใช้ branch ทดลองเพียงอันเดียว `ci-trial/negative` ไม่ต้องเปิด PR และไม่ต้องมีหลาย branch:
+
+```bash
+bash scripts/ci/negative-trials.sh <commit ฐาน>
+python scripts/ci/summarize-trial-runs.py --repo owner/name
+git push origin --delete ci-trial/negative      # ลบเมื่อเสร็จ
+```
+
+สคริปต์สร้าง commit ละหนึ่งข้อบกพร่อง (test ล้ม 3 ภาษา, secret ปลอม 2 แบบ, ลิงก์เสีย, ลบ test, test ที่ถูกข้าม) แล้ว push ทับ branch เดิมทีละอัน แต่ละ commit ได้ run ของตัวเองเพราะ concurrency group ของ `ci-trial/**` ผูกกับ commit ผลของ run ครั้งแรกอยู่ใน [ci-negative-test-results.md](ci-negative-test-results.md) (ครั้งนั้นใช้ branch แยกต่อข้อบกพร่อง ซึ่งลบแล้ว)
