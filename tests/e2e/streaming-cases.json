@@ -1,0 +1,560 @@
+{
+  "repeats": 2,
+  "cases": [
+    {
+      "id": "QA1-N-n_thai",
+      "group": "3.1",
+      "title": "ภาษาไทย (ตัวอักษรแบ่งกลางชิ้นข้อมูล)",
+      "owner": "Backend",
+      "expected": "completed ครั้งเดียว ข้อความตรงกับคำตอบ ไม่มีเศษ JSON/ความคิด"
+    },
+    {
+      "id": "QA1-N-n_thai_b",
+      "group": "3.1",
+      "title": "ภาษาไทยมีวรรณยุกต์ (ทีละอักขระ)",
+      "owner": "Backend",
+      "expected": "completed ครั้งเดียว ข้อความตรงกับคำตอบ ไม่มีเศษ JSON/ความคิด"
+    },
+    {
+      "id": "QA1-N-n_english",
+      "group": "3.1",
+      "title": "ภาษาอังกฤษ",
+      "owner": "Backend",
+      "expected": "completed ครั้งเดียว ข้อความตรงกับคำตอบ ไม่มีเศษ JSON/ความคิด"
+    },
+    {
+      "id": "QA1-N-n_english_b",
+      "group": "3.1",
+      "title": "ภาษาอังกฤษมีเครื่องหมายวรรคตอน",
+      "owner": "Backend",
+      "expected": "completed ครั้งเดียว ข้อความตรงกับคำตอบ ไม่มีเศษ JSON/ความคิด"
+    },
+    {
+      "id": "QA1-N-n_emoji",
+      "group": "3.1",
+      "title": "emoji (คู่ surrogate แบ่งทีละอักขระ)",
+      "owner": "Backend",
+      "expected": "completed ครั้งเดียว ข้อความตรงกับคำตอบ ไม่มีเศษ JSON/ความคิด"
+    },
+    {
+      "id": "QA1-N-n_emoji_escaped",
+      "group": "3.1",
+      "title": "emoji ที่มาเป็น \\uXXXX",
+      "owner": "Backend",
+      "expected": "completed ครั้งเดียว ข้อความตรงกับคำตอบ ไม่มีเศษ JSON/ความคิด"
+    },
+    {
+      "id": "QA1-N-n_multiline",
+      "group": "3.1",
+      "title": "หลายบรรทัดและบรรทัดว่าง",
+      "owner": "Backend",
+      "expected": "completed ครั้งเดียว ข้อความตรงกับคำตอบ ไม่มีเศษ JSON/ความคิด"
+    },
+    {
+      "id": "QA1-N-n_multiline_b",
+      "group": "3.1",
+      "title": "CRLF และ tab",
+      "owner": "Backend",
+      "expected": "completed ครั้งเดียว ข้อความตรงกับคำตอบ ไม่มีเศษ JSON/ความคิด"
+    },
+    {
+      "id": "QA1-N-n_special",
+      "group": "3.1",
+      "title": "อักขระพิเศษ \" < & \\",
+      "owner": "Backend",
+      "expected": "completed ครั้งเดียว ข้อความตรงกับคำตอบ ไม่มีเศษ JSON/ความคิด"
+    },
+    {
+      "id": "QA1-N-n_special_b",
+      "group": "3.1",
+      "title": "แท็ก HTML และ entity เป็นข้อความ",
+      "owner": "Backend",
+      "expected": "completed ครั้งเดียว ข้อความตรงกับคำตอบ ไม่มีเศษ JSON/ความคิด"
+    },
+    {
+      "id": "QA1-N-n_short",
+      "group": "3.1",
+      "title": "คำตอบสั้นมาก",
+      "owner": "Backend",
+      "expected": "completed ครั้งเดียว ข้อความตรงกับคำตอบ ไม่มีเศษ JSON/ความคิด"
+    },
+    {
+      "id": "QA1-N-n_short_b",
+      "group": "3.1",
+      "title": "คำตอบสั้น 2 ตัวอักษร",
+      "owner": "Backend",
+      "expected": "completed ครั้งเดียว ข้อความตรงกับคำตอบ ไม่มีเศษ JSON/ความคิด"
+    },
+    {
+      "id": "QA1-N-n_medium",
+      "group": "3.1",
+      "title": "คำตอบขนาดกลาง",
+      "owner": "Backend",
+      "expected": "completed ครั้งเดียว ข้อความตรงกับคำตอบ ไม่มีเศษ JSON/ความคิด"
+    },
+    {
+      "id": "QA1-N-n_medium_b",
+      "group": "3.1",
+      "title": "คำตอบขนาดกลางภาษาไทย",
+      "owner": "Backend",
+      "expected": "completed ครั้งเดียว ข้อความตรงกับคำตอบ ไม่มีเศษ JSON/ความคิด"
+    },
+    {
+      "id": "QA1-N-n_long",
+      "group": "3.1",
+      "title": "คำตอบยาว (ภาษาไทย)",
+      "owner": "Backend",
+      "expected": "completed ครั้งเดียว ข้อความตรงกับคำตอบ ไม่มีเศษ JSON/ความคิด"
+    },
+    {
+      "id": "QA1-N-n_long_b",
+      "group": "3.1",
+      "title": "คำตอบยาว (ภาษาอังกฤษ)",
+      "owner": "Backend",
+      "expected": "completed ครั้งเดียว ข้อความตรงกับคำตอบ ไม่มีเศษ JSON/ความคิด"
+    },
+    {
+      "id": "QA1-N-n_thinking_field",
+      "group": "3.1",
+      "title": "ฟิลด์ thinking ต้องไม่ถึงผู้ใช้",
+      "owner": "Backend",
+      "expected": "completed ครั้งเดียว ข้อความตรงกับคำตอบ ไม่มีเศษ JSON/ความคิด"
+    },
+    {
+      "id": "QA1-N-n_thinking_field_b",
+      "group": "3.1",
+      "title": "ฟิลด์ thinking กับภาษาไทย",
+      "owner": "Backend",
+      "expected": "completed ครั้งเดียว ข้อความตรงกับคำตอบ ไม่มีเศษ JSON/ความคิด"
+    },
+    {
+      "id": "QA1-N-cold",
+      "group": "3.1",
+      "title": "cold start: started ถึงก่อน record แรกของ Ollama",
+      "owner": "Backend",
+      "expected": "started ≤ 1 วินาที ทั้งที่ Ollama ตอบช้า 2 วินาที"
+    },
+    {
+      "id": "QA1-N-cold-b",
+      "group": "3.1",
+      "title": "cold start ภาษาไทย",
+      "owner": "Backend",
+      "expected": "completed และข้อความตรง"
+    },
+    {
+      "id": "QA1-N-headers",
+      "group": "3.1",
+      "title": "header ของสตรีม",
+      "owner": "Backend",
+      "expected": "text/event-stream, no-cache, X-Accel-Buffering: no"
+    },
+    {
+      "id": "QA1-N-validation",
+      "group": "3.1",
+      "title": "ข้อความว่าง/ไม่มี/ผิดชนิด",
+      "owner": "Backend",
+      "expected": "400 INVALID_MESSAGE ก่อนเริ่มสตรีม"
+    },
+    {
+      "id": "QA1-E-e_down",
+      "group": "3.2",
+      "title": "Ollama ไม่ทำงาน",
+      "owner": "Backend",
+      "expected": "error ครั้งเดียว code=AI_UNAVAILABLE partial=false ไม่มี completed ไม่มีรายละเอียดภายใน"
+    },
+    {
+      "id": "QA1-E-e_http500",
+      "group": "3.2",
+      "title": "Ollama ตอบ HTTP 500",
+      "owner": "Backend",
+      "expected": "error ครั้งเดียว code=AI_PROVIDER_ERROR partial=false ไม่มี completed ไม่มีรายละเอียดภายใน"
+    },
+    {
+      "id": "QA1-E-e_http500_b",
+      "group": "3.2",
+      "title": "Ollama ตอบ HTTP 500 (ซ้ำ)",
+      "owner": "Backend",
+      "expected": "error ครั้งเดียว code=AI_PROVIDER_ERROR partial=false ไม่มี completed ไม่มีรายละเอียดภายใน"
+    },
+    {
+      "id": "QA1-E-e_crash",
+      "group": "3.2",
+      "title": "runner ล้มก่อนมีข้อความถึงผู้ใช้",
+      "owner": "Backend",
+      "expected": "error ครั้งเดียว code=AI_INVALID_RESPONSE partial=false ไม่มี completed ไม่มีรายละเอียดภายใน"
+    },
+    {
+      "id": "QA1-E-e_crash_b",
+      "group": "3.2",
+      "title": "runner ล้มหลังส่งข้อความไปแล้ว",
+      "owner": "Backend",
+      "expected": "error ครั้งเดียว code=AI_INVALID_RESPONSE partial=true ไม่มี completed ไม่มีรายละเอียดภายใน"
+    },
+    {
+      "id": "QA1-E-e_length",
+      "group": "3.2",
+      "title": "คำตอบถูกตัด (length)",
+      "owner": "Backend",
+      "expected": "error ครั้งเดียว code=AI_RESPONSE_TOO_LARGE partial=true ไม่มี completed ไม่มีรายละเอียดภายใน"
+    },
+    {
+      "id": "QA1-E-e_length_b",
+      "group": "3.2",
+      "title": "คำตอบถูกตัดภาษาไทย",
+      "owner": "Backend",
+      "expected": "error ครั้งเดียว code=AI_RESPONSE_TOO_LARGE partial=true ไม่มี completed ไม่มีรายละเอียดภายใน"
+    },
+    {
+      "id": "QA1-E-e_invalid_json",
+      "group": "3.2",
+      "title": "บรรทัดที่ไม่ใช่ JSON",
+      "owner": "Backend",
+      "expected": "error ครั้งเดียว code=AI_INVALID_RESPONSE partial=false ไม่มี completed ไม่มีรายละเอียดภายใน"
+    },
+    {
+      "id": "QA1-E-e_invalid_json_b",
+      "group": "3.2",
+      "title": "บรรทัดที่ไม่ใช่ JSON (ซ้ำ)",
+      "owner": "Backend",
+      "expected": "error ครั้งเดียว code=AI_INVALID_RESPONSE partial=false ไม่มี completed ไม่มีรายละเอียดภายใน"
+    },
+    {
+      "id": "QA1-E-e_wrong_model",
+      "group": "3.2",
+      "title": "โมเดลในตอบไม่ตรง",
+      "owner": "Backend",
+      "expected": "error ครั้งเดียว code=AI_INVALID_RESPONSE partial=false ไม่มี completed ไม่มีรายละเอียดภายใน"
+    },
+    {
+      "id": "QA1-E-e_wrong_model_b",
+      "group": "3.2",
+      "title": "โมเดลไม่ตรง (ซ้ำ)",
+      "owner": "Backend",
+      "expected": "error ครั้งเดียว code=AI_INVALID_RESPONSE partial=false ไม่มี completed ไม่มีรายละเอียดภายใน"
+    },
+    {
+      "id": "QA1-E-e_no_done",
+      "group": "3.2",
+      "title": "สตรีมจบโดยไม่มี done ก่อนมีข้อความ",
+      "owner": "Backend",
+      "expected": "error ครั้งเดียว code=AI_INVALID_RESPONSE partial=false ไม่มี completed ไม่มีรายละเอียดภายใน"
+    },
+    {
+      "id": "QA1-E-e_no_done_b",
+      "group": "3.2",
+      "title": "สตรีมจบโดยไม่มี done หลังส่งข้อความ",
+      "owner": "Backend",
+      "expected": "error ครั้งเดียว code=AI_INVALID_RESPONSE partial=true ไม่มี completed ไม่มีรายละเอียดภายใน"
+    },
+    {
+      "id": "QA1-E-e_error_record",
+      "group": "3.2",
+      "title": "record error ก่อนมีข้อความ (มีรายละเอียดภายใน)",
+      "owner": "Backend",
+      "expected": "error ครั้งเดียว code=AI_PROVIDER_ERROR partial=false ไม่มี completed ไม่มีรายละเอียดภายใน"
+    },
+    {
+      "id": "QA1-E-e_error_record_b",
+      "group": "3.2",
+      "title": "record error หลังส่งข้อความ",
+      "owner": "Backend",
+      "expected": "error ครั้งเดียว code=AI_PROVIDER_ERROR partial=true ไม่มี completed ไม่มีรายละเอียดภายใน"
+    },
+    {
+      "id": "QA1-E-e_bad_ct",
+      "group": "3.2",
+      "title": "Content-Type ไม่ใช่ ndjson",
+      "owner": "Backend",
+      "expected": "error ครั้งเดียว code=AI_INVALID_RESPONSE partial=false ไม่มี completed ไม่มีรายละเอียดภายใน"
+    },
+    {
+      "id": "QA1-E-e_bad_ct_b",
+      "group": "3.2",
+      "title": "Content-Type ผิด (ซ้ำ)",
+      "owner": "Backend",
+      "expected": "error ครั้งเดียว code=AI_INVALID_RESPONSE partial=false ไม่มี completed ไม่มีรายละเอียดภายใน"
+    },
+    {
+      "id": "QA1-E-e_oversize",
+      "group": "3.2",
+      "title": "ข้อมูลเกิน MaxResponseBytes",
+      "owner": "Backend",
+      "expected": "error ครั้งเดียว code=AI_RESPONSE_TOO_LARGE ไม่มี completed ไม่มีรายละเอียดภายใน"
+    },
+    {
+      "id": "QA1-E-e_oversize_b",
+      "group": "3.2",
+      "title": "ข้อมูลเกินขนาด (ซ้ำ)",
+      "owner": "Backend",
+      "expected": "error ครั้งเดียว code=AI_RESPONSE_TOO_LARGE ไม่มี completed ไม่มีรายละเอียดภายใน"
+    },
+    {
+      "id": "QA1-E-e_think_leak",
+      "group": "3.2",
+      "title": "<think> ในคำตอบ",
+      "owner": "Backend",
+      "expected": "error ครั้งเดียว code=AI_INVALID_RESPONSE ไม่มี completed ไม่มีรายละเอียดภายใน"
+    },
+    {
+      "id": "QA1-E-e_think_leak_b",
+      "group": "3.2",
+      "title": "<think> ภาษาไทย",
+      "owner": "Backend",
+      "expected": "error ครั้งเดียว code=AI_INVALID_RESPONSE ไม่มี completed ไม่มีรายละเอียดภายใน"
+    },
+    {
+      "id": "QA1-E-e_timeout_first",
+      "group": "3.2",
+      "title": "timeout: รอ record แรก",
+      "owner": "Backend",
+      "expected": "error ครั้งเดียว code=AI_TIMEOUT partial=false ไม่มี completed ไม่มีรายละเอียดภายใน"
+    },
+    {
+      "id": "QA1-E-e_timeout_first_b",
+      "group": "3.2",
+      "title": "timeout รอ record แรก (ซ้ำ)",
+      "owner": "Backend",
+      "expected": "error ครั้งเดียว code=AI_TIMEOUT partial=false ไม่มี completed ไม่มีรายละเอียดภายใน"
+    },
+    {
+      "id": "QA1-E-e_timeout_gap",
+      "group": "3.2",
+      "title": "timeout: ช่องว่างก่อนมีข้อความ",
+      "owner": "Backend",
+      "expected": "error ครั้งเดียว code=AI_TIMEOUT partial=false ไม่มี completed ไม่มีรายละเอียดภายใน"
+    },
+    {
+      "id": "QA1-E-e_timeout_gap_b",
+      "group": "3.2",
+      "title": "timeout: ช่องว่างหลังส่งข้อความ",
+      "owner": "Backend",
+      "expected": "error ครั้งเดียว code=AI_TIMEOUT partial=true ไม่มี completed ไม่มีรายละเอียดภายใน"
+    },
+    {
+      "id": "QA1-E-e_timeout_total",
+      "group": "3.2",
+      "title": "timeout: เวลารวม (หยดช้า)",
+      "owner": "Backend",
+      "expected": "error ครั้งเดียว code=AI_TIMEOUT partial=true ไม่มี completed ไม่มีรายละเอียดภายใน"
+    },
+    {
+      "id": "QA1-E-e_timeout_total_b",
+      "group": "3.2",
+      "title": "timeout เวลารวม (ซ้ำ)",
+      "owner": "Backend",
+      "expected": "error ครั้งเดียว code=AI_TIMEOUT partial=true ไม่มี completed ไม่มีรายละเอียดภายใน"
+    },
+    {
+      "id": "QA1-E-queue-full",
+      "group": "3.2",
+      "title": "คิวเต็ม: คำขอที่รอเกิน timeout",
+      "owner": "Backend",
+      "expected": "คำขอที่สองได้ AI_TIMEOUT partial=false ไม่มีข้อความ"
+    },
+    {
+      "id": "QA1-C-first_delta",
+      "group": "3.3",
+      "title": "ตัด connection หลัง delta แรก",
+      "owner": "Backend",
+      "expected": "Ollama หยุด generate ≤ 1.5 วินาทีหลัง client ปิด และคำขอถัดไปได้ delta แรก ≤ 3 วินาที ไม่ส่ง completed"
+    },
+    {
+      "id": "QA1-C-first_delta-b",
+      "group": "3.3",
+      "title": "ตัด connection หลัง delta แรก",
+      "owner": "Backend",
+      "expected": "Ollama หยุด generate ≤ 1.5 วินาทีหลัง client ปิด และคำขอถัดไปได้ delta แรก ≤ 3 วินาที ไม่ส่ง completed"
+    },
+    {
+      "id": "QA1-C-started",
+      "group": "3.3",
+      "title": "ตัด connection หลัง started ระหว่างรอ Ollama",
+      "owner": "Backend",
+      "expected": "Ollama หยุด generate ≤ 1.5 วินาทีหลัง client ปิด และคำขอถัดไปได้ delta แรก ≤ 3 วินาที ไม่ส่ง completed"
+    },
+    {
+      "id": "QA1-C-started-b",
+      "group": "3.3",
+      "title": "ตัด connection หลัง started ระหว่างรอ Ollama",
+      "owner": "Backend",
+      "expected": "Ollama หยุด generate ≤ 1.5 วินาทีหลัง client ปิด และคำขอถัดไปได้ delta แรก ≤ 3 วินาที ไม่ส่ง completed"
+    },
+    {
+      "id": "QA1-C-0.8",
+      "group": "3.3",
+      "title": "ตัด connection ที่ 0.8 วินาที",
+      "owner": "Backend",
+      "expected": "Ollama หยุด generate ≤ 1.5 วินาทีหลัง client ปิด และคำขอถัดไปได้ delta แรก ≤ 3 วินาที ไม่ส่ง completed"
+    },
+    {
+      "id": "QA1-C-0.8-b",
+      "group": "3.3",
+      "title": "ตัด connection ที่ 0.8 วินาที",
+      "owner": "Backend",
+      "expected": "Ollama หยุด generate ≤ 1.5 วินาทีหลัง client ปิด และคำขอถัดไปได้ delta แรก ≤ 3 วินาที ไม่ส่ง completed"
+    },
+    {
+      "id": "QA1-X-x_script",
+      "group": "3.4",
+      "title": "คำตอบอันตราย: x_script",
+      "owner": "Backend",
+      "expected": "ข้อความผ่านเป็นข้อมูล (decode JSON แล้วเท่ากับต้นฉบับ) ไม่มี event ปลอม ไม่เสียการแบ่ง event"
+    },
+    {
+      "id": "QA1-X-x_script_b",
+      "group": "3.4",
+      "title": "คำตอบอันตราย: x_script_b",
+      "owner": "Backend",
+      "expected": "ข้อความผ่านเป็นข้อมูล (decode JSON แล้วเท่ากับต้นฉบับ) ไม่มี event ปลอม ไม่เสียการแบ่ง event"
+    },
+    {
+      "id": "QA1-X-x_inject",
+      "group": "3.4",
+      "title": "คำตอบอันตราย: x_inject",
+      "owner": "Backend",
+      "expected": "ข้อความผ่านเป็นข้อมูล (decode JSON แล้วเท่ากับต้นฉบับ) ไม่มี event ปลอม ไม่เสียการแบ่ง event"
+    },
+    {
+      "id": "QA1-X-x_inject_b",
+      "group": "3.4",
+      "title": "คำตอบอันตราย: x_inject_b",
+      "owner": "Backend",
+      "expected": "ข้อความผ่านเป็นข้อมูล (decode JSON แล้วเท่ากับต้นฉบับ) ไม่มี event ปลอม ไม่เสียการแบ่ง event"
+    },
+    {
+      "id": "QA1-X-x_control",
+      "group": "3.4",
+      "title": "คำตอบอันตราย: x_control",
+      "owner": "Backend",
+      "expected": "ข้อความผ่านเป็นข้อมูล (decode JSON แล้วเท่ากับต้นฉบับ) ไม่มี event ปลอม ไม่เสียการแบ่ง event"
+    },
+    {
+      "id": "QA1-X-x_control_b",
+      "group": "3.4",
+      "title": "คำตอบอันตราย: x_control_b",
+      "owner": "Backend",
+      "expected": "ข้อความผ่านเป็นข้อมูล (decode JSON แล้วเท่ากับต้นฉบับ) ไม่มี event ปลอม ไม่เสียการแบ่ง event"
+    },
+    {
+      "id": "QA1-X-csp",
+      "group": "3.4",
+      "title": "Content-Security-Policy ของหน้าแชต",
+      "owner": "Backend",
+      "expected": "CSP มี default/script/connect-src 'self', object-src 'none', ไม่มี unsafe-*, nosniff"
+    },
+    {
+      "id": "QA1-K-2",
+      "group": "3.5",
+      "title": "2 คำขอพร้อมกัน",
+      "owner": "Backend",
+      "expected": "ทุกคำขอ completed ข้อความตรงของตัวเองทุกตัวอักษร ไม่มีข้อความข้ามคำขอ"
+    },
+    {
+      "id": "QA1-K-2-b",
+      "group": "3.5",
+      "title": "2 คำขอพร้อมกัน",
+      "owner": "Backend",
+      "expected": "ทุกคำขอ completed ข้อความตรงของตัวเองทุกตัวอักษร ไม่มีข้อความข้ามคำขอ"
+    },
+    {
+      "id": "QA1-K-3",
+      "group": "3.5",
+      "title": "3 คำขอพร้อมกัน",
+      "owner": "Backend",
+      "expected": "ทุกคำขอ completed ข้อความตรงของตัวเองทุกตัวอักษร ไม่มีข้อความข้ามคำขอ"
+    },
+    {
+      "id": "QA1-K-3-b",
+      "group": "3.5",
+      "title": "3 คำขอพร้อมกัน",
+      "owner": "Backend",
+      "expected": "ทุกคำขอ completed ข้อความตรงของตัวเองทุกตัวอักษร ไม่มีข้อความข้ามคำขอ"
+    },
+    {
+      "id": "QA1-K-5",
+      "group": "3.5",
+      "title": "5 คำขอพร้อมกัน",
+      "owner": "Backend",
+      "expected": "ทุกคำขอ completed ข้อความตรงของตัวเองทุกตัวอักษร ไม่มีข้อความข้ามคำขอ"
+    },
+    {
+      "id": "QA1-K-5-b",
+      "group": "3.5",
+      "title": "5 คำขอพร้อมกัน",
+      "owner": "Backend",
+      "expected": "ทุกคำขอ completed ข้อความตรงของตัวเองทุกตัวอักษร ไม่มีข้อความข้ามคำขอ"
+    },
+    {
+      "id": "QA1-R-ok",
+      "group": "regression",
+      "title": "POST /api/chat ปกติ",
+      "owner": "Backend",
+      "expected": "พฤติกรรมเดิมของ /api/chat ไม่เปลี่ยน"
+    },
+    {
+      "id": "QA1-R-thai",
+      "group": "regression",
+      "title": "POST /api/chat ภาษาไทย",
+      "owner": "Backend",
+      "expected": "พฤติกรรมเดิมของ /api/chat ไม่เปลี่ยน"
+    },
+    {
+      "id": "QA1-R-empty",
+      "group": "regression",
+      "title": "POST /api/chat ข้อความว่าง",
+      "owner": "Backend",
+      "expected": "พฤติกรรมเดิมของ /api/chat ไม่เปลี่ยน"
+    },
+    {
+      "id": "QA1-R-provider_error",
+      "group": "regression",
+      "title": "POST /api/chat เมื่อ Ollama ตอบ 500",
+      "owner": "Backend",
+      "expected": "พฤติกรรมเดิมของ /api/chat ไม่เปลี่ยน"
+    }
+  ],
+  "blocked": [
+    {
+      "id": "QA1-U-stop",
+      "group": "3.3",
+      "title": "ปุ่ม Stop Generating",
+      "owner": "UI",
+      "waiting_for": "FE-002"
+    },
+    {
+      "id": "QA1-U-close-tab",
+      "group": "3.3",
+      "title": "ปิดแท็บระหว่างสตรีม",
+      "owner": "UI",
+      "waiting_for": "FE-002"
+    },
+    {
+      "id": "QA1-U-navigate",
+      "group": "3.3",
+      "title": "เปลี่ยนหน้าระหว่างสตรีม",
+      "owner": "UI",
+      "waiting_for": "FE-002"
+    },
+    {
+      "id": "QA1-U-render-html",
+      "group": "3.4",
+      "title": "คำตอบที่มี HTML/script แสดงเป็นข้อความในหน้าแชต",
+      "owner": "UI",
+      "waiting_for": "FE-002"
+    },
+    {
+      "id": "QA1-U-queue-indicator",
+      "group": "3.5",
+      "title": "UI แสดงสถานะรอคิว",
+      "owner": "UI",
+      "waiting_for": "FE-002"
+    },
+    {
+      "id": "QA1-U-partial-display",
+      "group": "3.2",
+      "title": "UI แสดงข้อความบางส่วนก่อน error",
+      "owner": "UI",
+      "waiting_for": "FE-002"
+    }
+  ]
+}
