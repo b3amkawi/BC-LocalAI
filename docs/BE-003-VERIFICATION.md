@@ -91,3 +91,5 @@ Weak spots found this way were fixed (a test that hung instead of failing when t
 - Measured on one machine (RTX 4050 6 GB), not the target RTX 4060/4070; no real reverse proxy was in the path, so proxy timeouts are documented but untested.
 - Request size is not limited by this issue (a 200 KB question was accepted in BE-002 testing).
 - The Python tests of AI-002 were not run (no PowerShell 7 on this machine).
+- The long-answer test proves the API now returns `200` instead of `502`. The *content* the model returns for the "write as long as possible" question is a polite refusal
+  (the AI-002 system prompt asks for brief answers), so very long answers are not produced in practice. That is answer quality (AI-003) and the system prompt, not the backend.
