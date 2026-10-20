@@ -29,7 +29,7 @@ Each event uses `event: <name>` followed by a single JSON `data:` line and a bla
 | `delta` | `{"text":"..."}` | Decoded text from the `answer` value only. Concatenate in order without normalization. |
 | `completed` | `{"finishReason":"stop","evalCount":7}` | Sent only after `done:true`, `done_reason:"stop"`, a complete non-blank answer and a valid stream. |
 | `error` | `{"code":"AI_...","message":"...","partial":true}` | Terminal failure. `partial` is true after at least one delta. Provider detail is never exposed. |
-| `cancelled` | `{}` | Reserved by the AI-005 contract. Client disconnect normally makes the connection unwritable, so delivery is not guaranteed. |
+| `cancelled` | `{}` | Best-effort on caller cancellation with a separate 1-second delivery budget. Client disconnect normally makes the connection unwritable, so delivery is not guaranteed. |
 
 There is exactly one terminal outcome: `completed`, `error`, or a client disconnect/cancellation. `completed` is never sent after an error.
 
@@ -54,5 +54,12 @@ JSON scaffolding and the `thinking` field are never forwarded. Unknown Ollama fi
 
 The decoder preserves Unicode and JSON escapes even when UTF-8 code points, NDJSON records, the `answer` key or escape sequences cross reads.
 It retains a short tail so `<think>` and `</think>` split across records are rejected before the marker is emitted.
+
+Upstream must return HTTP 200, `application/x-ndjson`, and UTF-8 (charset may be omitted). Other HTTP status codes map to
+`AI_PROVIDER_ERROR`; incorrect media types/charsets map to `AI_INVALID_RESPONSE`. Known fields must have the documented types,
+duplicate record fields are rejected, and `response` may be omitted (treated as empty) per AI-005. An explicitly null `response` is invalid.
+Only JSON whitespace is accepted around the answer envelope. Decoded output is grouped per upstream fragment, with a final tail flush.
+
+Downstream write failures abort processing and close upstream. A failure writing a terminal event never triggers another terminal event.
 
 Reference: [AI-005 contract](ai/ollama-streaming-contract.md).

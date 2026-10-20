@@ -194,6 +194,13 @@ data: {"finishReason":"stop","evalCount":7}
 The complete contract and error/cancellation behavior are documented in
 [docs/BE-004-SSE-CONTRACT.md](docs/BE-004-SSE-CONTRACT.md).
 
+Review corrections and repeatable live verification: [BE-004 review](docs/BE-004-REVIEW-FIXES.md),
+[verification results](docs/BE-004-VERIFICATION.md). With the backend and Ollama running:
+
+```powershell
+python -I -X utf8 scripts/test-chat-stream.py --base-url http://127.0.0.1:5290 --output "$env:TEMP/be004-stream-results.json"
+```
+
 ### Known limits
 
 See [docs/KNOWN-LIMITATIONS.md](docs/KNOWN-LIMITATIONS.md) for the full list with measurements. In short:

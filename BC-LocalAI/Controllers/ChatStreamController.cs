@@ -4,6 +4,7 @@ using BC_LocalAI.Models.Streaming;
 using BC_LocalAI.Services;
 using BC_LocalAI.Configuration;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http.Features;
 using Microsoft.Extensions.Options;
 
 namespace BC_LocalAI.Controllers;
@@ -32,49 +33,74 @@ public sealed class ChatStreamController(
         Response.ContentType = "text/event-stream; charset=utf-8";
         Response.Headers.CacheControl = "no-cache";
         Response.Headers["X-Accel-Buffering"] = "no";
+        HttpContext.Features.Get<IHttpResponseBodyFeature>()?.DisableBuffering();
 
         var partial = false;
-        await WriteEventAsync("started", new StreamStartedEvent(options.Value.Model), cancellationToken);
+        if (!await TryWriteEventAsync("started", new StreamStartedEvent(options.Value.Model), cancellationToken)) return;
+        string terminalEvent;
+        object terminalData;
         try
         {
             var completion = await streamingService.StreamResponseAsync(
                 request.Message,
                 async (delta, token) =>
                 {
+                    if (!await TryWriteEventAsync("delta", new StreamDeltaEvent(delta), token))
+                    {
+                        token.ThrowIfCancellationRequested();
+                        throw new DownstreamClosedException();
+                    }
                     partial = true;
-                    await WriteEventAsync("delta", new StreamDeltaEvent(delta), token);
                 },
                 cancellationToken);
-            await WriteEventAsync(
-                "completed",
-                new StreamCompletedEvent(completion.FinishReason, completion.EvalCount),
-                cancellationToken);
+            terminalEvent = "completed";
+            terminalData = new StreamCompletedEvent(completion.FinishReason, completion.EvalCount);
         }
         catch (AiServiceException exception)
         {
-            await WriteEventAsync(
-                "error",
-                new StreamErrorEvent(exception.Code, exception.Message, partial),
-                cancellationToken);
+            terminalEvent = "error";
+            terminalData = new StreamErrorEvent(exception.Code, exception.Message, partial);
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
-            // Usually the client connection is already gone. Do not replace cancellation with an AI error.
+            // Best effort only: a disconnected browser cannot receive an event, but a still-writable caller can.
+            using var delivery = new CancellationTokenSource(TimeSpan.FromSeconds(1));
+            await TryWriteEventAsync("cancelled", new { }, delivery.Token);
+            return;
+        }
+        catch (DownstreamClosedException)
+        {
+            return;
         }
         catch (Exception exception)
         {
-            logger.LogError(exception, "An unexpected streaming error occurred.");
-            await WriteEventAsync(
-                "error",
-                new StreamErrorEvent("INTERNAL_ERROR", "An unexpected error occurred", partial),
-                cancellationToken);
+            logger.LogError("An unexpected streaming error occurred. FailureType={FailureType}", exception.GetType().Name);
+            terminalEvent = "error";
+            terminalData = new StreamErrorEvent("INTERNAL_ERROR", "An unexpected error occurred", partial);
+        }
+
+        // A terminal write failure must never cause a second terminal event on the same stream.
+        await TryWriteEventAsync(terminalEvent, terminalData, cancellationToken);
+    }
+
+    private async Task<bool> TryWriteEventAsync<T>(string eventName, T data, CancellationToken cancellationToken)
+    {
+        try
+        {
+            await Response.WriteAsync($"event: {eventName}\ndata: {JsonSerializer.Serialize(data)}\n\n", cancellationToken);
+            await Response.Body.FlushAsync(cancellationToken);
+            return true;
+        }
+        catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
+        {
+            return false;
+        }
+        catch (IOException)
+        {
+            HttpContext.Abort();
+            return false;
         }
     }
 
-    private async Task WriteEventAsync<T>(string eventName, T data, CancellationToken cancellationToken)
-    {
-        await Response.WriteAsync($"event: {eventName}\n", cancellationToken);
-        await Response.WriteAsync($"data: {JsonSerializer.Serialize(data)}\n\n", cancellationToken);
-        await Response.Body.FlushAsync(cancellationToken);
-    }
+    private sealed class DownstreamClosedException : Exception;
 }

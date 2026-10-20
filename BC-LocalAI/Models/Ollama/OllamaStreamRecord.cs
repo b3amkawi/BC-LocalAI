@@ -5,7 +5,7 @@ namespace BC_LocalAI.Models.Ollama;
 internal sealed class OllamaStreamRecord
 {
     [JsonPropertyName("model")] public string? Model { get; init; }
-    [JsonPropertyName("response")] public string? Response { get; init; }
+    [JsonPropertyName("response")] public string? Response { get; init; } = "";
     [JsonPropertyName("thinking")] public string? Thinking { get; init; }
     [JsonPropertyName("done")] public bool? Done { get; init; }
     [JsonPropertyName("done_reason")] public string? DoneReason { get; init; }

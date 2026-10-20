@@ -22,13 +22,14 @@ internal sealed class StreamingAnswerDecoder
 
     public IReadOnlyList<string> Push(string fragment)
     {
-        var output = new List<string>();
+        var output = new StringBuilder();
         foreach (var character in fragment)
         {
             Process(character, output);
         }
 
-        return output;
+        // One delta per upstream fragment, rather than a separate SSE write/flush for every character.
+        return output.Length == 0 ? [] : [output.ToString()];
     }
 
     public IReadOnlyList<string> Complete()
@@ -48,17 +49,17 @@ internal sealed class StreamingAnswerDecoder
         return output;
     }
 
-    private void Process(char character, List<string> output)
+    private void Process(char character, StringBuilder output)
     {
         switch (_state)
         {
             case DecoderState.Leading:
-                if (char.IsWhiteSpace(character)) return;
+                if (IsJsonWhitespace(character)) return;
                 Require(character == '{');
                 _state = DecoderState.BeforeKey;
                 return;
             case DecoderState.BeforeKey:
-                if (char.IsWhiteSpace(character)) return;
+                if (IsJsonWhitespace(character)) return;
                 Require(character == '"');
                 _state = DecoderState.Key;
                 return;
@@ -69,16 +70,16 @@ internal sealed class StreamingAnswerDecoder
                     _state = DecoderState.AfterKey;
                     return;
                 }
-                Require(character != '\\' && !char.IsControl(character));
+                Require(character != '\\' && character >= 0x20);
                 _key.Append(character);
                 return;
             case DecoderState.AfterKey:
-                if (char.IsWhiteSpace(character)) return;
+                if (IsJsonWhitespace(character)) return;
                 Require(character == ':');
                 _state = DecoderState.BeforeValue;
                 return;
             case DecoderState.BeforeValue:
-                if (char.IsWhiteSpace(character)) return;
+                if (IsJsonWhitespace(character)) return;
                 Require(character == '"');
                 _state = DecoderState.Value;
                 return;
@@ -94,7 +95,7 @@ internal sealed class StreamingAnswerDecoder
                     _state = DecoderState.Escape;
                     return;
                 }
-                Require(!char.IsControl(character));
+                Require(character >= 0x20);
                 AppendDecoded(character, output);
                 return;
             case DecoderState.Escape:
@@ -123,19 +124,19 @@ internal sealed class StreamingAnswerDecoder
                 }
                 return;
             case DecoderState.AfterValue:
-                if (char.IsWhiteSpace(character)) return;
+                if (IsJsonWhitespace(character)) return;
                 Require(character == '}');
                 _state = DecoderState.Done;
                 return;
             case DecoderState.Done:
-                Require(char.IsWhiteSpace(character));
+                Require(IsJsonWhitespace(character));
                 return;
             default:
                 throw Invalid();
         }
     }
 
-    private void AppendDecoded(char character, List<string> output)
+    private void AppendDecoded(char character, StringBuilder output)
     {
         if (_pendingHighSurrogate is char high)
         {
@@ -155,7 +156,7 @@ internal sealed class StreamingAnswerDecoder
         AppendSafe(character.ToString(), output);
     }
 
-    private void AppendSafe(string text, List<string> output)
+    private void AppendSafe(string text, StringBuilder output)
     {
         _safeTail.Append(text);
         var tail = _safeTail.ToString();
@@ -171,7 +172,7 @@ internal sealed class StreamingAnswerDecoder
             var emit = _safeTail.ToString(0, emitLength);
             _safeTail.Remove(0, emitLength);
             _hasNonWhitespace |= !string.IsNullOrWhiteSpace(emit);
-            output.Add(emit);
+            output.Append(emit);
         }
 
         _hasNonWhitespace |= !string.IsNullOrWhiteSpace(text);
@@ -181,6 +182,8 @@ internal sealed class StreamingAnswerDecoder
     {
         if (!condition) throw Invalid();
     }
+
+    private static bool IsJsonWhitespace(char character) => character is ' ' or '\t' or '\r' or '\n';
 
     private static AiServiceException Invalid() =>
         AiServiceException.InvalidResponse(InvalidResponseReasons.AnswerFieldInvalid);

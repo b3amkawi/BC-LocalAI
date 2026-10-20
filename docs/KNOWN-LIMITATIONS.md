@@ -14,7 +14,7 @@
 |---|----------|------------------|--------|
 | 1 | คำตอบที่ต้องใช้เกิน 1024 token (ค่า `Ollama:MaxOutputTokens`) ถูก Ollama ตัด | ได้ error 502 `AI_RESPONSE_TOO_LARGE` แทนคำตอบ (เกิดน้อยมาก: คำตอบที่ยาวที่สุดที่วัดได้ใช้ ~280 token) | วัดจริง (BE-003 แก้จาก 256 เป็น 1024) |
 | 2 | Ollama ตอบทีละคำขอ (เข้าคิว) | คนจำนวนมากพร้อมกันรอนานหรือได้ 504 | วัดจริงที่ 5–30 คำขอ, ส่วน 100 คนเป็นประมาณการ |
-| 3 | ไม่มี conversation history และไม่ streaming | ถามตอบทีละข้อ ไม่จำบริบท ได้คำตอบเมื่อเสร็จทั้งหมด | ตามขอบเขต Issue #6 |
+| 3 | ไม่มี conversation history; หน้า FE-001 ยังใช้ non-streaming API | ถามตอบทีละข้อ ไม่จำบริบท หน้าเดิมได้คำตอบเมื่อเสร็จทั้งหมด; BE-004 มี Streaming API แล้ว | FE-002 จะเชื่อมหน้าเว็บกับ Streaming API |
 | 4 | ไม่มี Authentication / rate limit | ใครเรียก API ได้ก็ใช้ GPU ได้ | นอกขอบเขต (issue แยก) |
 | 5 | สัญญา Ollama (Issue #5) ยังไม่มีการอนุมัติเป็นลายลักษณ์อักษร | อาจต้องแก้ถ้า Tech Lead เปลี่ยนสัญญา | รอคน |
 
@@ -57,10 +57,11 @@ Ollama ตัด (`done_reason = "length"`) แล้วได้ `AI_INVALID_RE
 
 ทางเลือก (ยังไม่ได้ทำ): จำกัดจำนวนคำขอพร้อมกันที่ฝั่ง Backend, แสดงตำแหน่งในคิว, ปรับ `OLLAMA_NUM_PARALLEL`, หรือใช้ GPU ที่แรงกว่า
 
-## 3. ไม่มี conversation history และไม่ streaming
+## 3. ไม่มี conversation history; หน้าเว็บเดิมยังไม่ใช้ Streaming API
 
 ทุกคำถามเป็นอิสระต่อกัน โมเดลไม่จำคำถามก่อนหน้า และผู้ใช้เห็นคำตอบเมื่อโมเดลเขียนเสร็จทั้งหมด
-ทั้งสองอย่างอยู่นอกขอบเขต Issue #6 (Out of Scope)
+BE-004 เพิ่ม `POST /api/chat/stream` แล้ว (ดู [SSE contract](BE-004-SSE-CONTRACT.md)) ส่วนการนำมาใช้บนหน้าเว็บอยู่ใน FE-002
+และ conversation history อยู่ใน BE-007
 
 ## 4. ไม่มี Authentication / rate limit
 

@@ -1,6 +1,6 @@
 using System.Diagnostics;
+using System.Net;
 using System.Net.Http.Json;
-using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
@@ -46,13 +46,21 @@ public sealed class OllamaStreamingService(
                 }, options: RequestJson)
             };
             using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, deadline.Token);
-            if (!response.IsSuccessStatusCode)
+            if (response.StatusCode != HttpStatusCode.OK)
             {
                 OllamaLog.ProviderError(logger, (int)response.StatusCode, ElapsedMs(started));
                 throw AiServiceException.ProviderError();
             }
 
             responseStarted = true;
+
+            var contentType = response.Content.Headers.ContentType;
+            var charset = contentType?.CharSet?.Trim('"');
+            if (!string.Equals(contentType?.MediaType, "application/x-ndjson", StringComparison.OrdinalIgnoreCase)
+                || (charset is not null && !string.Equals(charset, "utf-8", StringComparison.OrdinalIgnoreCase)))
+            {
+                throw AiServiceException.InvalidResponse("ContentType");
+            }
 
             await using var stream = await response.Content.ReadAsStreamAsync(deadline.Token);
             await using var boundedStream = new BoundedReadStream(stream, _options.MaxResponseBytes);
@@ -65,12 +73,22 @@ public sealed class OllamaStreamingService(
             {
                 var line = await reader.ReadLineAsync(deadline.Token);
                 if (line is null) break;
-                if (string.IsNullOrWhiteSpace(line)) continue;
+                if (line.All(character => character is ' ' or '\t' or '\r')) continue;
                 if (completed) throw AiServiceException.InvalidResponse(InvalidResponseReasons.UnexpectedDataAfterDone);
 
                 OllamaStreamRecord record;
                 try
                 {
+                    // Reject null or incorrectly typed known fields; response may be omitted (AI-005 section 5).
+                    using var document = JsonDocument.Parse(line);
+                    if (document.RootElement.ValueKind != JsonValueKind.Object) throw new JsonException();
+                    var names = new HashSet<string>(StringComparer.Ordinal);
+                    foreach (var property in document.RootElement.EnumerateObject())
+                    {
+                        if (!names.Add(property.Name)) throw new JsonException();
+                        if (property.Name is "response" or "thinking" or "error"
+                            && property.Value.ValueKind != JsonValueKind.String) throw new JsonException();
+                    }
                     record = JsonSerializer.Deserialize<OllamaStreamRecord>(line)
                         ?? throw new JsonException("Null streaming record");
                 }
@@ -122,21 +140,25 @@ public sealed class OllamaStreamingService(
             OllamaLog.TimedOut(logger, _options.TimeoutSeconds, ElapsedMs(started));
             throw AiServiceException.Timeout(exception);
         }
-        catch (AiServiceException)
+        catch (AiServiceException exception)
         {
+            OllamaLog.StreamFailed(logger, exception.Code, exception.Reason ?? "ProviderFailure", ElapsedMs(started));
             throw;
         }
         catch (DecoderFallbackException exception)
         {
+            OllamaLog.StreamFailed(logger, "AI_INVALID_RESPONSE", InvalidResponseReasons.InvalidUtf8, ElapsedMs(started));
             throw AiServiceException.InvalidResponse(InvalidResponseReasons.InvalidUtf8, exception);
         }
-        catch (IOException exception) when (responseStarted)
+        catch (Exception exception) when (responseStarted && exception is IOException or HttpRequestException)
         {
+            OllamaLog.StreamFailed(logger, "AI_INVALID_RESPONSE", InvalidResponseReasons.InterruptedStream, ElapsedMs(started));
             throw AiServiceException.InvalidResponse(InvalidResponseReasons.InterruptedStream, exception);
         }
         catch (Exception exception) when (exception is HttpRequestException or IOException)
         {
-            OllamaLog.Unavailable(logger, exception, OllamaOptions.DescribeEndpoint(_options.BaseUrl), ElapsedMs(started));
+            // Exception messages/inner exceptions can contain provider bodies, prompts, endpoints or credentials.
+            OllamaLog.StreamFailed(logger, "AI_UNAVAILABLE", "ConnectionFailure", ElapsedMs(started));
             throw AiServiceException.Unavailable(exception);
         }
     }

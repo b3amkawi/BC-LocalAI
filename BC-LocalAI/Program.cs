@@ -46,7 +46,9 @@ builder.Services.AddHttpClient<IStreamingAIService, OllamaStreamingService>((ser
 .ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler
 {
     // Never drain a cancelled stream for the default two seconds; close it so Ollama stops generating immediately.
-    MaxResponseDrainSize = 0
+    MaxResponseDrainSize = 0,
+    AllowAutoRedirect = false,
+    UseProxy = false
 });
 
 var app = builder.Build();

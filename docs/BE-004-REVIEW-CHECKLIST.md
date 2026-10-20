@@ -13,6 +13,14 @@
 - [x] Per-request state was tested concurrently.
 - [x] Unit, integration, Production, UI, Python contract and real-Ollama checks were run.
 - [x] Mutation check proved model-mismatch tests fail when validation is removed.
+- [x] Regression tests first reproduced 10 protocol/JSON/logging failures, then passed after the fixes.
+- [x] A real loopback Kestrel provider proves early delivery, upstream cancellation/timeout and refusal to follow redirects.
+- [x] Controller tests prove writable cancellation and no extra terminal event after downstream failure.
+- [x] Raw UTF-8 is split one byte at a time, with JSON escapes and surrogate pairs also split across records.
+- [x] Concurrency test synchronizes both in-flight calls before allowing either to finish.
+
+This is an engineering self-review; independent Tech Lead approval is still pending. Findings and evidence are in
+[BE-004-REVIEW-FIXES.md](BE-004-REVIEW-FIXES.md).
 
 Review focus:
 
