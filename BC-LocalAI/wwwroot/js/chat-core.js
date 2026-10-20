@@ -24,7 +24,9 @@
         AI_INVALID_RESPONSE: 'ได้รับคำตอบที่ไม่สมบูรณ์ กรุณาลองใหม่',
         AI_RESPONSE_TOO_LARGE: 'คำตอบยาวเกินกว่าที่ระบบรองรับ กรุณาถามให้สั้นลงหรือแบ่งเป็นหลายคำถาม',
         INTERNAL_ERROR: 'ระบบเกิดข้อผิดพลาด กรุณาลองใหม่',
-        NETWORK_ERROR: 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาตรวจการเชื่อมต่อแล้วลองใหม่'
+        NETWORK_ERROR: 'ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาตรวจการเชื่อมต่อแล้วลองใหม่',
+        // FE-002: the stream ended before a terminal event (connection dropped); what arrived may be incomplete.
+        STREAM_INTERRUPTED: 'การเชื่อมต่อขาดก่อนที่คำตอบจะเสร็จ คำตอบที่เห็นอาจไม่ครบ กรุณาลองใหม่'
     });
 
     function hasOwn(object, key) {

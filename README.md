@@ -33,11 +33,14 @@ cd <folder>
 dotnet BC-LocalAI.dll
 ```
 
-## Chat web page (FE-001)
+## Chat web page (FE-001, streaming since FE-002)
 
-Type a question and press **Enter** (or the **ส่ง** button) to send it; **Shift+Enter** starts a new line. The answer appears
-with the model name. While the AI is working a "กำลังประมวลผล" bubble is shown and the send button is disabled, so a question
-cannot be sent twice. The page works on desktop and on phones, and everything can be done with the keyboard
+Type a question and press **Enter** (or the **ส่ง** button) to send it; **Shift+Enter** starts a new line. Since FE-002 the answer
+**appears while it is being written** (`POST /api/chat/stream`), in one bubble with the model name. While the AI is working the
+**ส่ง** button becomes **หยุดสร้างคำตอบ** (Stop, also **Esc**): it stops the answer and the server stops generating; the text
+received so far stays, marked "หยุดการสร้างคำตอบแล้ว". Only one answer runs at a time, so a question cannot be sent twice.
+An answer that did not finish (stopped, failed or the connection dropped) is never shown as complete: it is marked
+"คำตอบไม่สมบูรณ์". Behaviour and states: [docs/FE-002-STREAMING-UI.md](docs/FE-002-STREAMING-UI.md). The page works on desktop and on phones, and everything can be done with the keyboard
 (Tab reaches the message area, the input and the button; the arrow keys scroll the message area).
 
 ![Desktop](docs/fe-001/desktop-conversation.jpg)
@@ -52,17 +55,19 @@ cannot be sent twice. The page works on desktop and on phones, and everything ca
 | `AI_RESPONSE_TOO_LARGE` | คำตอบยาวเกินกว่าที่ระบบรองรับ กรุณาถามให้สั้นลงหรือแบ่งเป็นหลายคำถาม |
 | `INTERNAL_ERROR` or anything unknown | ระบบเกิดข้อผิดพลาด กรุณาลองใหม่ |
 | The server cannot be reached at all | ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาตรวจการเชื่อมต่อแล้วลองใหม่ |
+| The stream ended before the answer finished (FE-002) | การเชื่อมต่อขาดก่อนที่คำตอบจะเสร็จ คำตอบที่เห็นอาจไม่ครบ กรุณาลองใหม่ |
 
 After an error the question is put back in the input so it can be sent again. Exceptions, stack traces and server messages are never shown.
 
-Rules the page follows: it calls only `POST /api/chat` (never Ollama on port 11434); every text is written with `textContent`,
+Rules the page follows: it calls only `POST /api/chat/stream` (never Ollama on port 11434; `POST /api/chat` stays available for other clients); every text is written with `textContent`,
 so HTML or script in an answer is shown as plain text; there is no CDN or new dependency; nothing is stored in the browser
 (the conversation is kept in memory only and is gone when the page is reloaded). The page sends a Content-Security-Policy
 header (`script-src 'self'`, `connect-src 'self'`, ...), which also stops the browser from calling anything but this site.
 
-Files: `BC-LocalAI/Views/Home/Index.cshtml`, `BC-LocalAI/wwwroot/js/chat-core.js` (logic), `chat.js` (page wiring), `css/chat.css`.
+Files: `BC-LocalAI/Views/Home/Index.cshtml`, `BC-LocalAI/wwwroot/js/chat-core.js` (texts, validation), `chat-stream.js` (FE-002: SSE parsing and answer states), `chat.js` (page wiring), `css/chat.css`.
 Colors come from the BetterCode logo (navy `#16386A`, yellow `#F9CB00`, red `#ED1C24`, white).
-Review guide and evidence: [docs/FE-001-REVIEW-CHECKLIST.md](docs/FE-001-REVIEW-CHECKLIST.md), [docs/FE-001-evidence.md](docs/FE-001-evidence.md).
+Review guide and evidence: [docs/FE-001-REVIEW-CHECKLIST.md](docs/FE-001-REVIEW-CHECKLIST.md), [docs/FE-001-evidence.md](docs/FE-001-evidence.md),
+[docs/FE-002-REVIEW-CHECKLIST.md](docs/FE-002-REVIEW-CHECKLIST.md), [docs/FE-002-VERIFICATION.md](docs/FE-002-VERIFICATION.md).
 
 ### Tests for the Chat page
 
@@ -211,7 +216,7 @@ See [docs/KNOWN-LIMITATIONS.md](docs/KNOWN-LIMITATIONS.md) for the full list wit
 - Ollama handles one request at a time. Under a burst, requests queue and later ones can time out with `504 AI_TIMEOUT`
   (measured on the development laptop: 15 simultaneous 3-sentence answers with a 12 s timeout -> 4 succeeded, 11 got 504,
   and the API recovered immediately).
-- No authentication, rate limit or conversation history. FE-001 remains non-streaming until FE-002 adopts `/api/chat/stream`.
+- No authentication, rate limit or conversation history. The Chat page uses `/api/chat/stream` since FE-002.
 
 ### Live smoke test (needs Ollama)
 
