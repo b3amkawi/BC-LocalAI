@@ -1,0 +1,26 @@
+﻿cold     short  c=1  r=0 #0: success HTTP 200 4731.3 ms
+measured short  c=1  r=1 #0: success HTTP 200 311.2 ms
+SCENARIO backend short c=1: 1/1 success, p50=311.2 p95=311.2 ms, 3.214 req/s
+SUMMARY: target=backend scenarios=1 requests=2 aborted=False
+cold backend #1: success HTTP 200 4731.3 ms
+cold     short  c=1  r=0 #0: success HTTP 200 4680 ms
+measured short  c=1  r=1 #0: success HTTP 200 314 ms
+SCENARIO backend short c=1: 1/1 success, p50=314 p95=314 ms, 3.184 req/s
+SUMMARY: target=backend scenarios=1 requests=2 aborted=False
+cold backend #2: success HTTP 200 4680 ms
+cold     short  c=1  r=0 #0: success HTTP 200 4410 ms
+measured short  c=1  r=1 #0: success HTTP 200 314.1 ms
+SCENARIO backend short c=1: 1/1 success, p50=314.1 p95=314.1 ms, 3.183 req/s
+SUMMARY: target=backend scenarios=1 requests=2 aborted=False
+cold backend #3: success HTTP 200 4410 ms
+cold     short  c=1  r=0 #0: success HTTP 200 4420.5 ms
+measured short  c=1  r=1 #0: success HTTP 200 316.1 ms
+SCENARIO backend short c=1: 1/1 success, p50=316.1 p95=316.1 ms, 3.164 req/s
+SUMMARY: target=backend scenarios=1 requests=2 aborted=False
+cold backend #4: success HTTP 200 4420.5 ms
+cold     short  c=1  r=0 #0: success HTTP 200 4383.2 ms
+measured short  c=1  r=1 #0: success HTTP 200 290.2 ms
+SCENARIO backend short c=1: 1/1 success, p50=290.2 p95=290.2 ms, 3.446 req/s
+SUMMARY: target=backend scenarios=1 requests=2 aborted=False
+cold backend #5: success HTTP 200 4383.2 ms
+SUMMARY: target=backend repeats=5 success=5 min=4383.2 median=4420.5 max=4731.3 ms

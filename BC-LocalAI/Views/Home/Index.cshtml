@@ -1,4 +1,5 @@
-﻿@{
+﻿@inject Microsoft.Extensions.Options.IOptions<BC_LocalAI.Configuration.OllamaOptions> OllamaOptions
+@{
     // The chat page has its own full-screen layout instead of the default site layout.
     Layout = null;
     ViewData["Title"] = "Local AI Chat";
@@ -36,7 +37,7 @@
             </noscript>
         </main>
 
-        <form id="composer" class="composer" action="#" method="post" novalidate>
+        <form id="composer" class="composer" action="#" method="post" novalidate data-timeout-seconds="@(OllamaOptions.Value.TimeoutSeconds + 20)">
             <p id="hint" class="composer__hint" role="alert"></p>
             <div class="composer__row">
                 <label for="message" class="visually-hidden">ข้อความของคุณ</label>
