@@ -1,0 +1,9 @@
+{
+  "measured_utc": "2026-10-21 04:15",
+  "note": "prompt of N repeated digits (1 token per digit), num_predict=1, qwen3:4b, Ollama 0.40.5. Same behavior with OLLAMA_NUM_PARALLEL=2 (port 11437) and the default (port 11434): each slot keeps context_length 4096; a longer prompt is cut silently to 2050 tokens.",
+  "prompt_eval_count": {
+    "np2": {"1500": 1510, "3000": 3010, "3600": 3610, "4500": 2050},
+    "np1": {"1500": 1510, "3000": 3010, "3600": 3610, "4500": 2050}
+  },
+  "api_ps_context_length_np2": 4096
+}

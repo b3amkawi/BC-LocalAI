@@ -1,0 +1,201 @@
+{
+  "run_id": "20261020T204923-backend",
+  "target": "backend",
+  "endpoint": "http://localhost:5290/api/chat",
+  "tested_at": "2026-10-20T20:49:35.4809143+07:00",
+  "preliminary": true,
+  "parameters": {
+    "concurrency": [
+      1
+    ],
+    "profiles": [
+      "short"
+    ],
+    "rounds": 1,
+    "min_samples_per_scenario": 40,
+    "warmup_requests": 0,
+    "client_timeout_sec": 300,
+    "resource_interval_ms": 1000,
+    "min_available_memory_mb": 512,
+    "memory_recovery_wait_sec": 120
+  },
+  "prompts": {
+    "short": [
+      "What is the capital of Japan? Answer with one word.",
+      "What is 12 + 30? Answer with the number only.",
+      "Which planet is known as the Red Planet? Answer with one word.",
+      "ประเทศไทยมีเมืองหลวงชื่ออะไร ตอบสั้น ๆ",
+      "What is the opposite of hot? Answer with one word.",
+      "What is the largest ocean on Earth? Answer with one word.",
+      "What is 9 × 7? Answer with the number only.",
+      "What color do you get by mixing blue and yellow? Answer with one word.",
+      "How many days are in a week? Answer with the number only.",
+      "What is the chemical symbol for gold? Answer with the symbol only.",
+      "ดาวเคราะห์ที่ใหญ่ที่สุดในระบบสุริยะคือดาวอะไร ตอบสั้น ๆ",
+      "What is the opposite of up? Answer with one word.",
+      "What is 100 - 58? Answer with the number only.",
+      "Which animal is known as the king of the jungle? Answer with one word.",
+      "หนึ่งปีมีกี่เดือน ตอบเป็นตัวเลขอย่างเดียว"
+    ],
+    "medium": [
+      "Explain in exactly three sentences why the sky looks blue.",
+      "In three sentences, explain what a database index is used for.",
+      "อธิบายเป็นภาษาไทยสามประโยคว่าทำไมควรล้างมือก่อนรับประทานอาหาร",
+      "In three sentences, describe how photosynthesis works.",
+      "In three sentences, explain what an HTTP status code is.",
+      "In three sentences, explain what a firewall does.",
+      "In three sentences, describe how a bicycle stays upright.",
+      "Explain in exactly three sentences what causes the seasons on Earth.",
+      "In three sentences, explain why we need sleep.",
+      "In three sentences, explain what an API is.",
+      "อธิบายเป็นภาษาไทยสามประโยคว่าฝนเกิดขึ้นได้อย่างไร",
+      "In three sentences, describe how a refrigerator keeps food cold.",
+      "In three sentences, explain what inflation means.",
+      "อธิบายเป็นภาษาไทยสามประโยคว่าทำไมต้องดื่มน้ำให้เพียงพอ",
+      "In three sentences, explain what a computer processor does."
+    ],
+    "long": [
+      "Write one paragraph of about 120 words explaining how a web browser loads a page.",
+      "Write one paragraph of about 120 words about the benefits of regular exercise.",
+      "เขียนย่อหน้าภาษาไทยประมาณ 120 คำ อธิบายประโยชน์ของการอ่านหนังสือ",
+      "Write one paragraph of about 120 words explaining what cloud computing is.",
+      "Write one paragraph of about 120 words describing how rain forms.",
+      "Write one paragraph of about 120 words describing how vaccines work.",
+      "Write one paragraph of about 120 words explaining why recycling matters.",
+      "Write one paragraph of about 120 words describing the water cycle.",
+      "Write one paragraph of about 120 words explaining how electricity reaches a home.",
+      "Write one paragraph of about 120 words describing the history of the bicycle.",
+      "เขียนย่อหน้าภาษาไทยประมาณ 120 คำ อธิบายความสำคัญของการนอนหลับ",
+      "Write one paragraph of about 120 words explaining how the internet works.",
+      "Write one paragraph of about 120 words explaining what machine learning is.",
+      "เขียนย่อหน้าภาษาไทยประมาณ 120 คำ อธิบายประโยชน์ของการออกกำลังกาย",
+      "Write one paragraph of about 120 words describing how coffee is produced."
+    ]
+  },
+  "environment": {
+    "backend_endpoint": "http://localhost:5290/api/chat",
+    "backend_ollama_model": "qwen3:4b",
+    "cpu": "Intel(R) Core(TM) 5 210H",
+    "cpu_threads": 12,
+    "ram_available_mb": 4763.0,
+    "ram_total_mb": 16011.0,
+    "vram_total_mb": 6141.0,
+    "backend_ollama_timeout_seconds": 180,
+    "gpu": "NVIDIA GeForce RTX 4050 Laptop GPU",
+    "powershell": "7.4.6",
+    "gpu_driver": "617.14",
+    "cpu_cores": 8,
+    "os": "Microsoft Windows 10.0.26200"
+  },
+  "cold_start_note": "",
+  "cold_start": null,
+  "aborted": null,
+  "memory_pauses": {
+    "count": 0,
+    "total_seconds": 0.0
+  },
+  "scenarios": [
+    {
+      "target": "backend",
+      "profile": "short",
+      "concurrency": 1,
+      "rounds": 40,
+      "requests": 40,
+      "success": 40,
+      "success_rate": 1.0,
+      "client_timeout": 0,
+      "server_timeout": 0,
+      "timeout_rate": 0.0,
+      "server_error": 0,
+      "truncated": 0,
+      "invalid_response": 0,
+      "connection_error": 0,
+      "latency_sample_size": 40,
+      "latency_min_ms": 216.7,
+      "latency_mean_ms": 251.0,
+      "latency_p50_ms": 247.1,
+      "latency_p95_ms": 296.5,
+      "latency_p99_ms": 311.8,
+      "p99_reliable": false,
+      "latency_max_ms": 311.8,
+      "wall_seconds": 10.04,
+      "throughput_rps": 3.985,
+      "output_tokens_per_sec": null,
+      "generation_tokens_per_sec_mean": null,
+      "queue_wait_p95_ms": null,
+      "cpu_percent_avg": 52.3,
+      "cpu_percent_max": 58.0,
+      "ram_available_mb_min": 4506.0,
+      "ollama_working_set_mb_max": 849.0,
+      "gpu_percent_avg": 66.5,
+      "gpu_percent_max": 95.0,
+      "vram_used_mb_max": 3534.0,
+      "resource_sample_count": 6
+    }
+  ],
+  "resource_samples": [
+    {
+      "time_utc": "2026-10-20T13:49:23.9506431+00:00",
+      "cpu_percent": 25.0,
+      "ram_available_mb": 4752.0,
+      "ollama_working_set_mb": 849.0,
+      "gpu_percent": 0.0,
+      "vram_used_mb": 3526.0,
+      "vram_total_mb": 6141.0
+    },
+    {
+      "time_utc": "2026-10-20T13:49:25.6137279+00:00",
+      "cpu_percent": 56.0,
+      "ram_available_mb": 4664.0,
+      "ollama_working_set_mb": 848.0,
+      "gpu_percent": 91.0,
+      "vram_used_mb": 3526.0,
+      "vram_total_mb": 6141.0
+    },
+    {
+      "time_utc": "2026-10-20T13:49:27.2540703+00:00",
+      "cpu_percent": 58.0,
+      "ram_available_mb": 4588.0,
+      "ollama_working_set_mb": 847.0,
+      "gpu_percent": 95.0,
+      "vram_used_mb": 3526.0,
+      "vram_total_mb": 6141.0
+    },
+    {
+      "time_utc": "2026-10-20T13:49:28.9201269+00:00",
+      "cpu_percent": 53.0,
+      "ram_available_mb": 4562.0,
+      "ollama_working_set_mb": 848.0,
+      "gpu_percent": 59.0,
+      "vram_used_mb": 3526.0,
+      "vram_total_mb": 6141.0
+    },
+    {
+      "time_utc": "2026-10-20T13:49:30.5858266+00:00",
+      "cpu_percent": 58.0,
+      "ram_available_mb": 4564.0,
+      "ollama_working_set_mb": 847.0,
+      "gpu_percent": 50.0,
+      "vram_used_mb": 3526.0,
+      "vram_total_mb": 6141.0
+    },
+    {
+      "time_utc": "2026-10-20T13:49:32.2516937+00:00",
+      "cpu_percent": 51.0,
+      "ram_available_mb": 4506.0,
+      "ollama_working_set_mb": 848.0,
+      "gpu_percent": 43.0,
+      "vram_used_mb": 3534.0,
+      "vram_total_mb": 6141.0
+    },
+    {
+      "time_utc": "2026-10-20T13:49:33.9058015+00:00",
+      "cpu_percent": 38.0,
+      "ram_available_mb": 4544.0,
+      "ollama_working_set_mb": 849.0,
+      "gpu_percent": 61.0,
+      "vram_used_mb": 3534.0,
+      "vram_total_mb": 6141.0
+    }
+  ]
+}

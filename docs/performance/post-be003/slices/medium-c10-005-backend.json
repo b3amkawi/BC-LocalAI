@@ -1,0 +1,471 @@
+{
+  "run_id": "20261020T231301-backend",
+  "target": "backend",
+  "endpoint": "http://localhost:5290/api/chat",
+  "tested_at": "2026-10-20T23:14:00.6488768+07:00",
+  "preliminary": true,
+  "parameters": {
+    "concurrency": [
+      10
+    ],
+    "profiles": [
+      "medium"
+    ],
+    "rounds": 1,
+    "min_samples_per_scenario": 40,
+    "warmup_requests": 0,
+    "client_timeout_sec": 300,
+    "resource_interval_ms": 1000,
+    "min_available_memory_mb": 512,
+    "memory_recovery_wait_sec": 120
+  },
+  "prompts": {
+    "short": [
+      "What is the capital of Japan? Answer with one word.",
+      "What is 12 + 30? Answer with the number only.",
+      "Which planet is known as the Red Planet? Answer with one word.",
+      "ประเทศไทยมีเมืองหลวงชื่ออะไร ตอบสั้น ๆ",
+      "What is the opposite of hot? Answer with one word.",
+      "What is the largest ocean on Earth? Answer with one word.",
+      "What is 9 × 7? Answer with the number only.",
+      "What color do you get by mixing blue and yellow? Answer with one word.",
+      "How many days are in a week? Answer with the number only.",
+      "What is the chemical symbol for gold? Answer with the symbol only.",
+      "ดาวเคราะห์ที่ใหญ่ที่สุดในระบบสุริยะคือดาวอะไร ตอบสั้น ๆ",
+      "What is the opposite of up? Answer with one word.",
+      "What is 100 - 58? Answer with the number only.",
+      "Which animal is known as the king of the jungle? Answer with one word.",
+      "หนึ่งปีมีกี่เดือน ตอบเป็นตัวเลขอย่างเดียว"
+    ],
+    "medium": [
+      "Explain in exactly three sentences why the sky looks blue.",
+      "In three sentences, explain what a database index is used for.",
+      "อธิบายเป็นภาษาไทยสามประโยคว่าทำไมควรล้างมือก่อนรับประทานอาหาร",
+      "In three sentences, describe how photosynthesis works.",
+      "In three sentences, explain what an HTTP status code is.",
+      "In three sentences, explain what a firewall does.",
+      "In three sentences, describe how a bicycle stays upright.",
+      "Explain in exactly three sentences what causes the seasons on Earth.",
+      "In three sentences, explain why we need sleep.",
+      "In three sentences, explain what an API is.",
+      "อธิบายเป็นภาษาไทยสามประโยคว่าฝนเกิดขึ้นได้อย่างไร",
+      "In three sentences, describe how a refrigerator keeps food cold.",
+      "In three sentences, explain what inflation means.",
+      "อธิบายเป็นภาษาไทยสามประโยคว่าทำไมต้องดื่มน้ำให้เพียงพอ",
+      "In three sentences, explain what a computer processor does."
+    ],
+    "long": [
+      "Write one paragraph of about 120 words explaining how a web browser loads a page.",
+      "Write one paragraph of about 120 words about the benefits of regular exercise.",
+      "เขียนย่อหน้าภาษาไทยประมาณ 120 คำ อธิบายประโยชน์ของการอ่านหนังสือ",
+      "Write one paragraph of about 120 words explaining what cloud computing is.",
+      "Write one paragraph of about 120 words describing how rain forms.",
+      "Write one paragraph of about 120 words describing how vaccines work.",
+      "Write one paragraph of about 120 words explaining why recycling matters.",
+      "Write one paragraph of about 120 words describing the water cycle.",
+      "Write one paragraph of about 120 words explaining how electricity reaches a home.",
+      "Write one paragraph of about 120 words describing the history of the bicycle.",
+      "เขียนย่อหน้าภาษาไทยประมาณ 120 คำ อธิบายความสำคัญของการนอนหลับ",
+      "Write one paragraph of about 120 words explaining how the internet works.",
+      "Write one paragraph of about 120 words explaining what machine learning is.",
+      "เขียนย่อหน้าภาษาไทยประมาณ 120 คำ อธิบายประโยชน์ของการออกกำลังกาย",
+      "Write one paragraph of about 120 words describing how coffee is produced."
+    ]
+  },
+  "environment": {
+    "cpu_threads": 12,
+    "backend_ollama_model": "qwen3:4b",
+    "gpu": "NVIDIA GeForce RTX 4050 Laptop GPU",
+    "cpu": "Intel(R) Core(TM) 5 210H",
+    "powershell": "7.4.6",
+    "gpu_driver": "617.14",
+    "backend_endpoint": "http://localhost:5290/api/chat",
+    "ram_available_mb": 5903.0,
+    "cpu_cores": 8,
+    "backend_ollama_timeout_seconds": 180,
+    "ram_total_mb": 16011.0,
+    "vram_total_mb": 6141.0,
+    "os": "Microsoft Windows 10.0.26200"
+  },
+  "cold_start_note": "",
+  "cold_start": null,
+  "aborted": null,
+  "memory_pauses": {
+    "count": 0,
+    "total_seconds": 0.0
+  },
+  "scenarios": [
+    {
+      "target": "backend",
+      "profile": "medium",
+      "concurrency": 10,
+      "rounds": 4,
+      "requests": 40,
+      "success": 40,
+      "success_rate": 1.0,
+      "client_timeout": 0,
+      "server_timeout": 0,
+      "timeout_rate": 0.0,
+      "server_error": 0,
+      "truncated": 0,
+      "invalid_response": 0,
+      "connection_error": 0,
+      "latency_sample_size": 40,
+      "latency_min_ms": 736.8,
+      "latency_mean_ms": 8093.8,
+      "latency_p50_ms": 8025.2,
+      "latency_p95_ms": 14175.4,
+      "latency_p99_ms": 15573.3,
+      "p99_reliable": false,
+      "latency_max_ms": 15573.3,
+      "wall_seconds": 56.96,
+      "throughput_rps": 0.702,
+      "output_tokens_per_sec": null,
+      "generation_tokens_per_sec_mean": null,
+      "queue_wait_p95_ms": null,
+      "cpu_percent_avg": 15.3,
+      "cpu_percent_max": 35.0,
+      "ram_available_mb_min": 5878.0,
+      "ollama_working_set_mb_max": 1195.0,
+      "gpu_percent_avg": 89.7,
+      "gpu_percent_max": 96.0,
+      "vram_used_mb_max": 3691.0,
+      "resource_sample_count": 35
+    }
+  ],
+  "resource_samples": [
+    {
+      "time_utc": "2026-10-20T16:13:01.3969329+00:00",
+      "cpu_percent": 3.0,
+      "ram_available_mb": 5893.0,
+      "ollama_working_set_mb": 1194.0,
+      "gpu_percent": 1.0,
+      "vram_used_mb": 3671.0,
+      "vram_total_mb": 6141.0
+    },
+    {
+      "time_utc": "2026-10-20T16:13:03.0719129+00:00",
+      "cpu_percent": 14.0,
+      "ram_available_mb": 5878.0,
+      "ollama_working_set_mb": 1195.0,
+      "gpu_percent": 32.0,
+      "vram_used_mb": 3671.0,
+      "vram_total_mb": 6141.0
+    },
+    {
+      "time_utc": "2026-10-20T16:13:04.7187591+00:00",
+      "cpu_percent": 15.0,
+      "ram_available_mb": 5889.0,
+      "ollama_working_set_mb": 1193.0,
+      "gpu_percent": 54.0,
+      "vram_used_mb": 3671.0,
+      "vram_total_mb": 6141.0
+    },
+    {
+      "time_utc": "2026-10-20T16:13:06.3370046+00:00",
+      "cpu_percent": 25.0,
+      "ram_available_mb": 5892.0,
+      "ollama_working_set_mb": 1190.0,
+      "gpu_percent": 95.0,
+      "vram_used_mb": 3671.0,
+      "vram_total_mb": 6141.0
+    },
+    {
+      "time_utc": "2026-10-20T16:13:07.9662867+00:00",
+      "cpu_percent": 12.0,
+      "ram_available_mb": 5890.0,
+      "ollama_working_set_mb": 1191.0,
+      "gpu_percent": 96.0,
+      "vram_used_mb": 3671.0,
+      "vram_total_mb": 6141.0
+    },
+    {
+      "time_utc": "2026-10-20T16:13:09.5746877+00:00",
+      "cpu_percent": 15.0,
+      "ram_available_mb": 5901.0,
+      "ollama_working_set_mb": 1177.0,
+      "gpu_percent": 95.0,
+      "vram_used_mb": 3671.0,
+      "vram_total_mb": 6141.0
+    },
+    {
+      "time_utc": "2026-10-20T16:13:11.1915229+00:00",
+      "cpu_percent": 11.0,
+      "ram_available_mb": 5899.0,
+      "ollama_working_set_mb": 1177.0,
+      "gpu_percent": 95.0,
+      "vram_used_mb": 3671.0,
+      "vram_total_mb": 6141.0
+    },
+    {
+      "time_utc": "2026-10-20T16:13:12.8115538+00:00",
+      "cpu_percent": 12.0,
+      "ram_available_mb": 5911.0,
+      "ollama_working_set_mb": 1160.0,
+      "gpu_percent": 94.0,
+      "vram_used_mb": 3672.0,
+      "vram_total_mb": 6141.0
+    },
+    {
+      "time_utc": "2026-10-20T16:13:14.4529712+00:00",
+      "cpu_percent": 10.0,
+      "ram_available_mb": 5910.0,
+      "ollama_working_set_mb": 1158.0,
+      "gpu_percent": 95.0,
+      "vram_used_mb": 3672.0,
+      "vram_total_mb": 6141.0
+    },
+    {
+      "time_utc": "2026-10-20T16:13:16.0685468+00:00",
+      "cpu_percent": 14.0,
+      "ram_available_mb": 5932.0,
+      "ollama_working_set_mb": 1137.0,
+      "gpu_percent": 95.0,
+      "vram_used_mb": 3672.0,
+      "vram_total_mb": 6141.0
+    },
+    {
+      "time_utc": "2026-10-20T16:13:17.6852983+00:00",
+      "cpu_percent": 15.0,
+      "ram_available_mb": 5933.0,
+      "ollama_working_set_mb": 1140.0,
+      "gpu_percent": 95.0,
+      "vram_used_mb": 3677.0,
+      "vram_total_mb": 6141.0
+    },
+    {
+      "time_utc": "2026-10-20T16:13:19.318702+00:00",
+      "cpu_percent": 10.0,
+      "ram_available_mb": 5928.0,
+      "ollama_working_set_mb": 1141.0,
+      "gpu_percent": 95.0,
+      "vram_used_mb": 3672.0,
+      "vram_total_mb": 6141.0
+    },
+    {
+      "time_utc": "2026-10-20T16:13:20.9476756+00:00",
+      "cpu_percent": 5.0,
+      "ram_available_mb": 5954.0,
+      "ollama_working_set_mb": 1114.0,
+      "gpu_percent": 95.0,
+      "vram_used_mb": 3676.0,
+      "vram_total_mb": 6141.0
+    },
+    {
+      "time_utc": "2026-10-20T16:13:22.5510738+00:00",
+      "cpu_percent": 11.0,
+      "ram_available_mb": 5961.0,
+      "ollama_working_set_mb": 1114.0,
+      "gpu_percent": 95.0,
+      "vram_used_mb": 3672.0,
+      "vram_total_mb": 6141.0
+    },
+    {
+      "time_utc": "2026-10-20T16:13:24.1829676+00:00",
+      "cpu_percent": 12.0,
+      "ram_available_mb": 5961.0,
+      "ollama_working_set_mb": 1110.0,
+      "gpu_percent": 95.0,
+      "vram_used_mb": 3672.0,
+      "vram_total_mb": 6141.0
+    },
+    {
+      "time_utc": "2026-10-20T16:13:25.8138471+00:00",
+      "cpu_percent": 13.0,
+      "ram_available_mb": 5937.0,
+      "ollama_working_set_mb": 1149.0,
+      "gpu_percent": 96.0,
+      "vram_used_mb": 3689.0,
+      "vram_total_mb": 6141.0
+    },
+    {
+      "time_utc": "2026-10-20T16:13:27.4420666+00:00",
+      "cpu_percent": 16.0,
+      "ram_available_mb": 5928.0,
+      "ollama_working_set_mb": 1128.0,
+      "gpu_percent": 95.0,
+      "vram_used_mb": 3691.0,
+      "vram_total_mb": 6141.0
+    },
+    {
+      "time_utc": "2026-10-20T16:13:29.0728376+00:00",
+      "cpu_percent": 35.0,
+      "ram_available_mb": 5948.0,
+      "ollama_working_set_mb": 1129.0,
+      "gpu_percent": 57.0,
+      "vram_used_mb": 3691.0,
+      "vram_total_mb": 6141.0
+    },
+    {
+      "time_utc": "2026-10-20T16:13:30.7027752+00:00",
+      "cpu_percent": 10.0,
+      "ram_available_mb": 5954.0,
+      "ollama_working_set_mb": 1145.0,
+      "gpu_percent": 95.0,
+      "vram_used_mb": 3682.0,
+      "vram_total_mb": 6141.0
+    },
+    {
+      "time_utc": "2026-10-20T16:13:32.3365193+00:00",
+      "cpu_percent": 16.0,
+      "ram_available_mb": 5972.0,
+      "ollama_working_set_mb": 1121.0,
+      "gpu_percent": 95.0,
+      "vram_used_mb": 3682.0,
+      "vram_total_mb": 6141.0
+    },
+    {
+      "time_utc": "2026-10-20T16:13:33.9609143+00:00",
+      "cpu_percent": 32.0,
+      "ram_available_mb": 5977.0,
+      "ollama_working_set_mb": 1118.0,
+      "gpu_percent": 84.0,
+      "vram_used_mb": 3679.0,
+      "vram_total_mb": 6141.0
+    },
+    {
+      "time_utc": "2026-10-20T16:13:35.5959309+00:00",
+      "cpu_percent": 16.0,
+      "ram_available_mb": 5975.0,
+      "ollama_working_set_mb": 1119.0,
+      "gpu_percent": 94.0,
+      "vram_used_mb": 3675.0,
+      "vram_total_mb": 6141.0
+    },
+    {
+      "time_utc": "2026-10-20T16:13:37.2252484+00:00",
+      "cpu_percent": 10.0,
+      "ram_available_mb": 5935.0,
+      "ollama_working_set_mb": 1117.0,
+      "gpu_percent": 94.0,
+      "vram_used_mb": 3674.0,
+      "vram_total_mb": 6141.0
+    },
+    {
+      "time_utc": "2026-10-20T16:13:38.8870369+00:00",
+      "cpu_percent": 17.0,
+      "ram_available_mb": 5964.0,
+      "ollama_working_set_mb": 1120.0,
+      "gpu_percent": 96.0,
+      "vram_used_mb": 3670.0,
+      "vram_total_mb": 6141.0
+    },
+    {
+      "time_utc": "2026-10-20T16:13:40.5176831+00:00",
+      "cpu_percent": 12.0,
+      "ram_available_mb": 5994.0,
+      "ollama_working_set_mb": 1105.0,
+      "gpu_percent": 95.0,
+      "vram_used_mb": 3670.0,
+      "vram_total_mb": 6141.0
+    },
+    {
+      "time_utc": "2026-10-20T16:13:42.1518019+00:00",
+      "cpu_percent": 15.0,
+      "ram_available_mb": 6003.0,
+      "ollama_working_set_mb": 1094.0,
+      "gpu_percent": 95.0,
+      "vram_used_mb": 3670.0,
+      "vram_total_mb": 6141.0
+    },
+    {
+      "time_utc": "2026-10-20T16:13:43.7670052+00:00",
+      "cpu_percent": 21.0,
+      "ram_available_mb": 5981.0,
+      "ollama_working_set_mb": 1120.0,
+      "gpu_percent": 96.0,
+      "vram_used_mb": 3670.0,
+      "vram_total_mb": 6141.0
+    },
+    {
+      "time_utc": "2026-10-20T16:13:45.3692649+00:00",
+      "cpu_percent": 8.0,
+      "ram_available_mb": 5960.0,
+      "ollama_working_set_mb": 1136.0,
+      "gpu_percent": 96.0,
+      "vram_used_mb": 3670.0,
+      "vram_total_mb": 6141.0
+    },
+    {
+      "time_utc": "2026-10-20T16:13:46.985453+00:00",
+      "cpu_percent": 35.0,
+      "ram_available_mb": 5958.0,
+      "ollama_working_set_mb": 943.0,
+      "gpu_percent": 95.0,
+      "vram_used_mb": 3670.0,
+      "vram_total_mb": 6141.0
+    },
+    {
+      "time_utc": "2026-10-20T16:13:48.615545+00:00",
+      "cpu_percent": 11.0,
+      "ram_available_mb": 5953.0,
+      "ollama_working_set_mb": 946.0,
+      "gpu_percent": 96.0,
+      "vram_used_mb": 3670.0,
+      "vram_total_mb": 6141.0
+    },
+    {
+      "time_utc": "2026-10-20T16:13:50.2768361+00:00",
+      "cpu_percent": 10.0,
+      "ram_available_mb": 5928.0,
+      "ollama_working_set_mb": 978.0,
+      "gpu_percent": 96.0,
+      "vram_used_mb": 3670.0,
+      "vram_total_mb": 6141.0
+    },
+    {
+      "time_utc": "2026-10-20T16:13:51.9087034+00:00",
+      "cpu_percent": 14.0,
+      "ram_available_mb": 5940.0,
+      "ollama_working_set_mb": 977.0,
+      "gpu_percent": 95.0,
+      "vram_used_mb": 3670.0,
+      "vram_total_mb": 6141.0
+    },
+    {
+      "time_utc": "2026-10-20T16:13:53.5256302+00:00",
+      "cpu_percent": 12.0,
+      "ram_available_mb": 5932.0,
+      "ollama_working_set_mb": 985.0,
+      "gpu_percent": 72.0,
+      "vram_used_mb": 3670.0,
+      "vram_total_mb": 6141.0
+    },
+    {
+      "time_utc": "2026-10-20T16:13:55.1609223+00:00",
+      "cpu_percent": 19.0,
+      "ram_available_mb": 5926.0,
+      "ollama_working_set_mb": 990.0,
+      "gpu_percent": 94.0,
+      "vram_used_mb": 3670.0,
+      "vram_total_mb": 6141.0
+    },
+    {
+      "time_utc": "2026-10-20T16:13:56.7922219+00:00",
+      "cpu_percent": 14.0,
+      "ram_available_mb": 5918.0,
+      "ollama_working_set_mb": 986.0,
+      "gpu_percent": 95.0,
+      "vram_used_mb": 3670.0,
+      "vram_total_mb": 6141.0
+    },
+    {
+      "time_utc": "2026-10-20T16:13:58.4096461+00:00",
+      "cpu_percent": 17.0,
+      "ram_available_mb": 5931.0,
+      "ollama_working_set_mb": 985.0,
+      "gpu_percent": 82.0,
+      "vram_used_mb": 3670.0,
+      "vram_total_mb": 6141.0
+    },
+    {
+      "time_utc": "2026-10-20T16:14:00.0087088+00:00",
+      "cpu_percent": 24.0,
+      "ram_available_mb": 5916.0,
+      "ollama_working_set_mb": 987.0,
+      "gpu_percent": 95.0,
+      "vram_used_mb": 3670.0,
+      "vram_total_mb": 6141.0
+    }
+  ]
+}
