@@ -8,5 +8,8 @@
   "QA2-Q-03-per-user-cap": "QA2-D06",
   "QA2-M-home-anonymous": "QA2-D07",
   "QA2-H-01-home": "QA2-D07",
-  "QA2-H-08-hsts": "QA2-D07"
+  "QA2-H-08-hsts": "QA2-D07",
+  "QA2-F-32-mock-assets": "QA2-D08",
+  "QA2-F-12-http-history": "QA2-D09",
+  "QA2-F-21-no-store-actor": "QA2-D10"
 }
