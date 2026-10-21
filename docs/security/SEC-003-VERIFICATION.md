@@ -1,6 +1,6 @@
 # SEC-003 — Verification report: Admin account management script
 
-Branch `watzapon_SEC-003` from `main` babbd61 (after PR #35, BE-006). Issue: draft only, not yet created on GitHub.
+Branch `watzapon_SEC-003` from `main` babbd61 (after PR #35, BE-006). Issue: [#37](https://github.com/b3amkawi/BC-LocalAI/issues/37).
 Date: 2026-10-21. Machine: Windows 11, RTX 4060 Laptop 8 GB (GPU not used by this work), MySQL 8.0 native, .NET SDK 10.0.402.
 Every result below comes from a run on this machine; nothing was run against a company or production database.
 
@@ -119,4 +119,4 @@ and the existing live suite was run, then the instance was stopped.
 | 9 | Live suites are not in CI (need the local fixture), same as BE-005 | run locally per this report |
 | 10 | Interactive hidden prompt (`ConsolePasswordSource`) is not covered by automated tests | tested only through the fake prompt and `--password-stdin`; manual check recommended |
 
-Not done (needs the user's word): GitHub issue creation, push, pull request, merge.
+Not done (needs the user's word): push, pull request, merge.
