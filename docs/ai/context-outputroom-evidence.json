@@ -1,0 +1,144 @@
+{
+  "generated_utc": "2026-10-21 06:38:12",
+  "ollama_version": "0.40.5",
+  "model": "qwen3:4b",
+  "base_url": "http://127.0.0.1:11434",
+  "repeats": 3,
+  "rows": [
+    {
+      "target_prompt_tokens": 2300,
+      "prompt_eval_count": 2221,
+      "eval_count": 1020,
+      "done_reason": "stop",
+      "lines": 60,
+      "lines_with_right_code": 60,
+      "first_code_in_last_line": true
+    },
+    {
+      "target_prompt_tokens": 2300,
+      "prompt_eval_count": 2221,
+      "eval_count": 1020,
+      "done_reason": "stop",
+      "lines": 60,
+      "lines_with_right_code": 60,
+      "first_code_in_last_line": true
+    },
+    {
+      "target_prompt_tokens": 2300,
+      "prompt_eval_count": 2221,
+      "eval_count": 1019,
+      "done_reason": "stop",
+      "lines": 60,
+      "lines_with_right_code": 60,
+      "first_code_in_last_line": true
+    },
+    {
+      "target_prompt_tokens": 2900,
+      "prompt_eval_count": 2837,
+      "eval_count": 1019,
+      "done_reason": "stop",
+      "lines": 60,
+      "lines_with_right_code": 60,
+      "first_code_in_last_line": true
+    },
+    {
+      "target_prompt_tokens": 2900,
+      "prompt_eval_count": 2837,
+      "eval_count": 1020,
+      "done_reason": "stop",
+      "lines": 60,
+      "lines_with_right_code": 60,
+      "first_code_in_last_line": true
+    },
+    {
+      "target_prompt_tokens": 2900,
+      "prompt_eval_count": 2837,
+      "eval_count": 1019,
+      "done_reason": "stop",
+      "lines": 60,
+      "lines_with_right_code": 60,
+      "first_code_in_last_line": true
+    },
+    {
+      "target_prompt_tokens": 3100,
+      "prompt_eval_count": 3035,
+      "eval_count": 1020,
+      "done_reason": "stop",
+      "lines": 60,
+      "lines_with_right_code": 60,
+      "first_code_in_last_line": true
+    },
+    {
+      "target_prompt_tokens": 3100,
+      "prompt_eval_count": 3035,
+      "eval_count": 1020,
+      "done_reason": "stop",
+      "lines": 60,
+      "lines_with_right_code": 60,
+      "first_code_in_last_line": true
+    },
+    {
+      "target_prompt_tokens": 3100,
+      "prompt_eval_count": 3035,
+      "eval_count": 1020,
+      "done_reason": "stop",
+      "lines": 60,
+      "lines_with_right_code": 60,
+      "first_code_in_last_line": true
+    },
+    {
+      "target_prompt_tokens": 3300,
+      "prompt_eval_count": 3233,
+      "eval_count": 1021,
+      "done_reason": "stop",
+      "lines": 60,
+      "lines_with_right_code": 59,
+      "first_code_in_last_line": true
+    },
+    {
+      "target_prompt_tokens": 3300,
+      "prompt_eval_count": 3233,
+      "eval_count": 1019,
+      "done_reason": "stop",
+      "lines": 60,
+      "lines_with_right_code": 60,
+      "first_code_in_last_line": true
+    },
+    {
+      "target_prompt_tokens": 3300,
+      "prompt_eval_count": 3233,
+      "eval_count": 1019,
+      "done_reason": "stop",
+      "lines": 60,
+      "lines_with_right_code": 60,
+      "first_code_in_last_line": true
+    },
+    {
+      "target_prompt_tokens": 3600,
+      "prompt_eval_count": 3519,
+      "eval_count": 1020,
+      "done_reason": "stop",
+      "lines": 60,
+      "lines_with_right_code": 60,
+      "first_code_in_last_line": true
+    },
+    {
+      "target_prompt_tokens": 3600,
+      "prompt_eval_count": 3519,
+      "eval_count": 1019,
+      "done_reason": "stop",
+      "lines": 60,
+      "lines_with_right_code": 60,
+      "first_code_in_last_line": true
+    },
+    {
+      "target_prompt_tokens": 3600,
+      "prompt_eval_count": 3519,
+      "eval_count": 1019,
+      "done_reason": "stop",
+      "lines": 60,
+      "lines_with_right_code": 60,
+      "first_code_in_last_line": true
+    }
+  ]
+}

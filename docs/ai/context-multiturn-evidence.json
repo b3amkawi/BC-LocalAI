@@ -1,0 +1,553 @@
+{
+  "generated_utc": "2026-10-21 05:05:30",
+  "ollama_version": "0.40.5",
+  "model": "qwen3:4b",
+  "base_url": "http://127.0.0.1:11434",
+  "repeats": 5,
+  "rows": [
+    {
+      "language": "thai",
+      "method": "single_prompt_generate",
+      "question": "แมวของฉันชื่ออะไร",
+      "expected": "มะลิ",
+      "hit": true,
+      "answer": "มะลิ",
+      "seconds": 0.43
+    },
+    {
+      "language": "thai",
+      "method": "single_prompt_generate",
+      "question": "แมวของฉันชื่ออะไร",
+      "expected": "มะลิ",
+      "hit": true,
+      "answer": "มะลิ",
+      "seconds": 0.24
+    },
+    {
+      "language": "thai",
+      "method": "single_prompt_generate",
+      "question": "แมวของฉันชื่ออะไร",
+      "expected": "มะลิ",
+      "hit": true,
+      "answer": "มะลิ",
+      "seconds": 0.23
+    },
+    {
+      "language": "thai",
+      "method": "single_prompt_generate",
+      "question": "แมวของฉันชื่ออะไร",
+      "expected": "มะลิ",
+      "hit": true,
+      "answer": "มะลิ",
+      "seconds": 0.25
+    },
+    {
+      "language": "thai",
+      "method": "single_prompt_generate",
+      "question": "แมวของฉันชื่ออะไร",
+      "expected": "มะลิ",
+      "hit": true,
+      "answer": "มะลิ",
+      "seconds": 0.27
+    },
+    {
+      "language": "thai",
+      "method": "chat_messages",
+      "question": "แมวของฉันชื่ออะไร",
+      "expected": "มะลิ",
+      "hit": true,
+      "answer": "แมวของคุณชื่อมะลิครับ",
+      "seconds": 0.54
+    },
+    {
+      "language": "thai",
+      "method": "chat_messages",
+      "question": "แมวของฉันชื่ออะไร",
+      "expected": "มะลิ",
+      "hit": true,
+      "answer": "แมวของคุณชื่อมะลิครับ",
+      "seconds": 0.47
+    },
+    {
+      "language": "thai",
+      "method": "chat_messages",
+      "question": "แมวของฉันชื่ออะไร",
+      "expected": "มะลิ",
+      "hit": true,
+      "answer": "แมวของคุณชื่อมะลิครับ",
+      "seconds": 0.52
+    },
+    {
+      "language": "thai",
+      "method": "chat_messages",
+      "question": "แมวของฉันชื่ออะไร",
+      "expected": "มะลิ",
+      "hit": true,
+      "answer": "แมวของคุณชื่อมะลิครับ",
+      "seconds": 0.5
+    },
+    {
+      "language": "thai",
+      "method": "chat_messages",
+      "question": "แมวของฉันชื่ออะไร",
+      "expected": "มะลิ",
+      "hit": true,
+      "answer": "แมวของคุณชื่อมะลิครับ",
+      "seconds": 0.48
+    },
+    {
+      "language": "thai",
+      "method": "single_prompt_generate",
+      "question": "ฉันจะไปที่ไหน",
+      "expected": "เชียงใหม่",
+      "hit": true,
+      "answer": "คุณสมชายจะไปเชียงใหม่",
+      "seconds": 0.42
+    },
+    {
+      "language": "thai",
+      "method": "single_prompt_generate",
+      "question": "ฉันจะไปที่ไหน",
+      "expected": "เชียงใหม่",
+      "hit": true,
+      "answer": "เชียงใหม่",
+      "seconds": 0.24
+    },
+    {
+      "language": "thai",
+      "method": "single_prompt_generate",
+      "question": "ฉันจะไปที่ไหน",
+      "expected": "เชียงใหม่",
+      "hit": true,
+      "answer": "เชียงใหม่",
+      "seconds": 0.27
+    },
+    {
+      "language": "thai",
+      "method": "single_prompt_generate",
+      "question": "ฉันจะไปที่ไหน",
+      "expected": "เชียงใหม่",
+      "hit": true,
+      "answer": "เชียงใหม่",
+      "seconds": 0.26
+    },
+    {
+      "language": "thai",
+      "method": "single_prompt_generate",
+      "question": "ฉันจะไปที่ไหน",
+      "expected": "เชียงใหม่",
+      "hit": true,
+      "answer": "เชียงใหม่",
+      "seconds": 0.26
+    },
+    {
+      "language": "thai",
+      "method": "chat_messages",
+      "question": "ฉันจะไปที่ไหน",
+      "expected": "เชียงใหม่",
+      "hit": true,
+      "answer": "คุณสมชายจะไปเชียงใหม่ด้วยรถไฟ",
+      "seconds": 0.51
+    },
+    {
+      "language": "thai",
+      "method": "chat_messages",
+      "question": "ฉันจะไปที่ไหน",
+      "expected": "เชียงใหม่",
+      "hit": true,
+      "answer": "คุณสมชายจะไปเชียงใหม่ด้วยรถไฟ",
+      "seconds": 0.47
+    },
+    {
+      "language": "thai",
+      "method": "chat_messages",
+      "question": "ฉันจะไปที่ไหน",
+      "expected": "เชียงใหม่",
+      "hit": true,
+      "answer": "คุณสมชายจะไปเชียงใหม่ด้วยรถไฟ",
+      "seconds": 0.48
+    },
+    {
+      "language": "thai",
+      "method": "chat_messages",
+      "question": "ฉันจะไปที่ไหน",
+      "expected": "เชียงใหม่",
+      "hit": true,
+      "answer": "คุณสมชายจะไปเชียงใหม่ด้วยรถไฟ",
+      "seconds": 0.48
+    },
+    {
+      "language": "thai",
+      "method": "chat_messages",
+      "question": "ฉันจะไปที่ไหน",
+      "expected": "เชียงใหม่",
+      "hit": true,
+      "answer": "คุณสมชายจะไปเชียงใหม่ด้วยรถไฟ",
+      "seconds": 0.47
+    },
+    {
+      "language": "thai",
+      "method": "single_prompt_generate",
+      "question": "ฉันชื่ออะไร",
+      "expected": "สมชาย",
+      "hit": true,
+      "answer": "สมชาย",
+      "seconds": 0.23
+    },
+    {
+      "language": "thai",
+      "method": "single_prompt_generate",
+      "question": "ฉันชื่ออะไร",
+      "expected": "สมชาย",
+      "hit": true,
+      "answer": "สมชาย",
+      "seconds": 0.23
+    },
+    {
+      "language": "thai",
+      "method": "single_prompt_generate",
+      "question": "ฉันชื่ออะไร",
+      "expected": "สมชาย",
+      "hit": true,
+      "answer": "สมชาย",
+      "seconds": 0.2
+    },
+    {
+      "language": "thai",
+      "method": "single_prompt_generate",
+      "question": "ฉันชื่ออะไร",
+      "expected": "สมชาย",
+      "hit": true,
+      "answer": "สมชาย",
+      "seconds": 0.2
+    },
+    {
+      "language": "thai",
+      "method": "single_prompt_generate",
+      "question": "ฉันชื่ออะไร",
+      "expected": "สมชาย",
+      "hit": true,
+      "answer": "สมชาย",
+      "seconds": 0.22
+    },
+    {
+      "language": "thai",
+      "method": "chat_messages",
+      "question": "ฉันชื่ออะไร",
+      "expected": "สมชาย",
+      "hit": true,
+      "answer": "คุณสมชาย",
+      "seconds": 0.32
+    },
+    {
+      "language": "thai",
+      "method": "chat_messages",
+      "question": "ฉันชื่ออะไร",
+      "expected": "สมชาย",
+      "hit": true,
+      "answer": "คุณสมชาย",
+      "seconds": 0.31
+    },
+    {
+      "language": "thai",
+      "method": "chat_messages",
+      "question": "ฉันชื่ออะไร",
+      "expected": "สมชาย",
+      "hit": true,
+      "answer": "คุณสมชาย",
+      "seconds": 0.28
+    },
+    {
+      "language": "thai",
+      "method": "chat_messages",
+      "question": "ฉันชื่ออะไร",
+      "expected": "สมชาย",
+      "hit": true,
+      "answer": "คุณสมชาย",
+      "seconds": 0.31
+    },
+    {
+      "language": "thai",
+      "method": "chat_messages",
+      "question": "ฉันชื่ออะไร",
+      "expected": "สมชาย",
+      "hit": true,
+      "answer": "คุณสมชาย",
+      "seconds": 0.3
+    },
+    {
+      "language": "english",
+      "method": "single_prompt_generate",
+      "question": "What is my parrot called?",
+      "expected": "Pepper",
+      "hit": true,
+      "answer": "Pepper",
+      "seconds": 0.33
+    },
+    {
+      "language": "english",
+      "method": "single_prompt_generate",
+      "question": "What is my parrot called?",
+      "expected": "Pepper",
+      "hit": true,
+      "answer": "Pepper",
+      "seconds": 0.27
+    },
+    {
+      "language": "english",
+      "method": "single_prompt_generate",
+      "question": "What is my parrot called?",
+      "expected": "Pepper",
+      "hit": true,
+      "answer": "Pepper",
+      "seconds": 0.27
+    },
+    {
+      "language": "english",
+      "method": "single_prompt_generate",
+      "question": "What is my parrot called?",
+      "expected": "Pepper",
+      "hit": true,
+      "answer": "Pepper",
+      "seconds": 0.26
+    },
+    {
+      "language": "english",
+      "method": "single_prompt_generate",
+      "question": "What is my parrot called?",
+      "expected": "Pepper",
+      "hit": true,
+      "answer": "Pepper",
+      "seconds": 0.25
+    },
+    {
+      "language": "english",
+      "method": "chat_messages",
+      "question": "What is my parrot called?",
+      "expected": "Pepper",
+      "hit": true,
+      "answer": "Your parrot is called Pepper.",
+      "seconds": 0.34
+    },
+    {
+      "language": "english",
+      "method": "chat_messages",
+      "question": "What is my parrot called?",
+      "expected": "Pepper",
+      "hit": true,
+      "answer": "Your parrot is called Pepper.",
+      "seconds": 0.31
+    },
+    {
+      "language": "english",
+      "method": "chat_messages",
+      "question": "What is my parrot called?",
+      "expected": "Pepper",
+      "hit": true,
+      "answer": "Your parrot is called Pepper.",
+      "seconds": 0.3
+    },
+    {
+      "language": "english",
+      "method": "chat_messages",
+      "question": "What is my parrot called?",
+      "expected": "Pepper",
+      "hit": true,
+      "answer": "Your parrot is called Pepper.",
+      "seconds": 0.32
+    },
+    {
+      "language": "english",
+      "method": "chat_messages",
+      "question": "What is my parrot called?",
+      "expected": "Pepper",
+      "hit": true,
+      "answer": "Your parrot is called Pepper.",
+      "seconds": 0.31
+    },
+    {
+      "language": "english",
+      "method": "single_prompt_generate",
+      "question": "Where am I travelling?",
+      "expected": "Lisbon",
+      "hit": true,
+      "answer": "Lisbon",
+      "seconds": 0.3
+    },
+    {
+      "language": "english",
+      "method": "single_prompt_generate",
+      "question": "Where am I travelling?",
+      "expected": "Lisbon",
+      "hit": true,
+      "answer": "Lisbon",
+      "seconds": 0.25
+    },
+    {
+      "language": "english",
+      "method": "single_prompt_generate",
+      "question": "Where am I travelling?",
+      "expected": "Lisbon",
+      "hit": true,
+      "answer": "Lisbon",
+      "seconds": 0.28
+    },
+    {
+      "language": "english",
+      "method": "single_prompt_generate",
+      "question": "Where am I travelling?",
+      "expected": "Lisbon",
+      "hit": true,
+      "answer": "Lisbon",
+      "seconds": 0.26
+    },
+    {
+      "language": "english",
+      "method": "single_prompt_generate",
+      "question": "Where am I travelling?",
+      "expected": "Lisbon",
+      "hit": true,
+      "answer": "Lisbon",
+      "seconds": 0.25
+    },
+    {
+      "language": "english",
+      "method": "chat_messages",
+      "question": "Where am I travelling?",
+      "expected": "Lisbon",
+      "hit": true,
+      "answer": "Lisbon",
+      "seconds": 0.28
+    },
+    {
+      "language": "english",
+      "method": "chat_messages",
+      "question": "Where am I travelling?",
+      "expected": "Lisbon",
+      "hit": true,
+      "answer": "Lisbon",
+      "seconds": 0.26
+    },
+    {
+      "language": "english",
+      "method": "chat_messages",
+      "question": "Where am I travelling?",
+      "expected": "Lisbon",
+      "hit": true,
+      "answer": "Lisbon",
+      "seconds": 0.26
+    },
+    {
+      "language": "english",
+      "method": "chat_messages",
+      "question": "Where am I travelling?",
+      "expected": "Lisbon",
+      "hit": true,
+      "answer": "Lisbon",
+      "seconds": 0.25
+    },
+    {
+      "language": "english",
+      "method": "chat_messages",
+      "question": "Where am I travelling?",
+      "expected": "Lisbon",
+      "hit": true,
+      "answer": "Lisbon",
+      "seconds": 0.27
+    },
+    {
+      "language": "english",
+      "method": "single_prompt_generate",
+      "question": "What is my name?",
+      "expected": "Anna",
+      "hit": true,
+      "answer": "Anna",
+      "seconds": 0.27
+    },
+    {
+      "language": "english",
+      "method": "single_prompt_generate",
+      "question": "What is my name?",
+      "expected": "Anna",
+      "hit": true,
+      "answer": "Anna",
+      "seconds": 0.24
+    },
+    {
+      "language": "english",
+      "method": "single_prompt_generate",
+      "question": "What is my name?",
+      "expected": "Anna",
+      "hit": true,
+      "answer": "Anna",
+      "seconds": 0.24
+    },
+    {
+      "language": "english",
+      "method": "single_prompt_generate",
+      "question": "What is my name?",
+      "expected": "Anna",
+      "hit": true,
+      "answer": "Anna",
+      "seconds": 0.23
+    },
+    {
+      "language": "english",
+      "method": "single_prompt_generate",
+      "question": "What is my name?",
+      "expected": "Anna",
+      "hit": true,
+      "answer": "Anna",
+      "seconds": 0.21
+    },
+    {
+      "language": "english",
+      "method": "chat_messages",
+      "question": "What is my name?",
+      "expected": "Anna",
+      "hit": true,
+      "answer": "Your name is Anna.",
+      "seconds": 0.28
+    },
+    {
+      "language": "english",
+      "method": "chat_messages",
+      "question": "What is my name?",
+      "expected": "Anna",
+      "hit": true,
+      "answer": "Your name is Anna.",
+      "seconds": 0.28
+    },
+    {
+      "language": "english",
+      "method": "chat_messages",
+      "question": "What is my name?",
+      "expected": "Anna",
+      "hit": true,
+      "answer": "Your name is Anna.",
+      "seconds": 0.26
+    },
+    {
+      "language": "english",
+      "method": "chat_messages",
+      "question": "What is my name?",
+      "expected": "Anna",
+      "hit": true,
+      "answer": "Your name is Anna.",
+      "seconds": 0.28
+    },
+    {
+      "language": "english",
+      "method": "chat_messages",
+      "question": "What is my name?",
+      "expected": "Anna",
+      "hit": true,
+      "answer": "Your name is Anna.",
+      "seconds": 0.27
+    }
+  ],
+  "hit_rate": {
+    "single_prompt_generate": 1,
+    "chat_messages": 1
+  }
+}
