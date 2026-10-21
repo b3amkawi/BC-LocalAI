@@ -3,6 +3,12 @@
 2026-10-21 (Asia/Bangkok) · [FE-003 #24](https://github.com/b3amkawi/BC-LocalAI/issues/24)
 · branch `watzapon_FE-003` · main base `d121f50`, merge `c0a1d5e`.
 
+Implementation/test evidence is stored in local commit `db98567`. At the final read-only Git check, the shared `origin/main`
+reference had advanced to `d636b4f` (AI-006 benchmark documents/scripts and additional Python tests; its Python floor is158).
+Those later changes were not silently merged into this run. The test counts below apply to the requested `d121f50` base plus FE-003,
+not to a hypothetical merge with that newer main. Before a later PR/merge, synchronize the newer main, retain the higher Python
+floor158 and run the combined regression set. There are no application-runtime changes in the observed main delta.
+
 This supersedes the **Mock-only** scope of [the historical preparation report](FE-003-VERIFICATION.md).
 See [setup, contracts and recovery](FE-003-REAL-UI.md). No actual employee credentials/company schema were supplied or tested.
 All live data below is synthetic and isolated on MySQL3338; Ollama is the actual loopback `qwen3:4b`, not MockAIService.
