@@ -1,9 +1,9 @@
 # QA-002 Results and Verification Report (D3, D5)
 
-ทดสอบเมื่อ 2026-10-21 (2 รอบเต็มที่สั่งแยกกัน) บน Windows 11, .NET SDK 10.0.402, Python 3.11.9 ไม่ใช้ GPU และไม่ใช้ Ollama จริง
-ระบบที่ทดสอบ: `main` ที่รวม SEC-001, BE-004, BE-005, BE-006, BE-007 (เปิดประวัติสนทนาด้วย `ChatHistory:Enabled` เฉพาะ host ทดสอบ) และงาน AI-006 ตรวจจาก pipeline จริง (`Program`) ไม่ได้แก้โค้ดของ Backend/Frontend
+ทดสอบเมื่อ 2026-10-21 (2 รอบเต็มที่สั่งแยกกัน; รอบแรก 256 กรณีก่อน FE-003/SEC-003 และรอบปัจจุบัน 300 กรณีหลัง merge `origin/main`) บน Windows 11, .NET SDK 10.0.402, Python 3.11.9 ไม่ใช้ GPU และไม่ใช้ Ollama จริง
+ระบบที่ทดสอบ: `origin/main` ที่รวม SEC-001, BE-004, BE-005, BE-006, BE-007, FE-003, SEC-003 (เปิดประวัติสนทนาด้วย `ChatHistory:Enabled` เฉพาะ host ทดสอบ) และงาน AI-006 ตรวจจาก pipeline จริง (`Program`) ไม่ได้แก้โค้ดของ Backend/Frontend
 
-- Expected ของ 256 กรณีเขียนไว้ก่อนรันและ commit แยก ([qa-002-test-matrix.md](qa-002-test-matrix.md), [qa002-cases.json](../../tests/security/qa002-cases.json)) ไม่มีการแก้ Expected หลังเห็นผล
+- Expected ของ 300 กรณีเขียนไว้ก่อนรัน (256 กรณีแรกใน commit `0b0d23b`, 44 กรณีกลุ่ม F ใน commit `7d2d93c` ก่อนเขียนโค้ดทดสอบของกลุ่มนั้น)และ commit แยก ([qa-002-test-matrix.md](qa-002-test-matrix.md), [qa002-cases.json](../../tests/security/qa002-cases.json)) ไม่มีการแก้ Expected หลังเห็นผล
 - Actual บันทึกแยกต่อกรณีต่อรอบใน [qa-002-evidence.json](qa-002-evidence.json) และตาราง Expected เทียบ Actual รายกรณีใน [qa-002-results-table.md](qa-002-results-table.md)
 - ข้อบกพร่องอยู่ใน [qa-002-defects.md](qa-002-defects.md)
 
@@ -11,20 +11,21 @@
 
 | ชุด | กรณี | ผ่าน | ไม่ผ่าน | สังเกต |
 | --- | ---: | ---: | ---: | ---: |
-| M role × endpoint | 76 | 76 | 0 | 0 |
+| M role × endpoint | 76 | 75 | 1 | 0 |
 | A authentication | 39 | 39 | 0 | 0 |
 | S session | 23 | 23 | 0 | 0 |
 | I authorization / IDOR | 15 | 15 | 0 | 0 |
 | C CSRF | 46 | 46 | 0 | 0 |
-| H security headers | 12 | 10 | 2 | 0 |
+| H security headers | 12 | 8 | 4 | 0 |
 | L ความลับใน error/log | 12 | 10 | 2 | 0 |
 | U ไม่ล็อกอินแล้วไม่ถึง Ollama | 9 | 9 | 0 | 0 |
 | MS session สิ้นสุดระหว่างสตรีม | 14 | 13 | 1 | 0 |
 | Q ผู้ใช้เดียวยิงมาก / คิว | 3 | 2 | 0 | 1 |
 | O ค่าตั้งต้นและการปิดฟีเจอร์ | 7 | 6 | 0 | 1 |
-| **รวม** | **256** | **249** | **5** | **2** |
+| F FE-003 / SEC-003 | 44 | 40 | 3 | 1 |
+| **รวม** | **300** | **286** | **11** | **3** |
 
-512 การรันกรณี (256 × 2 รอบ) ผลของทุกกรณีเหมือนกันทั้งสองรอบ ชุดทดสอบ .NET มี 162 test (บางตัวบันทึกหลายกรณี) ใช้เวลา ~47 วินาทีต่อรอบ
+600 การรันกรณี (300 × 2 รอบ) ผลของทุกกรณีเหมือนกันทั้งสองรอบ ชุดทดสอบ .NET ของ QA มี 187 test (บางตัวบันทึกหลายกรณี) ใช้เวลา ~41 วินาทีต่อรอบ
 
 **ผลหลักตามเกณฑ์ยอมรับของ Issue**
 
@@ -39,7 +40,7 @@
 | คำขอที่เปลี่ยนสถานะมี CSRF protection | **ผ่าน** `/api/chat`, `/stream`, สร้าง/แก้/ลบสนทนา, logout: 36 รูปแบบข้ามเว็บถูกปฏิเสธ 403 `AUTH_CSRF_INVALID` โดยไม่มีผลข้างเคียง; `text/plain` และฟอร์มได้ 415 |
 | error และ log ไม่มีรหัสผ่าน hash token หรือรายละเอียดภายใน | **ผ่านเกือบทั้งหมด** body ของ client สะอาดทุกกรณี; log สะอาดจากรหัสผ่าน/hash/stamp/session id/cookie/CSRF token/ข้อความคำถาม มี 2 ข้อบกพร่องระดับต่ำ/ข้อมูล: QA2-D03, QA2-D04 |
 | ไม่ใช้บัญชีหรือข้อมูลจริง | **ผ่าน** บัญชีสังเคราะห์ รหัสผ่านสุ่มใหม่ทุกรอบ ไม่มีการเชื่อมต่อ MySQL หรือ Ollama จริง |
-| ข้อบกพร่องด้านความปลอดภัยทั้งหมดแก้และทดสอบซ้ำ | **ยังไม่ครบ** 5 ข้อบกพร่อง + 1 ข้อสังเกตรอเจ้าของ (ต่ำ 4, ข้อมูล 1, ปานกลาง 1) ไม่มีข้อสูง |
+| ข้อบกพร่องด้านความปลอดภัยทั้งหมดแก้และทดสอบซ้ำ | **ยังไม่ครบ** 10 รายการรอเจ้าของ (D01-D10: ต่ำ 6, ข้อมูล 3, ปานกลาง 1 ที่เป็นข้อสังเกต) ไม่มีข้อสูง |
 
 ## ข้อบกพร่องที่พบ (สรุป)
 
@@ -51,8 +52,23 @@
 | QA2-D04 | ข้อมูล | Backend/DevOps | log ของ HttpClient แสดง URL/พอร์ต Ollama ที่ Information | QA2-L-01 |
 | QA2-D05 | ต่ำ | Backend | session ที่สิ้นสุดตอน Ollama เงียบ ไม่ตัดสตรีมจนกว่าชิ้นถัดไปมา | QA2-MS-stalled-model |
 | QA2-D06 | ปานกลาง (ข้อสังเกต) | Backend (BE-008) | ไม่มีเพดานคำขอพร้อมกันต่อผู้ใช้ | QA2-Q-03 |
+| QA2-D07 | ข้อมูล | Backend (BE-006 doc) | `GET /` ไม่ล็อกอินเป็น 302 `/login` แล้ว แต่ BE-006 matrix ยังเขียน 200 | QA2-M-home-anonymous, H-01, H-08 |
+| QA2-D08 | ต่ำ | Frontend | ไฟล์ mock ของ preview ถูกเสิร์ฟใน Production | QA2-F-32 |
+| QA2-D09 | ต่ำ | Backend | `/api/chat[/stream]` ที่มี conversationId ผ่าน HTTP ได้ 307 แทน 403 (เมื่อตั้งพอร์ต HTTPS) | QA2-F-12 |
+| QA2-D10 | ข้อมูล | Backend | stream ตั้ง `Cache-Control: no-cache` ทับ `no-store` | QA2-F-21 |
 
 รายละเอียด หลักฐาน และข้อเสนอแก้ดู [qa-002-defects.md](qa-002-defects.md)
+
+## ผลของ FE-003 / SEC-003 (กลุ่ม F, 44 กรณี)
+
+| หัวข้อ | ผล |
+| --- | --- |
+| `X-BC-Expected-User` | **ผ่าน** ตรงกัน → 200 + `X-BC-User`; ไม่ตรง/ซ้ำ/ตัวพิมพ์ต่าง → 401 `AUTH_SESSION_CHANGED` กับ chat, stream, conversations, `/api/auth/me` โดย Ollama 0 และ session ของผู้เรียกไม่ถูกเพิกถอน; เส้นทางสำรอง (`/API/CHAT`, `/api/chat/`, `/Api/Conversations/`, `/api/CHAT/STREAM/`, `/api/auth/ME`) ถูกครอบคลุม; ล็อกอินทับบน browser เดียวกัน → แท็บเก่าได้ 401; หลัง logout ได้ `AUTH_REQUIRED` ค่าว่างทดสอบไม่ได้ (QA2-N06) |
+| CSRF token ของการเปลี่ยนประวัติ | **ผ่าน** สร้าง/เปลี่ยนชื่อ/ลบ/chat/stream ที่มี conversationId: ไม่มี token, token ซ้ำ, token ปลอม, token ของผู้ใช้อื่น, token ของผู้ไม่ล็อกอิน → 403 `AUTH_CSRF_INVALID` โดยไม่เขียนข้อมูลและ Ollama 0; alias เส้นทางไม่เลี่ยงได้; ไม่มี token + conversationId ที่ไม่มีอยู่ → 403 (ไม่ใช้ 404 เป็นช่องตรวจ id); token ถูกต้อง → สำเร็จทั้ง 5; chat/stream แบบเดิมที่ไม่มี conversationId ไม่ต้องใช้ token (ไม่เปลี่ยน) |
+| HTTPS | `/api/conversations*` และคำขอที่มี `X-BC-Expected-User` ผ่าน HTTP → 403 `AUTH_HTTPS_REQUIRED` **ผ่าน**; `/api/chat[/stream]` ที่มี conversationId ผ่าน HTTP เมื่อตั้งพอร์ต HTTPS → 307 (D09) |
+| หน้า | `/login`: 404 เมื่อปิด Authentication, 403 ผ่าน HTTP, 200 ผ่าน HTTPS พร้อม CSP/no-store/nosniff และไม่สะท้อน returnUrl, redirect ไป `/` เมื่อล็อกอินแล้ว **ผ่านทั้งหมด**; `/` ไม่ล็อกอิน → 302 `/login` (D07), ผ่าน HTTP → 403, บัญชีถูกปิด → 302, หน้าแอปไม่มี id/stamp/cookie/token **ผ่าน**; `/preview/login` ไม่เปิดใน 3 เงื่อนไขทดสอบ **ผ่าน**; ไฟล์ mock ถูกเสิร์ฟ (D08) |
+| header | response ที่ล็อกอินเป็น `no-store` + `X-BC-User` ยกเว้น stream (D10); 401 ไม่มี `X-BC-User` **ผ่าน** |
+| ผลต่อกรณีรอบแรก | harness ส่ง `X-CSRF-TOKEN` อัตโนมัติกับการเปลี่ยนประวัติ (เหมือนหน้าเว็บ) Expected เดิมไม่ถูกแก้ ที่ต่างมีเฉพาะ `GET /` ของผู้ไม่ล็อกอิน (D07) กรณีสตรีมเพิกถอน (`QA2-MS-*`) ผลเดิมทั้งหมด |
 
 ## วิธีที่ใช้ และเหตุผล
 
@@ -90,7 +106,9 @@ Expected ในแค็ตตาล็อกไม่ได้ถูกแก�
 - **การเข้ารหัส/การหมุนคีย์ของ cookie (DataProtection)**: ใช้ key ring แบบชั่วคราวใน host ทดสอบ ไม่ทดสอบการเก็บคีย์ด้วย DPAPI/ACL จริง (อยู่ใน BE-005 ที่ต้องตรวจบนเครื่อง deploy)
 - **ความลับในไฟล์ log จริง/ระบบรวม log**: ตรวจเฉพาะ log ที่แอปเขียนผ่าน `ILogger` ใน host ทดสอบ ไม่ตรวจ log ของเซิร์ฟเวอร์เว็บภายนอก
 - **ผู้เชี่ยวชาญด้านความปลอดภัยรีวิว** และ **Leader อนุมัติ** (ข้อ 10 ของ Definition of Done) ยังรอ: รายงานนี้เป็นผลของ QA เท่านั้น
-- **การทดสอบซ้ำหลังแก้** QA2-D01 ถึง D06 ยังรอเจ้าของ
+- **การทดสอบซ้ำหลังแก้** QA2-D01 ถึง D10 ยังรอเจ้าของ
+- **`X-BC-Expected-User` ค่าว่าง** ทดสอบไม่ได้ผ่าน TestServer (header ไม่ถึงแอป) ตรวจจากโค้ดเท่านั้น (QA2-N06)
+- **หน้า login/แชตในเบราว์เซอร์จริง** ทดสอบเฉพาะ HTML/header ที่เซิร์ฟเวอร์ส่ง ไม่ได้รัน JavaScript ของหน้า (`login.js`, `frontend-http.js`, `authenticated-chat.js`)
 - นอกขอบเขต Issue: การแก้ข้อบกพร่อง, penetration test ภายนอก, ประวัติสนทนา (QA-003), streaming (QA-001)
 
 ## วิธีรันซ้ำ

@@ -27,6 +27,7 @@ docs_module = load("make_qa002_docs")
 runner = load("run_qa002")
 CATALOG = json.loads((SECURITY / "qa002-cases.json").read_text(encoding="utf-8"))
 IDS = [c["id"] for c in CATALOG["cases"]]
+PLAIN = "QA2-A-01-login-ok"  # a case with no documented defect
 
 
 class CatalogTests(unittest.TestCase):
@@ -65,7 +66,7 @@ class CatalogTests(unittest.TestCase):
         used = set()
         for path in CSHARP.glob("*.cs"):
             used |= set(re.findall(r"QA2-[A-Z]+-[A-Za-z0-9-]*[A-Za-z0-9]", path.read_text(encoding="utf-8")))
-        unknown = sorted(i for i in used if i not in IDS and not i.endswith("-"))
+        unknown = sorted(i for i in used if i not in IDS and not any(c.startswith(i + "-") for c in IDS))  # f-string templates are prefixes
         self.assertEqual(unknown, [])
 
     def test_every_catalogued_case_has_a_test(self):
@@ -76,6 +77,8 @@ class CatalogTests(unittest.TestCase):
                 continue
             if case_id.startswith("QA2-C-") and any(case_id.startswith(f"QA2-C-{e}-") for e in ("chat", "stream", "conv-create", "conv-patch", "conv-delete", "logout")):
                 continue  # built from the endpoint x variant tables of Qa002CsrfTests
+            if case_id.startswith("QA2-F-") and any(case_id.startswith(t) for t in re.findall(r"(QA2-F-[A-Za-z0-9-]*-)\{", text)):
+                continue  # built from the operation / token-kind lists of Qa002FrontendTests
             if case_id.startswith("QA2-M-"):
                 rest = case_id[len("QA2-M-"):]
                 for role in ("anonymous", "user", "admin", "logged-out", "disabled", "idle-expired", "absolute-expired", "role-changed"):
@@ -105,22 +108,22 @@ class RunnerMergeTests(unittest.TestCase):
         return {"id": case_id, "run": "1", "verdict": verdict, "actualStatus": status, "actualCode": None, "actualOllama": 0, "detail": "", "defect": None}
 
     def test_a_case_passes_only_when_every_run_passes(self):
-        merged = self.merge([[self.line(IDS[0], "PASS")], [self.line(IDS[0], "PASS")]])
+        merged = self.merge([[self.line(PLAIN, "PASS")], [self.line(PLAIN, "PASS")]])
         case = merged["cases"][0]
         self.assertEqual((case["verdict"], case["passedRuns"], case["runs"]), ("PASS", 2, 2))
 
     def test_one_failing_run_fails_the_case(self):
-        merged = self.merge([[self.line(IDS[0], "PASS")], [self.line(IDS[0], "FAIL", 500)]])
+        merged = self.merge([[self.line(PLAIN, "PASS")], [self.line(PLAIN, "FAIL", 500)]])
         self.assertEqual(merged["cases"][0]["verdict"], "FAIL")
-        self.assertEqual(merged["summary"]["inconsistentAcrossRuns"], [IDS[0]])
-        self.assertIn(IDS[0], merged["summary"]["failWithoutDefect"])
+        self.assertEqual(merged["summary"]["inconsistentAcrossRuns"], [PLAIN])
+        self.assertIn(PLAIN, merged["summary"]["failWithoutDefect"])
 
     def test_cases_without_evidence_are_reported_not_hidden(self):
-        merged = self.merge([[self.line(IDS[0], "PASS")]])
+        merged = self.merge([[self.line(PLAIN, "PASS")]])
         self.assertEqual(len(merged["summary"]["notExecuted"]), len(IDS) - 1)
 
     def test_observations_are_not_counted_as_passes(self):
-        merged = self.merge([[self.line(IDS[0], "OBSERVED")]])
+        merged = self.merge([[self.line(PLAIN, "OBSERVED")]])
         self.assertEqual((merged["summary"]["pass"], merged["summary"]["observed"]), (0, 1))
 
 
