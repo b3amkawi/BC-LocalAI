@@ -1,7 +1,7 @@
--- DRAFT / REVIEW ONLY. MySQL >= 8.0.17, InnoDB, separate application-owned schema.
--- No USE/CREATE DATABASE/GRANT: the approved migrator must select the correct schema explicitly.
--- Not run by application startup. No company/account table or user foreign key is changed.
--- DDL implicitly commits; a multi-statement failure requires operator reconciliation, not ROLLBACK.
+-- BE-007 migration 001: chat history tables. MySQL >= 8.0.17, InnoDB.
+-- Applied by an operator with scripts/chat-history/migrate.ps1 (migrator account), never by application startup.
+-- No USE/CREATE DATABASE/GRANT: the migrator selects the approved schema explicitly; runtime grants are separate.
+-- No account table or user foreign key is changed. DDL implicitly commits; a partial failure needs operator reconciliation.
 CREATE TABLE Conversations (
     Id BINARY(16) NOT NULL,
     UserId VARCHAR(64) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_bin NOT NULL,

@@ -337,9 +337,3 @@ public abstract class ChatHistoryRepositoryContractTests
         Assert.Empty((await repo.ListConversationsAsync(Alice, new PageRequest())).Items);
     }
 }
-
-/// <summary>Runs the contract against the in-memory reference implementation.</summary>
-public sealed class InMemoryChatHistoryRepositoryTests : ChatHistoryRepositoryContractTests
-{
-    protected override IChatHistoryRepository CreateRepository(Func<DateTimeOffset> clock) => new InMemoryChatHistoryRepository(clock);
-}

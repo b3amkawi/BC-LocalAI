@@ -1,4 +1,4 @@
--- DRAFT / REVIEW ONLY. EMPTY pre-go-live schema only; never automatic or a production rollback.
+-- BE-007 rollback of migration 001. EMPTY pre-go-live schema only; never automatic or a production rollback.
 -- Operator must verify database identity, backup/restore readiness and approve this exact target first.
 -- Then, in the SAME connection: SET @BE007_ALLOW_EMPTY_ROLLBACK = 1;
 -- Requires CREATE ROUTINE for this temporary guard; runtime app account must not have it.

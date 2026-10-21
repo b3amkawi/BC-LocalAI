@@ -106,3 +106,24 @@ internal static class AttemptWriterBootstrap
         ];
     }
 }
+
+// Opt-in BE-007 fixture only: the chat history runtime account. Table-level SELECT/INSERT/UPDATE on the two history tables;
+// nothing on users, no DELETE (deletion is a soft delete), no DDL. The tables are created here with the BE-007 migration so the
+// grants have something to apply to; MySQL keeps table grants by name, so a rehearsed rollback and re-apply keeps them.
+internal static class ChatHistoryBootstrap
+{
+    internal const string User = "bc_history_rw";
+
+    internal static string[] Create(string secret, string migrationSql)
+    {
+        if (secret.Length != 64 || !secret.All(Uri.IsHexDigit)) throw new ArgumentException("Only generated secrets may be used.");
+        return
+        [
+            "USE bc_localai_sec001;",
+            migrationSql,
+            $"CREATE USER '{User}'@'127.0.0.1' IDENTIFIED BY '{secret}' REQUIRE SSL;",
+            $"GRANT SELECT, INSERT, UPDATE ON bc_localai_sec001.Conversations TO '{User}'@'127.0.0.1';",
+            $"GRANT SELECT, INSERT, UPDATE ON bc_localai_sec001.Messages TO '{User}'@'127.0.0.1';"
+        ];
+    }
+}

@@ -5,12 +5,13 @@ param(
     [string]$MySqlBin = 'C:\Program Files\MySQL\MySQL Server 8.0\bin',
     # Loopback port of this isolated instance. Another port lets a second checkout run its own instance side by side.
     [ValidateRange(1025, 65535)][int]$Port = 3307,
-    [ValidateSet('sec001-mysql-v2', 'be005-mysql')][string]$InstanceName = 'sec001-mysql-v2'
+    [ValidateSet('sec001-mysql-v2', 'be005-mysql', 'be007-mysql')][string]$InstanceName = 'sec001-mysql-v2'
 )
 $ErrorActionPreference = 'Stop'
 $repo = (Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
 $instance = Join-Path $repo ".local/$InstanceName"
 if ($InstanceName -eq 'be005-mysql' -and $Port -ne 3319) { throw 'BE-005 fixture must use its dedicated loopback port3319.' }
+if ($InstanceName -eq 'be007-mysql' -and $Port -ne 3320) { throw 'BE-007 fixture must use its dedicated loopback port 3320.' }
 $private = Join-Path $instance 'private'
 $data = Join-Path $instance 'data'
 $ready = Join-Path $instance 'initialized'
@@ -72,6 +73,8 @@ switch ($Action) {
         New-Item -ItemType Directory -Path $private, $data | Out-Null
         $fixtureArguments = @($private, (Join-Path $repo 'database/sec001/schema.sql'), $Port)
         if ($InstanceName -eq 'be005-mysql') { $fixtureArguments += 'be005-attempt-writer' }
+        # BE-007: login (attempt writer) plus the chat history tables and their runtime account.
+        if ($InstanceName -eq 'be007-mysql') { $fixtureArguments += 'be005-attempt-writer', 'be007-history' }
         & dotnet run --project (Join-Path $repo 'tools/Sec001Fixtures/Sec001Fixtures.csproj') -c Release -- @fixtureArguments
         if ($LASTEXITCODE -ne 0) { throw 'Fixture generation failed. No database initialization attempted.' }
         & $server --no-defaults --initialize "--basedir=$(Split-Path $MySqlBin)" "--datadir=$data" "--log-error=$(Join-Path $instance 'initialize.log')"
