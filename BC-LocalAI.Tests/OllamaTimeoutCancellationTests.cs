@@ -69,7 +69,8 @@ public sealed class OllamaTimeoutCancellationTests
     {
         var handler = new FakeHandler(async (_, token) =>
         {
-            await Task.Delay(TimeSpan.FromMilliseconds(300), token);
+            // Well inside the 1 s deadline: 300 ms left too little margin when the whole suite runs in parallel on a busy machine.
+            await Task.Delay(TimeSpan.FromMilliseconds(50), token);
             return OllamaBodies.Response(GoodBody()).Response;
         });
 

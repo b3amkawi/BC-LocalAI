@@ -22,7 +22,7 @@ Code: `ConversationsController`, `ChatController`, `ChatStreamController`, `Chat
 | GET | `/api/conversations?limit=20&cursor=...` | | 200 `{"items":[conversation...],"nextCursor":"..."\|null}` newest activity first |
 | GET | `/api/conversations/{id}` | | 200 conversation |
 | PATCH | `/api/conversations/{id}` | `{"title":"..."}` (required) | 200 conversation |
-| DELETE | `/api/conversations/{id}` | | 204 (soft delete; it and its messages disappear from every call) |
+| DELETE | `/api/conversations/{id}` | | 204 (soft delete; it and its messages disappear from every call at once, and are erased after 30 days) |
 | GET | `/api/conversations/{id}/messages?limit=20&cursor=...` | | 200 `{"items":[message...],"nextCursor":...}` oldest first |
 
 Conversation: `{"id","title","createdAt","updatedAt"}`. Message:
@@ -70,4 +70,5 @@ The chat contract's own codes (`AI_*`, `INVALID_MESSAGE` for `/api/chat`) are un
 
 ## 5. Not provided (out of scope or later)
 
-Sharing, admin read-all, restore of deleted conversations, physical purge, idempotency keys / retries, search, title generation.
+Sharing, admin read-all, restore of deleted conversations, idempotency keys / retries, search, title generation.
+Erasure (30 days after delete, 90 days after an account is closed) is an operator job, not an API (design section 5).
