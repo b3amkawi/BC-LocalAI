@@ -268,6 +268,20 @@ public sealed class AdminScriptTests
     }
 
     [Fact]
+    public void DbConfig_RefusesAFileWithNoAccessList_WhichEveryoneCanRead()
+    {
+        if (!OperatingSystem.IsWindows()) return; // Windows-only concept (NULL DACL); see DbConfig_RefusesAFileOthersCanRead.
+        using var file = PrivateFile.Create("bc_admin_writer", "127.0.0.1", database: "bc");
+        // A NULL DACL has no rules at all, so a check that only looks for foreign Allow rules finds nothing to refuse.
+        var security = new FileSecurity();
+        security.SetSecurityDescriptorSddlForm("D:NO_ACCESS_CONTROL", AccessControlSections.Access);
+        new FileInfo(file.Path).SetAccessControl(security);
+
+        var error = Assert.Throws<AdminConfigException>(() => DbConfig.Load(file.Path, allowLocalDevelopmentDatabase: true));
+        Assert.Contains("readable by other accounts", error.Message);
+    }
+
+    [Fact]
     public void DbConfig_RefusesRelativeOrMissingPaths_AndMissingFields()
     {
         Assert.Throws<AdminConfigException>(() => DbConfig.Load("admin-writer.cnf"));
@@ -476,6 +490,47 @@ public sealed class AdminScriptTests
         Assert.Equal(ExitCodes.OutcomeUnknown, await run.Cli.RunAsync(["disable", "--db-config", file.Path, "--local-dev-database", "--actor", "a", "--user", "alice"]));
         Assert.Contains("may or may not be saved", run.Error);
         Assert.DoesNotContain("Nothing changed", run.Error);
+    }
+
+    [Theory]
+    [InlineData("io")]
+    [InlineData("timeout")]
+    [InlineData("invalid-operation")]
+    [InlineData("canceled")]
+    public async Task CommitFailure_InTheRealStore_BecomesOutcomeUnknown(string failure)
+    {
+        // The real wrapper MySqlAdminAccountStore uses around COMMIT (round-two review S3): not the fake store.
+        Exception error = failure switch
+        {
+            "io" => new IOException("connection reset"),
+            "timeout" => new TimeoutException(),
+            "invalid-operation" => new InvalidOperationException("connection closed"),
+            _ => new OperationCanceledException()
+        };
+
+        await Assert.ThrowsAsync<AdminOutcomeUnknownException>(() => MySqlAdminAccountStore.CommitOrOutcomeUnknownAsync(() => throw error));
+    }
+
+    [Fact]
+    public async Task CommitSuccess_IsReturnedUnchanged_AndOtherBugsAreNotHidden()
+    {
+        var committed = false;
+        await MySqlAdminAccountStore.CommitOrOutcomeUnknownAsync(() => { committed = true; return Task.CompletedTask; });
+        Assert.True(committed);
+        // A programming error is not a lost connection: it must surface as itself.
+        await Assert.ThrowsAsync<NullReferenceException>(() => MySqlAdminAccountStore.CommitOrOutcomeUnknownAsync(() => throw new NullReferenceException()));
+    }
+
+    [Theory]
+    [InlineData("bc_auth_reader")]
+    [InlineData("bc_history_rw")]
+    [InlineData("root")]
+    public async Task PrintGrants_RefusesToGrantAReservedAccount(string user)
+    {
+        var run = Run.For(null);
+
+        Assert.Equal(ExitCodes.Usage, await run.Cli.RunAsync(["print-grants", "--writer-host", "10.0.0.5", "--writer-user", user]));
+        Assert.Empty(run.Output);
     }
 
     [Fact]

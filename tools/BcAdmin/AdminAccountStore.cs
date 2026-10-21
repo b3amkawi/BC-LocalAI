@@ -124,9 +124,13 @@ internal sealed class MySqlAdminAccountStore(string connectionString) : IAdminAc
         throw new AdminConfigException("The database did not write an audit record (SEC-003 triggers missing). Nothing changed.");
     }
 
-    private static async Task CommitAsync(MySqlTransaction transaction, CancellationToken cancellationToken)
+    private static Task CommitAsync(MySqlTransaction transaction, CancellationToken cancellationToken) =>
+        CommitOrOutcomeUnknownAsync(() => transaction.CommitAsync(cancellationToken));
+
+    /// <summary>Runs the COMMIT; any failure of it means the outcome is unknown, never "nothing changed".</summary>
+    internal static async Task CommitOrOutcomeUnknownAsync(Func<Task> commit)
     {
-        try { await transaction.CommitAsync(cancellationToken); }
+        try { await commit(); }
         catch (Exception exception) when (exception is MySqlException or IOException or TimeoutException or InvalidOperationException or OperationCanceledException)
         {
             // The server may have committed before the connection failed: never report "nothing changed" here.

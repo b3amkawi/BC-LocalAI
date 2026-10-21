@@ -61,6 +61,9 @@ public sealed class AdminScriptLiveTests : IAsyncLifetime
 
         var disable = await Cli(["disable", "--user", username]);
         Assert.Equal(ExitCodes.Ok, disable.Code);
+        var disableAudit = long.Parse(disable.Output.Trim().Split("audit=")[1]);
+        Assert.Equal(1L, await settings.Scalar("SELECT COUNT(*) FROM admin_audit_log WHERE id = @a AND target_user_id = @id AND action = 'disable'",
+            ("@a", disableAudit), ("@id", id)));
         Assert.Equal(HttpStatusCode.Unauthorized, (await client.GetAsync("/api/auth/me")).StatusCode);
         var disabled = await settings.Row(id);
         Assert.False(disabled.Active);
@@ -356,6 +359,10 @@ public sealed class AdminScriptLiveTests : IAsyncLifetime
         var id = Convert.ToString(await settings.ScalarObject("SELECT id FROM users WHERE username = @u", ("@u", username)))!;
         created.Add(id);
         Assert.StartsWith($"OK create user={id} role={role} active=yes audit=", result.Output.Trim());
+        // The printed audit id is the real row the trigger wrote for this account.
+        var auditId = long.Parse(result.Output.Trim().Split("audit=")[1]);
+        Assert.Equal(1L, await settings.Scalar("SELECT COUNT(*) FROM admin_audit_log WHERE id = @a AND target_user_id = @id AND action = 'create'",
+            ("@a", auditId), ("@id", id)));
         return (username, password);
     }
 

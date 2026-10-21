@@ -127,6 +127,7 @@ internal sealed class AdminCli(TextReader stdin, TextWriter stdout, TextWriter s
     {
         if (!options.TryGetValue("--writer-host", out var host)) return await Fail(ExitCodes.Usage, "--writer-host is required.");
         var user = options.GetValueOrDefault("--writer-user", AdminWriterGrants.DefaultUser);
+        if (DbConfig.IsReserved(user)) return await Fail(ExitCodes.Usage, "That account belongs to another component and must not get the admin writer grants.");
         string[] grants;
         try { grants = AdminWriterGrants.Create(user, host); }
         catch (ArgumentException exception) { return await Fail(ExitCodes.Usage, exception.Message); }
@@ -183,7 +184,8 @@ internal sealed class AdminCli(TextReader stdin, TextWriter stdout, TextWriter s
     private static string DatabaseMessage(MySqlException exception) => exception.Number switch
     {
         1062 => "That username already exists. Nothing changed.",
-        1142 or 1143 or 1227 => $"The database account lacks a required permission (MySQL {exception.Number}). Check the SEC-003 grants. Nothing changed.",
+        1142 or 1143 or 1227 => $"A database account lacks a required permission (MySQL {exception.Number}): the admin writer's SEC-003 grants, or the audit triggers' DEFINER (INSERT on admin_audit_log, SELECT and TRIGGER on users). Nothing changed.",
+        1449 => "The audit triggers' DEFINER account no longer exists (MySQL 1449): every change to users fails, logins included. A DBA must recreate the triggers (guide section 3). Nothing changed.",
         1146 => "Table missing: run database/sec003/admin-audit.sql first. Nothing changed.",
         1045 => "The database refused the credentials in the config file.",
         _ => $"Database error (MySQL {exception.Number}). Nothing changed."

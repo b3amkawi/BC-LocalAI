@@ -117,7 +117,13 @@ FROM admin_audit_log WHERE target_user_id = '<id>' ORDER BY id;
 2. สร้างตาราง audit และ trigger ด้วย `mysql` client (ไฟล์ใช้ `DELIMITER`):
    `mysql --database=<ฐาน> -e "source database/sec003/admin-audit.sql"`
    - เพิ่ม 1 ตาราง (InnoDB, utf8mb4) และ 2 trigger ไม่แก้และไม่ลบข้อมูลเดิม รันซ้ำได้ (`IF NOT EXISTS`)
-   - บัญชีที่รันจะเป็น `DEFINER` ของ trigger และต้องมีสิทธิ์ INSERT บน `admin_audit_log` ตลอด (แนะนำบัญชีเฉพาะที่ lock ไว้)
+   - บัญชีที่รันจะเป็น `DEFINER` ของ trigger และต้องคงสิทธิ์ต่อไปนี้ไว้ตลอดที่ trigger ยังอยู่: **INSERT บน `admin_audit_log`,
+     SELECT และ TRIGGER บน `users`** ใช้บัญชีเฉพาะที่ lock ไว้ (เช่น `bc_audit_definer` ... `ACCOUNT LOCK`) ไม่ใช่บัญชีส่วนตัวของ DBA
+   - ⚠️ ถ้าบัญชี definer ถูกลบหรือเสียสิทธิ์ **การแก้ `users` ทุกครั้งจะล้ม** (error 1449 / 1142) รวมถึงการบันทึก login ผิดของ BE-005
+     ทำให้ login ทุกคนได้ 503 แก้โดยให้ DBA สร้าง trigger ใหม่ด้วยบัญชี definer ที่ถูกต้อง
+   - ตรวจหลังติดตั้ง (ต้องได้ 2 แถว และ `DEFINER` เป็นบัญชีเฉพาะนั้น):
+     `SELECT trigger_name, definer FROM information_schema.triggers WHERE trigger_schema = DATABASE() AND event_object_table = 'users';`
+   - `IF NOT EXISTS` ไม่แทน trigger ที่มีอยู่แล้ว ถ้าต้องติดตั้ง body ใหม่ DBA ต้อง drop แล้วสร้างใหม่เองโดยตั้งใจ
    - ไฟล์ตั้ง `sql_mode` แบบ strict ก่อนสร้าง trigger (trigger ใช้ mode ตอนสร้าง) ถ้าเปิด binary log อาจต้องตั้ง `log_bin_trust_function_creators`
      ตามนโยบาย DBA
 3. สร้างบัญชี writer ด้วย secret ที่สุ่มใหม่ แล้วรัน `database/sec003/admin-writer-grants.sql` (แทน `<admin-host>` ด้วย IP คงที่หรือ netmask
@@ -158,7 +164,7 @@ ssl-ca=C:\BcAdmin\mysql-ca.pem
 
 ## 5. สิ่งที่สคริปต์ไม่ทำ และความเสี่ยงที่เหลือ
 
-- ไม่อ่านแชตหรือข้อมูลอื่นของผู้ใช้ บัญชี writer ไม่มีสิทธิ์ตารางอื่นนอกจาก `users` (ทดสอบแล้วด้วยตารางจำลองแชต)
+- ไม่อ่านแชตหรือข้อมูลอื่นของผู้ใช้ บัญชี writer ไม่มีสิทธิ์ตารางอื่นนอกจาก `users` (ทดสอบแล้วกับตาราง `Conversations` / `Messages` จริงของ BE-007)
 - ใครได้ไฟล์ credential ของ writer ไป**แก้บัญชีได้** (สร้าง Admin, reset รหัส) แต่**ทุกการแก้มี audit** พร้อม `db_user` จริง
   `actor`/`os_user` ปลอมได้ ส่วน DBA หรือบัญชี definer ยังแก้หรือลบ audit ได้ การเก็บรักษาและส่งออก audit อยู่ใน OPS-002
 - ไม่ลบบัญชี (ใช้ `disable`) และไม่ปลด lockout (หมดเองใน 15 นาที ตาม BE-005)
@@ -179,4 +185,4 @@ pwsh -File scripts/security/local-mysql.ps1 -Action Stop -InstanceName sec003-my
 
 Fixture นี้มี reader, attempt writer ของ BE-005, ตารางและบัญชีของ BE-007 (chat history), admin writer, ตาราง audit พร้อม trigger (จาก `admin-audit.sql` ไฟล์เดียวกับที่ DBA ใช้)
 และบัญชีสมมติ 3 บัญชีของ SEC-001 credential อยู่ใน `.local/sec003-mysql/private/` (ACL เฉพาะผู้ใช้ปัจจุบัน, ไม่อยู่ใน git)
-fixture เดิม (`sec001-mysql-v2`, `be005-mysql`) ไม่เปลี่ยน
+fixture เดิม (`sec001-mysql-v2`, `be005-mysql`, `be007-mysql`) ไม่เปลี่ยน

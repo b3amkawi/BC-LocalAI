@@ -1,7 +1,10 @@
 -- SEC-003 audit for account administration. Additive only: one table and two triggers; changes and deletes no data.
 -- Run with the mysql client in the BC-LocalAI database after approval: mysql --database=<name> -e "source admin-audit.sql"
--- Needs MySQL 8.0.29+ (CREATE TRIGGER IF NOT EXISTS). The account running it becomes the triggers' DEFINER and must keep
--- INSERT on admin_audit_log; the admin writer itself gets no privilege on this table.
+-- Needs MySQL 8.0.29+ (CREATE TRIGGER IF NOT EXISTS). The account running it becomes the triggers' DEFINER and must keep,
+-- for as long as the triggers exist: INSERT on admin_audit_log, SELECT and TRIGGER on users. If that account is dropped or
+-- loses them, EVERY update of users fails (error 1449/1142) - BE-005's failed-login bookkeeping included, so logins fail too.
+-- Use a dedicated, locked definer account (guide section 3). The admin writer itself gets no privilege on this table.
+-- IF NOT EXISTS keeps an existing trigger unchanged: to deploy a changed body, a DBA drops and recreates it deliberately.
 -- No column may hold a password, password hash or security stamp.
 --
 -- Why triggers: the database writes the audit row for every change to an account's password, status, role or stamp,
@@ -40,8 +43,9 @@ CREATE TRIGGER IF NOT EXISTS trg_users_admin_audit_update AFTER UPDATE ON users 
 BEGIN
     -- One row per kind of change, decided from the data itself (OLD vs NEW), never from what the client claims.
     -- Failed-attempt and lockout updates (BE-005) change none of these columns and are not recorded.
-    DECLARE who_actor VARCHAR(128) DEFAULT COALESCE(@bc_admin_actor, '(direct SQL)');
-    DECLARE who_os VARCHAR(256) DEFAULT COALESCE(@bc_admin_os_user, '(unknown)');
+    -- utf8mb4 explicitly: local variables otherwise take the database default charset and could refuse Thai names.
+    DECLARE who_actor VARCHAR(128) CHARACTER SET utf8mb4 DEFAULT COALESCE(@bc_admin_actor, '(direct SQL)');
+    DECLARE who_os VARCHAR(256) CHARACTER SET utf8mb4 DEFAULT COALESCE(@bc_admin_os_user, '(unknown)');
     IF NOT (NEW.password_hash <=> OLD.password_hash) THEN
         INSERT INTO admin_audit_log (actor, os_user, db_user, action, target_user_id, detail)
         VALUES (who_actor, who_os, USER(), 'reset_password', NEW.id, NULL);

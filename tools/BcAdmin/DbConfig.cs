@@ -30,7 +30,7 @@ internal static class DbConfig
             ? value : throw new AdminConfigException($"Database config file has no '{name}'.");
 
         var user = Field("user");
-        if (ReservedUsers.Contains(user, StringComparer.OrdinalIgnoreCase))
+        if (IsReserved(user))
             throw new AdminConfigException("This database account may not administer accounts. Use the separate admin writer account.");
         var host = Field("host");
         var builder = new MySqlConnectionStringBuilder
@@ -57,6 +57,8 @@ internal static class DbConfig
         else throw new AdminConfigException("A remote database needs 'ssl-ca' in the config file (certificate verification).");
         return builder.ConnectionString;
     }
+
+    internal static bool IsReserved(string user) => ReservedUsers.Contains(user, StringComparer.OrdinalIgnoreCase);
 
     internal static Dictionary<string, string> Parse(IEnumerable<string> lines)
     {

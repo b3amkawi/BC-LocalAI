@@ -13,11 +13,11 @@ identity/password policy, MySQL DBA) — section 2. Sections 1, 3, 5 and 6 descr
 |---|---|---|
 | create, disable, enable, reset password, set role (User/Admin), revoke all sessions | `tools/BcAdmin`, `scripts/security/bc-admin.ps1` | live tests 1–4, wrapper smoke run (section 4) |
 | SEC-001 schema reused (`users`, IdentityV3 hash, `is_active`, `role`, `security_stamp`) | `AccountPolicy.HashPassword`, `MySqlAdminAccountStore` | hash checked by the app's `IdentityPasswordVerifier`; created accounts sign in through the real app |
-| separate writer `bc_admin_writer`, column-level least privilege, never the reader | `AdminWriterGrants`, `database/sec003/admin-writer-grants.sql`, `DbConfig` | `SHOW GRANTS` live test; 15 denied statements; reader / attempt writer / fixture admin refused |
+| separate writer `bc_admin_writer`, column-level least privilege, never the reader | `AdminWriterGrants`, `database/sec003/admin-writer-grants.sql`, `DbConfig` | `SHOW GRANTS` live test; 18 denied statements; reader / attempt writer / BE-007 history and purge / fixture admin refused |
 | credentials from a protected file or prompt, never repo/log/argument | `DbConfig.EnsurePrivate`, `AdminCli` | unit tests (ACL, `--password*` refused, `--password-stdin` refused at a console, no secret in output) |
 | audit for every action: who, what, when, target id; no password/hash/stamp | `database/sec003/admin-audit.sql` (table + 2 triggers) | live: every column checked against password, hash, stamp; changes made **without** the script are audited too |
 | password reset and disable always rotate `security_stamp` | `ChangeAsync` (every change rotates) | live tests + mutations |
-| Admin can never read other users' chats | grants on `users` only, nothing on any other table | live: writer refused on a stand-in chat table |
+| Admin can never read other users' chats | grants on `users` only, nothing on any other table | live: writer refused on the real BE-007 `Conversations` / `Messages` tables and a stand-in table |
 | tests: unit + live against isolated fixture, data restored in `finally` | `BC-LocalAI.Tests/Admin`, `tests/SEC003.AdminTests` | section 3 |
 
 Design decisions (current):
@@ -64,23 +64,49 @@ sides, self-service password change + must-change flag, cap of 100 consecutive f
 at deploy. DBA open questions (production `users` table exists? version ≥ 8.0.29, backup/PITR, per-admin accounts, audit retention
 and reader) remain for the owner/DBA.
 
-## 3. Tests actually run (after the review fixes and merging `main` d121f50)
+## 3. Tests actually run (final round: `main` d636b4f merged, second security review fixed)
 
-`main` gained BE-007 chat history (PRs #36/#39) while this PR was open. It was merged in (no rebase); the `sec003-mysql` fixture now
-also holds the real BE-007 tables (`Conversations`, `Messages`) and accounts (`bc_history_rw`, `bc_history_purge`), so the
-"cannot read chats" checks run against the real chat tables, and both BE-007 accounts are refused by the script.
+`main` gained BE-007 chat history (PRs #36/#39) and AI-006 benchmark tools (d636b4f) while this PR was open. Both were merged in (no
+rebase, no conflicts in the second merge). The `sec003-mysql` fixture holds the real BE-007 tables (`Conversations`, `Messages`) and
+accounts (`bc_history_rw`, `bc_history_purge`), so the "cannot read chats" checks run against the real chat tables, and both BE-007
+accounts are refused by the script. Results below are from the final code (fixture rebuilt after the trigger change).
 
 | Suite | Result |
 |---|---|
-| `dotnet test BC-LocalAI.slnx` (unit + integration, 78 SEC-003 unit tests) | **913** passed, 0 failed, 0 skipped |
+| `dotnet test BC-LocalAI.slnx` Development (87 SEC-003 unit tests) | **922** passed, 0 failed, 0 skipped |
+| Same, `ASPNETCORE_ENVIRONMENT=Production` | **922** passed |
+| Same, hostile environment (`Authentication__Enabled=true`, idle 999, absolute 1, `MaxSessions=1`, `ChatHistory__Enabled=true`, budget 1, checkpoint 60, `MaxQuestionTokens=5`) | **922** passed |
 | `node --test "tests/ui/*.test.mjs"` | 61 passed |
-| `python -m unittest discover -s tests` | 143 passed |
-| `check_test_counts.py` (baseline: main 835 + 78 = 913) | all gates passed |
+| `python -m unittest discover -s tests` (includes CI script tests) | **158** passed |
+| `check_test_counts.py` (baseline dotnet 922, node 23, python 158 from main) | all gates passed |
 | `scan_secrets.py` (files staged) / `check_doc_links.py` | clean / OK |
-| Fixture `sec003-mysql` rebuilt, Initialize + Verify (127.0.0.1:3318) | **16/16** checks (11 SEC-001 + audit table, 2 triggers, writer grants applied, writer cannot read hash, writer cannot read audit) |
-| Live `tests/SEC003.AdminTests` against `sec003-mysql` (with BE-007 tables) | **36** passed |
+| Fixture `sec003-mysql` rebuilt, Initialize + Verify (127.0.0.1:3318) | **16/16** checks; triggers' `DEFINER` = fixture admin, 2 triggers |
+| Live `tests/SEC003.AdminTests` against `sec003-mysql` (with BE-007 tables) | **36** passed; fixture back to 3 accounts / 0 audit rows |
 | Regression: `be005-mysql` (3319) + live `tests/BE005.MySqlTests` | **16** passed |
-| Regression: fresh `be007-mysql` (3320, 11/11 checks) + live `tests/BE007.MySqlTests` | **53** passed, 1 skipped (real-model check, skipped by default as in BE-007's report) |
+| Regression: `be007-mysql` (3320) + live `tests/BE007.MySqlTests` | **53** passed, 1 skipped (real-model check, skipped by default as in BE-007's report) |
+
+Second security review (round 2, specialist agent): 0 blocking, 3 should-fix, 9 nice-to-have; all earlier findings confirmed fixed.
+Fixed in this round:
+
+| Finding | Fix | Proof |
+|---|---|---|
+| S1 results not from the head to be merged | everything above re-run on the final code; baseline 922 | this table; CI on the pushed head |
+| S2 trigger DEFINER needs INSERT on audit **and** SELECT + TRIGGER on `users`; a dropped definer breaks every update of `users`, logins included | `admin-audit.sql` header and guide §3: required privileges, dedicated locked definer, outage warning, `information_schema.triggers` check; script maps 1449 to a definer message and 1142/1143 to "writer or definer" | doc review; risk row 12 |
+| S3 no test that the real store turns a COMMIT failure into "outcome unknown" | `MySqlAdminAccountStore.CommitOrOutcomeUnknownAsync` helper | unit `CommitFailure_InTheRealStore_BecomesOutcomeUnknown` (IO, timeout, invalid operation, canceled) and `CommitSuccess_…` (other bugs not hidden); mutation "wrapper removed" fails 4 tests |
+| NTH trigger locals took the database charset | `CHARACTER SET utf8mb4` on both locals | live suite (Thai actor) after fixture rebuild |
+| NTH `print-grants` accepted reserved accounts | refused | unit `PrintGrants_RefusesToGrantAReservedAccount` |
+| NTH printed `audit=` id never checked against the real row | live `Create` and `disable` assert the row with that id, target and action | live suite |
+| NTH `IF NOT EXISTS` keeps an older trigger body | documented in the SQL file and guide | doc review |
+| NTH docs stale after the BE-007 merge | scope table and guide updated | doc links OK |
+| (own check) credential file with a NULL DACL | already refused (.NET reports it as an Everyone rule) | unit `DbConfig_RefusesAFileWithNoAccessList_…`; mutation fails it |
+
+Not fixed, accepted and recorded: no DELETE trigger (the writer has no DELETE; a DBA deletion is outside the script), `AllowUserVariables`
+turns a misspelt parameter into NULL (all SQL is fixed and covered by live tests), `--local-dev-database` through an SSH tunnel skips
+certificate checks (flag documented as loopback development only), Unicode format characters in `--actor`, symbolic-link credential
+files (this machine cannot create symlinks without privilege, so the check could not be tested), wrapper builds from source.
+
+Process note: one run in this round failed 4 tests because a mutation check restored the source with an older timestamp than the built
+DLL, so MSBuild skipped the rebuild; after touching the sources and a non-incremental build all suites passed (numbers above).
 
 Live tests (`AdminScriptLiveTests`), real admin writer + real app login:
 
@@ -165,5 +191,6 @@ live `Be007PurgeTests`, 53 passed in section 3); no SEC-003 test exercises the p
 | 9 | Interactive hidden prompt (`ConsolePasswordSource`) is not covered by automated tests | manual check recommended |
 | 10 | Triggers with binary logging on may need `log_bin_trust_function_creators` or SUPER for the definer | DBA decision (guide §3) |
 | 11 | `disable` starts BE-007's 90-day erasure of the account's chats; later admin changes postpone it (section 5) | warning in the admin guide; data owner informed before disabling |
+| 12 | The audit triggers' DEFINER account is dropped or loses INSERT on the audit / SELECT + TRIGGER on `users` → every update of `users` fails, logins included | dedicated locked definer; install check on `information_schema.triggers`; script names the definer on 1449 |
 
 Not done (needs the owner's word): merge.
