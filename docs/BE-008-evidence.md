@@ -7,8 +7,8 @@
 | คำสั่ง | ผล |
 |---|---|
 | `dotnet build BC-LocalAI.slnx` | สำเร็จ 0 warning |
-| `dotnet test BC-LocalAI.slnx` (ชุดเต็ม) | **1185 ผ่าน / 0 ล้ม / 0 ข้าม** (1137 เดิม + 48 ใหม่) |
-| `ChatAdmission*` ×3 รอบติดกัน | 48/48 ผ่านทุกรอบ (ไม่ flaky) |
+| `dotnet test BC-LocalAI.slnx` (ชุดเต็ม) | **1189 ผ่าน / 0 ล้ม / 0 ข้าม** (1137 เดิม + 52 ใหม่) และ CI gates ครบ: node 177, python 183 ผ่าน |
+| `ChatAdmission*` ×8 รอบติดกัน | 52/52 ผ่านทุกรอบ (ไม่ flaky) |
 | `scan_secrets.py`, `check_doc_links.py`, `tests.test_ci_scripts` | สะอาด / OK / OK |
 
 ระหว่างทำพบว่า `Qa002StreamTests.OneUserFlooding_*` ล้มเมื่อเปิดเพดานต่อผู้ใช้ (สอดคล้องที่ BE-008 แก้ QA2-D06); แก้โดยคง baseline ของ case นั้นด้วย config (ดู checklist ข้อ 3) แล้ว Qa002 ทั้ง 187 ตัวผ่าน
@@ -27,6 +27,7 @@
 | ไม่ล็อกอิน | 401 ก่อนคิว (admitted=0, rejected=0, โมเดล 0 ครั้ง) | ผ่าน |
 | ปลอม `X-User-Id`/`userId` | นับเป็นผู้ใช้ที่ยืนยันแล้ว → 429; อีกผู้ใช้ไม่ถูกกระทบ | ผ่าน |
 | auth ปิด | ใช้โควตาร่วมเดียว | ผ่าน |
+| ร่วมกับ BE-007 (`ChatAdmissionHistoryTests`) | ปฏิเสธตอน admission ⇒ ไม่บันทึกคำถาม; รอคิวเกินเวลา ⇒ turn เป็น `failed` ไม่ค้าง pending/streaming และคำถามถัดไปทำงานได้ | ผ่านทั้ง chat/stream |
 
 ## 2. Live กับ Ollama จริง (เครื่องพัฒนา RTX 4060 Laptop, `qwen3:4b`, คำถามสังเคราะห์สั้น ๆ, auth ปิด)
 
