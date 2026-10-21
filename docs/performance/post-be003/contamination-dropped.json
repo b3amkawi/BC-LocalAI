@@ -1,0 +1,41 @@
+{
+  "dropped": [
+    {
+      "run_id": "20261020T233042-ollama",
+      "slice": "long-c1-005-ollama.json",
+      "reason": "partner of 20261020T233246-backend",
+      "rows": 41
+    },
+    {
+      "run_id": "20261020T233246-backend",
+      "slice": "long-c1-005-backend.json",
+      "reason": "request of 525653 ms (scenario median 2407 ms): the machine paused after the display was turned off",
+      "rows": 41
+    },
+    {
+      "run_id": "20261020T234850-backend",
+      "slice": "long-c2-002-backend.json",
+      "reason": "partner of 20261020T235123-ollama",
+      "rows": 41
+    },
+    {
+      "run_id": "20261020T235123-ollama",
+      "slice": "long-c2-002-ollama.json",
+      "reason": "requests of 13487525 and 25307226 ms (scenario median 4664 ms): the machine slept for about 7 hours",
+      "rows": 41
+    },
+    {
+      "run_id": "20261021T072643-ollama",
+      "slice": "long-c5-003-ollama.json",
+      "reason": "partner of 20261021T073004-backend",
+      "rows": 41
+    },
+    {
+      "run_id": "20261021T073004-backend",
+      "slice": "long-c5-003-backend.json",
+      "reason": "started after 20261021T072750 (machine on battery)",
+      "rows": 41
+    }
+  ],
+  "rule": "request > 120 s and > 5x the scenario median; or slice started after the --drop-after time"
+}

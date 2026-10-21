@@ -1,0 +1,1988 @@
+{
+  "scenarios": [
+    {
+      "target": "backend",
+      "profile": "long",
+      "concurrency": 1,
+      "post": {
+        "requests": 200,
+        "success": 200,
+        "success_rate": 1.0,
+        "outcomes": {
+          "success": 200
+        },
+        "error_codes": {},
+        "p50_ms": 2369.6,
+        "p95_ms": 6237.0,
+        "p99_ms": 6266.8,
+        "max_ms": 6277.0,
+        "mean_ms": 2967.2,
+        "p99_reliable": true,
+        "wall_seconds": 593.4,
+        "slices": 5,
+        "throughput_rps": 0.337,
+        "gpu_percent_avg": 92.8,
+        "gpu_percent_max": 96.0,
+        "vram_used_mb_max": 3758.0,
+        "ram_available_mb_min": 4391.0,
+        "cpu_percent_avg": 24.6,
+        "cpu_percent_max": 74.0,
+        "ollama_working_set_mb_max": 1479.0
+      },
+      "baseline": {
+        "requests": 125,
+        "success": 100,
+        "success_rate": 0.8,
+        "outcomes": {
+          "success": 100,
+          "server_error": 25
+        },
+        "error_codes": {
+          "AI_INVALID_RESPONSE": 25
+        },
+        "p50_ms": 2270.0,
+        "p95_ms": 3233.1,
+        "p99_ms": 3248.1,
+        "max_ms": 3261.1,
+        "mean_ms": 2397.3,
+        "p99_reliable": true,
+        "throughput_rps": 0.29
+      }
+    },
+    {
+      "target": "ollama",
+      "profile": "long",
+      "concurrency": 1,
+      "post": {
+        "requests": 200,
+        "success": 200,
+        "success_rate": 1.0,
+        "outcomes": {
+          "success": 200
+        },
+        "error_codes": {},
+        "p50_ms": 2366.8,
+        "p95_ms": 6238.1,
+        "p99_ms": 6263.9,
+        "max_ms": 6271.2,
+        "mean_ms": 2961.7,
+        "p99_reliable": true,
+        "wall_seconds": 592.3,
+        "slices": 5,
+        "throughput_rps": 0.338,
+        "gpu_percent_avg": 92.8,
+        "gpu_percent_max": 96.0,
+        "vram_used_mb_max": 3727.0,
+        "ram_available_mb_min": 4484.0,
+        "cpu_percent_avg": 15.6,
+        "cpu_percent_max": 54.0,
+        "ollama_working_set_mb_max": 1483.0
+      },
+      "baseline": {
+        "requests": 125,
+        "success": 100,
+        "success_rate": 0.8,
+        "outcomes": {
+          "success": 100,
+          "truncated": 25
+        },
+        "error_codes": {},
+        "p50_ms": 2250.6,
+        "p95_ms": 3219.3,
+        "p99_ms": 3288.2,
+        "max_ms": 3304.0,
+        "mean_ms": 2376.6,
+        "p99_reliable": true,
+        "throughput_rps": 0.292
+      }
+    },
+    {
+      "target": "backend",
+      "profile": "long",
+      "concurrency": 2,
+      "post": {
+        "requests": 200,
+        "success": 200,
+        "success_rate": 1.0,
+        "outcomes": {
+          "success": 200
+        },
+        "error_codes": {},
+        "p50_ms": 4513.5,
+        "p95_ms": 8596.5,
+        "p99_ms": 10566.0,
+        "max_ms": 10699.9,
+        "mean_ms": 4612.8,
+        "p99_reliable": true,
+        "wall_seconds": 502.4,
+        "slices": 4,
+        "throughput_rps": 0.318,
+        "gpu_percent_avg": 92.7,
+        "gpu_percent_max": 97.0,
+        "vram_used_mb_max": 3732.0,
+        "ram_available_mb_min": 4178.0,
+        "cpu_percent_avg": 18.4,
+        "cpu_percent_max": 43.0,
+        "ollama_working_set_mb_max": 1068.0
+      },
+      "baseline": {
+        "requests": 126,
+        "success": 101,
+        "success_rate": 0.8016,
+        "outcomes": {
+          "success": 101,
+          "server_error": 25
+        },
+        "error_codes": {
+          "AI_INVALID_RESPONSE": 25
+        },
+        "p50_ms": 4197.1,
+        "p95_ms": 6526.3,
+        "p99_ms": 6738.3,
+        "max_ms": 7509.7,
+        "mean_ms": 3834.4,
+        "p99_reliable": true,
+        "throughput_rps": 0.294
+      }
+    },
+    {
+      "target": "ollama",
+      "profile": "long",
+      "concurrency": 2,
+      "post": {
+        "requests": 200,
+        "success": 200,
+        "success_rate": 1.0,
+        "outcomes": {
+          "success": 200
+        },
+        "error_codes": {},
+        "p50_ms": 4515.7,
+        "p95_ms": 8599.6,
+        "p99_ms": 10541.7,
+        "max_ms": 10696.1,
+        "mean_ms": 4645.0,
+        "p99_reliable": true,
+        "wall_seconds": 502.5,
+        "slices": 4,
+        "throughput_rps": 0.318,
+        "gpu_percent_avg": 92.9,
+        "gpu_percent_max": 98.0,
+        "vram_used_mb_max": 3737.0,
+        "ram_available_mb_min": 3504.0,
+        "cpu_percent_avg": 21.1,
+        "cpu_percent_max": 63.0,
+        "ollama_working_set_mb_max": 1069.0
+      },
+      "baseline": {
+        "requests": 126,
+        "success": 101,
+        "success_rate": 0.8016,
+        "outcomes": {
+          "success": 101,
+          "truncated": 25
+        },
+        "error_codes": {},
+        "p50_ms": 3257.0,
+        "p95_ms": 6425.6,
+        "p99_ms": 6743.4,
+        "max_ms": 7486.9,
+        "mean_ms": 3735.9,
+        "p99_reliable": true,
+        "throughput_rps": 0.295
+      }
+    },
+    {
+      "target": "backend",
+      "profile": "long",
+      "concurrency": 5,
+      "post": {
+        "requests": 200,
+        "success": 200,
+        "success_rate": 1.0,
+        "outcomes": {
+          "success": 200
+        },
+        "error_codes": {},
+        "p50_ms": 9109.6,
+        "p95_ms": 15471.1,
+        "p99_ms": 17952.8,
+        "max_ms": 18349.7,
+        "mean_ms": 9207.4,
+        "p99_reliable": true,
+        "wall_seconds": 614.3,
+        "slices": 5,
+        "throughput_rps": 0.326,
+        "gpu_percent_avg": 92.0,
+        "gpu_percent_max": 97.0,
+        "vram_used_mb_max": 3732.0,
+        "ram_available_mb_min": 485.0,
+        "cpu_percent_avg": 20.0,
+        "cpu_percent_max": 71.0,
+        "ollama_working_set_mb_max": 1420.0
+      },
+      "baseline": {
+        "requests": 125,
+        "success": 100,
+        "success_rate": 0.8,
+        "outcomes": {
+          "server_error": 25,
+          "success": 100
+        },
+        "error_codes": {
+          "AI_INVALID_RESPONSE": 25
+        },
+        "p50_ms": 8082.0,
+        "p95_ms": 13580.9,
+        "p99_ms": 14974.1,
+        "max_ms": 15296.1,
+        "mean_ms": 7939.4,
+        "p99_reliable": true,
+        "throughput_rps": 0.291
+      }
+    },
+    {
+      "target": "ollama",
+      "profile": "long",
+      "concurrency": 5,
+      "post": {
+        "requests": 200,
+        "success": 200,
+        "success_rate": 1.0,
+        "outcomes": {
+          "success": 200
+        },
+        "error_codes": {},
+        "p50_ms": 9507.8,
+        "p95_ms": 16125.5,
+        "p99_ms": 18184.3,
+        "max_ms": 18703.2,
+        "mean_ms": 9470.6,
+        "p99_reliable": true,
+        "wall_seconds": 626.4,
+        "slices": 5,
+        "throughput_rps": 0.319,
+        "gpu_percent_avg": 91.8,
+        "gpu_percent_max": 99.0,
+        "vram_used_mb_max": 4014.0,
+        "ram_available_mb_min": 494.0,
+        "cpu_percent_avg": 24.1,
+        "cpu_percent_max": 100.0,
+        "ollama_working_set_mb_max": 1421.0
+      },
+      "baseline": {
+        "requests": 125,
+        "success": 100,
+        "success_rate": 0.8,
+        "outcomes": {
+          "truncated": 25,
+          "success": 100
+        },
+        "error_codes": {},
+        "p50_ms": 8571.2,
+        "p95_ms": 14832.2,
+        "p99_ms": 15023.0,
+        "max_ms": 15189.2,
+        "mean_ms": 8396.1,
+        "p99_reliable": true,
+        "throughput_rps": 0.292
+      }
+    },
+    {
+      "target": "backend",
+      "profile": "long",
+      "concurrency": 10,
+      "post": {
+        "requests": 200,
+        "success": 200,
+        "success_rate": 1.0,
+        "outcomes": {
+          "success": 200
+        },
+        "error_codes": {},
+        "p50_ms": 15842.5,
+        "p95_ms": 30004.4,
+        "p99_ms": 32445.2,
+        "max_ms": 36297.4,
+        "mean_ms": 16219.7,
+        "p99_reliable": true,
+        "wall_seconds": 596.7,
+        "slices": 5,
+        "throughput_rps": 0.335,
+        "gpu_percent_avg": 92.0,
+        "gpu_percent_max": 98.0,
+        "vram_used_mb_max": 3486.0,
+        "ram_available_mb_min": 695.0,
+        "cpu_percent_avg": 18.5,
+        "cpu_percent_max": 72.0,
+        "ollama_working_set_mb_max": 1348.0
+      },
+      "baseline": {
+        "requests": 150,
+        "success": 120,
+        "success_rate": 0.8,
+        "outcomes": {
+          "success": 120,
+          "server_error": 30
+        },
+        "error_codes": {
+          "AI_INVALID_RESPONSE": 30
+        },
+        "p50_ms": 14577.8,
+        "p95_ms": 27676.6,
+        "p99_ms": 28321.1,
+        "max_ms": 28370.3,
+        "mean_ms": 14390.9,
+        "p99_reliable": true,
+        "throughput_rps": 0.291
+      }
+    },
+    {
+      "target": "ollama",
+      "profile": "long",
+      "concurrency": 10,
+      "post": {
+        "requests": 200,
+        "success": 200,
+        "success_rate": 1.0,
+        "outcomes": {
+          "success": 200
+        },
+        "error_codes": {},
+        "p50_ms": 17079.4,
+        "p95_ms": 32074.7,
+        "p99_ms": 36164.3,
+        "max_ms": 37903.6,
+        "mean_ms": 17383.1,
+        "p99_reliable": true,
+        "wall_seconds": 627.5,
+        "slices": 5,
+        "throughput_rps": 0.319,
+        "gpu_percent_avg": 92.4,
+        "gpu_percent_max": 97.0,
+        "vram_used_mb_max": 3475.0,
+        "ram_available_mb_min": 1555.0,
+        "cpu_percent_avg": 18.6,
+        "cpu_percent_max": 100.0,
+        "ollama_working_set_mb_max": 1361.0
+      },
+      "baseline": {
+        "requests": 150,
+        "success": 120,
+        "success_rate": 0.8,
+        "outcomes": {
+          "success": 120,
+          "truncated": 30
+        },
+        "error_codes": {},
+        "p50_ms": 14159.1,
+        "p95_ms": 27299.9,
+        "p99_ms": 28505.6,
+        "max_ms": 28671.6,
+        "mean_ms": 14387.5,
+        "p99_reliable": true,
+        "throughput_rps": 0.291
+      }
+    },
+    {
+      "target": "backend",
+      "profile": "medium",
+      "concurrency": 1,
+      "post": {
+        "requests": 200,
+        "success": 200,
+        "success_rate": 1.0,
+        "outcomes": {
+          "success": 200
+        },
+        "error_codes": {},
+        "p50_ms": 1291.9,
+        "p95_ms": 2772.9,
+        "p99_ms": 2815.6,
+        "max_ms": 2894.6,
+        "mean_ms": 1345.7,
+        "p99_reliable": true,
+        "wall_seconds": 269.1,
+        "slices": 5,
+        "throughput_rps": 0.743,
+        "gpu_percent_avg": 88.9,
+        "gpu_percent_max": 96.0,
+        "vram_used_mb_max": 3566.0,
+        "ram_available_mb_min": 3877.0,
+        "cpu_percent_avg": 22.3,
+        "cpu_percent_max": 50.0,
+        "ollama_working_set_mb_max": 1074.0
+      },
+      "baseline": {
+        "requests": 125,
+        "success": 125,
+        "success_rate": 1.0,
+        "outcomes": {
+          "success": 125
+        },
+        "error_codes": {},
+        "p50_ms": 1308.9,
+        "p95_ms": 2864.7,
+        "p99_ms": 2913.2,
+        "max_ms": 2918.1,
+        "mean_ms": 1350.2,
+        "p99_reliable": true,
+        "throughput_rps": 0.741
+      }
+    },
+    {
+      "target": "ollama",
+      "profile": "medium",
+      "concurrency": 1,
+      "post": {
+        "requests": 200,
+        "success": 200,
+        "success_rate": 1.0,
+        "outcomes": {
+          "success": 200
+        },
+        "error_codes": {},
+        "p50_ms": 1279.1,
+        "p95_ms": 2768.5,
+        "p99_ms": 2817.1,
+        "max_ms": 2834.4,
+        "mean_ms": 1344.3,
+        "p99_reliable": true,
+        "wall_seconds": 268.9,
+        "slices": 5,
+        "throughput_rps": 0.744,
+        "gpu_percent_avg": 89.0,
+        "gpu_percent_max": 97.0,
+        "vram_used_mb_max": 3567.0,
+        "ram_available_mb_min": 3955.0,
+        "cpu_percent_avg": 27.9,
+        "cpu_percent_max": 77.0,
+        "ollama_working_set_mb_max": 1120.0
+      },
+      "baseline": {
+        "requests": 125,
+        "success": 125,
+        "success_rate": 1.0,
+        "outcomes": {
+          "success": 125
+        },
+        "error_codes": {},
+        "p50_ms": 1300.0,
+        "p95_ms": 2743.7,
+        "p99_ms": 2942.9,
+        "max_ms": 2945.0,
+        "mean_ms": 1343.6,
+        "p99_reliable": true,
+        "throughput_rps": 0.744
+      }
+    },
+    {
+      "target": "backend",
+      "profile": "medium",
+      "concurrency": 2,
+      "post": {
+        "requests": 200,
+        "success": 200,
+        "success_rate": 1.0,
+        "outcomes": {
+          "success": 200
+        },
+        "error_codes": {},
+        "p50_ms": 1912.7,
+        "p95_ms": 4111.5,
+        "p99_ms": 4805.6,
+        "max_ms": 5043.9,
+        "mean_ms": 2173.4,
+        "p99_reliable": true,
+        "wall_seconds": 294.0,
+        "slices": 5,
+        "throughput_rps": 0.68,
+        "gpu_percent_avg": 85.7,
+        "gpu_percent_max": 96.0,
+        "vram_used_mb_max": 4095.0,
+        "ram_available_mb_min": 2424.0,
+        "cpu_percent_avg": 21.3,
+        "cpu_percent_max": 73.0,
+        "ollama_working_set_mb_max": 1180.0
+      },
+      "baseline": {
+        "requests": 126,
+        "success": 126,
+        "success_rate": 1.0,
+        "outcomes": {
+          "success": 126
+        },
+        "error_codes": {},
+        "p50_ms": 1946.5,
+        "p95_ms": 4261.9,
+        "p99_ms": 4797.8,
+        "max_ms": 4935.5,
+        "mean_ms": 2220.2,
+        "p99_reliable": true,
+        "throughput_rps": 0.684
+      }
+    },
+    {
+      "target": "ollama",
+      "profile": "medium",
+      "concurrency": 2,
+      "post": {
+        "requests": 240,
+        "success": 240,
+        "success_rate": 1.0,
+        "outcomes": {
+          "success": 240
+        },
+        "error_codes": {},
+        "p50_ms": 1838.7,
+        "p95_ms": 4132.6,
+        "p99_ms": 4661.5,
+        "max_ms": 4948.2,
+        "mean_ms": 2142.3,
+        "p99_reliable": true,
+        "wall_seconds": 289.2,
+        "slices": 5,
+        "throughput_rps": 0.692,
+        "gpu_percent_avg": 86.5,
+        "gpu_percent_max": 96.0,
+        "vram_used_mb_max": 3825.0,
+        "ram_available_mb_min": 3211.0,
+        "cpu_percent_avg": 23.0,
+        "cpu_percent_max": 70.0,
+        "ollama_working_set_mb_max": 1182.0
+      },
+      "baseline": {
+        "requests": 126,
+        "success": 126,
+        "success_rate": 1.0,
+        "outcomes": {
+          "success": 126
+        },
+        "error_codes": {},
+        "p50_ms": 1912.9,
+        "p95_ms": 4315.1,
+        "p99_ms": 4780.4,
+        "max_ms": 4896.3,
+        "mean_ms": 2221.1,
+        "p99_reliable": true,
+        "throughput_rps": 0.681
+      }
+    },
+    {
+      "target": "backend",
+      "profile": "medium",
+      "concurrency": 5,
+      "post": {
+        "requests": 200,
+        "success": 200,
+        "success_rate": 1.0,
+        "outcomes": {
+          "success": 200
+        },
+        "error_codes": {},
+        "p50_ms": 4497.8,
+        "p95_ms": 8182.6,
+        "p99_ms": 9209.5,
+        "max_ms": 9328.3,
+        "mean_ms": 4524.7,
+        "p99_reliable": true,
+        "wall_seconds": 299.5,
+        "slices": 5,
+        "throughput_rps": 0.668,
+        "gpu_percent_avg": 87.2,
+        "gpu_percent_max": 96.0,
+        "vram_used_mb_max": 4192.0,
+        "ram_available_mb_min": 2915.0,
+        "cpu_percent_avg": 21.4,
+        "cpu_percent_max": 68.0,
+        "ollama_working_set_mb_max": 1224.0
+      },
+      "baseline": {
+        "requests": 125,
+        "success": 125,
+        "success_rate": 1.0,
+        "outcomes": {
+          "success": 125
+        },
+        "error_codes": {},
+        "p50_ms": 4281.2,
+        "p95_ms": 8368.5,
+        "p99_ms": 8436.1,
+        "max_ms": 8582.6,
+        "mean_ms": 4437.0,
+        "p99_reliable": true,
+        "throughput_rps": 0.67
+      }
+    },
+    {
+      "target": "ollama",
+      "profile": "medium",
+      "concurrency": 5,
+      "post": {
+        "requests": 200,
+        "success": 200,
+        "success_rate": 1.0,
+        "outcomes": {
+          "success": 200
+        },
+        "error_codes": {},
+        "p50_ms": 4416.1,
+        "p95_ms": 8220.2,
+        "p99_ms": 9075.0,
+        "max_ms": 9225.5,
+        "mean_ms": 4562.5,
+        "p99_reliable": true,
+        "wall_seconds": 305.5,
+        "slices": 5,
+        "throughput_rps": 0.655,
+        "gpu_percent_avg": 84.7,
+        "gpu_percent_max": 96.0,
+        "vram_used_mb_max": 4042.0,
+        "ram_available_mb_min": 2854.0,
+        "cpu_percent_avg": 22.4,
+        "cpu_percent_max": 58.0,
+        "ollama_working_set_mb_max": 1231.0
+      },
+      "baseline": {
+        "requests": 125,
+        "success": 125,
+        "success_rate": 1.0,
+        "outcomes": {
+          "success": 125
+        },
+        "error_codes": {},
+        "p50_ms": 4520.9,
+        "p95_ms": 7996.1,
+        "p99_ms": 8620.2,
+        "max_ms": 8833.7,
+        "mean_ms": 4546.9,
+        "p99_reliable": true,
+        "throughput_rps": 0.673
+      }
+    },
+    {
+      "target": "backend",
+      "profile": "medium",
+      "concurrency": 10,
+      "post": {
+        "requests": 200,
+        "success": 200,
+        "success_rate": 1.0,
+        "outcomes": {
+          "success": 200
+        },
+        "error_codes": {},
+        "p50_ms": 7989.4,
+        "p95_ms": 14193.2,
+        "p99_ms": 15561.5,
+        "max_ms": 15862.5,
+        "mean_ms": 7916.2,
+        "p99_reliable": true,
+        "wall_seconds": 281.9,
+        "slices": 5,
+        "throughput_rps": 0.71,
+        "gpu_percent_avg": 89.3,
+        "gpu_percent_max": 96.0,
+        "vram_used_mb_max": 3950.0,
+        "ram_available_mb_min": 3611.0,
+        "cpu_percent_avg": 16.2,
+        "cpu_percent_max": 73.0,
+        "ollama_working_set_mb_max": 1224.0
+      },
+      "baseline": {
+        "requests": 150,
+        "success": 150,
+        "success_rate": 1.0,
+        "outcomes": {
+          "success": 150
+        },
+        "error_codes": {},
+        "p50_ms": 7865.2,
+        "p95_ms": 14730.5,
+        "p99_ms": 16262.9,
+        "max_ms": 16274.2,
+        "mean_ms": 7896.4,
+        "p99_reliable": true,
+        "throughput_rps": 0.681
+      }
+    },
+    {
+      "target": "ollama",
+      "profile": "medium",
+      "concurrency": 10,
+      "post": {
+        "requests": 200,
+        "success": 200,
+        "success_rate": 1.0,
+        "outcomes": {
+          "success": 200
+        },
+        "error_codes": {},
+        "p50_ms": 8114.4,
+        "p95_ms": 14297.5,
+        "p99_ms": 15666.6,
+        "max_ms": 15850.9,
+        "mean_ms": 8128.3,
+        "p99_reliable": true,
+        "wall_seconds": 284.9,
+        "slices": 5,
+        "throughput_rps": 0.702,
+        "gpu_percent_avg": 89.2,
+        "gpu_percent_max": 96.0,
+        "vram_used_mb_max": 3993.0,
+        "ram_available_mb_min": 3479.0,
+        "cpu_percent_avg": 19.9,
+        "cpu_percent_max": 64.0,
+        "ollama_working_set_mb_max": 1233.0
+      },
+      "baseline": {
+        "requests": 150,
+        "success": 150,
+        "success_rate": 1.0,
+        "outcomes": {
+          "success": 150
+        },
+        "error_codes": {},
+        "p50_ms": 7784.0,
+        "p95_ms": 14668.5,
+        "p99_ms": 15973.6,
+        "max_ms": 16075.0,
+        "mean_ms": 8035.6,
+        "p99_reliable": true,
+        "throughput_rps": 0.687
+      }
+    },
+    {
+      "target": "backend",
+      "profile": "short",
+      "concurrency": 1,
+      "post": {
+        "requests": 200,
+        "success": 200,
+        "success_rate": 1.0,
+        "outcomes": {
+          "success": 200
+        },
+        "error_codes": {},
+        "p50_ms": 233.6,
+        "p95_ms": 283.7,
+        "p99_ms": 296.5,
+        "max_ms": 311.8,
+        "mean_ms": 238.2,
+        "p99_reliable": true,
+        "wall_seconds": 47.6,
+        "slices": 5,
+        "throughput_rps": 4.199,
+        "gpu_percent_avg": 68.8,
+        "gpu_percent_max": 97.0,
+        "vram_used_mb_max": 3534.0,
+        "ram_available_mb_min": 4506.0,
+        "cpu_percent_avg": 40.7,
+        "cpu_percent_max": 63.0,
+        "ollama_working_set_mb_max": 860.0
+      },
+      "baseline": {
+        "requests": 125,
+        "success": 125,
+        "success_rate": 1.0,
+        "outcomes": {
+          "success": 125
+        },
+        "error_codes": {},
+        "p50_ms": 256.4,
+        "p95_ms": 319.2,
+        "p99_ms": 351.7,
+        "max_ms": 453.4,
+        "mean_ms": 258.6,
+        "p99_reliable": true,
+        "throughput_rps": 3.866
+      }
+    },
+    {
+      "target": "ollama",
+      "profile": "short",
+      "concurrency": 1,
+      "post": {
+        "requests": 200,
+        "success": 200,
+        "success_rate": 1.0,
+        "outcomes": {
+          "success": 200
+        },
+        "error_codes": {},
+        "p50_ms": 227.1,
+        "p95_ms": 281.3,
+        "p99_ms": 290.7,
+        "max_ms": 305.9,
+        "mean_ms": 235.3,
+        "p99_reliable": true,
+        "wall_seconds": 47.1,
+        "slices": 5,
+        "throughput_rps": 4.249,
+        "gpu_percent_avg": 73.2,
+        "gpu_percent_max": 95.0,
+        "vram_used_mb_max": 3528.0,
+        "ram_available_mb_min": 4645.0,
+        "cpu_percent_avg": 38.7,
+        "cpu_percent_max": 63.0,
+        "ollama_working_set_mb_max": 857.0
+      },
+      "baseline": {
+        "requests": 125,
+        "success": 125,
+        "success_rate": 1.0,
+        "outcomes": {
+          "success": 125
+        },
+        "error_codes": {},
+        "p50_ms": 230.7,
+        "p95_ms": 274.0,
+        "p99_ms": 298.9,
+        "max_ms": 299.0,
+        "mean_ms": 236.2,
+        "p99_reliable": true,
+        "throughput_rps": 4.234
+      }
+    },
+    {
+      "target": "backend",
+      "profile": "short",
+      "concurrency": 2,
+      "post": {
+        "requests": 200,
+        "success": 200,
+        "success_rate": 1.0,
+        "outcomes": {
+          "success": 200
+        },
+        "error_codes": {},
+        "p50_ms": 292.0,
+        "p95_ms": 504.3,
+        "p99_ms": 519.8,
+        "max_ms": 537.2,
+        "mean_ms": 349.4,
+        "p99_reliable": true,
+        "wall_seconds": 46.5,
+        "slices": 5,
+        "throughput_rps": 4.305,
+        "gpu_percent_avg": 73.5,
+        "gpu_percent_max": 96.0,
+        "vram_used_mb_max": 3536.0,
+        "ram_available_mb_min": 4436.0,
+        "cpu_percent_avg": 34.7,
+        "cpu_percent_max": 50.0,
+        "ollama_working_set_mb_max": 889.0
+      },
+      "baseline": {
+        "requests": 126,
+        "success": 126,
+        "success_rate": 1.0,
+        "outcomes": {
+          "success": 126
+        },
+        "error_codes": {},
+        "p50_ms": 358.7,
+        "p95_ms": 590.0,
+        "p99_ms": 640.9,
+        "max_ms": 651.3,
+        "mean_ms": 407.6,
+        "p99_reliable": true,
+        "throughput_rps": 3.684
+      }
+    },
+    {
+      "target": "ollama",
+      "profile": "short",
+      "concurrency": 2,
+      "post": {
+        "requests": 200,
+        "success": 200,
+        "success_rate": 1.0,
+        "outcomes": {
+          "success": 200
+        },
+        "error_codes": {},
+        "p50_ms": 305.2,
+        "p95_ms": 508.6,
+        "p99_ms": 542.9,
+        "max_ms": 557.5,
+        "mean_ms": 351.3,
+        "p99_reliable": true,
+        "wall_seconds": 46.7,
+        "slices": 5,
+        "throughput_rps": 4.284,
+        "gpu_percent_avg": 69.2,
+        "gpu_percent_max": 87.0,
+        "vram_used_mb_max": 3544.0,
+        "ram_available_mb_min": 4521.0,
+        "cpu_percent_avg": 36.7,
+        "cpu_percent_max": 53.0,
+        "ollama_working_set_mb_max": 895.0
+      },
+      "baseline": {
+        "requests": 126,
+        "success": 126,
+        "success_rate": 1.0,
+        "outcomes": {
+          "success": 126
+        },
+        "error_codes": {},
+        "p50_ms": 298.5,
+        "p95_ms": 495.5,
+        "p99_ms": 516.6,
+        "max_ms": 518.8,
+        "mean_ms": 347.5,
+        "p99_reliable": true,
+        "throughput_rps": 4.349
+      }
+    },
+    {
+      "target": "backend",
+      "profile": "short",
+      "concurrency": 5,
+      "post": {
+        "requests": 200,
+        "success": 200,
+        "success_rate": 1.0,
+        "outcomes": {
+          "success": 200
+        },
+        "error_codes": {},
+        "p50_ms": 690.0,
+        "p95_ms": 1189.9,
+        "p99_ms": 1251.3,
+        "max_ms": 1362.6,
+        "mean_ms": 701.1,
+        "p99_reliable": true,
+        "wall_seconds": 46.5,
+        "slices": 5,
+        "throughput_rps": 4.304,
+        "gpu_percent_avg": 72.9,
+        "gpu_percent_max": 96.0,
+        "vram_used_mb_max": 3546.0,
+        "ram_available_mb_min": 4169.0,
+        "cpu_percent_avg": 31.6,
+        "cpu_percent_max": 56.0,
+        "ollama_working_set_mb_max": 866.0
+      },
+      "baseline": {
+        "requests": 125,
+        "success": 125,
+        "success_rate": 1.0,
+        "outcomes": {
+          "success": 125
+        },
+        "error_codes": {},
+        "p50_ms": 818.5,
+        "p95_ms": 1435.2,
+        "p99_ms": 1507.4,
+        "max_ms": 1516.8,
+        "mean_ms": 794.0,
+        "p99_reliable": true,
+        "throughput_rps": 3.791
+      }
+    },
+    {
+      "target": "ollama",
+      "profile": "short",
+      "concurrency": 5,
+      "post": {
+        "requests": 200,
+        "success": 200,
+        "success_rate": 1.0,
+        "outcomes": {
+          "success": 200
+        },
+        "error_codes": {},
+        "p50_ms": 676.5,
+        "p95_ms": 1176.3,
+        "p99_ms": 1217.5,
+        "max_ms": 1227.7,
+        "mean_ms": 691.8,
+        "p99_reliable": true,
+        "wall_seconds": 45.9,
+        "slices": 5,
+        "throughput_rps": 4.354,
+        "gpu_percent_avg": 74.0,
+        "gpu_percent_max": 96.0,
+        "vram_used_mb_max": 3545.0,
+        "ram_available_mb_min": 4662.0,
+        "cpu_percent_avg": 33.5,
+        "cpu_percent_max": 55.0,
+        "ollama_working_set_mb_max": 908.0
+      },
+      "baseline": {
+        "requests": 125,
+        "success": 125,
+        "success_rate": 1.0,
+        "outcomes": {
+          "success": 125
+        },
+        "error_codes": {},
+        "p50_ms": 681.4,
+        "p95_ms": 1169.4,
+        "p99_ms": 1202.4,
+        "max_ms": 1206.8,
+        "mean_ms": 683.0,
+        "p99_reliable": true,
+        "throughput_rps": 4.432
+      }
+    },
+    {
+      "target": "backend",
+      "profile": "short",
+      "concurrency": 10,
+      "post": {
+        "requests": 200,
+        "success": 200,
+        "success_rate": 1.0,
+        "outcomes": {
+          "success": 200
+        },
+        "error_codes": {},
+        "p50_ms": 1241.2,
+        "p95_ms": 2287.2,
+        "p99_ms": 2342.9,
+        "max_ms": 2367.1,
+        "mean_ms": 1258.2,
+        "p99_reliable": true,
+        "wall_seconds": 45.7,
+        "slices": 5,
+        "throughput_rps": 4.374,
+        "gpu_percent_avg": 71.0,
+        "gpu_percent_max": 83.0,
+        "vram_used_mb_max": 3545.0,
+        "ram_available_mb_min": 4451.0,
+        "cpu_percent_avg": 32.5,
+        "cpu_percent_max": 60.0,
+        "ollama_working_set_mb_max": 899.0
+      },
+      "baseline": {
+        "requests": 150,
+        "success": 150,
+        "success_rate": 1.0,
+        "outcomes": {
+          "success": 150
+        },
+        "error_codes": {},
+        "p50_ms": 1199.2,
+        "p95_ms": 2286.0,
+        "p99_ms": 2314.9,
+        "max_ms": 2320.8,
+        "mean_ms": 1248.5,
+        "p99_reliable": true,
+        "throughput_rps": 4.412
+      }
+    },
+    {
+      "target": "ollama",
+      "profile": "short",
+      "concurrency": 10,
+      "post": {
+        "requests": 200,
+        "success": 200,
+        "success_rate": 1.0,
+        "outcomes": {
+          "success": 200
+        },
+        "error_codes": {},
+        "p50_ms": 1271.0,
+        "p95_ms": 2292.3,
+        "p99_ms": 2337.8,
+        "max_ms": 2413.7,
+        "mean_ms": 1264.9,
+        "p99_reliable": true,
+        "wall_seconds": 45.7,
+        "slices": 5,
+        "throughput_rps": 4.373,
+        "gpu_percent_avg": 69.9,
+        "gpu_percent_max": 94.0,
+        "vram_used_mb_max": 3539.0,
+        "ram_available_mb_min": 4182.0,
+        "cpu_percent_avg": 29.8,
+        "cpu_percent_max": 51.0,
+        "ollama_working_set_mb_max": 866.0
+      },
+      "baseline": {
+        "requests": 150,
+        "success": 150,
+        "success_rate": 1.0,
+        "outcomes": {
+          "success": 150
+        },
+        "error_codes": {},
+        "p50_ms": 1183.1,
+        "p95_ms": 2241.4,
+        "p99_ms": 2259.9,
+        "max_ms": 2361.5,
+        "mean_ms": 1230.0,
+        "p99_reliable": true,
+        "throughput_rps": 4.493
+      }
+    }
+  ],
+  "overhead": [
+    {
+      "profile": "long",
+      "concurrency": 1,
+      "pairs": 5,
+      "mean_diff_ms": 2.6,
+      "sd_ms": 4.6,
+      "ci95_low_ms": -3.1,
+      "ci95_high_ms": 8.4,
+      "direct_mean_p50_ms": 2364.3,
+      "separable_from_zero": false
+    },
+    {
+      "profile": "long",
+      "concurrency": 2,
+      "pairs": 4,
+      "mean_diff_ms": -45.4,
+      "sd_ms": 198.0,
+      "ci95_low_ms": -360.1,
+      "ci95_high_ms": 269.4,
+      "direct_mean_p50_ms": 4749.9,
+      "separable_from_zero": false
+    },
+    {
+      "profile": "long",
+      "concurrency": 5,
+      "pairs": 5,
+      "mean_diff_ms": -364.5,
+      "sd_ms": 863.9,
+      "ci95_low_ms": -1438.5,
+      "ci95_high_ms": 709.6,
+      "direct_mean_p50_ms": 9368.7,
+      "separable_from_zero": false
+    },
+    {
+      "profile": "long",
+      "concurrency": 10,
+      "pairs": 5,
+      "mean_diff_ms": -1232.3,
+      "sd_ms": 2580.1,
+      "ci95_low_ms": -4440.0,
+      "ci95_high_ms": 1975.5,
+      "direct_mean_p50_ms": 16818.8,
+      "separable_from_zero": false
+    },
+    {
+      "profile": "medium",
+      "concurrency": 1,
+      "pairs": 5,
+      "mean_diff_ms": 0.9,
+      "sd_ms": 18.4,
+      "ci95_low_ms": -22.0,
+      "ci95_high_ms": 23.8,
+      "direct_mean_p50_ms": 1276.8,
+      "separable_from_zero": false
+    },
+    {
+      "profile": "medium",
+      "concurrency": 2,
+      "pairs": 5,
+      "mean_diff_ms": -12.3,
+      "sd_ms": 195.5,
+      "ci95_low_ms": -255.4,
+      "ci95_high_ms": 230.8,
+      "direct_mean_p50_ms": 1885.9,
+      "separable_from_zero": false
+    },
+    {
+      "profile": "medium",
+      "concurrency": 5,
+      "pairs": 5,
+      "mean_diff_ms": 364.3,
+      "sd_ms": 493.2,
+      "ci95_low_ms": -249.0,
+      "ci95_high_ms": 977.5,
+      "direct_mean_p50_ms": 4113.2,
+      "separable_from_zero": false
+    },
+    {
+      "profile": "medium",
+      "concurrency": 10,
+      "pairs": 5,
+      "mean_diff_ms": -249.3,
+      "sd_ms": 561.6,
+      "ci95_low_ms": -947.4,
+      "ci95_high_ms": 448.9,
+      "direct_mean_p50_ms": 8096.3,
+      "separable_from_zero": false
+    },
+    {
+      "profile": "short",
+      "concurrency": 1,
+      "pairs": 5,
+      "mean_diff_ms": 5.3,
+      "sd_ms": 10.9,
+      "ci95_low_ms": -8.3,
+      "ci95_high_ms": 18.8,
+      "direct_mean_p50_ms": 225.5,
+      "separable_from_zero": false
+    },
+    {
+      "profile": "short",
+      "concurrency": 2,
+      "pairs": 5,
+      "mean_diff_ms": -11.6,
+      "sd_ms": 16.9,
+      "ci95_low_ms": -32.5,
+      "ci95_high_ms": 9.4,
+      "direct_mean_p50_ms": 292.2,
+      "separable_from_zero": false
+    },
+    {
+      "profile": "short",
+      "concurrency": 5,
+      "pairs": 5,
+      "mean_diff_ms": 3.7,
+      "sd_ms": 17.4,
+      "ci95_low_ms": -18.0,
+      "ci95_high_ms": 25.4,
+      "direct_mean_p50_ms": 679.3,
+      "separable_from_zero": false
+    },
+    {
+      "profile": "short",
+      "concurrency": 10,
+      "pairs": 5,
+      "mean_diff_ms": -36.9,
+      "sd_ms": 55.6,
+      "ci95_low_ms": -106.1,
+      "ci95_high_ms": 32.3,
+      "direct_mean_p50_ms": 1226.4,
+      "separable_from_zero": false
+    }
+  ],
+  "thai_long": [
+    {
+      "target": "ollama",
+      "prompt_id": "long-3",
+      "baseline": {
+        "truncated": 35
+      },
+      "baseline_codes": {},
+      "post": {
+        "success": 60
+      },
+      "post_codes": {}
+    },
+    {
+      "target": "ollama",
+      "prompt_id": "long-11",
+      "baseline": {
+        "truncated": 35
+      },
+      "baseline_codes": {},
+      "post": {
+        "success": 60
+      },
+      "post_codes": {}
+    },
+    {
+      "target": "ollama",
+      "prompt_id": "long-14",
+      "baseline": {
+        "truncated": 35
+      },
+      "baseline_codes": {},
+      "post": {
+        "success": 40
+      },
+      "post_codes": {}
+    },
+    {
+      "target": "backend",
+      "prompt_id": "long-3",
+      "baseline": {
+        "server_error": 35
+      },
+      "baseline_codes": {
+        "AI_INVALID_RESPONSE": 35
+      },
+      "post": {
+        "success": 60
+      },
+      "post_codes": {}
+    },
+    {
+      "target": "backend",
+      "prompt_id": "long-11",
+      "baseline": {
+        "server_error": 35
+      },
+      "baseline_codes": {
+        "AI_INVALID_RESPONSE": 35
+      },
+      "post": {
+        "success": 60
+      },
+      "post_codes": {}
+    },
+    {
+      "target": "backend",
+      "prompt_id": "long-14",
+      "baseline": {
+        "server_error": 35
+      },
+      "baseline_codes": {
+        "AI_INVALID_RESPONSE": 35
+      },
+      "post": {
+        "success": 40
+      },
+      "post_codes": {}
+    }
+  ],
+  "np2": [
+    {
+      "profile": "long",
+      "concurrency": 1,
+      "np1": {
+        "requests": 200,
+        "success": 200,
+        "success_rate": 1.0,
+        "outcomes": {
+          "success": 200
+        },
+        "error_codes": {},
+        "p50_ms": 2366.8,
+        "p95_ms": 6238.1,
+        "p99_ms": 6263.9,
+        "max_ms": 6271.2,
+        "mean_ms": 2961.7,
+        "p99_reliable": true,
+        "wall_seconds": 592.3,
+        "slices": 5,
+        "throughput_rps": 0.338,
+        "gpu_percent_avg": 92.8,
+        "gpu_percent_max": 96.0,
+        "vram_used_mb_max": 3727.0,
+        "ram_available_mb_min": 4484.0,
+        "cpu_percent_avg": 15.6,
+        "cpu_percent_max": 54.0,
+        "ollama_working_set_mb_max": 1483.0
+      },
+      "np2": {
+        "requests": 200,
+        "success": 200,
+        "success_rate": 1.0,
+        "outcomes": {
+          "success": 200
+        },
+        "error_codes": {},
+        "p50_ms": 2744.3,
+        "p95_ms": 6629.1,
+        "p99_ms": 7815.8,
+        "max_ms": 7824.8,
+        "mean_ms": 3482.2,
+        "p99_reliable": true,
+        "wall_seconds": 696.5,
+        "slices": 5,
+        "throughput_rps": 0.287,
+        "gpu_percent_avg": 92.6,
+        "gpu_percent_max": 98.0,
+        "vram_used_mb_max": 3951.0,
+        "ram_available_mb_min": 2990.0,
+        "cpu_percent_avg": 21.8,
+        "cpu_percent_max": 76.0,
+        "ollama_working_set_mb_max": 1958.0
+      }
+    },
+    {
+      "profile": "long",
+      "concurrency": 2,
+      "np1": {
+        "requests": 200,
+        "success": 200,
+        "success_rate": 1.0,
+        "outcomes": {
+          "success": 200
+        },
+        "error_codes": {},
+        "p50_ms": 4515.7,
+        "p95_ms": 8599.6,
+        "p99_ms": 10541.7,
+        "max_ms": 10696.1,
+        "mean_ms": 4645.0,
+        "p99_reliable": true,
+        "wall_seconds": 502.5,
+        "slices": 4,
+        "throughput_rps": 0.318,
+        "gpu_percent_avg": 92.9,
+        "gpu_percent_max": 98.0,
+        "vram_used_mb_max": 3737.0,
+        "ram_available_mb_min": 3504.0,
+        "cpu_percent_avg": 21.1,
+        "cpu_percent_max": 63.0,
+        "ollama_working_set_mb_max": 1069.0
+      },
+      "np2": {
+        "requests": 200,
+        "success": 200,
+        "success_rate": 1.0,
+        "outcomes": {
+          "success": 200
+        },
+        "error_codes": {},
+        "p50_ms": 3613.1,
+        "p95_ms": 12082.6,
+        "p99_ms": 14793.3,
+        "max_ms": 23433.5,
+        "mean_ms": 4927.8,
+        "p99_reliable": true,
+        "wall_seconds": 603.4,
+        "slices": 5,
+        "throughput_rps": 0.331,
+        "gpu_percent_avg": 91.1,
+        "gpu_percent_max": 100.0,
+        "vram_used_mb_max": 4127.0,
+        "ram_available_mb_min": 2307.0,
+        "cpu_percent_avg": 29.6,
+        "cpu_percent_max": 97.0,
+        "ollama_working_set_mb_max": 1685.0
+      }
+    },
+    {
+      "profile": "long",
+      "concurrency": 5,
+      "np1": {
+        "requests": 200,
+        "success": 200,
+        "success_rate": 1.0,
+        "outcomes": {
+          "success": 200
+        },
+        "error_codes": {},
+        "p50_ms": 9507.8,
+        "p95_ms": 16125.5,
+        "p99_ms": 18184.3,
+        "max_ms": 18703.2,
+        "mean_ms": 9470.6,
+        "p99_reliable": true,
+        "wall_seconds": 626.4,
+        "slices": 5,
+        "throughput_rps": 0.319,
+        "gpu_percent_avg": 91.8,
+        "gpu_percent_max": 99.0,
+        "vram_used_mb_max": 4014.0,
+        "ram_available_mb_min": 494.0,
+        "cpu_percent_avg": 24.1,
+        "cpu_percent_max": 100.0,
+        "ollama_working_set_mb_max": 1421.0
+      },
+      "np2": {
+        "requests": 200,
+        "success": 200,
+        "success_rate": 1.0,
+        "outcomes": {
+          "success": 200
+        },
+        "error_codes": {},
+        "p50_ms": 8401.8,
+        "p95_ms": 25695.4,
+        "p99_ms": 30526.0,
+        "max_ms": 32268.4,
+        "mean_ms": 10542.1,
+        "p99_reliable": true,
+        "wall_seconds": 645.5,
+        "slices": 5,
+        "throughput_rps": 0.31,
+        "gpu_percent_avg": 90.9,
+        "gpu_percent_max": 100.0,
+        "vram_used_mb_max": 3994.0,
+        "ram_available_mb_min": 1510.0,
+        "cpu_percent_avg": 24.7,
+        "cpu_percent_max": 98.0,
+        "ollama_working_set_mb_max": 2571.0
+      }
+    },
+    {
+      "profile": "long",
+      "concurrency": 10,
+      "np1": {
+        "requests": 200,
+        "success": 200,
+        "success_rate": 1.0,
+        "outcomes": {
+          "success": 200
+        },
+        "error_codes": {},
+        "p50_ms": 17079.4,
+        "p95_ms": 32074.7,
+        "p99_ms": 36164.3,
+        "max_ms": 37903.6,
+        "mean_ms": 17383.1,
+        "p99_reliable": true,
+        "wall_seconds": 627.5,
+        "slices": 5,
+        "throughput_rps": 0.319,
+        "gpu_percent_avg": 92.4,
+        "gpu_percent_max": 97.0,
+        "vram_used_mb_max": 3475.0,
+        "ram_available_mb_min": 1555.0,
+        "cpu_percent_avg": 18.6,
+        "cpu_percent_max": 100.0,
+        "ollama_working_set_mb_max": 1361.0
+      },
+      "np2": {
+        "requests": 200,
+        "success": 200,
+        "success_rate": 1.0,
+        "outcomes": {
+          "success": 200
+        },
+        "error_codes": {},
+        "p50_ms": 9707.0,
+        "p95_ms": 19163.3,
+        "p99_ms": 20648.3,
+        "max_ms": 23115.5,
+        "mean_ms": 10100.5,
+        "p99_reliable": true,
+        "wall_seconds": 375.1,
+        "slices": 5,
+        "throughput_rps": 0.533,
+        "gpu_percent_avg": 88.9,
+        "gpu_percent_max": 97.0,
+        "vram_used_mb_max": 3976.0,
+        "ram_available_mb_min": 1097.0,
+        "cpu_percent_avg": 21.8,
+        "cpu_percent_max": 86.0,
+        "ollama_working_set_mb_max": 3809.0
+      }
+    },
+    {
+      "profile": "medium",
+      "concurrency": 1,
+      "np1": {
+        "requests": 200,
+        "success": 200,
+        "success_rate": 1.0,
+        "outcomes": {
+          "success": 200
+        },
+        "error_codes": {},
+        "p50_ms": 1279.1,
+        "p95_ms": 2768.5,
+        "p99_ms": 2817.1,
+        "max_ms": 2834.4,
+        "mean_ms": 1344.3,
+        "p99_reliable": true,
+        "wall_seconds": 268.9,
+        "slices": 5,
+        "throughput_rps": 0.744,
+        "gpu_percent_avg": 89.0,
+        "gpu_percent_max": 97.0,
+        "vram_used_mb_max": 3567.0,
+        "ram_available_mb_min": 3955.0,
+        "cpu_percent_avg": 27.9,
+        "cpu_percent_max": 77.0,
+        "ollama_working_set_mb_max": 1120.0
+      },
+      "np2": {
+        "requests": 200,
+        "success": 200,
+        "success_rate": 1.0,
+        "outcomes": {
+          "success": 200
+        },
+        "error_codes": {},
+        "p50_ms": 1312.9,
+        "p95_ms": 2714.0,
+        "p99_ms": 3178.4,
+        "max_ms": 3432.9,
+        "mean_ms": 1374.2,
+        "p99_reliable": true,
+        "wall_seconds": 274.8,
+        "slices": 5,
+        "throughput_rps": 0.728,
+        "gpu_percent_avg": 88.5,
+        "gpu_percent_max": 97.0,
+        "vram_used_mb_max": 3957.0,
+        "ram_available_mb_min": 3511.0,
+        "cpu_percent_avg": 18.1,
+        "cpu_percent_max": 65.0,
+        "ollama_working_set_mb_max": 1219.0
+      }
+    },
+    {
+      "profile": "medium",
+      "concurrency": 2,
+      "np1": {
+        "requests": 240,
+        "success": 240,
+        "success_rate": 1.0,
+        "outcomes": {
+          "success": 240
+        },
+        "error_codes": {},
+        "p50_ms": 1838.7,
+        "p95_ms": 4132.6,
+        "p99_ms": 4661.5,
+        "max_ms": 4948.2,
+        "mean_ms": 2142.3,
+        "p99_reliable": true,
+        "wall_seconds": 289.2,
+        "slices": 5,
+        "throughput_rps": 0.692,
+        "gpu_percent_avg": 86.5,
+        "gpu_percent_max": 96.0,
+        "vram_used_mb_max": 3825.0,
+        "ram_available_mb_min": 3211.0,
+        "cpu_percent_avg": 23.0,
+        "cpu_percent_max": 70.0,
+        "ollama_working_set_mb_max": 1182.0
+      },
+      "np2": {
+        "requests": 200,
+        "success": 200,
+        "success_rate": 1.0,
+        "outcomes": {
+          "success": 200
+        },
+        "error_codes": {},
+        "p50_ms": 1358.7,
+        "p95_ms": 2824.4,
+        "p99_ms": 2959.0,
+        "max_ms": 3560.2,
+        "mean_ms": 1458.7,
+        "p99_reliable": true,
+        "wall_seconds": 173.0,
+        "slices": 5,
+        "throughput_rps": 1.156,
+        "gpu_percent_avg": 86.3,
+        "gpu_percent_max": 96.0,
+        "vram_used_mb_max": 3979.0,
+        "ram_available_mb_min": 4472.0,
+        "cpu_percent_avg": 20.3,
+        "cpu_percent_max": 67.0,
+        "ollama_working_set_mb_max": 1331.0
+      }
+    },
+    {
+      "profile": "medium",
+      "concurrency": 5,
+      "np1": {
+        "requests": 200,
+        "success": 200,
+        "success_rate": 1.0,
+        "outcomes": {
+          "success": 200
+        },
+        "error_codes": {},
+        "p50_ms": 4416.1,
+        "p95_ms": 8220.2,
+        "p99_ms": 9075.0,
+        "max_ms": 9225.5,
+        "mean_ms": 4562.5,
+        "p99_reliable": true,
+        "wall_seconds": 305.5,
+        "slices": 5,
+        "throughput_rps": 0.655,
+        "gpu_percent_avg": 84.7,
+        "gpu_percent_max": 96.0,
+        "vram_used_mb_max": 4042.0,
+        "ram_available_mb_min": 2854.0,
+        "cpu_percent_avg": 22.4,
+        "cpu_percent_max": 58.0,
+        "ollama_working_set_mb_max": 1231.0
+      },
+      "np2": {
+        "requests": 200,
+        "success": 200,
+        "success_rate": 1.0,
+        "outcomes": {
+          "success": 200
+        },
+        "error_codes": {},
+        "p50_ms": 2771.1,
+        "p95_ms": 4964.2,
+        "p99_ms": 5553.1,
+        "max_ms": 5766.5,
+        "mean_ms": 2789.1,
+        "p99_reliable": true,
+        "wall_seconds": 179.6,
+        "slices": 5,
+        "throughput_rps": 1.114,
+        "gpu_percent_avg": 86.9,
+        "gpu_percent_max": 97.0,
+        "vram_used_mb_max": 3954.0,
+        "ram_available_mb_min": 3695.0,
+        "cpu_percent_avg": 25.2,
+        "cpu_percent_max": 100.0,
+        "ollama_working_set_mb_max": 1391.0
+      }
+    },
+    {
+      "profile": "medium",
+      "concurrency": 10,
+      "np1": {
+        "requests": 200,
+        "success": 200,
+        "success_rate": 1.0,
+        "outcomes": {
+          "success": 200
+        },
+        "error_codes": {},
+        "p50_ms": 8114.4,
+        "p95_ms": 14297.5,
+        "p99_ms": 15666.6,
+        "max_ms": 15850.9,
+        "mean_ms": 8128.3,
+        "p99_reliable": true,
+        "wall_seconds": 284.9,
+        "slices": 5,
+        "throughput_rps": 0.702,
+        "gpu_percent_avg": 89.2,
+        "gpu_percent_max": 96.0,
+        "vram_used_mb_max": 3993.0,
+        "ram_available_mb_min": 3479.0,
+        "cpu_percent_avg": 19.9,
+        "cpu_percent_max": 64.0,
+        "ollama_working_set_mb_max": 1233.0
+      },
+      "np2": {
+        "requests": 200,
+        "success": 200,
+        "success_rate": 1.0,
+        "outcomes": {
+          "success": 200
+        },
+        "error_codes": {},
+        "p50_ms": 4566.6,
+        "p95_ms": 8149.7,
+        "p99_ms": 9393.2,
+        "max_ms": 10166.5,
+        "mean_ms": 4682.5,
+        "p99_reliable": true,
+        "wall_seconds": 165.5,
+        "slices": 5,
+        "throughput_rps": 1.208,
+        "gpu_percent_avg": 81.3,
+        "gpu_percent_max": 95.0,
+        "vram_used_mb_max": 3942.0,
+        "ram_available_mb_min": 3909.0,
+        "cpu_percent_avg": 18.3,
+        "cpu_percent_max": 41.0,
+        "ollama_working_set_mb_max": 1485.0
+      }
+    },
+    {
+      "profile": "short",
+      "concurrency": 1,
+      "np1": {
+        "requests": 200,
+        "success": 200,
+        "success_rate": 1.0,
+        "outcomes": {
+          "success": 200
+        },
+        "error_codes": {},
+        "p50_ms": 227.1,
+        "p95_ms": 281.3,
+        "p99_ms": 290.7,
+        "max_ms": 305.9,
+        "mean_ms": 235.3,
+        "p99_reliable": true,
+        "wall_seconds": 47.1,
+        "slices": 5,
+        "throughput_rps": 4.249,
+        "gpu_percent_avg": 73.2,
+        "gpu_percent_max": 95.0,
+        "vram_used_mb_max": 3528.0,
+        "ram_available_mb_min": 4645.0,
+        "cpu_percent_avg": 38.7,
+        "cpu_percent_max": 63.0,
+        "ollama_working_set_mb_max": 857.0
+      },
+      "np2": {
+        "requests": 200,
+        "success": 200,
+        "success_rate": 1.0,
+        "outcomes": {
+          "success": 200
+        },
+        "error_codes": {},
+        "p50_ms": 279.4,
+        "p95_ms": 339.5,
+        "p99_ms": 349.7,
+        "max_ms": 358.7,
+        "mean_ms": 277.2,
+        "p99_reliable": true,
+        "wall_seconds": 55.4,
+        "slices": 5,
+        "throughput_rps": 3.608,
+        "gpu_percent_avg": 72.6,
+        "gpu_percent_max": 96.0,
+        "vram_used_mb_max": 3945.0,
+        "ram_available_mb_min": 4978.0,
+        "cpu_percent_avg": 31.1,
+        "cpu_percent_max": 79.0,
+        "ollama_working_set_mb_max": 944.0
+      }
+    },
+    {
+      "profile": "short",
+      "concurrency": 2,
+      "np1": {
+        "requests": 200,
+        "success": 200,
+        "success_rate": 1.0,
+        "outcomes": {
+          "success": 200
+        },
+        "error_codes": {},
+        "p50_ms": 305.2,
+        "p95_ms": 508.6,
+        "p99_ms": 542.9,
+        "max_ms": 557.5,
+        "mean_ms": 351.3,
+        "p99_reliable": true,
+        "wall_seconds": 46.7,
+        "slices": 5,
+        "throughput_rps": 4.284,
+        "gpu_percent_avg": 69.2,
+        "gpu_percent_max": 87.0,
+        "vram_used_mb_max": 3544.0,
+        "ram_available_mb_min": 4521.0,
+        "cpu_percent_avg": 36.7,
+        "cpu_percent_max": 53.0,
+        "ollama_working_set_mb_max": 895.0
+      },
+      "np2": {
+        "requests": 200,
+        "success": 200,
+        "success_rate": 1.0,
+        "outcomes": {
+          "success": 200
+        },
+        "error_codes": {},
+        "p50_ms": 313.8,
+        "p95_ms": 368.9,
+        "p99_ms": 376.1,
+        "max_ms": 400.2,
+        "mean_ms": 313.9,
+        "p99_reliable": true,
+        "wall_seconds": 33.5,
+        "slices": 5,
+        "throughput_rps": 5.97,
+        "gpu_percent_avg": 62.0,
+        "gpu_percent_max": 75.0,
+        "vram_used_mb_max": 3946.0,
+        "ram_available_mb_min": 5014.0,
+        "cpu_percent_avg": 28.0,
+        "cpu_percent_max": 39.0,
+        "ollama_working_set_mb_max": 1062.0
+      }
+    },
+    {
+      "profile": "short",
+      "concurrency": 5,
+      "np1": {
+        "requests": 200,
+        "success": 200,
+        "success_rate": 1.0,
+        "outcomes": {
+          "success": 200
+        },
+        "error_codes": {},
+        "p50_ms": 676.5,
+        "p95_ms": 1176.3,
+        "p99_ms": 1217.5,
+        "max_ms": 1227.7,
+        "mean_ms": 691.8,
+        "p99_reliable": true,
+        "wall_seconds": 45.9,
+        "slices": 5,
+        "throughput_rps": 4.354,
+        "gpu_percent_avg": 74.0,
+        "gpu_percent_max": 96.0,
+        "vram_used_mb_max": 3545.0,
+        "ram_available_mb_min": 4662.0,
+        "cpu_percent_avg": 33.5,
+        "cpu_percent_max": 55.0,
+        "ollama_working_set_mb_max": 908.0
+      },
+      "np2": {
+        "requests": 200,
+        "success": 200,
+        "success_rate": 1.0,
+        "outcomes": {
+          "success": 200
+        },
+        "error_codes": {},
+        "p50_ms": 604.3,
+        "p95_ms": 908.9,
+        "p99_ms": 932.0,
+        "max_ms": 989.9,
+        "mean_ms": 562.9,
+        "p99_reliable": true,
+        "wall_seconds": 35.5,
+        "slices": 5,
+        "throughput_rps": 5.629,
+        "gpu_percent_avg": 56.7,
+        "gpu_percent_max": 79.0,
+        "vram_used_mb_max": 3942.0,
+        "ram_available_mb_min": 5040.0,
+        "cpu_percent_avg": 29.3,
+        "cpu_percent_max": 45.0,
+        "ollama_working_set_mb_max": 1011.0
+      }
+    },
+    {
+      "profile": "short",
+      "concurrency": 10,
+      "np1": {
+        "requests": 200,
+        "success": 200,
+        "success_rate": 1.0,
+        "outcomes": {
+          "success": 200
+        },
+        "error_codes": {},
+        "p50_ms": 1271.0,
+        "p95_ms": 2292.3,
+        "p99_ms": 2337.8,
+        "max_ms": 2413.7,
+        "mean_ms": 1264.9,
+        "p99_reliable": true,
+        "wall_seconds": 45.7,
+        "slices": 5,
+        "throughput_rps": 4.373,
+        "gpu_percent_avg": 69.9,
+        "gpu_percent_max": 94.0,
+        "vram_used_mb_max": 3539.0,
+        "ram_available_mb_min": 4182.0,
+        "cpu_percent_avg": 29.8,
+        "cpu_percent_max": 51.0,
+        "ollama_working_set_mb_max": 866.0
+      },
+      "np2": {
+        "requests": 200,
+        "success": 200,
+        "success_rate": 1.0,
+        "outcomes": {
+          "success": 200
+        },
+        "error_codes": {},
+        "p50_ms": 976.2,
+        "p95_ms": 1722.8,
+        "p99_ms": 2251.7,
+        "max_ms": 2385.2,
+        "mean_ms": 1009.7,
+        "p99_reliable": true,
+        "wall_seconds": 34.4,
+        "slices": 5,
+        "throughput_rps": 5.821,
+        "gpu_percent_avg": 62.2,
+        "gpu_percent_max": 82.0,
+        "vram_used_mb_max": 3942.0,
+        "ram_available_mb_min": 3865.0,
+        "cpu_percent_avg": 36.3,
+        "cpu_percent_max": 100.0,
+        "ollama_working_set_mb_max": 1002.0
+      }
+    }
+  ]
+}

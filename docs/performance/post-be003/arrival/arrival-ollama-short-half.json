@@ -1,0 +1,724 @@
+{
+  "mode": "Arrival",
+  "target": "ollama",
+  "profile": "short",
+  "endpoint": "http://127.0.0.1:11434/api/generate",
+  "num_predict": 1024,
+  "tested_utc": "2026-10-21T02:04:33.0745158Z",
+  "rate_rps": 2.1,
+  "duration_sec": 60,
+  "arrived": 117,
+  "success": 117,
+  "unfinished": 0,
+  "other_failures": [],
+  "latency_p50_ms": 279.5,
+  "latency_p95_ms": 514.1,
+  "latency_p99_ms": 591.7,
+  "latency_max_ms": 728.7,
+  "latency_p50_first_quarter_ms": 249.4,
+  "latency_p50_last_quarter_ms": 327.9,
+  "requests": [
+    {
+      "start_ms": 315.3,
+      "latency_ms": 245.2,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 482.0,
+      "latency_ms": 308.5,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 729.6,
+      "latency_ms": 309.9,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 760.7,
+      "latency_ms": 557.1,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 1538.9,
+      "latency_ms": 248.7,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 1881.0,
+      "latency_ms": 251.1,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 2332.2,
+      "latency_ms": 246.8,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 2410.6,
+      "latency_ms": 384.7,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 2765.6,
+      "latency_ms": 246.8,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 3244.7,
+      "latency_ms": 230.7,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 3383.1,
+      "latency_ms": 387.0,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 3677.5,
+      "latency_ms": 342.6,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 3832.8,
+      "latency_ms": 406.6,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 4867.2,
+      "latency_ms": 232.6,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 6322.2,
+      "latency_ms": 215.8,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 6570.9,
+      "latency_ms": 264.8,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 6806.3,
+      "latency_ms": 247.9,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 7476.1,
+      "latency_ms": 246.3,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 7661.0,
+      "latency_ms": 341.3,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 7754.4,
+      "latency_ms": 466.2,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 8034.6,
+      "latency_ms": 403.4,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 8454.5,
+      "latency_ms": 249.4,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 9498.9,
+      "latency_ms": 230.0,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 10511.6,
+      "latency_ms": 233.9,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 10761.9,
+      "latency_ms": 232.0,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 10979.0,
+      "latency_ms": 265.1,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 11010.8,
+      "latency_ms": 481.1,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 12457.0,
+      "latency_ms": 231.0,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 12863.3,
+      "latency_ms": 231.8,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 13798.9,
+      "latency_ms": 217.2,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 14544.5,
+      "latency_ms": 248.8,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 14746.0,
+      "latency_ms": 296.0,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 14761.7,
+      "latency_ms": 514.1,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 14995.5,
+      "latency_ms": 544.7,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 15602.5,
+      "latency_ms": 231.9,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 15696.2,
+      "latency_ms": 357.1,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 16738.7,
+      "latency_ms": 247.7,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 17129.0,
+      "latency_ms": 234.2,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 17709.7,
+      "latency_ms": 233.4,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 18021.5,
+      "latency_ms": 230.3,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 18282.6,
+      "latency_ms": 295.0,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 18298.2,
+      "latency_ms": 479.7,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 19121.0,
+      "latency_ms": 233.3,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 19324.1,
+      "latency_ms": 262.9,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 19758.8,
+      "latency_ms": 216.0,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 19835.7,
+      "latency_ms": 372.4,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 20270.8,
+      "latency_ms": 246.8,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 20579.8,
+      "latency_ms": 247.3,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 20780.0,
+      "latency_ms": 326.9,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 21091.4,
+      "latency_ms": 233.5,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 22105.3,
+      "latency_ms": 231.2,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 22585.7,
+      "latency_ms": 246.1,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 22863.9,
+      "latency_ms": 232.3,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 23221.7,
+      "latency_ms": 233.2,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 23470.8,
+      "latency_ms": 235.3,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 24483.8,
+      "latency_ms": 292.9,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 24730.0,
+      "latency_ms": 263.8,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 25117.6,
+      "latency_ms": 235.0,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 25587.1,
+      "latency_ms": 231.9,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 25849.2,
+      "latency_ms": 249.3,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 26129.8,
+      "latency_ms": 250.3,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 26648.2,
+      "latency_ms": 297.5,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 27055.1,
+      "latency_ms": 293.8,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 27581.7,
+      "latency_ms": 340.2,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 28467.3,
+      "latency_ms": 279.5,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 29604.6,
+      "latency_ms": 278.0,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 29866.8,
+      "latency_ms": 296.0,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 30939.0,
+      "latency_ms": 279.3,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 31014.0,
+      "latency_ms": 468.4,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 31716.9,
+      "latency_ms": 279.1,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 32057.5,
+      "latency_ms": 321.3,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 32890.1,
+      "latency_ms": 281.6,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 32937.0,
+      "latency_ms": 499.3,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 33763.3,
+      "latency_ms": 264.0,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 34464.7,
+      "latency_ms": 263.5,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 34727.9,
+      "latency_ms": 295.7,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 35383.2,
+      "latency_ms": 295.8,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 35757.2,
+      "latency_ms": 295.8,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 35914.1,
+      "latency_ms": 481.3,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 36052.5,
+      "latency_ms": 591.7,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 36753.0,
+      "latency_ms": 265.0,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 37187.9,
+      "latency_ms": 295.2,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 37624.0,
+      "latency_ms": 278.2,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 37670.9,
+      "latency_ms": 494.3,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 39410.1,
+      "latency_ms": 266.1,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 39503.5,
+      "latency_ms": 483.2,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 40612.2,
+      "latency_ms": 264.6,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 40938.5,
+      "latency_ms": 276.9,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 43154.7,
+      "latency_ms": 279.4,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 44029.0,
+      "latency_ms": 250.1,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 44727.2,
+      "latency_ms": 280.2,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 44929.6,
+      "latency_ms": 358.7,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 46268.7,
+      "latency_ms": 292.7,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 46406.9,
+      "latency_ms": 480.4,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 46422.4,
+      "latency_ms": 728.7,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 47088.1,
+      "latency_ms": 313.2,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 47385.4,
+      "latency_ms": 296.6,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 47462.9,
+      "latency_ms": 482.9,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 47805.7,
+      "latency_ms": 403.5,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 48361.7,
+      "latency_ms": 263.9,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 48965.7,
+      "latency_ms": 327.9,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 49558.0,
+      "latency_ms": 265.0,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 49729.8,
+      "latency_ms": 389.2,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 50134.8,
+      "latency_ms": 279.5,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 52017.9,
+      "latency_ms": 233.2,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 52048.8,
+      "latency_ms": 479.9,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 52436.1,
+      "latency_ms": 372.7,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 52900.2,
+      "latency_ms": 297.8,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 53568.9,
+      "latency_ms": 343.6,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 56875.1,
+      "latency_ms": 311.9,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 56938.0,
+      "latency_ms": 499.6,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 57950.5,
+      "latency_ms": 294.5,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 58089.3,
+      "latency_ms": 417.8,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 58291.9,
+      "latency_ms": 461.4,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 58830.9,
+      "latency_ms": 263.9,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": false
+    },
+    {
+      "start_ms": 59711.7,
+      "latency_ms": 309.0,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": true
+    },
+    {
+      "start_ms": 59741.7,
+      "latency_ms": 542.2,
+      "outcome": "success",
+      "finished_after_arrivals_stopped": true
+    }
+  ]
+}
