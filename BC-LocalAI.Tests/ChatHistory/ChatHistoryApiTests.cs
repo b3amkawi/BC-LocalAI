@@ -257,7 +257,7 @@ public sealed class ChatHistoryApiTests(WebApplicationFactory<Program> factory) 
         Assert.Equal("ฉันมีหมา", host.Ai.Prompts[0]);                 // nothing earlier: exactly the question, as before BE-007
         Assert.Contains("User: ฉันมีหมา", host.Ai.Prompts[1]);
         Assert.Contains("Assistant: ฉันมีหมาหนึ่งตัว", host.Ai.Prompts[1]);
-        Assert.EndsWith(ConversationPrompt.QuestionLabel + Environment.NewLine + "มันชื่ออะไร", host.Ai.Prompts[1]);
+        Assert.EndsWith(ConversationPrompt.QuestionLabel + "\n" + "มันชื่ออะไร", host.Ai.Prompts[1]);
         var messages = await Messages(alice, id);
         Assert.Equal(["user", "assistant", "user", "assistant"], messages.Select(m => m.GetProperty("role").GetString()));
         Assert.All(messages, m => Assert.Equal("completed", m.GetProperty("status").GetString()));

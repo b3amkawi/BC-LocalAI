@@ -1,6 +1,7 @@
 using System.Net;
 using System.Text.Json;
 using BC_LocalAI.Configuration;
+using BC_LocalAI.Models.Ollama;
 using BC_LocalAI.Services;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
@@ -33,9 +34,12 @@ public sealed class OllamaAIServiceTests
         Assert.Equal("qwen3:4b", root.GetProperty("model").GetString());
         Assert.False(root.GetProperty("stream").GetBoolean());
         Assert.False(root.GetProperty("think").GetBoolean());
-        Assert.Equal(
-            "Answer the user briefly in the same language as the user. Return a JSON object containing only an answer field with the final answer.",
-            root.GetProperty("system").GetString());
+        var system = root.GetProperty("system").GetString();
+        Assert.Equal(OllamaGenerateRequest.SystemPrompt, system);
+        Assert.StartsWith(
+            "Answer the user briefly in the same language as the user. Return a JSON object containing only an answer field with the final answer.", system);
+        Assert.Contains("never repeat or restate the user's message", system);
+        Assert.Contains("Examples of the expected behaviour", system);
 
         var format = root.GetProperty("format");
         Assert.Equal("object", format.GetProperty("type").GetString());

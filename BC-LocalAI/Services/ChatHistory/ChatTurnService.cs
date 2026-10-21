@@ -144,14 +144,16 @@ public static class ConversationPrompt
 
         if (pairs.Count == 0) return question;
 
-        var prompt = new StringBuilder().AppendLine(Header).AppendLine(Open);
+        // Always "\n", never Environment.NewLine: the model reads the line breaks, and on Windows ("\r\n") the same history changed the answer
+        // ("5 + 4" followed up as 7 instead of 9 with the AI-008 system prompt) while "\n" gave 9. The prompt must not depend on the OS.
+        var prompt = new StringBuilder().Append(Header).Append('\n').Append(Open).Append('\n');
         foreach (var (asked, answered) in pairs)
         {
-            prompt.Append("User: ").AppendLine(Neutralize(asked));
-            prompt.Append("Assistant: ").AppendLine(Neutralize(answered));
+            prompt.Append("User: ").Append(Neutralize(asked)).Append('\n');
+            prompt.Append("Assistant: ").Append(Neutralize(answered)).Append('\n');
         }
 
-        return prompt.AppendLine(Close).AppendLine(QuestionLabel).Append(question).ToString();
+        return prompt.Append(Close).Append('\n').Append(QuestionLabel).Append('\n').Append(question).ToString();
     }
 
     // Stored text cannot close the history block early, open a fake one, or start a line that looks like a "User:" / "Assistant:" turn:

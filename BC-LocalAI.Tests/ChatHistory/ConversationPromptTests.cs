@@ -25,7 +25,7 @@ public sealed class ConversationPromptTests
             [Message(MessageRole.User, "q1"), Message(MessageRole.Assistant, "a1"), Message(MessageRole.User, "q2"), Message(MessageRole.Assistant, "a2")],
             "q3");
 
-        var nl = Environment.NewLine;
+        var nl = "\n";   // the template never uses the OS newline
         Assert.Equal(
             $"{ConversationPrompt.Header}{nl}<conversation>{nl}User: q1{nl}Assistant: a1{nl}User: q2{nl}Assistant: a2{nl}</conversation>{nl}Current question:{nl}q3",
             prompt);
@@ -67,6 +67,15 @@ public sealed class ConversationPromptTests
         var turnLines = prompt.Split('\n').Select(l => l.TrimEnd('\r')).Where(l => l.StartsWith("User:") || l.StartsWith("Assistant:")).ToList();
 
         Assert.Equal(["User: q", "Assistant: fine"], turnLines);
+    }
+
+    [Fact]
+    public void ThePromptUsesLineFeedOnly_NotTheOsNewline()
+    {
+        var prompt = ConversationPrompt.Compose(
+            [Message(MessageRole.User, "q\r\nsecond line"), Message(MessageRole.Assistant, "a\r\nmore")], "now");
+
+        Assert.DoesNotContain('\r', prompt);
     }
 
     private static int CountOf(string text, string value)
