@@ -108,36 +108,56 @@ public sealed class MySqlChatHistoryRepository(IOptions<ChatHistoryOptions> opti
         ChatHistoryRules.EnsureValidMessage(role, content);
         return !IsUser(userId) ? WhenCancelled<ChatMessage?>(cancellationToken, null) : InTransaction(cancellationToken, async (connection, transaction) =>
         {
-            // The owner-filtered row lock serializes sequence numbers of one conversation; the unique key is only a backstop.
-            long next;
-            await using (var select = Command(connection, transaction,
-                             "SELECT c.NextSequence FROM Conversations c WHERE " + Owned + " FOR UPDATE"))
-            {
-                Add(select, conversationId, userId);
-                if (await select.ExecuteScalarAsync(cancellationToken) is not long sequence) return null;
-                next = sequence;
-            }
-
+            if (await LockNextSequence(connection, transaction, userId, conversationId, cancellationToken) is not { } next) return null;
             var now = Now();
-            var message = new ChatMessage(Guid.NewGuid(), conversationId, next, role, content,
-                role == MessageRole.User ? MessageStatus.Completed : MessageStatus.Pending, null, now, now);
-            await using (var insert = Command(connection, transaction,
-                             "INSERT INTO Messages (Id, ConversationId, Sequence, Role, Content, Status, ErrorCode, CreatedAt, UpdatedAt) " +
-                             "VALUES (@id, @conversation, @sequence, @role, @content, @status, NULL, @now, @now)"))
-            {
-                insert.Parameters.Add("@id", MySqlDbType.Binary).Value = message.Id.ToByteArray(bigEndian: true);
-                insert.Parameters.Add("@conversation", MySqlDbType.Binary).Value = conversationId.ToByteArray(bigEndian: true);
-                insert.Parameters.Add("@sequence", MySqlDbType.Int64).Value = next;
-                insert.Parameters.Add("@role", MySqlDbType.VarChar).Value = RoleText(role);
-                insert.Parameters.Add("@content", MySqlDbType.MediumText).Value = content;
-                insert.Parameters.Add("@status", MySqlDbType.VarChar).Value = StatusText(message.Status);
-                insert.Parameters.Add("@now", MySqlDbType.DateTime).Value = now.UtcDateTime;
-                await insert.ExecuteNonQueryAsync(cancellationToken);
-            }
-
-            await Touch(connection, transaction, conversationId, now, nextSequence: true, cancellationToken);
+            var message = await Insert(connection, transaction, conversationId, next, role, content, now, cancellationToken);
+            await Touch(connection, transaction, conversationId, now, sequencesUsed: 1, cancellationToken);
             return message;
         });
+    }
+
+    public Task<ChatTurnMessages?> AddTurnAsync(
+        string userId, Guid conversationId, string question, CancellationToken cancellationToken = default)
+    {
+        ChatHistoryRules.EnsureValidMessage(MessageRole.User, question);
+        return !IsUser(userId) ? WhenCancelled<ChatTurnMessages?>(cancellationToken, null) : InTransaction(cancellationToken, async (connection, transaction) =>
+        {
+            // One transaction: either both the question and its answer placeholder exist, or neither does.
+            if (await LockNextSequence(connection, transaction, userId, conversationId, cancellationToken) is not { } next) return null;
+            var now = Now();
+            var asked = await Insert(connection, transaction, conversationId, next, MessageRole.User, question, now, cancellationToken);
+            var answer = await Insert(connection, transaction, conversationId, next + 1, MessageRole.Assistant, "", now, cancellationToken);
+            await Touch(connection, transaction, conversationId, now, sequencesUsed: 2, cancellationToken);
+            return (ChatTurnMessages?)new ChatTurnMessages(asked, answer);
+        });
+    }
+
+    // The owner-filtered row lock serializes sequence numbers of one conversation; the unique key is only a backstop.
+    private async Task<long?> LockNextSequence(MySqlConnection connection, MySqlTransaction transaction, string userId, Guid conversationId,
+        CancellationToken cancellationToken)
+    {
+        await using var select = Command(connection, transaction, "SELECT c.NextSequence FROM Conversations c WHERE " + Owned + " FOR UPDATE");
+        Add(select, conversationId, userId);
+        return await select.ExecuteScalarAsync(cancellationToken) is long sequence ? sequence : null;
+    }
+
+    private async Task<ChatMessage> Insert(MySqlConnection connection, MySqlTransaction transaction, Guid conversationId, long sequence,
+        MessageRole role, string content, DateTimeOffset now, CancellationToken cancellationToken)
+    {
+        var message = new ChatMessage(Guid.NewGuid(), conversationId, sequence, role, content,
+            role == MessageRole.User ? MessageStatus.Completed : MessageStatus.Pending, null, now, now);
+        await using var insert = Command(connection, transaction,
+            "INSERT INTO Messages (Id, ConversationId, Sequence, Role, Content, Status, ErrorCode, CreatedAt, UpdatedAt) " +
+            "VALUES (@id, @conversation, @sequence, @role, @content, @status, NULL, @now, @now)");
+        insert.Parameters.Add("@id", MySqlDbType.Binary).Value = message.Id.ToByteArray(bigEndian: true);
+        insert.Parameters.Add("@conversation", MySqlDbType.Binary).Value = conversationId.ToByteArray(bigEndian: true);
+        insert.Parameters.Add("@sequence", MySqlDbType.Int64).Value = sequence;
+        insert.Parameters.Add("@role", MySqlDbType.VarChar).Value = RoleText(role);
+        insert.Parameters.Add("@content", MySqlDbType.MediumText).Value = content;
+        insert.Parameters.Add("@status", MySqlDbType.VarChar).Value = StatusText(message.Status);
+        insert.Parameters.Add("@now", MySqlDbType.DateTime).Value = now.UtcDateTime;
+        await insert.ExecuteNonQueryAsync(cancellationToken);
+        return message;
     }
 
     public Task<ChatMessage?> UpdateMessageAsync(
@@ -171,7 +191,7 @@ public sealed class MySqlChatHistoryRepository(IOptions<ChatHistoryOptions> opti
                 if (await update.ExecuteNonQueryAsync(cancellationToken) != 1) throw new ChatHistoryUnavailableException();
             }
 
-            await Touch(connection, transaction, current.ConversationId, now, nextSequence: false, cancellationToken);
+            await Touch(connection, transaction, current.ConversationId, now, sequencesUsed: 0, cancellationToken);
             return current with { Content = content, Status = status, ErrorCode = errorCode, UpdatedAt = now };
         });
 
@@ -288,10 +308,11 @@ public sealed class MySqlChatHistoryRepository(IOptions<ChatHistoryOptions> opti
     }
 
     private async Task Touch(MySqlConnection connection, MySqlTransaction transaction, Guid conversationId, DateTimeOffset now,
-        bool nextSequence, CancellationToken cancellationToken)
+        int sequencesUsed, CancellationToken cancellationToken)
     {
         await using var command = Command(connection, transaction,
-            "UPDATE Conversations SET UpdatedAt = @now" + (nextSequence ? ", NextSequence = NextSequence + 1" : "") + " WHERE Id = @conversation");
+            "UPDATE Conversations SET UpdatedAt = @now, NextSequence = NextSequence + @used WHERE Id = @conversation");
+        command.Parameters.Add("@used", MySqlDbType.Int32).Value = sequencesUsed;
         command.Parameters.Add("@conversation", MySqlDbType.Binary).Value = conversationId.ToByteArray(bigEndian: true);
         command.Parameters.Add("@now", MySqlDbType.DateTime).Value = now.UtcDateTime;
         await command.ExecuteNonQueryAsync(cancellationToken);

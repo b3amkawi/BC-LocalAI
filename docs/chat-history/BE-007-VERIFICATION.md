@@ -17,20 +17,20 @@ review), budget 1500 estimated tokens, MySqlConnector (no new package). **Off by
 Files outside chat history: `Program.cs` (registration, 404 gate, history-only model-state code), `ChatController` /
 `ChatStreamController` (optional `conversationId`), `ChatRequest` / `ChatResponse` / `StreamStartedEvent` (optional fields, absent
 without a conversation), `tools/Sec001Fixtures` + `scripts/security/local-mysql.ps1` (opt-in `be007-mysql` fixture),
-`TestSupport.cs` (pins `ChatHistory:*`), `docs/devops/test-baseline.json` (.NET 781 → 819), README.
+`TestSupport.cs` (pins `ChatHistory:*`), `docs/devops/test-baseline.json` (.NET 781 → 821), README.
 
 ## 2. Tests actually run
 
 | Suite | Result |
 |---|---|
 | `dotnet build BC-LocalAI.slnx -c Release --no-incremental` | 0 warnings, 0 errors |
-| `dotnet test BC-LocalAI.slnx` (Development) | **819** passed |
-| Same, `ASPNETCORE_ENVIRONMENT=Production` | **819** passed |
-| Same with hostile environment (`Authentication__Enabled=true`, idle 999, absolute 1, `MaxSessions=1`, `ChatHistory__Enabled=true`, budget 1, checkpoint 60) | **819** passed (settings pinned in tests) |
+| `dotnet test BC-LocalAI.slnx` (Development) | **821** passed |
+| Same, `ASPNETCORE_ENVIRONMENT=Production` | **821** passed |
+| Same with hostile environment (`Authentication__Enabled=true`, idle 999, absolute 1, `MaxSessions=1`, `ChatHistory__Enabled=true`, budget 1, checkpoint 60) | **821** passed (settings pinned in tests) |
 | `node --test "tests/ui/*.test.mjs"` | 61 passed |
 | `python -m unittest discover -s tests` | 143 passed |
 | `check_test_counts.py` / secret scan / doc links / CI script tests | all gates passed / clean / OK / OK |
-| Live MySQL `tests/BE007.MySqlTests` (fixture `be007-mysql`, 127.0.0.1:3320) | **43** passed, 1 skipped by default (real-model check below) |
+| Live MySQL `tests/BE007.MySqlTests` (fixture `be007-mysql`, 127.0.0.1:3320) | **44** passed, 1 skipped by default (real-model check below) |
 | Real model: same suite with `BE007_LIVE_OLLAMA=1`, Ollama qwen3:4b | **1** passed, 3 runs |
 | Live MySQL `tests/BE005.MySqlTests` on a **fresh** `be005-mysql` fixture built with the changed fixture tool | 16 passed (BE-005 + BE-006 unaffected) |
 | Fixture checks (`local-mysql.ps1 -Action Verify`) | 11/11 on both fixtures |
@@ -39,7 +39,8 @@ What the tests cover:
 
 - **Repository contract** (runs unchanged on the in-memory reference and on MySQL): owner on every call, same answer for missing /
   deleted / someone else's (IDOR), exact owner comparison (case, trailing space), paging without gaps or duplicates (timestamp ties),
-  forged cursors, message state machine, Thai/emoji text unchanged, recent messages for context, cancellation changes nothing.
+  forged cursors, message state machine, Thai/emoji text unchanged, recent messages for context, question + answer placeholder
+  created together with consecutive sequence numbers, cancellation changes nothing.
 - **MySQL only**: 24 parallel writers get sequence numbers 1–24 (row lock), data survives a new connection pool, ids stored in RFC byte
   order and times in UTC microseconds (what the API returns equals what is stored), CHECK constraints refuse a blank completed answer /
   a failed answer without a code / an unknown status even when the C# rules are bypassed, the runtime account cannot DELETE, read
@@ -50,7 +51,8 @@ What the tests cover:
   changes nothing; 400 codes for bad id / limit / cursor / JSON / title; paging through the API.
 - **Chat in a conversation**: turn saved, earlier completed pairs sent as context (first question sent exactly as typed); a failed
   answer stored as `failed` with its code, never `completed`, and not reused as context; context budget keeps the newest turns;
-  double submit → 409 and the AI is not called, an answer abandoned longer than the AI deadline + 60 s no longer blocks; storage down
+  double submit → 409 and the AI is not called, an answer abandoned longer than the AI deadline + 60 s no longer blocks, reads as
+  `failed INTERRUPTED` (reading never writes) and is closed as such at the next question; storage down
   → 503 before the AI is called (chat, stream, list); conversation deleted while answering → 404, nothing stored; session ended while
   waiting → 401 and the answer stored as `failed AUTH_SESSION_ENDED`, its text not returned or stored.
 - **Stream**: `started` carries the ids; the answer stays `pending` while pieces arrive and becomes `completed` only after the full
@@ -74,7 +76,8 @@ history block (3) · stream sends `completed` without saving (1) · no stream ch
 error saved as completed (1) · history routes reachable while disabled (7) · chat session end not recorded (**survived first**; test
 added, then 1).
 MySQL (live): owner filter removed (4) · deleted conversations visible (2) · no row lock for sequence numbers (1) · update of any
-owner's message (1) · times not truncated to microseconds (1).
+owner's message (1) · times not truncated to microseconds (1) · turn insert advances the sequence counter by 1 instead of 2 (2).
+Follow-up round: abandoned answer not shown as interrupted (1) · abandoned answer not closed at the next question (1).
 
 ### Migration / rollback rehearsal
 
@@ -109,10 +112,9 @@ non-empty tables (guard routine cleaned up), Down on empty tables, Up again with
 - **Retention**: no automatic purge, no restore; the data owner must set the retention period and how deleted data (and backups) are erased.
 - **AI Engineer review**: the prompt template and the 1500-token estimate (system + template + history + question + 1024 output must fit
   the model's context window); the real-model check is one scenario on one machine.
-- **Crash recovery**: an answer interrupted by a process crash stays `pending`/`streaming`; readers must show it as interrupted. After
-  the AI deadline + 60 s it no longer blocks the conversation. No background job rewrites it.
+- **Crash recovery**: an answer interrupted by a process crash is shown as `failed INTERRUPTED` after the AI deadline + 60 s and is
+  closed in the database at the next question in that conversation (no background job; a conversation never used again keeps the raw
+  `pending`/`streaming` row, which the API still shows as interrupted).
 - **Concurrency**: one answer per conversation (409); no idempotency key, so a retried request after a lost response creates a new turn.
-- Question and answer placeholder are two inserts, not one transaction: a failure between them leaves a question without an answer
-  (shown as such, not used as context).
 - Paging is live, not a snapshot (documented for FE-003).
 - Not enabled in a real deployment until FE-003, HTTPS, the history account and the migration are in place.

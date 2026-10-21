@@ -27,6 +27,7 @@ public sealed class ChatHistoryPreparationBoundaryTests
         public Task<Conversation?> RenameConversationAsync(string u, Guid id, string t, CancellationToken c = default) => throw Touched();
         public Task<bool> DeleteConversationAsync(string u, Guid id, CancellationToken c = default) => throw Touched();
         public Task<ChatMessage?> AddMessageAsync(string u, Guid id, MessageRole r, string t, CancellationToken c = default) => throw Touched();
+        public Task<ChatTurnMessages?> AddTurnAsync(string u, Guid id, string q, CancellationToken c = default) => throw Touched();
         public Task<ChatMessage?> UpdateMessageAsync(string u, Guid id, string t, MessageStatus s, string? e = null, CancellationToken c = default) => throw Touched();
         public Task<Page<ChatMessage>?> ListMessagesAsync(string u, Guid id, PageRequest p, CancellationToken c = default) => throw Touched();
         public Task<IReadOnlyList<ChatMessage>?> GetRecentMessagesAsync(string u, Guid id, int n, CancellationToken c = default) => throw Touched();

@@ -43,6 +43,14 @@ public interface IChatHistoryRepository
     Task<ChatMessage?> AddMessageAsync(
         string userId, Guid conversationId, MessageRole role, string content, CancellationToken cancellationToken = default);
 
+    /// <summary>
+    /// Adds a user question (completed) and the pending placeholder of its answer in ONE transaction, with consecutive sequence
+    /// numbers: either both exist or neither does, so a failure can never leave a question without its answer row.
+    /// </summary>
+    /// <returns>Both messages, or null when the conversation is not found for this user.</returns>
+    /// <exception cref="ChatHistoryValidationException">An empty or invalid question.</exception>
+    Task<ChatTurnMessages?> AddTurnAsync(string userId, Guid conversationId, string question, CancellationToken cancellationToken = default);
+
     /// <summary>Moves an assistant message to its next state (see <see cref="ChatHistoryRules.EnsureTransition"/>).</summary>
     /// <returns>The updated message, or null when it is not found for this user.</returns>
     /// <exception cref="ChatHistoryValidationException">The transition is not allowed.</exception>

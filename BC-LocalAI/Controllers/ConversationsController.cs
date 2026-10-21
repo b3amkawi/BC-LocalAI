@@ -19,7 +19,7 @@ namespace BC_LocalAI.Controllers;
 [Route("api/conversations")]
 [Authorize(Policy = BcPolicies.ChatUser)]
 [ChatHistoryErrors]
-public sealed class ConversationsController(IChatHistoryRepository history) : ControllerBase
+public sealed class ConversationsController(IChatHistoryRepository history, ChatTurnService turns) : ControllerBase
 {
     public const string NotFoundCode = "CONVERSATION_NOT_FOUND";
     public const string NotFoundMessage = "ไม่พบบทสนทนา";
@@ -62,7 +62,7 @@ public sealed class ConversationsController(IChatHistoryRepository history) : Co
     public async Task<IActionResult> Messages(string id, [FromQuery] string? limit, [FromQuery] string? cursor,
         CancellationToken cancellationToken) =>
         await history.ListMessagesAsync(UserId, Id(id), Page(limit, cursor), cancellationToken) is { } page
-            ? Ok(new PageDto<MessageDto>(page.Items.Select(MessageDto.From).ToList(), page.NextCursor))
+            ? Ok(new PageDto<MessageDto>(page.Items.Select(m => MessageDto.From(turns.Present(m))).ToList(), page.NextCursor))
             : ConversationNotFound();
 
     // The authorization policy guarantees a signed-in user; a missing id is a server fault, never "anonymous history".

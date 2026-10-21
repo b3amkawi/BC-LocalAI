@@ -132,6 +132,35 @@ internal sealed class InMemoryChatHistoryRepository(Func<DateTimeOffset> clock) 
         }
     }
 
+    public Task<ChatTurnMessages?> AddTurnAsync(
+        string userId, Guid conversationId, string question, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        ChatHistoryRules.EnsureValidMessage(MessageRole.User, question);
+        lock (_gate)
+        {
+            var stored = FindOwned(userId, conversationId);
+            if (stored is null)
+            {
+                return Task.FromResult<ChatTurnMessages?>(null);
+            }
+
+            var now = clock();
+            var asked = new ChatMessage(Guid.NewGuid(), conversationId, stored.NextSequence, MessageRole.User, question,
+                MessageStatus.Completed, null, now, now);
+            var answer = new ChatMessage(Guid.NewGuid(), conversationId, stored.NextSequence + 1, MessageRole.Assistant, "",
+                MessageStatus.Pending, null, now, now);
+            _messages[asked.Id] = asked;
+            _messages[answer.Id] = answer;
+            _conversations[conversationId] = stored with
+            {
+                NextSequence = stored.NextSequence + 2,
+                Conversation = stored.Conversation with { UpdatedAt = now }
+            };
+            return Task.FromResult<ChatTurnMessages?>(new ChatTurnMessages(asked, answer));
+        }
+    }
+
     public Task<ChatMessage?> UpdateMessageAsync(
         string userId, Guid messageId, string content, MessageStatus status, string? errorCode = null,
         CancellationToken cancellationToken = default)

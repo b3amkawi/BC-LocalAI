@@ -25,7 +25,21 @@ public sealed class ChatTurnService(
     TimeProvider clock,
     ILogger<ChatTurnService> logger)
 {
+    public const string InterruptedCode = "INTERRUPTED";
+
     public bool Enabled => options.Value.Enabled;
+
+    /// <summary>An unfinished assistant answer that has not moved for longer than <see cref="RunningWindow"/>.</summary>
+    public bool IsAbandoned(ChatMessage message) =>
+        message.Role == MessageRole.Assistant && !ChatHistoryRules.IsFinal(message.Status)
+        && clock.GetUtcNow() - message.UpdatedAt >= RunningWindow;
+
+    /// <summary>
+    /// How a message is shown: an abandoned answer reads as failed <see cref="InterruptedCode"/> even before it is closed in the
+    /// database (that happens at the next question in the conversation). Reading never writes.
+    /// </summary>
+    public ChatMessage Present(ChatMessage message) =>
+        IsAbandoned(message) ? message with { Status = MessageStatus.Failed, ErrorCode = InterruptedCode } : message;
 
     /// <summary>An unfinished answer older than this is treated as abandoned (a crash or a lost process), not as still running.</summary>
     public TimeSpan RunningWindow => TimeSpan.FromSeconds(ollama.Value.TimeoutSeconds + 60);
@@ -39,16 +53,19 @@ public sealed class ChatTurnService(
         if (recent is null) return null;
 
         var running = recent.LastOrDefault(m => m.Role == MessageRole.Assistant && !ChatHistoryRules.IsFinal(m.Status));
-        if (running is not null && clock.GetUtcNow() - running.UpdatedAt < RunningWindow)
+        if (running is not null && !IsAbandoned(running))
             throw new ChatTurnConflictException();
+
+        // Answers left unfinished by a crash are closed now, so they read as interrupted everywhere (not "still running").
+        foreach (var abandoned in recent.Where(IsAbandoned))
+            await FinishQuietly(new ChatTurn(userId, conversationId, Guid.Empty, abandoned.Id, ""), abandoned.Content,
+                MessageStatus.Failed, InterruptedCode);
 
         var context = contextBuilder.Build(recent, options.Value.ContextTokenBudget);
         var prompt = ConversationPrompt.Compose(context.Messages, question);
 
-        var asked = await history.AddMessageAsync(userId, conversationId, MessageRole.User, question, cancellationToken);
-        if (asked is null) return null;
-        var answer = await history.AddMessageAsync(userId, conversationId, MessageRole.Assistant, "", cancellationToken);
-        return answer is null ? null : new ChatTurn(userId, conversationId, asked.Id, answer.Id, prompt);
+        var added = await history.AddTurnAsync(userId, conversationId, question, cancellationToken);
+        return added is null ? null : new ChatTurn(userId, conversationId, added.Question.Id, added.Answer.Id, prompt);
     }
 
     /// <summary>Partial text of a streaming answer.</summary>

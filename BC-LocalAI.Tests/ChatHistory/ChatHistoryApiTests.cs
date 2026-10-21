@@ -321,6 +321,30 @@ public sealed class ChatHistoryApiTests(WebApplicationFactory<Program> factory) 
     }
 
     [Fact]
+    public async Task AnAnswerAbandonedByACrash_ReadsAsInterrupted_AndIsClosedAtTheNextQuestion()
+    {
+        var host = Create(factory);
+        var alice = await SignedIn(host, Alice);
+        var id = await NewConversation(alice);
+        var crashed = (await host.Repo.AddTurnAsync(Alice, id, "asked before the crash"))!;
+        await host.Repo.UpdateMessageAsync(Alice, crashed.Answer.Id, "half an ans", MessageStatus.Streaming);
+
+        // Still inside the AI deadline: it is running, shown as such.
+        Assert.Equal("streaming", (await Messages(alice, id))[1].GetProperty("status").GetString());
+
+        host.Clock.Advance(TimeSpan.FromMinutes(5));
+        var shown = (await Messages(alice, id))[1];
+        Assert.Equal(("failed", "INTERRUPTED", "half an ans"),
+            (shown.GetProperty("status").GetString(), shown.GetProperty("errorCode").GetString(), shown.GetProperty("content").GetString()));
+        Assert.Equal(MessageStatus.Streaming, (await host.Repo.ListMessagesAsync(Alice, id, new PageRequest()))!.Items[1].Status); // reading never writes
+
+        Assert.Equal(HttpStatusCode.OK, (await alice.PostAsync("/api/chat", Json(new { message = "next", conversationId = id }))).StatusCode);
+        var stored = (await host.Repo.ListMessagesAsync(Alice, id, new PageRequest()))!.Items[1];
+        Assert.Equal((MessageStatus.Failed, "INTERRUPTED", "half an ans"), (stored.Status, stored.ErrorCode, stored.Content));
+        Assert.Equal("next", host.Ai.Prompts[^1]);   // the interrupted pair is not context
+    }
+
+    [Fact]
     public async Task HistoryStorageDown_Is503_BeforeTheAIIsCalled_WithoutDetails()
     {
         var host = Create(factory, repository: new DownRepository());
@@ -472,6 +496,7 @@ public sealed class ChatHistoryApiTests(WebApplicationFactory<Program> factory) 
         public Task<Conversation?> RenameConversationAsync(string u, Guid id, string t, CancellationToken c = default) => throw Down();
         public Task<bool> DeleteConversationAsync(string u, Guid id, CancellationToken c = default) => throw Down();
         public Task<ChatMessage?> AddMessageAsync(string u, Guid id, MessageRole r, string t, CancellationToken c = default) => throw Down();
+        public Task<ChatTurnMessages?> AddTurnAsync(string u, Guid id, string q, CancellationToken c = default) => throw Down();
         public Task<ChatMessage?> UpdateMessageAsync(string u, Guid id, string t, MessageStatus s, string? e = null, CancellationToken c = default) => throw Down();
         public Task<Page<ChatMessage>?> ListMessagesAsync(string u, Guid id, PageRequest p, CancellationToken c = default) => throw Down();
         public Task<IReadOnlyList<ChatMessage>?> GetRecentMessagesAsync(string u, Guid id, int n, CancellationToken c = default) => throw Down();

@@ -28,8 +28,9 @@ Code: `ConversationsController`, `ChatController`, `ChatStreamController`, `Chat
 Conversation: `{"id","title","createdAt","updatedAt"}`. Message:
 `{"id","conversationId","sequence","role":"user|assistant","content","status","errorCode","createdAt","updatedAt"}`.
 
-`status`: `completed` is the only finished answer. `pending` / `streaming` = still running (or abandoned by a crash: older than the
-AI deadline + 60 s); `failed` (with `errorCode`) / `cancelled` = interrupted, `content` is the partial text the user saw.
+`status`: `completed` is the only finished answer. `pending` / `streaming` = still running; `failed` (with `errorCode`) / `cancelled`
+= interrupted, `content` is the partial text the user saw. An answer abandoned by a crash (not moved for longer than the AI deadline
++ 60 s) is returned as `failed` with `errorCode` `INTERRUPTED`, and is closed as such in the database at the next question.
 **Show any non-`completed` answer as incomplete, never as an answer.** Render `content` as text (escape HTML).
 
 Paging: `limit` 1–100 (default 20); `cursor` is opaque, pass back `nextCursor` unchanged. Paging is live (not a snapshot): a

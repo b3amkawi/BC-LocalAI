@@ -44,6 +44,9 @@ public sealed record ChatMessage(
     DateTimeOffset CreatedAt,
     DateTimeOffset UpdatedAt);
 
+/// <summary>A question and the placeholder of its answer, created together in one transaction.</summary>
+public sealed record ChatTurnMessages(ChatMessage Question, ChatMessage Answer);
+
 /// <summary>Page request. <paramref name="Cursor"/> is opaque: pass back the value from the previous page.</summary>
 public sealed record PageRequest(int Limit = PageRequest.DefaultLimit, string? Cursor = null)
 {

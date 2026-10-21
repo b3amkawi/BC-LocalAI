@@ -326,6 +326,27 @@ public abstract class ChatHistoryRepositoryContractTests
     }
 
     [Fact]
+    public async Task Turn_AddsTheQuestionAndItsPendingAnswer_Together_OwnerOnly()
+    {
+        var repo = Repo();
+        var conversation = await repo.CreateConversationAsync(Alice, "t");
+        await repo.AddMessageAsync(Alice, conversation.Id, MessageRole.User, "before");
+        Tick();
+
+        var turn = await repo.AddTurnAsync(Alice, conversation.Id, "คำถาม");
+
+        Assert.Equal((2L, MessageRole.User, MessageStatus.Completed, "คำถาม"),
+            (turn!.Question.Sequence, turn.Question.Role, turn.Question.Status, turn.Question.Content));
+        Assert.Equal((3L, MessageRole.Assistant, MessageStatus.Pending, ""),
+            (turn.Answer.Sequence, turn.Answer.Role, turn.Answer.Status, turn.Answer.Content));
+        Assert.Equal(turn.Answer.UpdatedAt, (await repo.GetConversationAsync(Alice, conversation.Id))!.UpdatedAt);
+        Assert.Equal(4L, (await repo.AddMessageAsync(Alice, conversation.Id, MessageRole.User, "after"))!.Sequence);
+        Assert.Null(await repo.AddTurnAsync(Bob, conversation.Id, "q"));
+        await Assert.ThrowsAsync<ChatHistoryValidationException>(() => repo.AddTurnAsync(Alice, conversation.Id, "  "));
+        Assert.Equal(4, (await repo.ListMessagesAsync(Alice, conversation.Id, new PageRequest()))!.Items.Count);
+    }
+
+    [Fact]
     public async Task Recent_ReturnsTheNewestMessagesInConversationOrder_OwnerOnly()
     {
         var repo = Repo();
