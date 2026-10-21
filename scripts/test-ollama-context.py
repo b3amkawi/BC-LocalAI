@@ -10,6 +10,8 @@ limits     input size sweep x language x num_predict x 3 repeats. Three random c
            (prompt_eval_count near the cut size while the text is far longer) against every run.
 multiturn  3-turn conversations in Thai and English: BE-007's single prompt (/api/generate) against /api/chat messages that keep
            format and think:false. Recall of facts from earlier turns.
+outputroom prompt + answer must fit the context together: a 700-token answer to a prompt of 1,500-3,600 tokens; does the code planted
+           at the start survive on every line? Finds the real input limit when the answer is long (num_predict is 1024 in Backend).
 ctx8192    run against an instance started with OLLAMA_CONTEXT_LENGTH=8192 (never change the real configuration): VRAM, prefill
            speed and cold start, and where truncation starts. Pass --base-url of that instance.
 Nothing is changed on Ollama. Exit 0 when Ollama answered.
@@ -37,7 +39,6 @@ QUESTION = {
     "thai": "ช่วยบอกรหัสลับสามรหัสที่ให้ไว้ (รหัสแรก รหัสกลาง และรหัสสุดท้าย) ตามลำดับ",
 }
 QUESTION["mixed"] = QUESTION["english"]
-CUT_SIZE = 2050            # observed: Ollama keeps 4 + the tail and reports this prompt_eval_count when it cuts at context 4096
 SAFE_BYTES_PER_TOKEN = 6.5  # fewest tokens per byte seen with qwen3 (English prose is ~5.9 bytes/token), so bytes/6.5 is a lower bound
 
 
@@ -63,9 +64,10 @@ def answer_text(response):
 
 def tokens_per_unit(base, lang):
     """Real tokens of one filler sentence, from prompt_eval_count at two sizes (the fixed overhead cancels out)."""
-    small = generate(base, FILLER[lang] * 10, 1)["prompt_eval_count"]
-    big = generate(base, FILLER[lang] * 110, 1)["prompt_eval_count"]
-    return (big - small) / 100.0
+    # Sizes stay far below the context (Thai is ~40 tokens per sentence): a cut prompt would make the slope wrong.
+    small = generate(base, FILLER[lang] * 4, 1)["prompt_eval_count"]
+    big = generate(base, FILLER[lang] * 24, 1)["prompt_eval_count"]
+    return (big - small) / 20.0
 
 
 def make_prompt(lang, units, codes):
@@ -81,9 +83,15 @@ def recalled(text, codes):
     return [code in text for code in codes]
 
 
-def truncation_rule(prompt_eval_count, prompt_bytes):
-    """Silent-cut detector: the cut result sits at CUT_SIZE (+-10) while even the most generous token estimate says the prompt was longer."""
-    return abs(prompt_eval_count - CUT_SIZE) <= 10 and prompt_bytes / SAFE_BYTES_PER_TOKEN > CUT_SIZE + 150
+def cut_size(num_ctx=4096):
+    """Measured: when the prompt does not fit, Ollama keeps 4 tokens plus the tail and reports num_ctx/2 + 2 (2050 at 4096, 4098 at 8192)."""
+    return num_ctx // 2 + 2
+
+
+def truncation_rule(prompt_eval_count, prompt_bytes, num_ctx=4096):
+    """Silent-cut detector: the count sits at the cut size (+-10) while even the most generous token estimate says the prompt was longer."""
+    cut = cut_size(num_ctx)
+    return abs(prompt_eval_count - cut) <= 10 and prompt_bytes / SAFE_BYTES_PER_TOKEN > cut + 150
 
 
 def run_limits(base, args, num_ctx_label):
@@ -105,7 +113,7 @@ def run_limits(base, args, num_ctx_label):
                     expected = round(base_tokens + units * tpu + 60)
                     got = recalled(answer_text(r), codes)
                     rows.append({"language": lang, "num_predict": num_predict, "target_tokens": target, "expected_tokens": expected,
-                                 "prompt_eval_count": pec, "truncated": pec < 0.9 * expected, "rule_says_truncated": truncation_rule(pec, len(prompt.encode("utf-8"))),
+                                 "prompt_eval_count": pec, "truncated": pec < 0.9 * expected, "rule_says_truncated": truncation_rule(pec, len(prompt.encode("utf-8")), args.num_ctx),
                                  "recalled_first": got[0], "recalled_middle": got[1], "recalled_last": got[2], "done_reason": r.get("done_reason"),
                                  "seconds": round(time.time() - t0, 2)})
             print(f"{lang} num_predict={num_predict}: {sum(1 for x in rows if x['language'] == lang and x['num_predict'] == num_predict)} runs", flush=True)
@@ -173,6 +181,29 @@ def run_multiturn(base, args):
     return rows
 
 
+def run_outputroom(base, args):
+    """Prompt + answer must fit the context together: when they do not, Ollama shifts the window during generation and drops the oldest tokens.
+    The model is asked to repeat a code from the early part of the prompt on 60 numbered lines (about 700 output tokens); lines with a wrong code show the loss."""
+    rng = random.Random(20261022)
+    rows = []
+    for target in args.sizes or [1500, 2300, 2900, 3100, 3300, 3600]:
+        tpu = tokens_per_unit(base, "english")
+        units = max(4, int((target - 150) / tpu))
+        for rep in range(args.repeats):
+            code = str(rng.randint(100000, 999999))
+            # The code sits after the first ~10% of the text, not in the first tokens Ollama always keeps when it shifts the window.
+            head = max(1, units // 10)
+            prompt = FILLER["english"] * head + f"[SECRET CODE: {code}] " + FILLER["english"] * (units - head) + (
+                "\n\nWrite 60 numbered lines. Every line must be exactly: Line <number>: the secret code is <the secret code from the early part of this message>.")
+            r = generate(base, prompt, 1024)
+            text = answer_text(r)
+            lines = [ln for ln in text.split("\n") if ln.strip().lower().startswith("line")]
+            rows.append({"target_prompt_tokens": target, "prompt_eval_count": r["prompt_eval_count"], "eval_count": r.get("eval_count"), "done_reason": r.get("done_reason"),
+                         "lines": len(lines), "lines_with_right_code": sum(code in ln for ln in lines), "first_code_in_last_line": bool(lines) and code in lines[-1]})
+        print(f"outputroom target={target} done", flush=True)
+    return rows
+
+
 def vram_mb():
     try:
         return int(subprocess.run(["nvidia-smi", "--query-gpu=memory.used", "--format=csv,noheader,nounits"], capture_output=True, text=True, timeout=20).stdout.split()[0])
@@ -195,8 +226,8 @@ def run_ctx(base, args):
     speeds = []
     for tokens in (1000, 3000, 6000):
         units = int(tokens / tokens_per_unit(base, "english"))
-        prompt = FILLER["english"] * units
-        rs = [generate(base, prompt, 1) for _ in range(3)]
+        # A different first line per request: an identical prompt is served from Ollama's prompt cache and its prefill time reads as ~0.
+        rs = [generate(base, f"[run {random.random()}] " + FILLER["english"] * units, 1) for _ in range(3)]
         speeds.append({"prompt_tokens": rs[0]["prompt_eval_count"], "prefill_tokens_per_second": round(statistics.median(x["prompt_eval_count"] / (x["prompt_eval_duration"] / 1e9) for x in rs), 1),
                        "truncated": rs[0]["prompt_eval_count"] < 0.9 * tokens})
     out["prefill"] = speeds
@@ -206,10 +237,11 @@ def run_ctx(base, args):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("mode", choices=("limits", "multiturn", "ctx8192"))
+    ap.add_argument("mode", choices=("limits", "multiturn", "ctx8192", "outputroom"))
     ap.add_argument("--base-url", default="http://127.0.0.1:11434")
     ap.add_argument("--output", required=True)
     ap.add_argument("--repeats", type=int, default=3)
+    ap.add_argument("--num-ctx", type=int, default=4096, help="context length of the instance under test (for the truncation rule)")
     ap.add_argument("--num-predict", type=int, nargs="+", default=[256, 1024, 2048])
     ap.add_argument("--sizes", type=int, nargs="+")
     args = ap.parse_args()
@@ -229,6 +261,8 @@ def main():
         rows = run_multiturn(args.base_url, args)
         result = {**meta, "repeats": args.repeats, "rows": rows, "hit_rate": {m: round(statistics.mean(r["hit"] for r in rows if r["method"] == m), 3)
                                                                          for m in ("single_prompt_generate", "chat_messages")}}
+    elif args.mode == "outputroom":
+        result = {**meta, "repeats": args.repeats, "rows": run_outputroom(args.base_url, args)}
     else:
         result = {**meta, **run_ctx(args.base_url, args)}
     Path(args.output).write_text(json.dumps(result, ensure_ascii=False, indent=2), encoding="utf-8")

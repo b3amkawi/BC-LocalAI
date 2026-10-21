@@ -41,6 +41,12 @@ class TruncationRuleTests(unittest.TestCase):
         self.assertFalse(ctx.truncation_rule(1500, 20000))
         self.assertFalse(ctx.truncation_rule(3900, 20000))
 
+    def test_cut_size_follows_the_context_length(self):
+        self.assertEqual(2050, ctx.cut_size(4096))
+        self.assertEqual(4098, ctx.cut_size(8192))
+        self.assertTrue(ctx.truncation_rule(4098, 40000, 8192))
+        self.assertFalse(ctx.truncation_rule(4098, 40000, 4096))   # not the cut size of a 4096 context
+
     def test_summary_counts_detection_and_false_alarms(self):
         def row(truncated, rule, first=True):
             return {"language": "english", "num_predict": 256, "expected_tokens": 5000 if truncated else 1000, "truncated": truncated,

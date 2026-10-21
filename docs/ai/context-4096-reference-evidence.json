@@ -1,0 +1,29 @@
+{
+  "generated_utc": "2026-10-21 05:24:33",
+  "ollama_version": "0.40.5",
+  "model": "qwen3:4b",
+  "base_url": "http://127.0.0.1:11434",
+  "cold_start_seconds": 3.79,
+  "load_duration_ms": 3671,
+  "vram_mb_before_load": 131,
+  "vram_mb_after_load": 3254,
+  "context_length_reported": 4096,
+  "prefill": [
+    {
+      "prompt_tokens": 1054,
+      "prefill_tokens_per_second": 3379.1,
+      "truncated": false
+    },
+    {
+      "prompt_tokens": 3054,
+      "prefill_tokens_per_second": 3235.0,
+      "truncated": false
+    },
+    {
+      "prompt_tokens": 2050,
+      "prefill_tokens_per_second": 44087.0,
+      "truncated": true
+    }
+  ],
+  "vram_mb_after_long_prompts": 3266
+}
