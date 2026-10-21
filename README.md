@@ -92,6 +92,13 @@ dotnet build .\BC-LocalAI.slnx
 dotnet test .\BC-LocalAI.slnx
 ```
 
+## Login UI preparation (FE-003, offline Mock only)
+
+An opt-in Development/loopback preview is available at `/preview/login`; it is off by default.
+It demonstrates Login/profile/Logout/auth errors with synthetic data, **not real authentication or protected Chat**.
+No credentials are sent to the backend. Session integration and Chat History still require BE-006/BE-007.
+See [scope and run instructions](docs/FE-003-PREPARATION.md) and [verification evidence](docs/FE-003-VERIFICATION.md).
+
 ## Authentication (BE-005, opt-in validation only)
 
 Basic MySQL account authentication is implemented behind `Authentication:Enabled=false` by default.

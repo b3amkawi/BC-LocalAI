@@ -2,8 +2,8 @@
   "_comment": "Minimum number of tests each suite must run. Lower it only in a PR that explains why. Raise it when tests are added.",
   "allowed_skipped": 0,
   "min_tests": {
-    "dotnet": 546,
-    "node": 23,
+    "dotnet": 558,
+    "node": 115,
     "python": 143
   },
   "allowed_skips": {
