@@ -96,17 +96,19 @@ the settings.
 
 | Suite | Result |
 |---|---|
-| `dotnet test` (all, after the merge) Development / Production | **625** passed, 0 warnings (baseline raised 535 → 625) |
-| `dotnet test` with hostile environment (`Authentication__Enabled=true`, idle 999, absolute 1, `MaxSessions=1`) | **625** passed (`MaxSessions` now pinned in `TestSupport.cs` too) |
+| `dotnet test` (all, after the merge) Development / Production | **627** passed, 0 warnings (baseline raised 535 → 627) |
+| `dotnet test` with hostile environment (`Authentication__Enabled=true`, idle 999, absolute 1, `MaxSessions=1`) | **627** passed (`MaxSessions` now pinned in `TestSupport.cs` too) |
 | `node --test "tests/ui/*.test.mjs"` / CI secret scan / doc links / `check_test_counts.py` for .NET and Node | 61 passed / clean / OK / pass |
 | `python -m unittest discover -s tests` | 140 of 141: `test_resource_samples_are_attached_to_scenarios` (benchmark script, no auth code) fails on this machine **and on a clean `main` 8bffcc8** — not caused by this branch, not fixed here |
 | New: `LoginIntegrationTests` (real BE-005 login endpoints) | disabled after login → next `/me` 401; role from the account, not the backend; account disabled / missing / unknown role between password check and sign-in → same 401 `AUTH_INVALID_CREDENTIALS`, no cookie |
 | New: `SessionServiceTests` | sign-in refused for missing / inactive / locked / unknown role / no stamp; profile claims cannot override id, role or session id |
+| New: `OllamaCookieIsolationTests` (Issue §4.2) | signed-in user, real Ollama clients for `/api/chat` and `/api/chat/stream` with a recording stub: the request to Ollama has no `Cookie` / `Authorization` header and the cookie value, an unrelated browser cookie and a bearer token appear nowhere in its URL, headers or body |
 | New: `SessionCapacityTests` | full store fails closed (`AuthenticationDependencyException` → 503); reclaims revoked, idle-expired and 8 h-expired sessions; keeps live ones |
 | Live MySQL (`tests/BE005.MySqlTests`, isolated fixture 127.0.0.1:3318) | BE-005 suite + `Be006LiveSessionTests` (disable / stamp / role changed in MySQL → open session 401 at next request, stays dead after restore, fresh login works); runs serially because tests share fixture accounts |
 
 Mutation check of the integration (each bug made tests fail): inactive account allowed to sign in (2) · reserved profile claims not
-filtered (1) · dead sessions not reclaimed (3) · capacity not enforced (2) · login ignores a refused sign-in (3).
+filtered (1) · dead sessions not reclaimed (3) · capacity not enforced (2) · login ignores a refused sign-in (3) ·
+chat client forwards the browser `Cookie` to Ollama (1) · stream client forwards `Authorization` under another header name (1).
 
 BE-005 files changed in this branch: `AuthenticationController.cs`, `AuthenticationRegistration.cs`, `BasicAuthenticationTicketStore.cs` (removed),
 `AuthenticationApiTests.cs` / `AuthenticationSessionAndLimitTests.cs` (ticket-store tests removed; user store added to the factory).

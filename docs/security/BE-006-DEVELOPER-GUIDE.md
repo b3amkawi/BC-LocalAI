@@ -19,6 +19,7 @@ Issue: #22 · Code: `BC-LocalAI/Security/` · Matrix: [BE-006-AUTHORIZATION-MATR
 
 Cookie: `__Host-BC.LocalAI`, `Secure`, `HttpOnly`, `SameSite=Lax`, `Path=/`, ไม่มี `Domain`, ไม่มี `Expires` (หมดเมื่อปิด browser),
 เนื้อใน cookie เข้ารหัสด้วย ASP.NET Core Data Protection และมีแค่ user id, role, session id (ไม่มีรหัสผ่าน/hash/stamp)
+Cookie และ header `Authorization` ของ browser **ไม่ถูกส่งต่อไป Ollama** (`OllamaCookieIsolationTests`); ห้ามเพิ่มการส่งต่อ header ของผู้ใช้ไปยัง Ollama client
 
 ## 2. การต่อกับ BE-005 (รวมแล้วใน branch นี้)
 
