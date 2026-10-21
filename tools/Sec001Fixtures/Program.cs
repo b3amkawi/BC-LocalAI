@@ -23,8 +23,10 @@ if (args.Length == 2 && args[0] == "verify-db")
 }
 
 // Paths are provided by scripts/security/local-mysql.ps1 after ACL protection is applied.
-if (args.Length is not (2 or 3 or 4) || (args.Length == 4 && args[3] != "be005-attempt-writer"))
-    throw new ArgumentException("Expected private output directory, schema path, optional port and optional BE-005 writer flag.");
+string[] knownFlags = ["be005-attempt-writer", "be007-history"];
+var flags = args.Skip(3).ToArray();
+if (args.Length is < 2 or > 5 || flags.Any(flag => !knownFlags.Contains(flag)) || flags.Distinct().Count() != flags.Length)
+    throw new ArgumentException("Expected private output directory, schema path, optional port and optional flags be005-attempt-writer / be007-history.");
 var output = Path.GetFullPath(args[0]);
 var schema = Path.GetFullPath(args[1]);
 var port = 3307;
@@ -38,10 +40,19 @@ var schemaSql = string.Join(" ", File.ReadAllLines(schema)
     .Where(line => !line.TrimStart().StartsWith("--")));
 // bootstrap.sql is used once by --init-file; local-mysql.ps1 deletes it after the first start.
 var bootstrap = BootstrapScript.Create(secrets, schemaSql, fixtures);
-var writerSecret = args.Length == 4 ? FixtureFactory.RandomSecret() : null;
+var writerSecret = flags.Contains("be005-attempt-writer") ? FixtureFactory.RandomSecret() : null;
 if (writerSecret is not null) bootstrap.AddRange(AttemptWriterBootstrap.Create(writerSecret));
+var historySecret = flags.Contains("be007-history") ? FixtureFactory.RandomSecret() : null;
+if (historySecret is not null)
+{
+    // The BE-007 migration that operators apply, read from the repository next to the SEC-001 schema.
+    var migration = Path.Combine(Path.GetDirectoryName(schema)!, "..", "chat-history", "001-initial.up.sql");
+    bootstrap.AddRange(ChatHistoryBootstrap.Create(historySecret, string.Join(" ", File.ReadAllLines(migration)
+        .Where(line => !line.TrimStart().StartsWith("--")))));
+}
 File.WriteAllLines(Path.Combine(output, "bootstrap.sql"), bootstrap, new UTF8Encoding(false));
 if (writerSecret is not null) File.WriteAllText(Path.Combine(output, "writer.cnf"), BootstrapScript.OptionFile("bc_auth_attempt_writer", writerSecret, port), new UTF8Encoding(false));
+if (historySecret is not null) File.WriteAllText(Path.Combine(output, "history.cnf"), BootstrapScript.OptionFile(ChatHistoryBootstrap.User, historySecret, port), new UTF8Encoding(false));
 // The root secret is never stored: root@localhost cannot connect over TCP under skip-name-resolve, so nobody needs it,
 // and the admin account (this schema + SHUTDOWN) covers every lifecycle step. Recovery of this dev instance = new Initialize.
 foreach (var (name, user, password) in new[]

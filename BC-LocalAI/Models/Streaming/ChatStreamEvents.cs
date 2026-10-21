@@ -2,7 +2,16 @@ using System.Text.Json.Serialization;
 
 namespace BC_LocalAI.Models.Streaming;
 
-public sealed record StreamStartedEvent([property: JsonPropertyName("model")] string Model);
+public sealed record StreamStartedEvent([property: JsonPropertyName("model")] string Model)
+{
+    /// <summary>BE-007: present only when the turn is saved in a conversation.</summary>
+    [JsonPropertyName("conversationId"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public Guid? ConversationId { get; init; }
+
+    /// <summary>BE-007: id of the answer message being saved.</summary>
+    [JsonPropertyName("messageId"), JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public Guid? MessageId { get; init; }
+}
 
 public sealed record StreamDeltaEvent([property: JsonPropertyName("text")] string Text);
 

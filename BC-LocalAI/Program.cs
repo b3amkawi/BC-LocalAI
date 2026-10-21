@@ -6,6 +6,7 @@ using Microsoft.Extensions.Options;
 using BC_LocalAI.Services;
 using BC_LocalAI.Security;
 using BC_LocalAI.Services.Authentication;
+using BC_LocalAI.Services.ChatHistory;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,14 +21,19 @@ builder.Services.AddControllersWithViews()
     .ConfigureApiBehaviorOptions(options =>
     {
         // Malformed JSON / wrong types must follow the same error contract.
-        options.InvalidModelStateResponseFactory = _ => new BadRequestObjectResult(
-            new ApiErrorResponse(new ApiError("INVALID_MESSAGE", "Message is required")));
+        options.InvalidModelStateResponseFactory = context => new BadRequestObjectResult(
+            context.HttpContext.Request.Path.StartsWithSegments(ChatHistoryRegistration.RoutePrefix)
+                // BE-007: history requests have their own error code; the chat contract below is unchanged.
+                ? new ApiErrorResponse(new ApiError("INVALID_REQUEST", "คำขอไม่ถูกต้อง"))
+                : new ApiErrorResponse(new ApiError("INVALID_MESSAGE", "Message is required")));
     });
 // BE-005: login against MySQL, antiforgery, rate limits, the authentication cookie scheme.
 builder.Services.AddLocalAuthentication(builder.Configuration);
 // BE-006: server-side sessions checked on every request, roles and policies, on BE-005's cookie scheme
 // (chat APIs open while Authentication:Enabled is false).
 builder.Services.AddBcLocalAiSecurity(builder.Configuration);
+// BE-007: persistent chat history (off by default; needs authentication and its own database account).
+builder.Services.AddChatHistory(builder.Configuration);
 builder.Services.AddSingleton<IValidateOptions<OllamaOptions>, OllamaOptionsValidator>();
 builder.Services.AddOptions<OllamaOptions>()
     .Bind(builder.Configuration.GetSection(OllamaOptions.SectionName))
@@ -79,6 +85,8 @@ app.UseWhen(context => !context.Request.Path.StartsWithSegments("/api/auth"), br
 app.UseRouting();
 
 // Same-site guard for /api and authentication (BE-006).
+// BE-007: history routes do not exist (404) while ChatHistory:Enabled is false, before authentication can answer 401.
+app.UseChatHistoryGate();
 app.UseBcLocalAiSecurity();
 // Antiforgery must see the authenticated principal, not an anonymous pre-authentication context.
 app.UseMiddleware<AuthenticationBoundaryMiddleware>();
