@@ -77,7 +77,13 @@ internal static class TestApp
                 ["Authentication:Enabled"] = "false",
                 ["Authentication:IdleTimeoutMinutes"] = "30",
                 ["Authentication:AbsoluteLifetimeMinutes"] = "480",
-                ["Authentication:MaxSessions"] = "1024"
+                ["Authentication:MaxSessions"] = "1024",
+                // BE-007: a ChatHistory__* environment variable must not change unrelated tests either.
+                ["ChatHistory:Enabled"] = "false",
+                ["ChatHistory:ConnectionString"] = "",
+                ["ChatHistory:CommandTimeoutSeconds"] = "5",
+                ["ChatHistory:ContextTokenBudget"] = "1500",
+                ["ChatHistory:StreamCheckpointSeconds"] = "2"
             }));
 
     /// <summary>App whose Ollama HttpClient is backed by <paramref name="handler"/>.</summary>

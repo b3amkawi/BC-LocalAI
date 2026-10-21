@@ -1,36 +1,31 @@
-# BE-007 - Persistent Chat History: design draft (groundwork)
+# BE-007 - Persistent Chat History: design
 
-Issue: #23 · Status: **draft for review, not wired into the application** · Branch: `watzapon_BE-007`
+Issue: #23 · Status: **implemented on `watzapon_BE-007`, off by default (`ChatHistory:Enabled`)** · Updated 2026-10-21
+Results: [Verification](BE-007-VERIFICATION.md) · API for FE-003: [API contract](BE-007-API-CONTRACT.md) · [Migration plan](BE-007-MIGRATION-PLAN.md)
 
-อัปเดต 2026-10-20: pull `main` ที่รวม BE-004/FE-002 แล้ว (`91916ea`) เข้า branch ที่ `258f23c`
-รอบนี้ทำเฉพาะส่วนเตรียมตาม Dependencies ของ Issue ไม่ทำ Login, History Controller, DB adapter หรือ DI wiring
-ไม่มีการ merge งาน SEC-001 เข้ามา และไม่ใช้ฐานบัญชีของบริษัท/ฐานทดสอบ SEC-001 เป็นที่เก็บ History
-ผลทดสอบล่าสุดและสิ่งที่ยังไม่ได้ทำอยู่ [BE-007-VERIFICATION.md](BE-007-VERIFICATION.md)
+The 2026-10-20 groundwork (models, rules, context builder, repository contract, draft SQL; by the earlier BE-007 worktree) is kept.
+On 2026-10-21 `main` with SEC-001 / BE-005 / BE-006 was merged in and the feature was completed on top of it.
 
-BE-007 needs BE-005 (login) and BE-006 (session / authorization) before it can be switched on. The issue allows this part to start
-early: *"you can start designing the database schema and repository interfaces before BE-006 is done, but a stable user identity and a
-confirmed authorization contract are needed before real use"*. This document and the code listed below are that early part only.
-
-## 1. What exists now
+## 1. Components
 
 | Item | File | Notes |
 |------|------|-------|
-| Domain types | `BC-LocalAI/Models/ChatHistory/ChatHistoryModels.cs` | `Conversation`, `ChatMessage`, `MessageRole`, `MessageStatus`, `PageRequest`, `Page<T>` |
-| Repository contract | `BC-LocalAI/Services/ChatHistory/IChatHistoryRepository.cs` | every call takes the user id from the session; not-found and not-yours look the same |
-| Business rules | `BC-LocalAI/Services/ChatHistory/ChatHistoryRules.cs` | title rules, page limits, message state machine |
-| Multi-turn context builder (D4) | `BC-LocalAI/Services/ChatHistory/ConversationContextBuilder.cs` | token budget, newest turns first, completed messages only |
-| Reference implementation | `BC-LocalAI.Tests/ChatHistory/InMemoryChatHistoryRepository.cs` | test-only; defines the expected behaviour |
-| Contract tests | `BC-LocalAI.Tests/ChatHistory/ChatHistoryRepositoryContractTests.cs` | abstract: the future database repository inherits it and must pass the same tests |
-
-เพิ่มไฟล์ Migration/Rollback **Draft** ใน `database/chat-history/` พร้อม static contract checks แล้ว แต่ยังไม่ execute กับ MySQL
-Not done on purpose (needs BE-005 / BE-006 or a decision): database access code, applied migrations, API endpoints, DI registration,
-streaming persistence, retention job. `POST /api/chat` และ SSE contract เดิมไม่เปลี่ยน
+| Domain types, DTOs | `Models/ChatHistory/ChatHistoryModels.cs`, `ChatHistoryDtos.cs` | DTOs never carry the owner id or counters |
+| Repository contract | `Services/ChatHistory/IChatHistoryRepository.cs` | owner on every call; not found = not yours |
+| MySQL repository | `Services/ChatHistory/MySqlChatHistoryRepository.cs` | owner + DeletedAt in every statement, row lock for sequences |
+| Rules / cursor | `ChatHistoryRules.cs`, `ChatHistoryCursor.cs` | titles, paging, message state machine |
+| Context (D4) | `ConversationContextBuilder.cs`, `ConversationPrompt` in `ChatTurnService.cs` | token budget, complete pairs only, fixed template |
+| Turn persistence (D3/D5) | `ChatTurnService.cs` | question + answer placeholder, checkpoints, one final state, 409 on double submit |
+| API (D2) | `Controllers/ConversationsController.cs`, chat controllers | see the API contract |
+| Settings / wiring | `Configuration/ChatHistoryOptions.cs`, `ChatHistoryRegistration.cs`, `Program.cs` | validated at startup; 404 gate when off |
+| Migration (D1) | `database/chat-history/*.sql`, `scripts/chat-history/migrate.ps1` | operator tool, approved-target check |
+| Tests | `BC-LocalAI.Tests/ChatHistory/*`, `tests/BE007.MySqlTests` | the same contract runs in memory and on MySQL |
 
 ## 2. Data model
 
 ### Conversations
 
-| Column | Type (MySQL 8 draft) | Rule |
+| Column | Type (MySQL 8) | Rule |
 |--------|----------------------|------|
 | `Id` | `BINARY(16)` (UUID) | primary key; random, not guessable |
 | `UserId` | `VARCHAR(64)` | stable user id from the session (BE-005/006); **never from the request body** |
@@ -42,7 +37,7 @@ streaming persistence, retention job. `POST /api/chat` และ SSE contract �
 
 ### Messages
 
-| Column | Type (MySQL 8 draft) | Rule |
+| Column | Type (MySQL 8) | Rule |
 |--------|----------------------|------|
 | `Id` | `BINARY(16)` | primary key |
 | `ConversationId` | `BINARY(16)` | foreign key -> `Conversations.Id` |
@@ -66,7 +61,7 @@ user:       completed on insert, never changes
   (issue: "do not save an incomplete response as Completed").
 - An interrupted stream keeps its partial text with `failed` / `cancelled`, so the UI can show "the answer was interrupted".
 
-### DDL draft (not executed anywhere)
+### DDL (migration 001, rehearsed on the isolated fixture)
 
 Source of truth: [001-initial.up.sql](../../database/chat-history/001-initial.up.sql)
 และ [001-initial.down.sql](../../database/chat-history/001-initial.down.sql)
@@ -78,13 +73,13 @@ DDL เดิม `ai_ci` ขัดกับ exact identity contract จึงเ
 UUID ใช้ canonical network byte order (ไม่ swap); .NET `Guid.ToByteArray(bigEndian: true)`/`new Guid(bytes, bigEndian: true)`
 ไม่ใช้ byte layout จาก `Guid.ToByteArray()` ค่าเริ่มต้นโดยไม่ตกลงกับ SQL cursor order
 DateTimeOffset ต้องแปลง UTC และอ่านค่าที่ persist แล้วใน precision microseconds ก่อนสร้าง cursor
-UserId 64 ตัวอักษรเป็น Draft เท่านั้น ถ้า BE-005 ยืนยัน ID ยาวกว่านี้ต้องแก้ schema/contract ก่อนใช้
+UserId 64 ตัวอักษรพอสำหรับ `users.id` (UUID 36 ตัว) ของ BE-005; ถ้า id ยาวกว่านี้ต้องแก้ schema ก่อน
 
 - The ownership check is in the query itself (`WHERE c.Id = @id AND c.UserId = @userId AND c.DeletedAt IS NULL`), always parameterized.
 - Proposed sequence allocation: `SELECT NextSequence ... FOR UPDATE` with owner + not-deleted predicate, increment, insert message,
   update conversation activity, commit atomically. Unique key is a backstop, not the locking mechanism.
   ไม่ใช้ bare `MAX(Sequence)+1` โดยไม่มี lock และยังไม่ได้ทดสอบ concurrency กับ MySQL จริง
-- Store messages at most 1 MiB UTF-8 (Draft ceiling, not an AI token budget); reject ill-formed UTF-16 rather than silently replacing it.
+- Store messages at most 1 MiB UTF-8 (storage ceiling, not an AI token budget); reject ill-formed UTF-16 rather than silently replacing it.
   SQL CHECK ป้องกันค่าผิดพื้นฐาน แต่การตรวจ whitespace Unicode, enum, error code, state transitions และการห้ามแก้ terminal state ต้องผ่าน service/repository ด้วย
 - Indexes target owner/deleted/activity/id pagination and conversation/sequence message order; production query plans remain unmeasured.
 
@@ -113,43 +108,45 @@ UserId 64 ตัวอักษรเป็น Draft เท่านั้น �
 
 The default `Utf8TokenEstimator` counts one token per 3 UTF-8 bytes (+4 per message). **This is a heuristic, not a guaranteed upper bound.**
 ตัวอย่างภาษาไทยเดียวไม่ยืนยันทุก prompt/template; ห้ามอ้างว่าระบบจะไม่เกิน context window จาก estimator นี้
-รอ contract จาก AI Engineer (ข้อสังเกตใน Issue เสนอ AI-008 แต่ยังไม่ถือว่ามีงานนั้นอนุมัติแล้ว)
-ต้องรวม system/template/history/current question/output reserve/safety margin และทดสอบภาษาไทยจริงก่อนเชื่อม Ollama
-Builder ใน branch นี้เป็น offline prototype เท่านั้น ไม่มีการเปลี่ยน AI-002 จาก generate prompt เป็น chat messages
 
-## 5. Migration and rollback plan (draft)
+ต่อเข้ากับ chat แล้ว (2026-10-21): `ChatTurnService` อ่านข้อความล่าสุด (ไม่เกิน 200) → builder (budget `ChatHistory:ContextTokenBudget` 1500)
+→ `ConversationPrompt` ใส่เฉพาะคู่ คำถาม/คำตอบ ที่ completed ทั้งคู่ ลงใน template คงที่ (`<conversation>` ... `</conversation>`,
+ข้อความที่เก็บไว้ปิด/เปิด block เองไม่ได้) แล้วตามด้วยคำถามปัจจุบัน; ไม่มีคู่ก่อนหน้า = prompt คือคำถามเดิมทุกตัวอักษร
+AI-002 request ไม่เปลี่ยน (ยัง `/api/generate`, system prompt และ JSON answer format เดิม) — template และ budget รอ AI Engineer review
+ด้วย tokenizer จริง (system + template + history + คำถาม + output 1024 + margin ต้องไม่เกิน context window ของ qwen3:4b ที่ใช้)
+
+## 5. Migration and rollback plan
 
 ดู [BE-007-MIGRATION-PLAN.md](BE-007-MIGRATION-PLAN.md): แยก schema/migrator/runtime permissions,
 DDL implicit commits, partial-apply recovery, empty-only rollback guard และห้าม auto-delete เมื่อมีข้อมูล
-ไม่มี feature flag ที่ implement อยู่แล้ว: ขณะนี้ไม่มี DI registration/History route เลย จึงไม่เปิด persistence โดยปริยาย
-ต้องผ่าน BE-005/006 และ real database/authorization integration tests ก่อน enable
+Feature flag `ChatHistory:Enabled` (false): ปิดอยู่ = route 404 และไม่แตะฐาน; เปิดได้เมื่อ auth เปิด, migration apply แล้ว
+และมี connection string ของ `bc_history_rw` (ตรวจตอนเริ่มแอป) — rollback ของแอป = ปิด flag, ข้อมูลยังอยู่
 
-### Retention / deletion proposal (not approved)
+### Retention / deletion (soft delete now; period pending the data owner)
 
 - Soft delete ซ่อน conversation และ messages จากทุก owner query ทันที; ไม่เท่ากับลบข้อมูลจริง
-- ไม่มี admin-read-all, sharing, restore/purge API หรือ background purge job ในรอบเตรียมนี้
+- ไม่มี admin-read-all, sharing, restore/purge API หรือ background purge job (runtime account ไม่มีสิทธิ์ DELETE)
 - ไม่ตั้ง automatic purge และไม่อ้างว่า retention แบบไม่มีกำหนดได้รับอนุมัติ
 - Leader/data owner ต้องยืนยันระยะเก็บ, grace period, physical erasure ของ messages/backups/audit และ legal constraints ก่อนใช้กับพนักงาน
 - Physical deletion ต้องอยู่ใน transaction/approved job พร้อมสิทธิ์เฉพาะ ไม่แจก DELETE/DDL ให้ runtime โดยไม่จำเป็น
 
-## 6. Open questions (need a decision before implementation)
+## 6. Decisions (2026-10-21, watzapon on Claude Code's recommendation, delegated by the project owner)
 
-| # | Question | Why it matters |
-|---|----------|----------------|
-| 1 | Which database stores chat history? The company MySQL is **read-only** for BC-LocalAI (BE-005), so history needs its own schema or server. | write account, backup, who owns the data |
-| 2 | What is the stable user id (employee id? database key)? Can it change? | `UserId` column; comes from SEC-001 / BE-005 |
-| 3 | Retention: how long are conversations kept? Is delete soft (recoverable) or must it be erased? | `DeletedAt`, purge job, privacy policy |
-| 4 | Does an admin ever read other users' history? (BE-007 lists "Admin Read-All" as out of scope) | keep the "owner only" rule strict |
-| 5 | How is multi-turn context sent to Ollama? The AI-002 contract uses `/api/generate` with one prompt; `/api/chat` with a `messages` array would change the contract. | needs the AI Engineer |
-| 6 | Context token budget and maximum stored message size | AI-004 benchmark |
-| 7 | Data access library (ADO.NET with `MySqlConnector`, Dapper, EF Core)? | new dependency: licence and security review per AGENTS.md section 6 |
+| # | Question | Decision |
+|---|----------|----------|
+| 1 | Where is history stored? | The BC-LocalAI MySQL database (`bc_localai_sec001`, same server as the accounts), own tables, own runtime account `bc_history_rw` with SELECT/INSERT/UPDATE on the two tables only (no DELETE, no DDL, no access to `users`), TLS required. Migrations by a separate migrator account. |
+| 2 | Stable user id | `users.id` (UUID) from the BE-006 session claim `NameIdentifier`; never from the request. No foreign key to `users` (accounts are disabled, not deleted). |
+| 3 | Retention / deletion | Soft delete (`DeletedAt`); no automatic purge and no restore API yet. Retention period and physical erasure (including backups) are for the data owner to decide before go-live. |
+| 4 | Admin reads other users' history? | No (out of scope in the issue; matches SEC-001). |
+| 5 | How is context sent to Ollama? | The AI-002 request is unchanged: one prompt to `/api/generate`, same system prompt and JSON answer format. Earlier completed pairs are written before the question in a fixed template (`ConversationPrompt`); with no earlier pair the prompt is exactly the question. **For review by the AI Engineer.** |
+| 6 | Context budget / message size | `ChatHistory:ContextTokenBudget` 1500 estimated tokens for earlier turns (heuristic estimator; answers keep `MaxOutputTokens` 1024). Stored message ceiling 1 MiB. |
+| 7 | Data access library | MySqlConnector (already used by BE-005), plain parameterized ADO.NET; no new package. |
 
-## 7. Verification of the original groundwork (historical)
+## 7. Verification of the original groundwork (historical, 2026-10-20)
 
 - 93 new unit tests (`FullyQualifiedName~ChatHistory`), all passing; the existing suite is unchanged.
 - Mutation check: each deliberate bug makes tests fail: ownership not checked (2), final states changeable (14), incomplete answers used as
   context (4), skipping a big turn instead of stopping (1), cursor without a tie-breaker (1), `completed` allowed with empty content (2).
-- Not verified: anything against a real database (none exists for this yet), concurrency of `Sequence` allocation in MySQL, API behaviour.
+- At that time not verified: real database, `Sequence` concurrency, API — all verified on 2026-10-21 (see Verification).
 
-ผลปัจจุบัน/AC mapping ดู [Verification](BE-007-VERIFICATION.md)
-Proposed API สำหรับรีวิวก่อน FE-003 ใช้งานจริงอยู่ [API Contract](BE-007-API-CONTRACT.md)
+ผลปัจจุบัน (database จริง, API, mutation) และ AC mapping: [Verification](BE-007-VERIFICATION.md) · API: [API Contract](BE-007-API-CONTRACT.md)

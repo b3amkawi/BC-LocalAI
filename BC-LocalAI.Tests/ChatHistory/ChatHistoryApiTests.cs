@@ -337,6 +337,28 @@ public sealed class ChatHistoryApiTests(WebApplicationFactory<Program> factory) 
     }
 
     [Fact]
+    public async Task Chat_SessionEndedWhileWaitingForTheAnswer_Is401_AndTheAnswerIsStoredAsFailed()
+    {
+        var host = Create(factory);
+        var alice = await SignedIn(host, Alice);
+        var id = await NewConversation(alice);
+        var sessions = host.Security.Factory.Services.GetRequiredService<BC_LocalAI.Security.ISessionStore>();
+        host.Ai.Answer = _ =>
+        {
+            sessions.RevokeAllForUserAsync(Alice, host.Clock.Now).GetAwaiter().GetResult(); // signed out elsewhere meanwhile
+            return "an answer nobody may see";
+        };
+
+        var response = await alice.PostAsync("/api/chat", Json(new { message = "q", conversationId = id }));
+
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
+        Assert.DoesNotContain("nobody may see", await response.Content.ReadAsStringAsync());
+        var stored = (await host.Repo.ListMessagesAsync(Alice, id, new PageRequest()))!.Items[1];
+        Assert.Equal((MessageStatus.Failed, "AUTH_SESSION_ENDED"), (stored.Status, stored.ErrorCode));
+        Assert.DoesNotContain("nobody may see", stored.Content);
+    }
+
+    [Fact]
     public async Task ConversationDeletedWhileTheAnswerIsProduced_TheAnswerIsNotSavedAnywhere()
     {
         var host = Create(factory);

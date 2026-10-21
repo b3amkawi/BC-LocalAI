@@ -1,96 +1,118 @@
-# BE-007 — Preparation Verification / Handoff
+# BE-007 — Verification Report (D7)
 
-วันที่ 2026-10-20 (Asia/Bangkok) · Issue [#23](https://github.com/b3amkawi/BC-LocalAI/issues/23)
-Branch `watzapon_BE-007` · worktree `BC_BE007` · **Partial preparation, NOT the completed feature**
+วันที่ 2026-10-21 (Asia/Bangkok) · Issue [#23](https://github.com/b3amkawi/BC-LocalAI/issues/23) · Branch `watzapon_BE-007`
+(worktree `BC_BE-007`, local branch `be007-work`) · Base: groundwork `4011871` + `main` `babbd61` (SEC-001, BE-005, BE-006) merged in `63e269f`
+Machine: test machine Acer Predator PHN16-72, RTX 4060 Laptop 8 GB (reference spec RTX 4050 Laptop 6 GB) · MySQL 8.0 isolated fixtures only
 
-## 1. Baseline and authorized scope
+[Design](BE-007-DESIGN.md) · [API contract for FE-003](BE-007-API-CONTRACT.md) · [Migration plan](BE-007-MIGRATION-PLAN.md)
 
-ใช้ branch งานเดิมที่มี groundwork commit `1f0ac03` ไม่ลบทิ้งหรือสร้าง branch ชื่อซ้ำ
-ตามคำสั่งผู้ใช้ pull `origin/main` ที่ `91916ea0daf71c22d2abb10e36f97088f3bea63a` ก่อนแก้โค้ด
-merge ใน branch งาน: `258f23c95b333042e75f3aa8188aec258acde65c`
-main มี BE-003/BE-004/FE-002 แล้ว; BE-005/BE-006 ยังเป็น Required dependency ก่อนใช้ History จริง
-SEC-001 ถูกผู้ใช้สั่งหยุด ไม่ได้นำมา merge หรือแก้ Authentication เพื่อข้าม dependency
+## 1. Scope and decisions
 
-รอบนี้ทำ Schema/Migration/Rollback **Draft**, Repository Contract, offline business-rule/context prototype,
-Tests และเอกสารส่งต่อ ตามส่วนที่ Issue อนุญาตให้เตรียมล่วงหน้า
-ไม่มี History Controller, database provider dependency, fake/default owner, DI registration, AI contract change หรือ production deployment
+Built on the 2026-10-20 groundwork (kept): MySQL repository, migration tool, conversation API, chat/stream persistence with
+multi-turn context, settings and startup validation, tests and documents. Decisions (design section 6) were taken by watzapon on
+Claude Code's recommendation: same MySQL database with an own least-privilege runtime account, `users.id` as owner, soft delete with
+retention pending the data owner, no admin read-all, context written into the unchanged AI-002 prompt (template for AI Engineer
+review), budget 1500 estimated tokens, MySqlConnector (no new package). **Off by default** (`ChatHistory:Enabled=false`).
 
-## 2. Defects reproduced before fixes
+Files outside chat history: `Program.cs` (registration, 404 gate, history-only model-state code), `ChatController` /
+`ChatStreamController` (optional `conversationId`), `ChatRequest` / `ChatResponse` / `StreamStartedEvent` (optional fields, absent
+without a conversation), `tools/Sec001Fixtures` + `scripts/security/local-mysql.ps1` (opt-in `be007-mysql` fixture),
+`TestSupport.cs` (pins `ChatHistory:*`), `docs/devops/test-baseline.json` (.NET 781 → 819), README.
 
-Baseline filtered suite ผ่าน93/93 แต่ regression ใหม่12กรณี **fail12/12** (exit1) ก่อนแก้:
+## 2. Tests actually run
 
-| Defect | Evidence / fix |
+| Suite | Result |
 |---|---|
-| Unknown current/next MessageStatus ผ่าน state validation | 4 failing cases → Enum.IsDefined guard |
-| Reference repository รับ undefined MessageRole | failing case → common role/content validation before mutation |
-| Context รับข้อความหลาย Conversation และ Sequence ซ้ำ | 2 failing cases → reject mixed/ambiguous metadata; ไม่ใช่ authorization substitute |
-| Sum token cost int overflow / negative estimator | 2 failing cases → long accumulation + remaining-budget compare + negative rejection |
-| Orphan assistant ถูกส่งเป็น context โดยไม่มีคำถาม | failing case → exclude orphan instead of inventing a turn |
-| Null page กลายเป็น NullReference / cursor length ไม่ bounded | 2 failing cases → safe INVALID_PAGE validation and256-char bound |
+| `dotnet build BC-LocalAI.slnx -c Release --no-incremental` | 0 warnings, 0 errors |
+| `dotnet test BC-LocalAI.slnx` (Development) | **819** passed |
+| Same, `ASPNETCORE_ENVIRONMENT=Production` | **819** passed |
+| Same with hostile environment (`Authentication__Enabled=true`, idle 999, absolute 1, `MaxSessions=1`, `ChatHistory__Enabled=true`, budget 1, checkpoint 60) | **819** passed (settings pinned in tests) |
+| `node --test "tests/ui/*.test.mjs"` | 61 passed |
+| `python -m unittest discover -s tests` | 143 passed |
+| `check_test_counts.py` / secret scan / doc links / CI script tests | all gates passed / clean / OK / OK |
+| Live MySQL `tests/BE007.MySqlTests` (fixture `be007-mysql`, 127.0.0.1:3320) | **43** passed, 1 skipped by default (real-model check below) |
+| Real model: same suite with `BE007_LIVE_OLLAMA=1`, Ollama qwen3:4b | **1** passed, 3 runs |
+| Live MySQL `tests/BE005.MySqlTests` on a **fresh** `be005-mysql` fixture built with the changed fixture tool | 16 passed (BE-005 + BE-006 unaffected) |
+| Fixture checks (`local-mysql.ps1 -Action Verify`) | 11/11 on both fixtures |
 
-จุดพบจาก Source เพิ่มเติม: DDL เดิมใช้ ai_ci ซึ่งขัดกับ exact-owner contract เปลี่ยน draft เป็น utf8mb4_0900_bin/NO PAD
-และแก้คำอธิบาย UTF-8 heuristic ที่เคยรับประกันมากเกินหลักฐาน ตัวอย่างภาษาไทยเดียวไม่ใช่ upper bound สำหรับทุก prompt
-เพิ่ม UTF-8 storage limit/invalid Unicode/error-code tests และทดสอบ conversation activity หลัง update ข้อความ
+What the tests cover:
 
-## 3. Executed checks
+- **Repository contract** (runs unchanged on the in-memory reference and on MySQL): owner on every call, same answer for missing /
+  deleted / someone else's (IDOR), exact owner comparison (case, trailing space), paging without gaps or duplicates (timestamp ties),
+  forged cursors, message state machine, Thai/emoji text unchanged, recent messages for context, cancellation changes nothing.
+- **MySQL only**: 24 parallel writers get sequence numbers 1–24 (row lock), data survives a new connection pool, ids stored in RFC byte
+  order and times in UTC microseconds (what the API returns equals what is stored), CHECK constraints refuse a blank completed answer /
+  a failed answer without a code / an unknown status even when the C# rules are bypassed, the runtime account cannot DELETE, read
+  `users`, DROP or ALTER, a stale writer cannot reopen a completed answer, database down → `ChatHistoryUnavailableException` without
+  inner exception, port or password.
+- **API (real pipeline, BE-006 sessions)**: anonymous 401; create/list/get/rename/delete contract, `Location`, `no-store`, DTO fields
+  only (no owner id); another user gets byte-for-byte the same 404 as for an unknown id on all 6 routes (incl. chat and stream) and
+  changes nothing; 400 codes for bad id / limit / cursor / JSON / title; paging through the API.
+- **Chat in a conversation**: turn saved, earlier completed pairs sent as context (first question sent exactly as typed); a failed
+  answer stored as `failed` with its code, never `completed`, and not reused as context; context budget keeps the newest turns;
+  double submit → 409 and the AI is not called, an answer abandoned longer than the AI deadline + 60 s no longer blocks; storage down
+  → 503 before the AI is called (chat, stream, list); conversation deleted while answering → 404, nothing stored; session ended while
+  waiting → 401 and the answer stored as `failed AUTH_SESSION_ENDED`, its text not returned or stored.
+- **Stream**: `started` carries the ids; the answer stays `pending` while pieces arrive and becomes `completed` only after the full
+  text is stored (then `completed` is sent); partial text saved at checkpoints; an AI error mid-stream stored as `failed` with the
+  partial text; session ended mid-stream stored as `failed AUTH_SESSION_ENDED`.
+- **Off by default**: every history route 404 in Development and Production (also POST/PATCH/DELETE), chat with a conversation 404,
+  chat without one unchanged (no new fields), and a repository that fails the test if touched is never touched.
+- **Startup**: history on with authentication off → the app refuses to start.
+- **Real stack** (`Be007LiveApiTests`): BE-005 login against MySQL → conversation → two chats with context → a new application host
+  (restart) still lists the same 4 completed messages; a conversation of another user inserted in the database → 404 on every route,
+  unchanged, no message written.
+- **Real model** (`Be007LiveOllamaTests`, qwen3:4b, temperature 0): told "ฉันชื่อสมชาย … ชอบสีเขียว", the next `/api/chat` answer contains
+  "สมชาย" and a following `/api/chat/stream` answer contains "เขียว"; all 6 messages stored `completed`, so the JSON answer format of
+  AI-002 still holds with the context template. This shows the template works on this model and machine; it is not a quality
+  evaluation of multi-turn answers.
 
-คำสั่งจาก worktree BE-007; ชุด .NET/JS ใช้ mocks ไม่ต้องมี Ollama/MySQL
+### Mutation check (each deliberate bug made tests fail)
 
-| Command / check | Actual result |
+Application: failed pairs used as context (1) · no double-submit guard (1) · token budget ignored (1) · stored text can close the
+history block (3) · stream sends `completed` without saving (1) · no stream checkpoints (1) · stream AI error not recorded (1) · chat AI
+error saved as completed (1) · history routes reachable while disabled (7) · chat session end not recorded (**survived first**; test
+added, then 1).
+MySQL (live): owner filter removed (4) · deleted conversations visible (2) · no row lock for sequence numbers (1) · update of any
+owner's message (1) · times not truncated to microseconds (1).
+
+### Migration / rollback rehearsal
+
+See [Migration plan section 4](BE-007-MIGRATION-PLAN.md): Up refused on existing tables, Down refused without confirmation and on
+non-empty tables (guard routine cleaned up), Down on empty tables, Up again with runtime grants still working, wrong target refused.
+
+## 3. Acceptance criteria (Issue #23)
+
+| Criterion | Status |
 |---|---|
-| Baseline `dotnet test ... --filter FullyQualifiedName~ChatHistory` | 93 passed |
-| New regression before fix `--filter FullyQualifiedName~ChatHistoryPreparationRegressionTests` | 12 failed / 0 passed ตามที่คาดก่อนแก้ |
-| Focused ChatHistory after first fixes | 105 passed จากนั้น127 passed หลังเพิ่ม DDL/boundary cases |
-| `dotnet build BC-LocalAI.Tests/BC-LocalAI.Tests.csproj -c Release --no-restore` | 0 warnings / 0 errors |
-| Development `dotnet test BC-LocalAI.Tests/BC-LocalAI.Tests.csproj -c Release --no-build` | **557 passed, 0 failed, 0 skipped** |
-| Production คำสั่งเดียวกัน + ASPNETCORE_ENVIRONMENT=Production | **557 passed, 0 failed, 0 skipped** |
-| `node --test 'tests/ui/*.test.mjs'` | **61 passed, 0 failed** |
-| `python -I -X utf8 -m unittest discover -s tests -p 'test_*.py'` | **72 passed, OK, exit0** (181.476s) |
-| Final `dotnet test ... --filter FullyQualifiedName~ChatHistory` หลังแก้คำอธิบาย tests | **129 passed, 0 failed, 0 skipped** |
-| Preparation boundary tests ในชุดเต็ม | ไม่ register repository/context builder และ `/api/conversations` เป็น404 ทั้ง Development/Production |
+| Database schema for Conversations and Messages | ✅ migration 001, applied on the fixture |
+| Migration and rollback plan | ✅ tool + plan + rehearsal (production backup/restore rehearsal: operator, before go-live) |
+| Conversations bound to a stable user id | ✅ `users.id` from the session; never from the client |
+| Several conversations per user | ✅ |
+| Conversation management APIs | ✅ create, list, get, rename, delete, messages |
+| Message persistence | ✅ question completed; answer pending → streaming → final |
+| Multi-turn context | ✅ complete pairs, newest first, unchanged AI-002 request; real-model check passed |
+| Context token budget | ✅ `ContextTokenBudget` (estimate; AI Engineer to confirm with the tokenizer) |
+| Streaming message persistence | ✅ checkpoints + one final state |
+| Incomplete response never stored as completed | ✅ code, CHECK constraints, tests, mutations |
+| Ownership authorization / IDOR prevention | ✅ in every SQL statement; same 404; live + in-process tests |
+| Pagination | ✅ keyset cursors |
+| Data retention / deletion policy | ⚠️ soft delete implemented; **retention period and physical erasure await the data owner** |
+| Safe error handling | ✅ 400/404/409/503 codes, no database details |
+| Unit / integration tests, security verification | ✅ sections 2 |
+| No cross-user data leakage | ✅ tested in-process and on MySQL |
+| Existing chat API not regressed | ✅ all existing chat tests pass; without `conversationId` no new fields and nothing stored |
+| Code reviewed per AGENTS.md | ⚠️ author self-review; independent review in the pull request |
 
-SQL tests เป็น **static contract checks เท่านั้น**: collation/index/FK/state/size guard/rollback opt-in อยู่ในไฟล์
-ไม่ได้รัน MySQL, ไม่ยืนยัน SQL syntax/execution/transactions/concurrency/durability จากผล static tests
-Python มี ResourceWarning เดิมจากการเปิด CSV ใน `tests/test_benchmark_scripts.py` แต่ suite จบ OK
-บันทึกไว้โดยไม่แก้ไฟล์ของทีม AI นอกขอบเขต BE-007 ไม่อ้างว่า output ทุกเครื่องมือไม่มี warning
+## 4. Limitations / remaining
 
-## 4. Mutation evidence (isolated copy only)
-
-สำเนาอยู่ `artifacts/be007-mutation/` ที่ Git-ignore ไม่แก้ Source จริง:
-
-1. เปลี่ยน enum guard `||` เป็น `&&`: tests4กรณี fail
-2. เปลี่ยน mixed-conversation guard ให้ยอมรับ2Conversation: test1กรณี fail
-3. เปลี่ยน UserId collation ใน DDL กลับ ai_ci: static test1กรณี fail
-
-รันพร้อมกันเฉพาะ6กรณี: **6 failed, exit1** ไม่ใช่ compile failure
-คืนโค้ดทั้ง3จุดในสำเนาแล้ว rebuild/rerun: **6 passed, exit0**
-
-## 5. Deliverable / acceptance disposition
-
-| Deliverable / AC group | Status / evidence |
-|---|---|
-| D1 Schema, indexes, migration/rollback plan | Draft SQL + plan + static checks; real rehearsal Not Run |
-| D2 Conversation APIs / pagination | Proposal + repository paging contract/mock tests; live APIs Not implemented |
-| D3 Message persistence | Models/state rules/reference contract; durable DB storage Not implemented |
-| D4 Multi-turn/context budget | Offline prototype tests; AI/template/tokenizer contract unresolved; not wired |
-| D5 Streaming persistence / incomplete status | State tests only; SSE-to-database integration Not implemented |
-| D6 Tests / IDOR / ownership | Reference owner isolation + regression + app gate tested; real auth/DB integration Not Run |
-| D7 Docs / retention | Design, migration plan, API proposal, this evidence; retention policy pending data owner approval |
-| Stable User ID | Opaque repository parameter only; real claim/source/length contract pending BE-005/006 |
-| No cross-user leakage | Tested on test-only reference; no claim of deployed multi-user security |
-| Existing Chat regression | Full .NET/JS tests passed; no Chat Controller/DI/Ollama/FE source changes in this issue |
-| Code review | Author self-check only; independent reviewer approval pending |
-
-## 6. Required before activation
-
-- BE-005/006 complete, approved stable identity/authorization/CSRF/session contracts; never accept UserId from client
-- Approve separate storage/provider/credentials/TLS and run real DB contract tests, concurrent sequence allocation and restart durability
-- Approve API DTOs, retry/idempotency/write-conflict policy, streaming partial/crash recovery
-- AI Engineer confirms multi-turn prompt/template and total token budget (system + current prompt + history + output + margin)
-- Leader/data owner decides retention/deletion/backup erasure, reviews design and real migration/rollback rehearsal
-
-ไม่ปิด Issue #23 และไม่ติ๊กว่าได้ครบตาม Acceptance Criteria จากผลเตรียมงานนี้
-ไม่ได้รัน live Ollama/browser E2E ใหม่ เพราะไม่มีการเชื่อม prototype เข้ากับ request/streaming runtime
-ไม่ได้แก้หรือใช้งานฐาน MySQL80/SEC-001 ไม่เพิ่ม package และไม่ migrate/delete ข้อมูลใด
-
-เอกสาร: [Design](BE-007-DESIGN.md), [Migration plan](BE-007-MIGRATION-PLAN.md), [API proposal](BE-007-API-CONTRACT.md)
+- **Retention**: no automatic purge, no restore; the data owner must set the retention period and how deleted data (and backups) are erased.
+- **AI Engineer review**: the prompt template and the 1500-token estimate (system + template + history + question + 1024 output must fit
+  the model's context window); the real-model check is one scenario on one machine.
+- **Crash recovery**: an answer interrupted by a process crash stays `pending`/`streaming`; readers must show it as interrupted. After
+  the AI deadline + 60 s it no longer blocks the conversation. No background job rewrites it.
+- **Concurrency**: one answer per conversation (409); no idempotency key, so a retried request after a lost response creates a new turn.
+- Question and answer placeholder are two inserts, not one transaction: a failure between them leaves a question without an answer
+  (shown as such, not used as context).
+- Paging is live, not a snapshot (documented for FE-003).
+- Not enabled in a real deployment until FE-003, HTTPS, the history account and the migration are in place.

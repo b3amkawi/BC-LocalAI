@@ -1,6 +1,7 @@
-# BE-007 — Migration / Rollback Plan (Draft)
+# BE-007 — Migration / Rollback Plan
 
-วันที่ 2026-10-20 · **ยังไม่ได้ execute กับ MySQL ใด และยังไม่อนุมัติสำหรับ production**
+วันที่ 2026-10-21 · **Rehearsed on the isolated fixture (127.0.0.1:3320); not approved for production yet**
+Tool: `scripts/chat-history/migrate.ps1 -Action Status|Up|Down -DefaultsFile <migrator.cnf> -Database <db> -ApprovedTarget host:port/db [-ConfirmEmptyRollback]`
 Scope: [Issue #23](https://github.com/b3amkawi/BC-LocalAI/issues/23) ส่วนเตรียม Database Schema / Repository Contract
 
 ## 1. Preconditions / ownership
@@ -36,9 +37,19 @@ Scope: [Issue #23](https://github.com/b3amkawi/BC-LocalAI/issues/23) ส่ว�
 - หลังมีข้อมูลจริง ห้ามใช้ down script นี้ แม้มี backup; rollback แอปโดยปิด feature/คืน binary/config ที่ approved และคงข้อมูลไว้
 - ถ้าต้องแก้ schema/restore/purge ข้อมูล ต้องมี approved runbook พร้อม backup ที่ restore-tested และระบุผลกระทบ/ช่วงข้อมูลที่จะสูญเสีย
 
-## 4. What is verified now
+## 4. What is verified now (2026-10-21, isolated fixture `be007-mysql`, MySQL 8.0)
 
-มีเพียง **static DDL contract checks**: schema source ไม่มี ALTER/DROP/GRANT/USE, มี exact-owner collation,
-indexes/constraints และ rollback approval/non-empty guard อยู่ในไฟล์
-ไม่ได้ยืนยัน SQL syntax/runtime behaviour/permissions/rollback จริงจาก assertions เหล่านี้
-การอนุมัติ schema, apply/rollback rehearsal, real DB integration และ backup restore ยัง Pending/Not Run
+| Step | Result |
+|---|---|
+| `Status` | 2 of 2 tables |
+| `Up` when the tables exist | refused, nothing changed |
+| `Down` without `-ConfirmEmptyRollback` | refused, nothing changed |
+| `Down` with one conversation row | SQL guard refused ("must not be dropped"), tables kept, temporary guard procedure removed (0 routines left) |
+| `Down` on empty tables | both tables dropped (0 of 2) |
+| `Up` again | 2 tables; runtime account `bc_history_rw` works again (table grants are kept by name) |
+| Wrong `-ApprovedTarget` (another host) | refused before any connection |
+| Runtime account | INSERT/SELECT/UPDATE allowed; DELETE, reading `users`, DROP, CREATE, ALTER denied (1142); non-TLS login denied (1045) |
+| Repository contract + storage tests on the migrated schema | pass (see [Verification](BE-007-VERIFICATION.md)) |
+
+Not done: production backup/restore rehearsal, a migration journal table, and approval of the production target. Those stay with the
+operator/data owner before go-live.

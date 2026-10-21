@@ -12,7 +12,7 @@ public interface ITokenEstimator
 /// <summary>
 /// Heuristic estimate without a tokenizer: one token per 3 UTF-8 bytes plus a per-message overhead.
 /// A sample of Thai text does not establish an upper bound for all prompts or chat-template overhead.
-/// Not a production token-budget guarantee: an approved AI multi-turn/tokenizer contract is required before wiring this in.
+/// Not a guarantee: the budget (ChatHistory:ContextTokenBudget) is an estimate; the AI Engineer still has to confirm it with the real tokenizer.
 /// </summary>
 public sealed class Utf8TokenEstimator : ITokenEstimator
 {
@@ -34,7 +34,7 @@ public sealed record ConversationContext(IReadOnlyList<ChatMessage> Messages, in
 /// <item>a user question and the answer to it are kept or dropped together, so the model never sees an answer without its question;</item>
 /// <item>the result is in conversation order (oldest first).</item>
 /// </list>
-/// How the context is sent to Ollama is not decided yet (the AI-002 contract sends one prompt); that is an open point for the AI Engineer.
+/// The chosen messages are written into the one AI-002 prompt by <see cref="ConversationPrompt"/> (template for AI Engineer review).
 /// </summary>
 public sealed class ConversationContextBuilder
 {
