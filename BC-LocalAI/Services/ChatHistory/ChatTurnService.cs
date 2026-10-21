@@ -49,6 +49,9 @@ public sealed class ChatTurnService(
     public async Task<ChatTurn?> BeginAsync(string userId, Guid conversationId, string question, CancellationToken cancellationToken)
     {
         ChatHistoryRules.EnsureValidMessage(MessageRole.User, question);
+        if (contextBuilder.Estimate(question) > options.Value.MaxQuestionTokens)
+            throw new ChatHistoryValidationException("QUESTION_TOO_LONG",
+                "The question is too long for the AI model. Shorten it or split it into several questions.");
         var recent = await history.GetRecentMessagesAsync(userId, conversationId, ChatHistoryRules.MaxRecentMessages, cancellationToken);
         if (recent is null) return null;
 
@@ -151,8 +154,10 @@ public static class ConversationPrompt
         return prompt.AppendLine(Close).AppendLine(QuestionLabel).Append(question).ToString();
     }
 
-    // Stored text cannot close the history block early or open a fake one.
+    // Stored text cannot close the history block early, open a fake one, or start a line that looks like a "User:" / "Assistant:" turn:
+    // every continuation line is indented, so only the template writes a line that begins with a role label.
     private static string Neutralize(string text) =>
         text.Replace(Open, "<conversation >", StringComparison.OrdinalIgnoreCase)
-            .Replace(Close, "</conversation >", StringComparison.OrdinalIgnoreCase);
+            .Replace(Close, "</conversation >", StringComparison.OrdinalIgnoreCase)
+            .ReplaceLineEndings("\n").Replace("\n", "\n  ");
 }

@@ -130,10 +130,12 @@ public sealed class ConversationContextBuilderTests
 
     [Theory]
     [InlineData("", 4)]
-    [InlineData("abc", 5)]          // 3 bytes -> 1 token + overhead
-    [InlineData("abcd", 6)]         // 4 bytes -> 2 tokens (rounded up)
+    [InlineData("abc", 6)]          // 3 ASCII letters -> 1.5 -> 2 tokens + overhead
+    [InlineData("abcd", 6)]         // 4 letters -> 2 tokens
     [InlineData("สวัสดี", 10)]      // 6 Thai characters = 18 bytes -> 6 tokens
-    [InlineData("😊", 6)]           // 4 bytes -> 2 tokens
+    [InlineData("😊", 6)]           // 4 bytes -> 1.33 -> 2 tokens
+    [InlineData("1234", 8)]         // a digit is one token
+    [InlineData("{}[],", 9)]        // so is an ASCII symbol
     public void Utf8Estimator_ProducesDraftHeuristicEstimates(string text, int expected) =>
         Assert.Equal(expected, new Utf8TokenEstimator().Estimate(text));
 
@@ -149,8 +151,23 @@ public sealed class ConversationContextBuilderTests
     [Fact]
     public void DefaultBuilder_UsesTheUtf8Estimator()
     {
-        var context = new ConversationContextBuilder().Build([U("abc"), A("abc")], 10);
+        var context = new ConversationContextBuilder().Build([U("abc"), A("abc")], 12);
 
-        Assert.Equal(10, context.EstimatedTokens);
+        Assert.Equal(12, context.EstimatedTokens);
+    }
+
+    // Real qwen3:4b prompt token counts (scripts/measure-prompt-tokens.py, docs/ai/token-estimate-evidence.json).
+    // The estimate must never be below the real count, otherwise the history overflows the context and Ollama truncates it silently.
+    [Theory]
+    [InlineData("0123456789 3141592653 2718281828 1618033988 ", 1500, 1500)]
+    [InlineData("{}[]()<>;:,.!?@#$%^&*-_=+/\\|~` \"' ", 1500, 882)]
+    [InlineData("{\"id\": 12345, \"name\": \"item_a\", \"tags\": [\"x\", \"y\"], \"ok\": true, \"ratio\": 0.75}\n", 1500, 760)]
+    [InlineData("https://example.com/a/b?id=550e8400-e29b-41d4-a716-446655440000&t=9f86d081884c7d659a2feaa0c55ad015 ", 1500, 1098)]
+    [InlineData("ราคา 1,250 บาท จำนวน 37 ชิ้น รหัส A12B-3456 วันที่ 21/10/2569 โทร 081-234-5678 ", 1500, 1177)]
+    public void Utf8Estimator_IsNotBelowMeasuredRealTokens(string unit, int chars, int realTokens)
+    {
+        var text = string.Concat(Enumerable.Repeat(unit, chars / unit.Length + 1))[..chars];
+
+        Assert.True(new Utf8TokenEstimator().Estimate(text) >= realTokens);
     }
 }
