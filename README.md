@@ -6,8 +6,10 @@ answered by a local Ollama model (`qwen3:4b`) through `OllamaAIService` (BE-002)
 
 > **Known limitations (read before merging / deploying):** an answer longer than the output limit (`Ollama:MaxOutputTokens`, default 1024 tokens) returns `502 AI_RESPONSE_TOO_LARGE`;
 > Ollama answers one request at a time, so many simultaneous users queue and can receive `504 AI_TIMEOUT`; there is no
-> authentication, rate limit or conversation history. The backend streaming endpoint exists, but the current FE-001 page still uses the
-> non-streaming endpoint until FE-002. Details and measurements: [docs/KNOWN-LIMITATIONS.md](docs/KNOWN-LIMITATIONS.md).
+> global AI queue admission control. Authentication and conversation history are opt-in (off by default); FE-002 streams answers.
+> With Authentication enabled, FE-003 provides a protected Login/History UI over HTTPS using the existing server-side sessions.
+> Details: [FE-003 setup](docs/FE-003-REAL-UI.md), [verification](docs/FE-003-REAL-VERIFICATION.md),
+> and historical AI measurements: [docs/KNOWN-LIMITATIONS.md](docs/KNOWN-LIMITATIONS.md).
 
 ## Requirements
 
@@ -22,6 +24,10 @@ dotnet run --project .\BC-LocalAI\BC-LocalAI.csproj --launch-profile http
 
 Open <http://localhost:5290> in a browser: this is the Chat page.
 
+For the authenticated FE-003 UI, do not use the HTTP profile. Use the existing BE-005/006 authentication configuration,
+HTTPS and the BE-007 history configuration. An isolated synthetic-data walkthrough is in
+[FE-003 real UI](docs/FE-003-REAL-UI.md); no company database or production deployment is configured by this walkthrough.
+
 The page works in every environment, including `ASPNETCORE_ENVIRONMENT=Production` with `dotnet run`
 (before this fix the CSS and JavaScript arrived empty there; see `docs/BE-003-VERIFICATION.md` section 5b).
 
@@ -34,6 +40,9 @@ dotnet BC-LocalAI.dll
 ```
 
 ## Chat web page (FE-001, streaming since FE-002)
+
+This section describes the original anonymous page with Authentication disabled. For authenticated, server-persisted history,
+use [the FE-003 workflow](docs/FE-003-REAL-UI.md).
 
 Type a question and press **Enter** (or the **ส่ง** button) to send it; **Shift+Enter** starts a new line. Since FE-002 the answer
 **appears while it is being written** (`POST /api/chat/stream`), in one bubble with the model name. While the AI is working the

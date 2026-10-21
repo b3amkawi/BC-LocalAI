@@ -19,6 +19,7 @@ namespace BC_LocalAI.Controllers;
 [Route("api/conversations")]
 [Authorize(Policy = BcPolicies.ChatUser)]
 [ChatHistoryErrors]
+[FrontendHistoryMutation]
 public sealed class ConversationsController(IChatHistoryRepository history, ChatTurnService turns) : ControllerBase
 {
     public const string NotFoundCode = "CONVERSATION_NOT_FOUND";

@@ -9,6 +9,8 @@
         AUTH_INVALID_REQUEST: 'กรุณาตรวจสอบชื่อบัญชีและรหัสผ่าน',
         AUTH_INVALID_CREDENTIALS: 'ชื่อบัญชีหรือรหัสผ่านไม่ถูกต้อง', // ci-allow-secret: public error label, not a credential.
         AUTH_REQUIRED: 'เซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่',
+        AUTH_SESSION_CHANGED: 'บัญชีที่เข้าสู่ระบบเปลี่ยนไป กรุณาตรวจสอบเซสชันใหม่',
+        AUTH_SESSION_ENDED: 'เซสชันสิ้นสุดแล้ว กรุณาเข้าสู่ระบบใหม่',
         AUTH_FORBIDDEN: 'ไม่มีสิทธิ์ดำเนินการนี้',
         AUTH_CSRF_INVALID: 'คำขอไม่ผ่านการตรวจสอบความปลอดภัย กรุณาลองใหม่',
         AUTH_RATE_LIMITED: 'พยายามเข้าสู่ระบบบ่อยเกินไป กรุณารอก่อนลองใหม่',
@@ -137,6 +139,10 @@
             checkSession: () => run('me', signal => client.me(signal)),
             login: (username, password) => run('login', signal => client.login(username, password, signal)),
             logout: () => run('logout', signal => client.logout(signal)),
+            invalidate: code => {
+                generation++; active?.abort(); active = null; knownSession = false;
+                publish(['AUTH_REQUIRED', 'AUTH_SESSION_CHANGED', 'AUTH_SESSION_ENDED'].includes(code) ? 'expired' : 'error', null, failure(code));
+            },
             clear: () => { generation++; active?.abort(); active = null; knownSession = false; publish('unauthenticated'); }
         });
     }

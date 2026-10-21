@@ -63,6 +63,8 @@ public sealed class Be007LiveApiTests : IAsyncLifetime
         };
         request.Headers.Add("X-CSRF-TOKEN", csrf.RootElement.GetProperty("token").GetString());
         Assert.Equal(HttpStatusCode.OK, (await client.SendAsync(request)).StatusCode);
+        using var signedInCsrf = JsonDocument.Parse(await (await client.GetAsync("/api/auth/csrf")).Content.ReadAsStringAsync());
+        client.DefaultRequestHeaders.Add("X-CSRF-TOKEN", signedInCsrf.RootElement.GetProperty("token").GetString());
         return client;
     }
 

@@ -18,6 +18,15 @@
     // NETWORK_ERROR is a browser-side case: the request never reached the API.
     var MESSAGES = Object.freeze({
         INVALID_MESSAGE: 'กรุณาพิมพ์ข้อความก่อนส่ง',
+        AUTH_REQUIRED: 'เซสชันหมดอายุ กรุณาเข้าสู่ระบบใหม่',
+        AUTH_SESSION_ENDED: 'เซสชันสิ้นสุดแล้ว กรุณาเข้าสู่ระบบใหม่',
+        AUTH_SESSION_CHANGED: 'บัญชีที่เข้าสู่ระบบเปลี่ยนไป กรุณาตรวจสอบเซสชันใหม่',
+        AUTH_FORBIDDEN: 'ไม่มีสิทธิ์ดำเนินการนี้',
+        AUTH_CSRF_INVALID: 'คำขอไม่ผ่านการตรวจสอบความปลอดภัย กรุณาลองใหม่',
+        HISTORY_UNAVAILABLE: 'ไม่สามารถโหลดหรือบันทึกประวัติได้ กรุณาลองใหม่ภายหลัง',
+        HISTORY_CONFLICT: 'มีคำตอบที่กำลังสร้างอยู่ กรุณารอหรือรีเฟรชประวัติ',
+        CONVERSATION_NOT_FOUND: 'ไม่พบบทสนทนานี้ หรือคุณไม่มีสิทธิ์เข้าถึง',
+        QUESTION_TOO_LONG: 'คำถามยาวเกินกว่าที่ระบบรองรับ กรุณาถามให้สั้นลง',
         AI_UNAVAILABLE: 'ไม่สามารถเชื่อมต่อ AI ได้ กรุณาตรวจว่า Ollama เปิดอยู่',
         AI_TIMEOUT: 'AI ใช้เวลาตอบนานเกินไป กรุณาลองใหม่',
         AI_PROVIDER_ERROR: 'AI เกิดข้อผิดพลาด กรุณาลองใหม่',

@@ -96,6 +96,8 @@ public sealed class ChatHistoryApiTests(WebApplicationFactory<Program> factory) 
     {
         var client = host.Security.Browser();
         Assert.Equal(HttpStatusCode.NoContent, (await client.PostAsync($"/api/__test/signin/{userId}", null)).StatusCode);
+        using var csrf = await client.GetAsync("/api/auth/csrf");
+        client.DefaultRequestHeaders.Add("X-CSRF-TOKEN", (await csrf.Content.ReadFromJsonAsync<JsonElement>()).GetProperty("token").GetString());
         return client;
     }
 

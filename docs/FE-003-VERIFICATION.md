@@ -1,5 +1,7 @@
 # FE-003 — Mock Login groundwork verification
 
+> Historical Mock-only report. The real integration and current results are in [FE-003 real verification](FE-003-REAL-VERIFICATION.md).
+
 วันที่2026-10-21 · branch `watzapon_FE-003` · base `0cb07ff`
 · [ขอบเขตและวิธีรัน](FE-003-PREPARATION.md)
 

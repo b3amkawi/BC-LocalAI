@@ -1,0 +1,31 @@
+{
+  "issue": "FE-003 #24",
+  "date": "2026-10-21",
+  "timezone": "Asia/Bangkok",
+  "branch": "watzapon_FE-003",
+  "mainBase": "d121f5014b600288fc3cb69f57c22fd8de21f627",
+  "dataScope": "isolated synthetic accounts and history only; no company-account UAT or production deployment",
+  "results": {
+    "build": { "warnings": 0, "errors": 0 },
+    "dotnetDevelopment": { "passed": 863, "failed": 0, "skipped": 0 },
+    "dotnetProduction": { "passed": 863, "failed": 0, "skipped": 0 },
+    "node": { "passed": 177, "failed": 0, "cancelled": 0, "skipped": 0 },
+    "python": { "passed": 143, "failed": 0, "skipped": 0 },
+    "realMySqlOllamaApi": { "checksPassed": 38, "mysqlPort": 3338, "model": "qwen3:4b" },
+    "isolatedMutations": { "killed": 3, "survived": 0 },
+    "viewportGeometry": [
+      { "width": 1707, "height": 898, "bodyHeight": 898, "sendBottom": 831.38 },
+      { "width": 390, "height": 844, "bodyHeight": 844, "sendBottom": 809.61 },
+      { "width": 390, "height": 500, "bodyHeight": 500, "sendBottom": 470.42 }
+    ]
+  },
+  "logSha256": {
+    "artifacts/fe003-final-build.log": "d8feb9d31907b20e8a47c3faa34ef1dc36d0d697b61fe92dcfbc62a2abeb4a6a",
+    "artifacts/fe003-post-mutation-development.log": "3beafc044cfadde5536ff3a2517a3ee79a97d17ccec5fe1c27499cb7f5552f01",
+    "artifacts/fe003-post-mutation-production.log": "0e88507eebf6ce9b677f3d972a3f718f6f3f11e8c002dd0bf641e97a5dd6662d",
+    "artifacts/fe003-node-final.log": "1810abca80679514dd4c809d10db46eb88cc83a8b9d42f67e3b42b0dfdb1f7a4",
+    "artifacts/fe003-python-regression.log": "1f42f7dea56823c6c5848397b2e020752edc1f68e6f98d0c612c272a8bb19a38",
+    "artifacts/fe003-live-api-final.log": "375b5fb830f998f4ff5c56c298b14339f500a5b026a4d251131212df4de792cd"
+  },
+  "remoteWritesPerformed": false
+}
