@@ -205,6 +205,10 @@ BE-005's login signs in through these sessions and the account (status, stamp, r
 
 Accounts are managed with the SEC-003 admin script (create, disable/enable, reset password, change role, revoke sessions; separate least-privilege MySQL writer, audited): [docs/security/SEC-003-ADMIN-GUIDE.md](docs/security/SEC-003-ADMIN-GUIDE.md).
 
+For a new shared server, apply the versioned database schema and follow the LAN/HTTPS topology in the
+[shared server migration runbook](docs/deployment/SHARED-SERVER-MIGRATION.md). Browser clients connect only to the HTTPS application;
+they must never connect directly to MySQL or Ollama.
+
 ### Chat history (BE-007)
 
 `appsettings.json` section `ChatHistory`: `Enabled` (**false**; needs `Authentication:Enabled`), `ConnectionString` (secret, its own
