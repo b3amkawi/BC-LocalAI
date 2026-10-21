@@ -5,5 +5,8 @@
   "QA2-L-01-ollama-500": "QA2-D04",
   "QA2-L-07-unhandled-exception": "QA2-D03",
   "QA2-MS-stalled-model": "QA2-D05",
-  "QA2-Q-03-per-user-cap": "QA2-D06"
+  "QA2-Q-03-per-user-cap": "QA2-D06",
+  "QA2-M-home-anonymous": "QA2-D07",
+  "QA2-H-01-home": "QA2-D07",
+  "QA2-H-08-hsts": "QA2-D07"
 }

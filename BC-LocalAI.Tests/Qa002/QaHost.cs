@@ -236,6 +236,7 @@ internal sealed class QaHost
     public ManualClock Clock => Sec.Clock;
     public CapturingLoggerProvider Logs => Sec.Logs;
     public string BaseAddress { get; private set; } = SameOrigin;
+    public bool AutoCsrf { get; set; } = true;
 
     /// <summary>Random per run: synthetic accounts never share a password with anything real or with an earlier run.</summary>
     public static string NewSecret() => Convert.ToHexString(RandomNumberGenerator.GetBytes(16)).ToLowerInvariant();
@@ -301,6 +302,20 @@ internal sealed class QaHost
         string contentType = "application/json", IEnumerable<KeyValuePair<string, string>>? headers = null, bool http = false,
         HttpCompletionOption completion = HttpCompletionOption.ResponseContentRead)
     {
+        var extra = new List<KeyValuePair<string, string>>(headers ?? []);
+        // FE-003: cookie-backed history mutations need HTTPS and a valid X-CSRF-TOKEN. The page does this; the harness does it for
+        // every older case so their Expected results stay unchanged. Tests of the token itself switch AutoCsrf off.
+        var payload = body ?? (json is null ? "" : JsonSerializer.Serialize(json));
+        if (AutoCsrf && cookie is not null && !http && method != HttpMethod.Get && method != HttpMethod.Head && method != HttpMethod.Options &&
+            !path.StartsWith("/api/auth", StringComparison.OrdinalIgnoreCase) && !extra.Any(h => h.Key.Equals("X-CSRF-TOKEN", StringComparison.OrdinalIgnoreCase)) &&
+            (path.StartsWith("/api/conversations", StringComparison.OrdinalIgnoreCase) || payload.Contains("\"conversationId\"", StringComparison.Ordinal)))
+        {
+            var (pair, token) = await Csrf(cookie);
+            cookie += "; " + pair;
+            extra.Add(new("X-CSRF-TOKEN", token));
+        }
+
+        headers = extra;
         using var client = Client(http);
         var request = new HttpRequestMessage(method, path);
         if (json is not null || body is not null)
@@ -382,6 +397,13 @@ internal sealed class QaHost
         {
             Content = new StringContent(JsonSerializer.Serialize(conversationId is null ? new { message } : (object)new { message, conversationId }), Encoding.UTF8, "application/json")
         };
+        if (conversationId is not null && AutoCsrf)
+        {
+            var (pair, token) = await Csrf(cookie); // FE-003: a stream that saves history needs the CSRF header
+            cookie += "; " + pair;
+            request.Headers.TryAddWithoutValidation("X-CSRF-TOKEN", token);
+        }
+
         request.Headers.TryAddWithoutValidation("Cookie", cookie);
         foreach (var (key, value) in BrowserHeaders) request.Headers.TryAddWithoutValidation(key, value);
         return await client.SendAsync(request, HttpCompletionOption.ResponseHeadersRead);
