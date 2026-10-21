@@ -244,6 +244,8 @@ public sealed class AdminScriptTests
     [InlineData("BC_AUTH_ATTEMPT_WRITER")]
     [InlineData("root")]
     [InlineData("bc_sec001_admin")]
+    [InlineData("bc_history_rw")]
+    [InlineData("bc_history_purge")]
     public void DbConfig_RefusesTheReaderAndOtherReservedAccounts(string user)
     {
         using var file = PrivateFile.Create(user, "127.0.0.1", database: "bc");

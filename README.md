@@ -189,6 +189,17 @@ BE-005's login signs in through these sessions and the account (status, stamp, r
 
 Accounts are managed with the SEC-003 admin script (create, disable/enable, reset password, change role, revoke sessions; separate least-privilege MySQL writer, audited): [docs/security/SEC-003-ADMIN-GUIDE.md](docs/security/SEC-003-ADMIN-GUIDE.md).
 
+### Chat history (BE-007)
+
+`appsettings.json` section `ChatHistory`: `Enabled` (**false**; needs `Authentication:Enabled`), `ConnectionString` (secret, its own
+MySQL account with SELECT/INSERT/UPDATE on the two history tables only), `ContextTokenBudget` (1500), `StreamCheckpointSeconds` (2).
+When enabled: `/api/conversations` (create, list, get, rename, delete, messages) for the signed-in user only, and `/api/chat` /
+`/api/chat/stream` accept an optional `conversationId` to save the turn and send earlier turns as context. Without `conversationId`
+the chat works exactly as before. Tables are created by an operator with `scripts/chat-history/migrate.ps1`, never at startup;
+retention (deleted: 30 days, closed accounts: 90 days) is applied by `scripts/chat-history/purge.ps1`.
+Details: [API contract](docs/chat-history/BE-007-API-CONTRACT.md), [design](docs/chat-history/BE-007-DESIGN.md),
+[migration](docs/chat-history/BE-007-MIGRATION-PLAN.md), [verification](docs/chat-history/BE-007-VERIFICATION.md).
+
 ### Error contract
 
 All errors use `{ "error": { "code": "...", "message": "..." } }` and never include exceptions, stack traces or provider details.

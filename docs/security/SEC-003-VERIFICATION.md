@@ -64,18 +64,23 @@ sides, self-service password change + must-change flag, cap of 100 consecutive f
 at deploy. DBA open questions (production `users` table exists? version ≥ 8.0.29, backup/PITR, per-admin accounts, audit retention
 and reader) remain for the owner/DBA.
 
-## 3. Tests actually run (after the review fixes)
+## 3. Tests actually run (after the review fixes and merging `main` d121f50)
+
+`main` gained BE-007 chat history (PRs #36/#39) while this PR was open. It was merged in (no rebase); the `sec003-mysql` fixture now
+also holds the real BE-007 tables (`Conversations`, `Messages`) and accounts (`bc_history_rw`, `bc_history_purge`), so the
+"cannot read chats" checks run against the real chat tables, and both BE-007 accounts are refused by the script.
 
 | Suite | Result |
 |---|---|
-| `dotnet test BC-LocalAI.slnx` (unit + integration, 76 SEC-003 unit tests) | **728** passed, 0 failed, 0 skipped |
+| `dotnet test BC-LocalAI.slnx` (unit + integration, 78 SEC-003 unit tests) | **913** passed, 0 failed, 0 skipped |
 | `node --test "tests/ui/*.test.mjs"` | 61 passed |
 | `python -m unittest discover -s tests` | 143 passed |
-| `check_test_counts.py` (baseline 713 → 728) | all gates passed |
+| `check_test_counts.py` (baseline: main 835 + 78 = 913) | all gates passed |
 | `scan_secrets.py` (files staged) / `check_doc_links.py` | clean / OK |
 | Fixture `sec003-mysql` rebuilt, Initialize + Verify (127.0.0.1:3318) | **16/16** checks (11 SEC-001 + audit table, 2 triggers, writer grants applied, writer cannot read hash, writer cannot read audit) |
-| Live `tests/SEC003.AdminTests` against `sec003-mysql` | **31** passed |
+| Live `tests/SEC003.AdminTests` against `sec003-mysql` (with BE-007 tables) | **36** passed |
 | Regression: `be005-mysql` (3319) + live `tests/BE005.MySqlTests` | **16** passed |
+| Regression: fresh `be007-mysql` (3320, 11/11 checks) + live `tests/BE007.MySqlTests` | **53** passed, 1 skipped (real-model check, skipped by default as in BE-007's report) |
 
 Live tests (`AdminScriptLiveTests`), real admin writer + real app login:
 
@@ -90,10 +95,11 @@ Live tests (`AdminScriptLiveTests`), real admin writer + real app login:
 8. BE-005 failed-login bookkeeping by the attempt writer → no audit row
 9. duplicate username (other case) → exit 4, still one account, no audit row
 10. unknown username / id → exit 3, no audit row
-11. `reader.cnf`, `writer.cnf` (attempt writer), `admin.cnf` (fixture admin) → refused, exit 5
+11. `reader.cnf`, `writer.cnf` (attempt writer), `history.cnf` / `purge.cnf` (BE-007), `admin.cnf` (fixture admin) → refused, exit 5
 12. `SHOW GRANTS` equals exactly USAGE + one column-scoped grant on `users`
 13. writer refused (1142/1143): read hash / stamp / status+role / `SELECT *`, read / insert / update / delete audit, drop trigger,
-    delete users, update `access_failed_count` / `username`, read a stand-in chat table, create table, read `mysql.user`
+    delete users, update `access_failed_count` / `username`, read the real BE-007 `Messages` / `Conversations` tables, update
+    `Messages`, read a stand-in chat table, create table, read `mysql.user`
 
 Mutation check, review round (each bug introduced, tests run, file or trigger restored):
 

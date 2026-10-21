@@ -13,8 +13,9 @@ internal sealed class AdminConfigException(string message) : Exception(message);
 /// </summary>
 internal static class DbConfig
 {
-    // Accounts that must never run account administration (SEC-001 / BE-005 least privilege).
-    private static readonly string[] ReservedUsers = ["root", "bc_auth_reader", "bc_auth_attempt_writer", "bc_sec001_admin"];
+    // Accounts that must never run account administration (SEC-001 / BE-005 / BE-007 least privilege).
+    private static readonly string[] ReservedUsers =
+        ["root", "bc_auth_reader", "bc_auth_attempt_writer", "bc_sec001_admin", "bc_history_rw", "bc_history_purge"];
 
     /// <param name="allowLocalDevelopmentDatabase">
     /// Like the app's Authentication:AllowLocalDevelopmentDatabase: only then may a loopback database skip certificate checks

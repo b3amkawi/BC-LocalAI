@@ -277,6 +277,8 @@ public sealed class AdminScriptLiveTests : IAsyncLifetime
 
     [Theory]
     [InlineData("reader.cnf")]
+    [InlineData("history.cnf")]
+    [InlineData("purge.cnf")]
     [InlineData("writer.cnf")]
     [InlineData("admin.cnf")]
     public async Task TheReaderAttemptWriterAndFixtureAdmin_CannotRunTheScript(string file)
@@ -320,6 +322,9 @@ public sealed class AdminScriptLiveTests : IAsyncLifetime
     [InlineData("UPDATE users SET username = 'x' WHERE 1 = 0")]
     [InlineData("DROP TRIGGER trg_users_admin_audit_update")]
     [InlineData("SELECT * FROM sec003_probe_chats")]
+    [InlineData("SELECT * FROM Messages LIMIT 1")]       // BE-007 chat history, the real tables
+    [InlineData("SELECT * FROM Conversations LIMIT 1")]
+    [InlineData("UPDATE Messages SET Content = Content WHERE 1 = 0")]
     [InlineData("CREATE TABLE sec003_probe_new (id INT)")]
     [InlineData("SELECT user FROM mysql.user")]
     public async Task AdminWriter_IsRefusedEverythingElse_IncludingChatsAndTheAudit(string sql)

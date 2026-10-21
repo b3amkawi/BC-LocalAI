@@ -111,7 +111,8 @@ FROM admin_audit_log WHERE target_user_id = '<id>' ORDER BY id;
    | `UPDATE (password_hash, is_active, role, security_stamp, updated_at_utc) ON users` | คำสั่งที่เหลือ (ไม่มี `username`, `access_failed_count`, `lockout_end_utc`) |
 
    ไม่มี `DELETE`, ไม่มีสิทธิ์บน `admin_audit_log` หรือตารางอื่น (รวมถึงตารางแชตของ BE-007), ไม่มี `ON *.*`, ไม่มี `WITH GRANT OPTION`
-4. ห้ามใช้บัญชี `bc_auth_reader` (ของ login) หรือ `bc_auth_attempt_writer` (ของ lockout) สคริปต์ปฏิเสธบัญชีเหล่านี้ รวมถึง `root`
+4. ห้ามใช้บัญชี `bc_auth_reader` (ของ login), `bc_auth_attempt_writer` (ของ lockout), `bc_history_rw` / `bc_history_purge` (ของ BE-007)
+   สคริปต์ปฏิเสธบัญชีเหล่านี้ รวมถึง `root`
    และ `bc_sec001_admin` ของ fixture ส่วนแอปก็ไม่ยอมใช้บัญชีที่ชื่อมีคำว่า `admin` อยู่แล้ว ([AuthenticationOptions.cs](../../BC-LocalAI/Configuration/AuthenticationOptions.cs))
 
 แนะนำให้แต่ละ Admin มีบัญชี MySQL ของตัวเอง (grant ชุดเดียวกัน ใช้ `--writer-user`) แล้ว `db_user` จะระบุตัวคนได้โดยไม่ต้องพึ่ง `--actor`
@@ -156,6 +157,6 @@ dotnet test tests/SEC003.AdminTests
 pwsh -File scripts/security/local-mysql.ps1 -Action Stop -InstanceName sec003-mysql -Port 3318
 ```
 
-Fixture นี้มี reader, attempt writer ของ BE-005, admin writer, ตาราง audit พร้อม trigger (จาก `admin-audit.sql` ไฟล์เดียวกับที่ DBA ใช้)
+Fixture นี้มี reader, attempt writer ของ BE-005, ตารางและบัญชีของ BE-007 (chat history), admin writer, ตาราง audit พร้อม trigger (จาก `admin-audit.sql` ไฟล์เดียวกับที่ DBA ใช้)
 และบัญชีสมมติ 3 บัญชีของ SEC-001 credential อยู่ใน `.local/sec003-mysql/private/` (ACL เฉพาะผู้ใช้ปัจจุบัน, ไม่อยู่ใน git)
 fixture เดิม (`sec001-mysql-v2`, `be005-mysql`) ไม่เปลี่ยน
