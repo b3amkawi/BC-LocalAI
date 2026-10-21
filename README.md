@@ -92,6 +92,16 @@ dotnet build .\BC-LocalAI.slnx
 dotnet test .\BC-LocalAI.slnx
 ```
 
+## Authentication (BE-005, opt-in validation only)
+
+Basic MySQL account authentication is implemented behind `Authentication:Enabled=false` by default.
+Login/Logout/Me use HTTPS, framework Cookie Authentication, antiforgery and a bounded login-attempt limiter.
+Failures/lockout persist in MySQL through a separate least-privilege writer:5 consecutive failures lock15 minutes; success resets failures.
+See [configuration, API and FE-003/BE-006 handoff](docs/authentication/BE-005-INTEGRATION.md)
+and [current verification evidence / remaining gates](docs/authentication/BE-005-LOCKOUT-VERIFICATION.md).
+This does **not** enable Chat authorization: existing Chat routes remain anonymous until BE-006.
+No production deployment or account-administration UI/API is included.
+
 ## Continuous integration (DEVOPS-001)
 
 Every pull request to `main` runs `.github/workflows/ci.yml`: build, .NET, JavaScript and Python tests (with PowerShell 7), a test-count gate, a secret scan and a Markdown link check. No job needs Ollama or a GPU. The live suites (AI-003, AI-004, AI-005) are run on a developer machine and their evidence is pasted in the PR. See [CI quality gates](docs/devops/ci-quality-gates.md) and the [live test procedure](docs/devops/live-test-procedure.md).

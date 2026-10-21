@@ -23,11 +23,12 @@ if (args.Length == 2 && args[0] == "verify-db")
 }
 
 // Paths are provided by scripts/security/local-mysql.ps1 after ACL protection is applied.
-if (args.Length is not (2 or 3)) throw new ArgumentException("Expected private output directory, schema path and optional port.");
+if (args.Length is not (2 or 3 or 4) || (args.Length == 4 && args[3] != "be005-attempt-writer"))
+    throw new ArgumentException("Expected private output directory, schema path, optional port and optional BE-005 writer flag.");
 var output = Path.GetFullPath(args[0]);
 var schema = Path.GetFullPath(args[1]);
 var port = 3307;
-if (args.Length == 3 && (!int.TryParse(args[2], out port) || port is < 1025 or > 65535))
+if (args.Length >= 3 && (!int.TryParse(args[2], out port) || port is < 1025 or > 65535))
     throw new ArgumentException("Port must be between 1025 and 65535.");
 if (!Directory.Exists(output) || Directory.EnumerateFileSystemEntries(output).Any())
     throw new InvalidOperationException("Output must be a newly created, empty private directory.");
@@ -36,7 +37,11 @@ var fixtures = FixtureFactory.Create();
 var schemaSql = string.Join(" ", File.ReadAllLines(schema)
     .Where(line => !line.TrimStart().StartsWith("--")));
 // bootstrap.sql is used once by --init-file; local-mysql.ps1 deletes it after the first start.
-File.WriteAllLines(Path.Combine(output, "bootstrap.sql"), BootstrapScript.Create(secrets, schemaSql, fixtures), new UTF8Encoding(false));
+var bootstrap = BootstrapScript.Create(secrets, schemaSql, fixtures);
+var writerSecret = args.Length == 4 ? FixtureFactory.RandomSecret() : null;
+if (writerSecret is not null) bootstrap.AddRange(AttemptWriterBootstrap.Create(writerSecret));
+File.WriteAllLines(Path.Combine(output, "bootstrap.sql"), bootstrap, new UTF8Encoding(false));
+if (writerSecret is not null) File.WriteAllText(Path.Combine(output, "writer.cnf"), BootstrapScript.OptionFile("bc_auth_attempt_writer", writerSecret, port), new UTF8Encoding(false));
 // The root secret is never stored: root@localhost cannot connect over TCP under skip-name-resolve, so nobody needs it,
 // and the admin account (this schema + SHUTDOWN) covers every lifecycle step. Recovery of this dev instance = new Initialize.
 foreach (var (name, user, password) in new[]

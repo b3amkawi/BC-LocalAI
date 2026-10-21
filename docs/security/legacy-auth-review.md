@@ -61,7 +61,7 @@ Salt/format/verification ใช้ framework; Tests ตรวจ header ว่�
 | 1 | ใช้บัญชี BC-LocalAI แยกบน MySQL หรือเชื่อมบัญชีบริษัท | **ตัดสินแล้ว: ใช้บัญชีของ BC-LocalAI บน MySQL** (ไม่มีระบบบริษัท) |
 | 2 | ใครสร้าง/ปิด/reset บัญชีพนักงาน และใครเป็นผู้ sign-off ด้าน security | **ตัดสินแล้ว:** ผู้มี role **Admin** สร้าง/ปิด/reset บัญชีผ่าน**สคริปต์** (ไม่มี self-registration; ตัวสคริปต์ทำใน BE-005/006) · ผู้ sign-off ด้าน security คือ **watzapon (เติ้ฬ)** |
 | 3 | อายุ Session, roles | **ตัดสินแล้ว:** idle **30 นาที**, absolute **8 ชั่วโมง** (renewal ไม่เกิน absolute) · roles **User / Admin**; **Admin ไม่มีสิทธิ์อ่านแชตของคนอื่น** |
-| 3b | จำนวนครั้งของ lockout/rate limit, audit/retention | ยังไม่กำหนดตัวเลข — BE-005/006 เสนอพร้อมเหตุผลและเทสต์ ให้ผู้ sign-off อนุมัติใน PR ของ BE-005 |
+| 3b | จำนวนครั้งของ lockout/rate limit, audit/retention | Follow-up 2026-10-21: watzapon ยืนยันในแชต BE-005 ว่าผิด5ครั้งล็อก15นาที, สำเร็จล้างจำนวนครั้ง; rate5/account,30/IP,120/global ต่อนาที และ concurrent2 ตาม [หลักฐาน BE-005](../authentication/BE-005-LOCKOUT-VERIFICATION.md) · audit/retention ยังไม่กำหนด; ไม่ใช่การอ้างว่า PR ได้รับ approval แล้ว |
 | 4 | ข้อมูลระบบ Legacy | **N/A** — ไม่มีให้ (เปิดงานใหม่ถ้ามีภายหลัง) |
 | 5 | BE-005 ใช้ฐานไหน | **ตัดสินแล้ว:** MySQL ของ BC-LocalAI เอง; บัญชี **reader** (อ่านอย่างเดียว) สำหรับตรวจ login และบัญชี **writer แยก** ที่แก้ได้เฉพาะคอลัมน์ lockout/attempt |
 | 6 | instance เดิมที่ port 3307 (สร้างก่อนแก้สคริปต์) | **ตัดสินแล้ว:** ลบ `private/bootstrap.sql` (ทำแล้ว ดู Verification ข้อ 3b) |
