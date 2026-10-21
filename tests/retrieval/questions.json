@@ -1,0 +1,967 @@
+{
+  "schema_version": 1,
+  "synthetic": true,
+  "dataset_version": 1,
+  "cases": [
+    {
+      "id": "single-01",
+      "category": "single",
+      "language": "th",
+      "role": "engineer",
+      "question": "ตามเอกสาร SYN-S01 ค่าของอะไหล่ทดลองเท่าไร ตอบเฉพาะตัวเลขตามด้วยหน่วย ชิ้น",
+      "expected": {
+        "status": "answered",
+        "accepted_answers": [
+          "11 ชิ้น"
+        ],
+        "sources": [
+          "SYN-S01"
+        ]
+      }
+    },
+    {
+      "id": "missing-01",
+      "category": "missing",
+      "language": "th",
+      "role": "engineer",
+      "question": "เอกสาร SYN-S01 ระบุรหัสรุ่นถัดไปของอะไหล่ทดลองว่าอะไร ถ้าไม่มีข้อมูล ตอบว่า ไม่พบข้อมูล",
+      "expected": {
+        "status": "not_found",
+        "accepted_answers": [
+          "ไม่พบข้อมูล"
+        ],
+        "sources": []
+      }
+    },
+    {
+      "id": "single-02",
+      "category": "single",
+      "language": "th",
+      "role": "engineer",
+      "question": "ตามเอกสาร SYN-S02 ค่าของการอบรมจำลองเท่าไร ตอบเฉพาะตัวเลขตามด้วยหน่วย ชั่วโมง",
+      "expected": {
+        "status": "answered",
+        "accepted_answers": [
+          "12 ชั่วโมง"
+        ],
+        "sources": [
+          "SYN-S02"
+        ]
+      }
+    },
+    {
+      "id": "missing-02",
+      "category": "missing",
+      "language": "th",
+      "role": "engineer",
+      "question": "เอกสาร SYN-S02 ระบุรหัสรุ่นถัดไปของการอบรมจำลองว่าอะไร ถ้าไม่มีข้อมูล ตอบว่า ไม่พบข้อมูล",
+      "expected": {
+        "status": "not_found",
+        "accepted_answers": [
+          "ไม่พบข้อมูล"
+        ],
+        "sources": []
+      }
+    },
+    {
+      "id": "single-03",
+      "category": "single",
+      "language": "th",
+      "role": "engineer",
+      "question": "ตามเอกสาร SYN-S03 ค่าของรอบบำรุงรักษาจำลองเท่าไร ตอบเฉพาะตัวเลขตามด้วยหน่วย วัน",
+      "expected": {
+        "status": "answered",
+        "accepted_answers": [
+          "13 วัน"
+        ],
+        "sources": [
+          "SYN-S03"
+        ]
+      }
+    },
+    {
+      "id": "missing-03",
+      "category": "missing",
+      "language": "th",
+      "role": "engineer",
+      "question": "เอกสาร SYN-S03 ระบุรหัสรุ่นถัดไปของรอบบำรุงรักษาจำลองว่าอะไร ถ้าไม่มีข้อมูล ตอบว่า ไม่พบข้อมูล",
+      "expected": {
+        "status": "not_found",
+        "accepted_answers": [
+          "ไม่พบข้อมูล"
+        ],
+        "sources": []
+      }
+    },
+    {
+      "id": "single-04",
+      "category": "single",
+      "language": "th",
+      "role": "engineer",
+      "question": "ตามเอกสาร SYN-S04 ค่าของเวลาพักเครื่องทดลองเท่าไร ตอบเฉพาะตัวเลขตามด้วยหน่วย นาที",
+      "expected": {
+        "status": "answered",
+        "accepted_answers": [
+          "14 นาที"
+        ],
+        "sources": [
+          "SYN-S04"
+        ]
+      }
+    },
+    {
+      "id": "missing-04",
+      "category": "missing",
+      "language": "th",
+      "role": "engineer",
+      "question": "เอกสาร SYN-S04 ระบุรหัสรุ่นถัดไปของเวลาพักเครื่องทดลองว่าอะไร ถ้าไม่มีข้อมูล ตอบว่า ไม่พบข้อมูล",
+      "expected": {
+        "status": "not_found",
+        "accepted_answers": [
+          "ไม่พบข้อมูล"
+        ],
+        "sources": []
+      }
+    },
+    {
+      "id": "single-05",
+      "category": "single",
+      "language": "th",
+      "role": "engineer",
+      "question": "ตามเอกสาร SYN-S05 ค่าของกล่องขนส่งจำลองเท่าไร ตอบเฉพาะตัวเลขตามด้วยหน่วย กล่อง",
+      "expected": {
+        "status": "answered",
+        "accepted_answers": [
+          "15 กล่อง"
+        ],
+        "sources": [
+          "SYN-S05"
+        ]
+      }
+    },
+    {
+      "id": "missing-05",
+      "category": "missing",
+      "language": "th",
+      "role": "engineer",
+      "question": "เอกสาร SYN-S05 ระบุรหัสรุ่นถัดไปของกล่องขนส่งจำลองว่าอะไร ถ้าไม่มีข้อมูล ตอบว่า ไม่พบข้อมูล",
+      "expected": {
+        "status": "not_found",
+        "accepted_answers": [
+          "ไม่พบข้อมูล"
+        ],
+        "sources": []
+      }
+    },
+    {
+      "id": "single-06",
+      "category": "single",
+      "language": "th",
+      "role": "engineer",
+      "question": "ตามเอกสาร SYN-S06 ค่าของความยาวสายตัวอย่างเท่าไร ตอบเฉพาะตัวเลขตามด้วยหน่วย เมตร",
+      "expected": {
+        "status": "answered",
+        "accepted_answers": [
+          "16 เมตร"
+        ],
+        "sources": [
+          "SYN-S06"
+        ]
+      }
+    },
+    {
+      "id": "missing-06",
+      "category": "missing",
+      "language": "th",
+      "role": "engineer",
+      "question": "เอกสาร SYN-S06 ระบุรหัสรุ่นถัดไปของความยาวสายตัวอย่างว่าอะไร ถ้าไม่มีข้อมูล ตอบว่า ไม่พบข้อมูล",
+      "expected": {
+        "status": "not_found",
+        "accepted_answers": [
+          "ไม่พบข้อมูล"
+        ],
+        "sources": []
+      }
+    },
+    {
+      "id": "single-07",
+      "category": "single",
+      "language": "th",
+      "role": "engineer",
+      "question": "ตามเอกสาร SYN-S07 ค่าของน้ำหนักบรรจุภัณฑ์ตัวอย่างเท่าไร ตอบเฉพาะตัวเลขตามด้วยหน่วย กิโลกรัม",
+      "expected": {
+        "status": "answered",
+        "accepted_answers": [
+          "17 กิโลกรัม"
+        ],
+        "sources": [
+          "SYN-S07"
+        ]
+      }
+    },
+    {
+      "id": "missing-07",
+      "category": "missing",
+      "language": "th",
+      "role": "engineer",
+      "question": "เอกสาร SYN-S07 ระบุรหัสรุ่นถัดไปของน้ำหนักบรรจุภัณฑ์ตัวอย่างว่าอะไร ถ้าไม่มีข้อมูล ตอบว่า ไม่พบข้อมูล",
+      "expected": {
+        "status": "not_found",
+        "accepted_answers": [
+          "ไม่พบข้อมูล"
+        ],
+        "sources": []
+      }
+    },
+    {
+      "id": "single-08",
+      "category": "single",
+      "language": "th",
+      "role": "engineer",
+      "question": "ตามเอกสาร SYN-S08 ค่าของชุดทดสอบจำลองเท่าไร ตอบเฉพาะตัวเลขตามด้วยหน่วย ชุด",
+      "expected": {
+        "status": "answered",
+        "accepted_answers": [
+          "18 ชุด"
+        ],
+        "sources": [
+          "SYN-S08"
+        ]
+      }
+    },
+    {
+      "id": "missing-08",
+      "category": "missing",
+      "language": "th",
+      "role": "engineer",
+      "question": "เอกสาร SYN-S08 ระบุรหัสรุ่นถัดไปของชุดทดสอบจำลองว่าอะไร ถ้าไม่มีข้อมูล ตอบว่า ไม่พบข้อมูล",
+      "expected": {
+        "status": "not_found",
+        "accepted_answers": [
+          "ไม่พบข้อมูล"
+        ],
+        "sources": []
+      }
+    },
+    {
+      "id": "single-09",
+      "category": "single",
+      "language": "en",
+      "role": "engineer",
+      "question": "According to SYN-S09, what is the value for mock assembly time? Reply only with the number and minutes.",
+      "expected": {
+        "status": "answered",
+        "accepted_answers": [
+          "19 minutes"
+        ],
+        "sources": [
+          "SYN-S09"
+        ]
+      }
+    },
+    {
+      "id": "missing-09",
+      "category": "missing",
+      "language": "en",
+      "role": "engineer",
+      "question": "What next-revision identifier does SYN-S09 specify for mock assembly time? If absent, reply No information found.",
+      "expected": {
+        "status": "not_found",
+        "accepted_answers": [
+          "No information found"
+        ],
+        "sources": []
+      }
+    },
+    {
+      "id": "single-10",
+      "category": "single",
+      "language": "en",
+      "role": "engineer",
+      "question": "According to SYN-S10, what is the value for mock inspection interval? Reply only with the number and days.",
+      "expected": {
+        "status": "answered",
+        "accepted_answers": [
+          "20 days"
+        ],
+        "sources": [
+          "SYN-S10"
+        ]
+      }
+    },
+    {
+      "id": "missing-10",
+      "category": "missing",
+      "language": "en",
+      "role": "engineer",
+      "question": "What next-revision identifier does SYN-S10 specify for mock inspection interval? If absent, reply No information found.",
+      "expected": {
+        "status": "not_found",
+        "accepted_answers": [
+          "No information found"
+        ],
+        "sources": []
+      }
+    },
+    {
+      "id": "single-11",
+      "category": "single",
+      "language": "en",
+      "role": "engineer",
+      "question": "According to SYN-S11, what is the value for sample labels? Reply only with the number and labels.",
+      "expected": {
+        "status": "answered",
+        "accepted_answers": [
+          "21 labels"
+        ],
+        "sources": [
+          "SYN-S11"
+        ]
+      }
+    },
+    {
+      "id": "missing-11",
+      "category": "missing",
+      "language": "en",
+      "role": "engineer",
+      "question": "What next-revision identifier does SYN-S11 specify for sample labels? If absent, reply No information found.",
+      "expected": {
+        "status": "not_found",
+        "accepted_answers": [
+          "No information found"
+        ],
+        "sources": []
+      }
+    },
+    {
+      "id": "single-12",
+      "category": "single",
+      "language": "en",
+      "role": "engineer",
+      "question": "According to SYN-S12, what is the value for mock shelves? Reply only with the number and shelves.",
+      "expected": {
+        "status": "answered",
+        "accepted_answers": [
+          "22 shelves"
+        ],
+        "sources": [
+          "SYN-S12"
+        ]
+      }
+    },
+    {
+      "id": "missing-12",
+      "category": "missing",
+      "language": "en",
+      "role": "engineer",
+      "question": "What next-revision identifier does SYN-S12 specify for mock shelves? If absent, reply No information found.",
+      "expected": {
+        "status": "not_found",
+        "accepted_answers": [
+          "No information found"
+        ],
+        "sources": []
+      }
+    },
+    {
+      "id": "single-13",
+      "category": "single",
+      "language": "en",
+      "role": "engineer",
+      "question": "According to SYN-S13, what is the value for mock demonstration time? Reply only with the number and hours.",
+      "expected": {
+        "status": "answered",
+        "accepted_answers": [
+          "23 hours"
+        ],
+        "sources": [
+          "SYN-S13"
+        ]
+      }
+    },
+    {
+      "id": "missing-13",
+      "category": "missing",
+      "language": "en",
+      "role": "engineer",
+      "question": "What next-revision identifier does SYN-S13 specify for mock demonstration time? If absent, reply No information found.",
+      "expected": {
+        "status": "not_found",
+        "accepted_answers": [
+          "No information found"
+        ],
+        "sources": []
+      }
+    },
+    {
+      "id": "single-14",
+      "category": "single",
+      "language": "en",
+      "role": "engineer",
+      "question": "According to SYN-S14, what is the value for mock route distance? Reply only with the number and meters.",
+      "expected": {
+        "status": "answered",
+        "accepted_answers": [
+          "24 meters"
+        ],
+        "sources": [
+          "SYN-S14"
+        ]
+      }
+    },
+    {
+      "id": "missing-14",
+      "category": "missing",
+      "language": "en",
+      "role": "engineer",
+      "question": "What next-revision identifier does SYN-S14 specify for mock route distance? If absent, reply No information found.",
+      "expected": {
+        "status": "not_found",
+        "accepted_answers": [
+          "No information found"
+        ],
+        "sources": []
+      }
+    },
+    {
+      "id": "single-15",
+      "category": "single",
+      "language": "en",
+      "role": "engineer",
+      "question": "According to SYN-S15, what is the value for sample material sheets? Reply only with the number and sheets.",
+      "expected": {
+        "status": "answered",
+        "accepted_answers": [
+          "25 sheets"
+        ],
+        "sources": [
+          "SYN-S15"
+        ]
+      }
+    },
+    {
+      "id": "missing-15",
+      "category": "missing",
+      "language": "en",
+      "role": "engineer",
+      "question": "What next-revision identifier does SYN-S15 specify for sample material sheets? If absent, reply No information found.",
+      "expected": {
+        "status": "not_found",
+        "accepted_answers": [
+          "No information found"
+        ],
+        "sources": []
+      }
+    },
+    {
+      "id": "multi-01",
+      "category": "multi",
+      "language": "th",
+      "role": "engineer",
+      "question": "รวมค่าของอะไหล่ทดลองจาก SYN-M01-A และ SYN-M01-B ได้เท่าไร ตอบเฉพาะตัวเลขตามด้วยหน่วย ชิ้น",
+      "expected": {
+        "status": "answered",
+        "accepted_answers": [
+          "13 ชิ้น"
+        ],
+        "sources": [
+          "SYN-M01-A",
+          "SYN-M01-B"
+        ]
+      }
+    },
+    {
+      "id": "multi-02",
+      "category": "multi",
+      "language": "th",
+      "role": "engineer",
+      "question": "รวมค่าของการอบรมจำลองจาก SYN-M02-A และ SYN-M02-B ได้เท่าไร ตอบเฉพาะตัวเลขตามด้วยหน่วย ชั่วโมง",
+      "expected": {
+        "status": "answered",
+        "accepted_answers": [
+          "15 ชั่วโมง"
+        ],
+        "sources": [
+          "SYN-M02-A",
+          "SYN-M02-B"
+        ]
+      }
+    },
+    {
+      "id": "multi-03",
+      "category": "multi",
+      "language": "th",
+      "role": "engineer",
+      "question": "รวมค่าของรอบบำรุงรักษาจำลองจาก SYN-M03-A และ SYN-M03-B ได้เท่าไร ตอบเฉพาะตัวเลขตามด้วยหน่วย วัน",
+      "expected": {
+        "status": "answered",
+        "accepted_answers": [
+          "17 วัน"
+        ],
+        "sources": [
+          "SYN-M03-A",
+          "SYN-M03-B"
+        ]
+      }
+    },
+    {
+      "id": "multi-04",
+      "category": "multi",
+      "language": "th",
+      "role": "engineer",
+      "question": "รวมค่าของเวลาพักเครื่องทดลองจาก SYN-M04-A และ SYN-M04-B ได้เท่าไร ตอบเฉพาะตัวเลขตามด้วยหน่วย นาที",
+      "expected": {
+        "status": "answered",
+        "accepted_answers": [
+          "19 นาที"
+        ],
+        "sources": [
+          "SYN-M04-A",
+          "SYN-M04-B"
+        ]
+      }
+    },
+    {
+      "id": "multi-05",
+      "category": "multi",
+      "language": "th",
+      "role": "engineer",
+      "question": "รวมค่าของกล่องขนส่งจำลองจาก SYN-M05-A และ SYN-M05-B ได้เท่าไร ตอบเฉพาะตัวเลขตามด้วยหน่วย กล่อง",
+      "expected": {
+        "status": "answered",
+        "accepted_answers": [
+          "21 กล่อง"
+        ],
+        "sources": [
+          "SYN-M05-A",
+          "SYN-M05-B"
+        ]
+      }
+    },
+    {
+      "id": "multi-06",
+      "category": "multi",
+      "language": "th",
+      "role": "engineer",
+      "question": "รวมค่าของความยาวสายตัวอย่างจาก SYN-M06-A และ SYN-M06-B ได้เท่าไร ตอบเฉพาะตัวเลขตามด้วยหน่วย เมตร",
+      "expected": {
+        "status": "answered",
+        "accepted_answers": [
+          "23 เมตร"
+        ],
+        "sources": [
+          "SYN-M06-A",
+          "SYN-M06-B"
+        ]
+      }
+    },
+    {
+      "id": "multi-07",
+      "category": "multi",
+      "language": "th",
+      "role": "engineer",
+      "question": "รวมค่าของน้ำหนักบรรจุภัณฑ์ตัวอย่างจาก SYN-M07-A และ SYN-M07-B ได้เท่าไร ตอบเฉพาะตัวเลขตามด้วยหน่วย กิโลกรัม",
+      "expected": {
+        "status": "answered",
+        "accepted_answers": [
+          "25 กิโลกรัม"
+        ],
+        "sources": [
+          "SYN-M07-A",
+          "SYN-M07-B"
+        ]
+      }
+    },
+    {
+      "id": "multi-08",
+      "category": "multi",
+      "language": "en",
+      "role": "engineer",
+      "question": "Add the values for mock test kits in SYN-M08-A and SYN-M08-B. Reply only with the total number and kits.",
+      "expected": {
+        "status": "answered",
+        "accepted_answers": [
+          "27 kits"
+        ],
+        "sources": [
+          "SYN-M08-A",
+          "SYN-M08-B"
+        ]
+      }
+    },
+    {
+      "id": "multi-09",
+      "category": "multi",
+      "language": "en",
+      "role": "engineer",
+      "question": "Add the values for mock assembly time in SYN-M09-A and SYN-M09-B. Reply only with the total number and minutes.",
+      "expected": {
+        "status": "answered",
+        "accepted_answers": [
+          "29 minutes"
+        ],
+        "sources": [
+          "SYN-M09-A",
+          "SYN-M09-B"
+        ]
+      }
+    },
+    {
+      "id": "multi-10",
+      "category": "multi",
+      "language": "en",
+      "role": "engineer",
+      "question": "Add the values for mock inspection interval in SYN-M10-A and SYN-M10-B. Reply only with the total number and days.",
+      "expected": {
+        "status": "answered",
+        "accepted_answers": [
+          "31 days"
+        ],
+        "sources": [
+          "SYN-M10-A",
+          "SYN-M10-B"
+        ]
+      }
+    },
+    {
+      "id": "multi-11",
+      "category": "multi",
+      "language": "en",
+      "role": "engineer",
+      "question": "Add the values for sample labels in SYN-M11-A and SYN-M11-B. Reply only with the total number and labels.",
+      "expected": {
+        "status": "answered",
+        "accepted_answers": [
+          "33 labels"
+        ],
+        "sources": [
+          "SYN-M11-A",
+          "SYN-M11-B"
+        ]
+      }
+    },
+    {
+      "id": "multi-12",
+      "category": "multi",
+      "language": "en",
+      "role": "engineer",
+      "question": "Add the values for mock shelves in SYN-M12-A and SYN-M12-B. Reply only with the total number and shelves.",
+      "expected": {
+        "status": "answered",
+        "accepted_answers": [
+          "35 shelves"
+        ],
+        "sources": [
+          "SYN-M12-A",
+          "SYN-M12-B"
+        ]
+      }
+    },
+    {
+      "id": "multi-13",
+      "category": "multi",
+      "language": "en",
+      "role": "engineer",
+      "question": "Add the values for mock demonstration time in SYN-M13-A and SYN-M13-B. Reply only with the total number and hours.",
+      "expected": {
+        "status": "answered",
+        "accepted_answers": [
+          "37 hours"
+        ],
+        "sources": [
+          "SYN-M13-A",
+          "SYN-M13-B"
+        ]
+      }
+    },
+    {
+      "id": "multi-14",
+      "category": "multi",
+      "language": "en",
+      "role": "engineer",
+      "question": "Add the values for mock route distance in SYN-M14-A and SYN-M14-B. Reply only with the total number and meters.",
+      "expected": {
+        "status": "answered",
+        "accepted_answers": [
+          "39 meters"
+        ],
+        "sources": [
+          "SYN-M14-A",
+          "SYN-M14-B"
+        ]
+      }
+    },
+    {
+      "id": "multi-15",
+      "category": "multi",
+      "language": "en",
+      "role": "engineer",
+      "question": "Add the values for sample material sheets in SYN-M15-A and SYN-M15-B. Reply only with the total number and sheets.",
+      "expected": {
+        "status": "answered",
+        "accepted_answers": [
+          "41 sheets"
+        ],
+        "sources": [
+          "SYN-M15-A",
+          "SYN-M15-B"
+        ]
+      }
+    },
+    {
+      "id": "conflict-01",
+      "category": "conflict",
+      "language": "th",
+      "role": "engineer",
+      "question": "ค่าอะไหล่ทดลองใน SYN-C01-A และ SYN-C01-B ตรงกันหรือไม่ ถ้าค่าขัดแย้งและไม่มีลำดับเหนือกว่า ตอบว่า ข้อมูลขัดแย้ง",
+      "expected": {
+        "status": "conflict",
+        "accepted_answers": [
+          "ข้อมูลขัดแย้ง"
+        ],
+        "sources": [
+          "SYN-C01-A",
+          "SYN-C01-B"
+        ]
+      }
+    },
+    {
+      "id": "conflict-02",
+      "category": "conflict",
+      "language": "th",
+      "role": "engineer",
+      "question": "ค่าการอบรมจำลองใน SYN-C02-A และ SYN-C02-B ตรงกันหรือไม่ ถ้าค่าขัดแย้งและไม่มีลำดับเหนือกว่า ตอบว่า ข้อมูลขัดแย้ง",
+      "expected": {
+        "status": "conflict",
+        "accepted_answers": [
+          "ข้อมูลขัดแย้ง"
+        ],
+        "sources": [
+          "SYN-C02-A",
+          "SYN-C02-B"
+        ]
+      }
+    },
+    {
+      "id": "conflict-03",
+      "category": "conflict",
+      "language": "th",
+      "role": "engineer",
+      "question": "ค่ารอบบำรุงรักษาจำลองใน SYN-C03-A และ SYN-C03-B ตรงกันหรือไม่ ถ้าค่าขัดแย้งและไม่มีลำดับเหนือกว่า ตอบว่า ข้อมูลขัดแย้ง",
+      "expected": {
+        "status": "conflict",
+        "accepted_answers": [
+          "ข้อมูลขัดแย้ง"
+        ],
+        "sources": [
+          "SYN-C03-A",
+          "SYN-C03-B"
+        ]
+      }
+    },
+    {
+      "id": "conflict-04",
+      "category": "conflict",
+      "language": "th",
+      "role": "engineer",
+      "question": "ค่าเวลาพักเครื่องทดลองใน SYN-C04-A และ SYN-C04-B ตรงกันหรือไม่ ถ้าค่าขัดแย้งและไม่มีลำดับเหนือกว่า ตอบว่า ข้อมูลขัดแย้ง",
+      "expected": {
+        "status": "conflict",
+        "accepted_answers": [
+          "ข้อมูลขัดแย้ง"
+        ],
+        "sources": [
+          "SYN-C04-A",
+          "SYN-C04-B"
+        ]
+      }
+    },
+    {
+      "id": "conflict-05",
+      "category": "conflict",
+      "language": "th",
+      "role": "engineer",
+      "question": "ค่ากล่องขนส่งจำลองใน SYN-C05-A และ SYN-C05-B ตรงกันหรือไม่ ถ้าค่าขัดแย้งและไม่มีลำดับเหนือกว่า ตอบว่า ข้อมูลขัดแย้ง",
+      "expected": {
+        "status": "conflict",
+        "accepted_answers": [
+          "ข้อมูลขัดแย้ง"
+        ],
+        "sources": [
+          "SYN-C05-A",
+          "SYN-C05-B"
+        ]
+      }
+    },
+    {
+      "id": "conflict-06",
+      "category": "conflict",
+      "language": "th",
+      "role": "engineer",
+      "question": "ค่าความยาวสายตัวอย่างใน SYN-C06-A และ SYN-C06-B ตรงกันหรือไม่ ถ้าค่าขัดแย้งและไม่มีลำดับเหนือกว่า ตอบว่า ข้อมูลขัดแย้ง",
+      "expected": {
+        "status": "conflict",
+        "accepted_answers": [
+          "ข้อมูลขัดแย้ง"
+        ],
+        "sources": [
+          "SYN-C06-A",
+          "SYN-C06-B"
+        ]
+      }
+    },
+    {
+      "id": "conflict-07",
+      "category": "conflict",
+      "language": "th",
+      "role": "engineer",
+      "question": "ค่าน้ำหนักบรรจุภัณฑ์ตัวอย่างใน SYN-C07-A และ SYN-C07-B ตรงกันหรือไม่ ถ้าค่าขัดแย้งและไม่มีลำดับเหนือกว่า ตอบว่า ข้อมูลขัดแย้ง",
+      "expected": {
+        "status": "conflict",
+        "accepted_answers": [
+          "ข้อมูลขัดแย้ง"
+        ],
+        "sources": [
+          "SYN-C07-A",
+          "SYN-C07-B"
+        ]
+      }
+    },
+    {
+      "id": "conflict-08",
+      "category": "conflict",
+      "language": "en",
+      "role": "engineer",
+      "question": "Do the values for mock test kits in SYN-C08-A and SYN-C08-B agree? If conflicting with no higher authority, reply Conflicting sources.",
+      "expected": {
+        "status": "conflict",
+        "accepted_answers": [
+          "Conflicting sources"
+        ],
+        "sources": [
+          "SYN-C08-A",
+          "SYN-C08-B"
+        ]
+      }
+    },
+    {
+      "id": "conflict-09",
+      "category": "conflict",
+      "language": "en",
+      "role": "engineer",
+      "question": "Do the values for mock assembly time in SYN-C09-A and SYN-C09-B agree? If conflicting with no higher authority, reply Conflicting sources.",
+      "expected": {
+        "status": "conflict",
+        "accepted_answers": [
+          "Conflicting sources"
+        ],
+        "sources": [
+          "SYN-C09-A",
+          "SYN-C09-B"
+        ]
+      }
+    },
+    {
+      "id": "conflict-10",
+      "category": "conflict",
+      "language": "en",
+      "role": "engineer",
+      "question": "Do the values for mock inspection interval in SYN-C10-A and SYN-C10-B agree? If conflicting with no higher authority, reply Conflicting sources.",
+      "expected": {
+        "status": "conflict",
+        "accepted_answers": [
+          "Conflicting sources"
+        ],
+        "sources": [
+          "SYN-C10-A",
+          "SYN-C10-B"
+        ]
+      }
+    },
+    {
+      "id": "conflict-11",
+      "category": "conflict",
+      "language": "en",
+      "role": "engineer",
+      "question": "Do the values for sample labels in SYN-C11-A and SYN-C11-B agree? If conflicting with no higher authority, reply Conflicting sources.",
+      "expected": {
+        "status": "conflict",
+        "accepted_answers": [
+          "Conflicting sources"
+        ],
+        "sources": [
+          "SYN-C11-A",
+          "SYN-C11-B"
+        ]
+      }
+    },
+    {
+      "id": "conflict-12",
+      "category": "conflict",
+      "language": "en",
+      "role": "engineer",
+      "question": "Do the values for mock shelves in SYN-C12-A and SYN-C12-B agree? If conflicting with no higher authority, reply Conflicting sources.",
+      "expected": {
+        "status": "conflict",
+        "accepted_answers": [
+          "Conflicting sources"
+        ],
+        "sources": [
+          "SYN-C12-A",
+          "SYN-C12-B"
+        ]
+      }
+    },
+    {
+      "id": "conflict-13",
+      "category": "conflict",
+      "language": "en",
+      "role": "engineer",
+      "question": "Do the values for mock demonstration time in SYN-C13-A and SYN-C13-B agree? If conflicting with no higher authority, reply Conflicting sources.",
+      "expected": {
+        "status": "conflict",
+        "accepted_answers": [
+          "Conflicting sources"
+        ],
+        "sources": [
+          "SYN-C13-A",
+          "SYN-C13-B"
+        ]
+      }
+    },
+    {
+      "id": "conflict-14",
+      "category": "conflict",
+      "language": "en",
+      "role": "engineer",
+      "question": "Do the values for mock route distance in SYN-C14-A and SYN-C14-B agree? If conflicting with no higher authority, reply Conflicting sources.",
+      "expected": {
+        "status": "conflict",
+        "accepted_answers": [
+          "Conflicting sources"
+        ],
+        "sources": [
+          "SYN-C14-A",
+          "SYN-C14-B"
+        ]
+      }
+    },
+    {
+      "id": "conflict-15",
+      "category": "conflict",
+      "language": "en",
+      "role": "engineer",
+      "question": "Do the values for sample material sheets in SYN-C15-A and SYN-C15-B agree? If conflicting with no higher authority, reply Conflicting sources.",
+      "expected": {
+        "status": "conflict",
+        "accepted_answers": [
+          "Conflicting sources"
+        ],
+        "sources": [
+          "SYN-C15-A",
+          "SYN-C15-B"
+        ]
+      }
+    }
+  ]
+}

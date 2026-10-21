@@ -10,6 +10,10 @@
 [Oo]bj/
 artifacts/
 
+# Python bytecode (evaluation scripts and fixture generators)
+__pycache__/
+*.py[cod]
+
 # Test and coverage output
 TestResults/
 coverage/

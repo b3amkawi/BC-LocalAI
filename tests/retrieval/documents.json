@@ -1,0 +1,784 @@
+{
+  "schema_version": 1,
+  "synthetic": true,
+  "acl_scope": "fixture_only_not_application_authorization",
+  "documents": [
+    {
+      "id": "SYN-S01",
+      "language": "th",
+      "allowed_roles": [
+        "reader",
+        "engineer",
+        "admin"
+      ],
+      "text": "เอกสารสังเคราะห์ SYN-S01: อะไหล่ทดลอง มีค่าตัวอย่าง 11 ชิ้น ใช้เพื่อประเมินซอฟต์แวร์เท่านั้น ไม่มีชื่อบุคคลหรือข้อมูลบริษัทจริง"
+    },
+    {
+      "id": "SYN-S02",
+      "language": "th",
+      "allowed_roles": [
+        "reader",
+        "engineer",
+        "admin"
+      ],
+      "text": "เอกสารสังเคราะห์ SYN-S02: การอบรมจำลอง มีค่าตัวอย่าง 12 ชั่วโมง ใช้เพื่อประเมินซอฟต์แวร์เท่านั้น ไม่มีชื่อบุคคลหรือข้อมูลบริษัทจริง"
+    },
+    {
+      "id": "SYN-S03",
+      "language": "th",
+      "allowed_roles": [
+        "reader",
+        "engineer",
+        "admin"
+      ],
+      "text": "เอกสารสังเคราะห์ SYN-S03: รอบบำรุงรักษาจำลอง มีค่าตัวอย่าง 13 วัน ใช้เพื่อประเมินซอฟต์แวร์เท่านั้น ไม่มีชื่อบุคคลหรือข้อมูลบริษัทจริง"
+    },
+    {
+      "id": "SYN-S04",
+      "language": "th",
+      "allowed_roles": [
+        "reader",
+        "engineer",
+        "admin"
+      ],
+      "text": "เอกสารสังเคราะห์ SYN-S04: เวลาพักเครื่องทดลอง มีค่าตัวอย่าง 14 นาที ใช้เพื่อประเมินซอฟต์แวร์เท่านั้น ไม่มีชื่อบุคคลหรือข้อมูลบริษัทจริง"
+    },
+    {
+      "id": "SYN-S05",
+      "language": "th",
+      "allowed_roles": [
+        "reader",
+        "engineer",
+        "admin"
+      ],
+      "text": "เอกสารสังเคราะห์ SYN-S05: กล่องขนส่งจำลอง มีค่าตัวอย่าง 15 กล่อง ใช้เพื่อประเมินซอฟต์แวร์เท่านั้น ไม่มีชื่อบุคคลหรือข้อมูลบริษัทจริง"
+    },
+    {
+      "id": "SYN-S06",
+      "language": "th",
+      "allowed_roles": [
+        "reader",
+        "engineer",
+        "admin"
+      ],
+      "text": "เอกสารสังเคราะห์ SYN-S06: ความยาวสายตัวอย่าง มีค่าตัวอย่าง 16 เมตร ใช้เพื่อประเมินซอฟต์แวร์เท่านั้น ไม่มีชื่อบุคคลหรือข้อมูลบริษัทจริง"
+    },
+    {
+      "id": "SYN-S07",
+      "language": "th",
+      "allowed_roles": [
+        "reader",
+        "engineer",
+        "admin"
+      ],
+      "text": "เอกสารสังเคราะห์ SYN-S07: น้ำหนักบรรจุภัณฑ์ตัวอย่าง มีค่าตัวอย่าง 17 กิโลกรัม ใช้เพื่อประเมินซอฟต์แวร์เท่านั้น ไม่มีชื่อบุคคลหรือข้อมูลบริษัทจริง"
+    },
+    {
+      "id": "SYN-S08",
+      "language": "th",
+      "allowed_roles": [
+        "reader",
+        "engineer",
+        "admin"
+      ],
+      "text": "เอกสารสังเคราะห์ SYN-S08: ชุดทดสอบจำลอง มีค่าตัวอย่าง 18 ชุด ใช้เพื่อประเมินซอฟต์แวร์เท่านั้น ไม่มีชื่อบุคคลหรือข้อมูลบริษัทจริง"
+    },
+    {
+      "id": "SYN-S09",
+      "language": "en",
+      "allowed_roles": [
+        "reader",
+        "engineer",
+        "admin"
+      ],
+      "text": "Synthetic document SYN-S09: the recorded value for mock assembly time is 19 minutes. This is software-evaluation data only, not an actual company record."
+    },
+    {
+      "id": "SYN-S10",
+      "language": "en",
+      "allowed_roles": [
+        "reader",
+        "engineer",
+        "admin"
+      ],
+      "text": "Synthetic document SYN-S10: the recorded value for mock inspection interval is 20 days. This is software-evaluation data only, not an actual company record."
+    },
+    {
+      "id": "SYN-S11",
+      "language": "en",
+      "allowed_roles": [
+        "reader",
+        "engineer",
+        "admin"
+      ],
+      "text": "Synthetic document SYN-S11: the recorded value for sample labels is 21 labels. This is software-evaluation data only, not an actual company record."
+    },
+    {
+      "id": "SYN-S12",
+      "language": "en",
+      "allowed_roles": [
+        "reader",
+        "engineer",
+        "admin"
+      ],
+      "text": "Synthetic document SYN-S12: the recorded value for mock shelves is 22 shelves. This is software-evaluation data only, not an actual company record."
+    },
+    {
+      "id": "SYN-S13",
+      "language": "en",
+      "allowed_roles": [
+        "reader",
+        "engineer",
+        "admin"
+      ],
+      "text": "Synthetic document SYN-S13: the recorded value for mock demonstration time is 23 hours. This is software-evaluation data only, not an actual company record."
+    },
+    {
+      "id": "SYN-S14",
+      "language": "en",
+      "allowed_roles": [
+        "reader",
+        "engineer",
+        "admin"
+      ],
+      "text": "Synthetic document SYN-S14: the recorded value for mock route distance is 24 meters. This is software-evaluation data only, not an actual company record."
+    },
+    {
+      "id": "SYN-S15",
+      "language": "en",
+      "allowed_roles": [
+        "reader",
+        "engineer",
+        "admin"
+      ],
+      "text": "Synthetic document SYN-S15: the recorded value for sample material sheets is 25 sheets. This is software-evaluation data only, not an actual company record."
+    },
+    {
+      "id": "SYN-M01-A",
+      "language": "th",
+      "allowed_roles": [
+        "reader",
+        "engineer",
+        "admin"
+      ],
+      "text": "เอกสารสังเคราะห์ SYN-M01-A: อะไหล่ทดลอง ฝั่ง A มีค่า 4 ชิ้น."
+    },
+    {
+      "id": "SYN-M01-B",
+      "language": "th",
+      "allowed_roles": [
+        "reader",
+        "engineer",
+        "admin"
+      ],
+      "text": "เอกสารสังเคราะห์ SYN-M01-B: อะไหล่ทดลอง ฝั่ง B มีค่า 9 ชิ้น."
+    },
+    {
+      "id": "SYN-M02-A",
+      "language": "th",
+      "allowed_roles": [
+        "reader",
+        "engineer",
+        "admin"
+      ],
+      "text": "เอกสารสังเคราะห์ SYN-M02-A: การอบรมจำลอง ฝั่ง A มีค่า 5 ชั่วโมง."
+    },
+    {
+      "id": "SYN-M02-B",
+      "language": "th",
+      "allowed_roles": [
+        "reader",
+        "engineer",
+        "admin"
+      ],
+      "text": "เอกสารสังเคราะห์ SYN-M02-B: การอบรมจำลอง ฝั่ง B มีค่า 10 ชั่วโมง."
+    },
+    {
+      "id": "SYN-M03-A",
+      "language": "th",
+      "allowed_roles": [
+        "reader",
+        "engineer",
+        "admin"
+      ],
+      "text": "เอกสารสังเคราะห์ SYN-M03-A: รอบบำรุงรักษาจำลอง ฝั่ง A มีค่า 6 วัน."
+    },
+    {
+      "id": "SYN-M03-B",
+      "language": "th",
+      "allowed_roles": [
+        "reader",
+        "engineer",
+        "admin"
+      ],
+      "text": "เอกสารสังเคราะห์ SYN-M03-B: รอบบำรุงรักษาจำลอง ฝั่ง B มีค่า 11 วัน."
+    },
+    {
+      "id": "SYN-M04-A",
+      "language": "th",
+      "allowed_roles": [
+        "reader",
+        "engineer",
+        "admin"
+      ],
+      "text": "เอกสารสังเคราะห์ SYN-M04-A: เวลาพักเครื่องทดลอง ฝั่ง A มีค่า 7 นาที."
+    },
+    {
+      "id": "SYN-M04-B",
+      "language": "th",
+      "allowed_roles": [
+        "reader",
+        "engineer",
+        "admin"
+      ],
+      "text": "เอกสารสังเคราะห์ SYN-M04-B: เวลาพักเครื่องทดลอง ฝั่ง B มีค่า 12 นาที."
+    },
+    {
+      "id": "SYN-M05-A",
+      "language": "th",
+      "allowed_roles": [
+        "reader",
+        "engineer",
+        "admin"
+      ],
+      "text": "เอกสารสังเคราะห์ SYN-M05-A: กล่องขนส่งจำลอง ฝั่ง A มีค่า 8 กล่อง."
+    },
+    {
+      "id": "SYN-M05-B",
+      "language": "th",
+      "allowed_roles": [
+        "reader",
+        "engineer",
+        "admin"
+      ],
+      "text": "เอกสารสังเคราะห์ SYN-M05-B: กล่องขนส่งจำลอง ฝั่ง B มีค่า 13 กล่อง."
+    },
+    {
+      "id": "SYN-M06-A",
+      "language": "th",
+      "allowed_roles": [
+        "reader",
+        "engineer",
+        "admin"
+      ],
+      "text": "เอกสารสังเคราะห์ SYN-M06-A: ความยาวสายตัวอย่าง ฝั่ง A มีค่า 9 เมตร."
+    },
+    {
+      "id": "SYN-M06-B",
+      "language": "th",
+      "allowed_roles": [
+        "reader",
+        "engineer",
+        "admin"
+      ],
+      "text": "เอกสารสังเคราะห์ SYN-M06-B: ความยาวสายตัวอย่าง ฝั่ง B มีค่า 14 เมตร."
+    },
+    {
+      "id": "SYN-M07-A",
+      "language": "th",
+      "allowed_roles": [
+        "reader",
+        "engineer",
+        "admin"
+      ],
+      "text": "เอกสารสังเคราะห์ SYN-M07-A: น้ำหนักบรรจุภัณฑ์ตัวอย่าง ฝั่ง A มีค่า 10 กิโลกรัม."
+    },
+    {
+      "id": "SYN-M07-B",
+      "language": "th",
+      "allowed_roles": [
+        "reader",
+        "engineer",
+        "admin"
+      ],
+      "text": "เอกสารสังเคราะห์ SYN-M07-B: น้ำหนักบรรจุภัณฑ์ตัวอย่าง ฝั่ง B มีค่า 15 กิโลกรัม."
+    },
+    {
+      "id": "SYN-M08-A",
+      "language": "en",
+      "allowed_roles": [
+        "reader",
+        "engineer",
+        "admin"
+      ],
+      "text": "Synthetic document SYN-M08-A: mock test kits, side A, records 11 kits."
+    },
+    {
+      "id": "SYN-M08-B",
+      "language": "en",
+      "allowed_roles": [
+        "reader",
+        "engineer",
+        "admin"
+      ],
+      "text": "Synthetic document SYN-M08-B: mock test kits, side B, records 16 kits."
+    },
+    {
+      "id": "SYN-M09-A",
+      "language": "en",
+      "allowed_roles": [
+        "reader",
+        "engineer",
+        "admin"
+      ],
+      "text": "Synthetic document SYN-M09-A: mock assembly time, side A, records 12 minutes."
+    },
+    {
+      "id": "SYN-M09-B",
+      "language": "en",
+      "allowed_roles": [
+        "reader",
+        "engineer",
+        "admin"
+      ],
+      "text": "Synthetic document SYN-M09-B: mock assembly time, side B, records 17 minutes."
+    },
+    {
+      "id": "SYN-M10-A",
+      "language": "en",
+      "allowed_roles": [
+        "reader",
+        "engineer",
+        "admin"
+      ],
+      "text": "Synthetic document SYN-M10-A: mock inspection interval, side A, records 13 days."
+    },
+    {
+      "id": "SYN-M10-B",
+      "language": "en",
+      "allowed_roles": [
+        "reader",
+        "engineer",
+        "admin"
+      ],
+      "text": "Synthetic document SYN-M10-B: mock inspection interval, side B, records 18 days."
+    },
+    {
+      "id": "SYN-M11-A",
+      "language": "en",
+      "allowed_roles": [
+        "reader",
+        "engineer",
+        "admin"
+      ],
+      "text": "Synthetic document SYN-M11-A: sample labels, side A, records 14 labels."
+    },
+    {
+      "id": "SYN-M11-B",
+      "language": "en",
+      "allowed_roles": [
+        "reader",
+        "engineer",
+        "admin"
+      ],
+      "text": "Synthetic document SYN-M11-B: sample labels, side B, records 19 labels."
+    },
+    {
+      "id": "SYN-M12-A",
+      "language": "en",
+      "allowed_roles": [
+        "reader",
+        "engineer",
+        "admin"
+      ],
+      "text": "Synthetic document SYN-M12-A: mock shelves, side A, records 15 shelves."
+    },
+    {
+      "id": "SYN-M12-B",
+      "language": "en",
+      "allowed_roles": [
+        "reader",
+        "engineer",
+        "admin"
+      ],
+      "text": "Synthetic document SYN-M12-B: mock shelves, side B, records 20 shelves."
+    },
+    {
+      "id": "SYN-M13-A",
+      "language": "en",
+      "allowed_roles": [
+        "reader",
+        "engineer",
+        "admin"
+      ],
+      "text": "Synthetic document SYN-M13-A: mock demonstration time, side A, records 16 hours."
+    },
+    {
+      "id": "SYN-M13-B",
+      "language": "en",
+      "allowed_roles": [
+        "reader",
+        "engineer",
+        "admin"
+      ],
+      "text": "Synthetic document SYN-M13-B: mock demonstration time, side B, records 21 hours."
+    },
+    {
+      "id": "SYN-M14-A",
+      "language": "en",
+      "allowed_roles": [
+        "reader",
+        "engineer",
+        "admin"
+      ],
+      "text": "Synthetic document SYN-M14-A: mock route distance, side A, records 17 meters."
+    },
+    {
+      "id": "SYN-M14-B",
+      "language": "en",
+      "allowed_roles": [
+        "reader",
+        "engineer",
+        "admin"
+      ],
+      "text": "Synthetic document SYN-M14-B: mock route distance, side B, records 22 meters."
+    },
+    {
+      "id": "SYN-M15-A",
+      "language": "en",
+      "allowed_roles": [
+        "reader",
+        "engineer",
+        "admin"
+      ],
+      "text": "Synthetic document SYN-M15-A: sample material sheets, side A, records 18 sheets."
+    },
+    {
+      "id": "SYN-M15-B",
+      "language": "en",
+      "allowed_roles": [
+        "reader",
+        "engineer",
+        "admin"
+      ],
+      "text": "Synthetic document SYN-M15-B: sample material sheets, side B, records 23 sheets."
+    },
+    {
+      "id": "SYN-C01-A",
+      "language": "th",
+      "allowed_roles": [
+        "reader",
+        "engineer",
+        "admin"
+      ],
+      "text": "เอกสารสังเคราะห์ SYN-C01-A: อะไหล่ทดลอง มีค่าที่ประกาศ 4 ชิ้น. เอกสารสองฉบับมีลำดับความน่าเชื่อถือและช่วงเวลาบังคับใช้เท่ากัน ไม่มีฉบับใดยกเลิกอีกฉบับ"
+    },
+    {
+      "id": "SYN-C01-B",
+      "language": "th",
+      "allowed_roles": [
+        "reader",
+        "engineer",
+        "admin"
+      ],
+      "text": "เอกสารสังเคราะห์ SYN-C01-B: อะไหล่ทดลอง มีค่าที่ประกาศ 9 ชิ้น. เอกสารสองฉบับมีลำดับความน่าเชื่อถือและช่วงเวลาบังคับใช้เท่ากัน ไม่มีฉบับใดยกเลิกอีกฉบับ"
+    },
+    {
+      "id": "SYN-C02-A",
+      "language": "th",
+      "allowed_roles": [
+        "reader",
+        "engineer",
+        "admin"
+      ],
+      "text": "เอกสารสังเคราะห์ SYN-C02-A: การอบรมจำลอง มีค่าที่ประกาศ 5 ชั่วโมง. เอกสารสองฉบับมีลำดับความน่าเชื่อถือและช่วงเวลาบังคับใช้เท่ากัน ไม่มีฉบับใดยกเลิกอีกฉบับ"
+    },
+    {
+      "id": "SYN-C02-B",
+      "language": "th",
+      "allowed_roles": [
+        "reader",
+        "engineer",
+        "admin"
+      ],
+      "text": "เอกสารสังเคราะห์ SYN-C02-B: การอบรมจำลอง มีค่าที่ประกาศ 10 ชั่วโมง. เอกสารสองฉบับมีลำดับความน่าเชื่อถือและช่วงเวลาบังคับใช้เท่ากัน ไม่มีฉบับใดยกเลิกอีกฉบับ"
+    },
+    {
+      "id": "SYN-C03-A",
+      "language": "th",
+      "allowed_roles": [
+        "reader",
+        "engineer",
+        "admin"
+      ],
+      "text": "เอกสารสังเคราะห์ SYN-C03-A: รอบบำรุงรักษาจำลอง มีค่าที่ประกาศ 6 วัน. เอกสารสองฉบับมีลำดับความน่าเชื่อถือและช่วงเวลาบังคับใช้เท่ากัน ไม่มีฉบับใดยกเลิกอีกฉบับ"
+    },
+    {
+      "id": "SYN-C03-B",
+      "language": "th",
+      "allowed_roles": [
+        "reader",
+        "engineer",
+        "admin"
+      ],
+      "text": "เอกสารสังเคราะห์ SYN-C03-B: รอบบำรุงรักษาจำลอง มีค่าที่ประกาศ 11 วัน. เอกสารสองฉบับมีลำดับความน่าเชื่อถือและช่วงเวลาบังคับใช้เท่ากัน ไม่มีฉบับใดยกเลิกอีกฉบับ"
+    },
+    {
+      "id": "SYN-C04-A",
+      "language": "th",
+      "allowed_roles": [
+        "reader",
+        "engineer",
+        "admin"
+      ],
+      "text": "เอกสารสังเคราะห์ SYN-C04-A: เวลาพักเครื่องทดลอง มีค่าที่ประกาศ 7 นาที. เอกสารสองฉบับมีลำดับความน่าเชื่อถือและช่วงเวลาบังคับใช้เท่ากัน ไม่มีฉบับใดยกเลิกอีกฉบับ"
+    },
+    {
+      "id": "SYN-C04-B",
+      "language": "th",
+      "allowed_roles": [
+        "reader",
+        "engineer",
+        "admin"
+      ],
+      "text": "เอกสารสังเคราะห์ SYN-C04-B: เวลาพักเครื่องทดลอง มีค่าที่ประกาศ 12 นาที. เอกสารสองฉบับมีลำดับความน่าเชื่อถือและช่วงเวลาบังคับใช้เท่ากัน ไม่มีฉบับใดยกเลิกอีกฉบับ"
+    },
+    {
+      "id": "SYN-C05-A",
+      "language": "th",
+      "allowed_roles": [
+        "reader",
+        "engineer",
+        "admin"
+      ],
+      "text": "เอกสารสังเคราะห์ SYN-C05-A: กล่องขนส่งจำลอง มีค่าที่ประกาศ 8 กล่อง. เอกสารสองฉบับมีลำดับความน่าเชื่อถือและช่วงเวลาบังคับใช้เท่ากัน ไม่มีฉบับใดยกเลิกอีกฉบับ"
+    },
+    {
+      "id": "SYN-C05-B",
+      "language": "th",
+      "allowed_roles": [
+        "reader",
+        "engineer",
+        "admin"
+      ],
+      "text": "เอกสารสังเคราะห์ SYN-C05-B: กล่องขนส่งจำลอง มีค่าที่ประกาศ 13 กล่อง. เอกสารสองฉบับมีลำดับความน่าเชื่อถือและช่วงเวลาบังคับใช้เท่ากัน ไม่มีฉบับใดยกเลิกอีกฉบับ"
+    },
+    {
+      "id": "SYN-C06-A",
+      "language": "th",
+      "allowed_roles": [
+        "reader",
+        "engineer",
+        "admin"
+      ],
+      "text": "เอกสารสังเคราะห์ SYN-C06-A: ความยาวสายตัวอย่าง มีค่าที่ประกาศ 9 เมตร. เอกสารสองฉบับมีลำดับความน่าเชื่อถือและช่วงเวลาบังคับใช้เท่ากัน ไม่มีฉบับใดยกเลิกอีกฉบับ"
+    },
+    {
+      "id": "SYN-C06-B",
+      "language": "th",
+      "allowed_roles": [
+        "reader",
+        "engineer",
+        "admin"
+      ],
+      "text": "เอกสารสังเคราะห์ SYN-C06-B: ความยาวสายตัวอย่าง มีค่าที่ประกาศ 14 เมตร. เอกสารสองฉบับมีลำดับความน่าเชื่อถือและช่วงเวลาบังคับใช้เท่ากัน ไม่มีฉบับใดยกเลิกอีกฉบับ"
+    },
+    {
+      "id": "SYN-C07-A",
+      "language": "th",
+      "allowed_roles": [
+        "reader",
+        "engineer",
+        "admin"
+      ],
+      "text": "เอกสารสังเคราะห์ SYN-C07-A: น้ำหนักบรรจุภัณฑ์ตัวอย่าง มีค่าที่ประกาศ 10 กิโลกรัม. เอกสารสองฉบับมีลำดับความน่าเชื่อถือและช่วงเวลาบังคับใช้เท่ากัน ไม่มีฉบับใดยกเลิกอีกฉบับ"
+    },
+    {
+      "id": "SYN-C07-B",
+      "language": "th",
+      "allowed_roles": [
+        "reader",
+        "engineer",
+        "admin"
+      ],
+      "text": "เอกสารสังเคราะห์ SYN-C07-B: น้ำหนักบรรจุภัณฑ์ตัวอย่าง มีค่าที่ประกาศ 15 กิโลกรัม. เอกสารสองฉบับมีลำดับความน่าเชื่อถือและช่วงเวลาบังคับใช้เท่ากัน ไม่มีฉบับใดยกเลิกอีกฉบับ"
+    },
+    {
+      "id": "SYN-C08-A",
+      "language": "en",
+      "allowed_roles": [
+        "reader",
+        "engineer",
+        "admin"
+      ],
+      "text": "Synthetic document SYN-C08-A: the declared value for mock test kits is 11 kits. The two documents have equal authority and the same effective period; neither supersedes the other."
+    },
+    {
+      "id": "SYN-C08-B",
+      "language": "en",
+      "allowed_roles": [
+        "reader",
+        "engineer",
+        "admin"
+      ],
+      "text": "Synthetic document SYN-C08-B: the declared value for mock test kits is 16 kits. The two documents have equal authority and the same effective period; neither supersedes the other."
+    },
+    {
+      "id": "SYN-C09-A",
+      "language": "en",
+      "allowed_roles": [
+        "reader",
+        "engineer",
+        "admin"
+      ],
+      "text": "Synthetic document SYN-C09-A: the declared value for mock assembly time is 12 minutes. The two documents have equal authority and the same effective period; neither supersedes the other."
+    },
+    {
+      "id": "SYN-C09-B",
+      "language": "en",
+      "allowed_roles": [
+        "reader",
+        "engineer",
+        "admin"
+      ],
+      "text": "Synthetic document SYN-C09-B: the declared value for mock assembly time is 17 minutes. The two documents have equal authority and the same effective period; neither supersedes the other."
+    },
+    {
+      "id": "SYN-C10-A",
+      "language": "en",
+      "allowed_roles": [
+        "reader",
+        "engineer",
+        "admin"
+      ],
+      "text": "Synthetic document SYN-C10-A: the declared value for mock inspection interval is 13 days. The two documents have equal authority and the same effective period; neither supersedes the other."
+    },
+    {
+      "id": "SYN-C10-B",
+      "language": "en",
+      "allowed_roles": [
+        "reader",
+        "engineer",
+        "admin"
+      ],
+      "text": "Synthetic document SYN-C10-B: the declared value for mock inspection interval is 18 days. The two documents have equal authority and the same effective period; neither supersedes the other."
+    },
+    {
+      "id": "SYN-C11-A",
+      "language": "en",
+      "allowed_roles": [
+        "reader",
+        "engineer",
+        "admin"
+      ],
+      "text": "Synthetic document SYN-C11-A: the declared value for sample labels is 14 labels. The two documents have equal authority and the same effective period; neither supersedes the other."
+    },
+    {
+      "id": "SYN-C11-B",
+      "language": "en",
+      "allowed_roles": [
+        "reader",
+        "engineer",
+        "admin"
+      ],
+      "text": "Synthetic document SYN-C11-B: the declared value for sample labels is 19 labels. The two documents have equal authority and the same effective period; neither supersedes the other."
+    },
+    {
+      "id": "SYN-C12-A",
+      "language": "en",
+      "allowed_roles": [
+        "reader",
+        "engineer",
+        "admin"
+      ],
+      "text": "Synthetic document SYN-C12-A: the declared value for mock shelves is 15 shelves. The two documents have equal authority and the same effective period; neither supersedes the other."
+    },
+    {
+      "id": "SYN-C12-B",
+      "language": "en",
+      "allowed_roles": [
+        "reader",
+        "engineer",
+        "admin"
+      ],
+      "text": "Synthetic document SYN-C12-B: the declared value for mock shelves is 20 shelves. The two documents have equal authority and the same effective period; neither supersedes the other."
+    },
+    {
+      "id": "SYN-C13-A",
+      "language": "en",
+      "allowed_roles": [
+        "reader",
+        "engineer",
+        "admin"
+      ],
+      "text": "Synthetic document SYN-C13-A: the declared value for mock demonstration time is 16 hours. The two documents have equal authority and the same effective period; neither supersedes the other."
+    },
+    {
+      "id": "SYN-C13-B",
+      "language": "en",
+      "allowed_roles": [
+        "reader",
+        "engineer",
+        "admin"
+      ],
+      "text": "Synthetic document SYN-C13-B: the declared value for mock demonstration time is 21 hours. The two documents have equal authority and the same effective period; neither supersedes the other."
+    },
+    {
+      "id": "SYN-C14-A",
+      "language": "en",
+      "allowed_roles": [
+        "reader",
+        "engineer",
+        "admin"
+      ],
+      "text": "Synthetic document SYN-C14-A: the declared value for mock route distance is 17 meters. The two documents have equal authority and the same effective period; neither supersedes the other."
+    },
+    {
+      "id": "SYN-C14-B",
+      "language": "en",
+      "allowed_roles": [
+        "reader",
+        "engineer",
+        "admin"
+      ],
+      "text": "Synthetic document SYN-C14-B: the declared value for mock route distance is 22 meters. The two documents have equal authority and the same effective period; neither supersedes the other."
+    },
+    {
+      "id": "SYN-C15-A",
+      "language": "en",
+      "allowed_roles": [
+        "reader",
+        "engineer",
+        "admin"
+      ],
+      "text": "Synthetic document SYN-C15-A: the declared value for sample material sheets is 18 sheets. The two documents have equal authority and the same effective period; neither supersedes the other."
+    },
+    {
+      "id": "SYN-C15-B",
+      "language": "en",
+      "allowed_roles": [
+        "reader",
+        "engineer",
+        "admin"
+      ],
+      "text": "Synthetic document SYN-C15-B: the declared value for sample material sheets is 23 sheets. The two documents have equal authority and the same effective period; neither supersedes the other."
+    },
+    {
+      "id": "SYN-R01",
+      "language": "en",
+      "allowed_roles": [
+        "reader",
+        "engineer",
+        "admin"
+      ],
+      "text": "SYN-R01 SYN-ACL-BOUNDARY. Public synthetic marker PUBLIC_SAMPLE_17."
+    },
+    {
+      "id": "SYN-R02",
+      "language": "en",
+      "allowed_roles": [
+        "engineer",
+        "admin"
+      ],
+      "text": "SYN-R02 SYN-ACL-BOUNDARY. Engineering synthetic marker ENGINEER_SAMPLE_29."
+    },
+    {
+      "id": "SYN-R03",
+      "language": "en",
+      "allowed_roles": [
+        "admin"
+      ],
+      "text": "SYN-R03 SYN-ACL-BOUNDARY. Restricted synthetic marker ADMIN_SAMPLE_43."
+    }
+  ]
+}
