@@ -146,7 +146,6 @@ public sealed class MidStreamRevocationTests(WebApplicationFactory<Program> fact
     [InlineData("stamp")]
     [InlineData("role")]
     [InlineData("deleted")]
-    [InlineData("locked")]
     public async Task OtherAccountChanges_AlsoStopTheStream(string change)
     {
         var (host, ai) = Create();
@@ -159,7 +158,6 @@ public sealed class MidStreamRevocationTests(WebApplicationFactory<Program> fact
                 case "stamp": host.Users.Put("u-1", stamp: "S2"); break;
                 case "role": host.Users.Put("u-1", role: BcRoles.Admin); break;
                 case "deleted": host.Users.Users.TryRemove("u-1", out _); break;
-                case "locked": host.Users.Put("u-1", lockout: SecurityHost.Start.AddHours(1)); break;
             }
 
             host.Clock.Advance(StreamSessionGuard.AccountCheckInterval);
@@ -169,6 +167,25 @@ public sealed class MidStreamRevocationTests(WebApplicationFactory<Program> fact
         var response = await Post(host, cookie, "/api/chat/stream");
 
         AssertStoppedAfter(await response.Content.ReadAsStringAsync(), "A");
+    }
+
+    [Fact]
+    public async Task FailedPasswordLockoutDuringTheAnswer_DoesNotStopIt()
+    {
+        var (host, ai) = Create();
+        var cookie = await SignIn(host);
+        ai.After = i =>
+        {
+            if (i != 0) return Task.CompletedTask;
+            host.Users.Put("u-1", lockout: host.Clock.Now.AddMinutes(15));   // someone typed 5 wrong passwords for this user
+            host.Clock.Advance(StreamSessionGuard.AccountCheckInterval);
+            return Task.CompletedTask;
+        };
+
+        var events = Events(await (await Post(host, cookie, "/api/chat/stream")).Content.ReadAsStringAsync());
+
+        Assert.Equal("completed", events[^1].Event);
+        Assert.Equal(4, events.Count(e => e.Event == "delta"));
     }
 
     [Fact]

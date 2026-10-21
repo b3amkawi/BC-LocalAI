@@ -27,7 +27,8 @@ public sealed class AuthenticationApiTests
             builder.ConfigureAppConfiguration((_, configuration) => configuration.AddInMemoryCollection(new Dictionary<string, string?>
             {
                 ["Authentication:Enabled"] = "true", ["Authentication:KeyDirectory"] = keyPath,
-                ["Authentication:ReaderConnectionString"] = "Server=localhost;Database=synthetic;User ID=bc_auth_reader;Password=placeholder;SslMode=VerifyFull;Connection Timeout=3;MaximumPoolSize=4" // ci-allow-secret: fake placeholder test configuration, no database is contacted.
+                ["Authentication:ReaderConnectionString"] = "Server=localhost;Database=synthetic;User ID=bc_auth_reader;Password=placeholder;SslMode=VerifyFull;Connection Timeout=3;MaximumPoolSize=4", // ci-allow-secret: fake placeholder test configuration, no database is contacted.
+                ["Authentication:WriterConnectionString"] = "Server=localhost;Database=synthetic;User ID=bc_auth_attempt_writer;Password=placeholder-writer;SslMode=VerifyFull;Connection Timeout=3;MaximumPoolSize=4" // ci-allow-secret: fake placeholder writer configuration, no database is contacted.
             }));
             builder.ConfigureTestServices(services =>
             {

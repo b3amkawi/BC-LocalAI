@@ -91,3 +91,18 @@ internal static class BootstrapScript
     internal static string OptionFile(string user, string password, int port) =>
         $"[client]\nuser={user}\npassword={password}\nhost=127.0.0.1\nport={port}\nprotocol=TCP\ndefault-character-set=utf8mb4\n";
 }
+
+// Opt-in BE-005 fixture only. No grants on hashes, role, status, stamp, username, table DDL or account administration.
+internal static class AttemptWriterBootstrap
+{
+    internal static string[] Create(string secret)
+    {
+        if (secret.Length != 64 || !secret.All(Uri.IsHexDigit)) throw new ArgumentException("Only generated secrets may be used.");
+        return
+        [
+            $"CREATE USER 'bc_auth_attempt_writer'@'127.0.0.1' IDENTIFIED BY '{secret}' REQUIRE SSL;",
+            "GRANT SELECT (id, is_active, security_stamp, access_failed_count, lockout_end_utc) ON bc_localai_sec001.users TO 'bc_auth_attempt_writer'@'127.0.0.1';",
+            "GRANT UPDATE (access_failed_count, lockout_end_utc, updated_at_utc) ON bc_localai_sec001.users TO 'bc_auth_attempt_writer'@'127.0.0.1';"
+        ];
+    }
+}

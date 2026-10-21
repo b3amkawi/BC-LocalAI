@@ -52,7 +52,9 @@ BE-005 (dc477f7) ถูก merge เข้า `watzapon_BE-006` แล้ว ท
 - **คำตอบที่กำลังสร้าง (stream / chat):** `StreamSessionGuard` ตรวจซ้ำระหว่างคำตอบ — session (ในหน่วยความจำ) ก่อน**ทุกชิ้น**ของคำตอบ,
   บัญชีใน MySQL ทุก **5 วินาที** (`AccountCheckInterval`) นับจากตอนเริ่ม request; ถ้า session จบ stream ส่ง `event: error`
   `AUTH_SESSION_ENDED` แล้วหยุด (ไม่ส่งข้อความต่อ, ปิดการอ่านจาก Ollama) และ `/api/chat` ตอบ 401 `AUTH_SESSION_ENDED` แทนคำตอบ
-  — sign-out / revoke-all / ครบ 8 ชม. หยุดที่ชิ้นถัดไป; ปิด/ล็อก/ลบบัญชี/เปลี่ยน stamp หรือ role หยุดภายใน 5 วินาที;
+  — sign-out / revoke-all / ครบ 8 ชม. หยุดที่ชิ้นถัดไป; ปิด/ลบบัญชี/เปลี่ยน stamp หรือ role หยุดภายใน 5 วินาที;
   ฐานข้อมูลล่ม → หยุด (fail closed) แต่ไม่ revoke; idle timeout ไม่ตัดคำตอบที่กำลังสร้าง (ผู้ใช้กำลังใช้งานอยู่)
 - ตรวจบัญชี **ทุก request** (ไม่ cache) ตามการตัดสินใจ: 1 query เล็กต่อ request + ระหว่างคำตอบยาว 1 query ทุก 5 วินาที
-- ตัวเลข lockout/rate limit ของ login เป็นของ BE-005
+- ตัวเลข lockout/rate limit ของ login เป็นของ BE-005 (ใส่รหัสผิด 5 ครั้ง ล็อก 15 นาที)
+- **Lockout กันแค่การ login ใหม่** ไม่ตัด session ที่ login อยู่แล้ว (ไม่อย่างนั้นใครก็ได้ที่รู้ username พิมพ์รหัสผิด 5 ครั้งก็เตะเจ้าของออกได้);
+  ถ้า Admin ต้องการตัด session ให้ปิดบัญชี (`is_active = 0`) หรือหมุน `security_stamp`

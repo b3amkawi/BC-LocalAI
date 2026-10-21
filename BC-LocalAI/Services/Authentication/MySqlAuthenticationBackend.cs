@@ -4,7 +4,7 @@ namespace BC_LocalAI.Services.Authentication;
 
 public sealed class MySqlAuthenticationBackend(
     IAuthenticationRepository repository, IAuthenticationPasswordVerifier verifier, TimeProvider clock,
-    ILogger<MySqlAuthenticationBackend> logger) : IAuthenticationBackend
+    ILogger<MySqlAuthenticationBackend> logger, IAuthenticationAttemptStore attempts) : IAuthenticationBackend
 {
     public async Task<AuthenticationResult> AuthenticateAsync(LoginRequest request, CancellationToken cancellationToken = default)
     {
@@ -16,10 +16,15 @@ public sealed class MySqlAuthenticationBackend(
             // Always perform one bounded KDF, including unknown/disabled/locked accounts. Never log username/hash/password.
             var valid = verifier.Verify(account?.PasswordHash, request.Password!);
             cancellationToken.ThrowIfCancellationRequested();
-            if (!valid || account is null || !account.IsActive || account.LockoutEndUtc > clock.GetUtcNow() ||
-                !Guid.TryParseExact(account.Id, "D", out _) || account.Role is not ("User" or "Admin"))
+            var eligible = account is not null && account.IsActive && !(account.LockoutEndUtc > clock.GetUtcNow()) &&
+                Guid.TryParseExact(account.Id, "D", out _) && account.Role is ("User" or "Admin") &&
+                account.SecurityStamp.Length == 64 && account.SecurityStamp.All(Uri.IsHexDigit);
+            // Known/unknown/wrong/disabled/locked all perform one writer roundtrip. Null predicates cannot match any row.
+            var recorded = await attempts.RecordAsync(eligible ? account!.Id : null, eligible ? account!.SecurityStamp : null, eligible && valid, cancellationToken);
+            cancellationToken.ThrowIfCancellationRequested();
+            if (!valid || !eligible || !recorded)
                 return AuthenticationResult.InvalidCredentials();
-            return AuthenticationResult.Succeeded(new(account.Id, account.DisplayName, account.Username, [account.Role]));
+            return AuthenticationResult.Succeeded(new(account!.Id, account.DisplayName, account.Username, [account.Role]));
         }
         catch (AuthenticationDependencyException)
         {

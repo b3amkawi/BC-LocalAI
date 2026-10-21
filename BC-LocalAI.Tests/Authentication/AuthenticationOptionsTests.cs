@@ -52,6 +52,8 @@ public sealed class AuthenticationOptionsTests
         Assert.True(new AuthenticationOptionsValidator(new EnvironmentStub { EnvironmentName = "Development" }).Validate(null, options).Failed);
         var connection = new MySqlConnectionStringBuilder(options.ReaderConnectionString) { Server = "127.0.0.1", SslMode = MySqlSslMode.Required };
         options.ReaderConnectionString = connection.ConnectionString;
+        var writer = new MySqlConnectionStringBuilder(options.WriterConnectionString) { Server = "127.0.0.1", SslMode = MySqlSslMode.Required };
+        options.WriterConnectionString = writer.ConnectionString;
         Assert.True(new AuthenticationOptionsValidator(new EnvironmentStub { EnvironmentName = "Development" }).Validate(null, options).Succeeded);
     }
 
@@ -85,9 +87,41 @@ public sealed class AuthenticationOptionsTests
         Assert.True(new AuthenticationOptionsValidator(environment).Validate(null, Valid()).Failed);
     }
 
+    [Fact]
+    public void WriterMustBeSeparateLeastPrivilegeIdentityOnTheSameDatabase()
+    {
+        var options = Valid(); options.WriterConnectionString = "";
+        var validator = new AuthenticationOptionsValidator(new EnvironmentStub());
+        Assert.True(validator.Validate(null, options).Failed);
+        options = Valid(); options.WriterConnectionString = options.ReaderConnectionString;
+        Assert.True(validator.Validate(null, options).Failed);
+        options = Valid();
+        var writer = new MySqlConnectionStringBuilder(options.WriterConnectionString) { UserID = "root" };
+        options.WriterConnectionString = writer.ConnectionString;
+        Assert.True(validator.Validate(null, options).Failed);
+        options = Valid(); writer = new MySqlConnectionStringBuilder(options.WriterConnectionString) { Database = "wrong" };
+        options.WriterConnectionString = writer.ConnectionString;
+        Assert.True(validator.Validate(null, options).Failed);
+        options = Valid(); writer = new MySqlConnectionStringBuilder(options.WriterConnectionString) { UseAffectedRows = true };
+        options.WriterConnectionString = writer.ConnectionString;
+        Assert.True(validator.Validate(null, options).Failed);
+    }
+
+    [Theory]
+    [InlineData(0, 15)]
+    [InlineData(11, 15)]
+    [InlineData(5, 0)]
+    [InlineData(5, 61)]
+    public void LockoutConfigurationCannotDisableOrUnboundThePolicy(int threshold, int minutes)
+    {
+        var options = Valid(); options.LockoutThreshold = threshold; options.LockoutMinutes = minutes;
+        Assert.True(new AuthenticationOptionsValidator(new EnvironmentStub()).Validate(null, options).Failed);
+    }
+
     private static AuthenticationOptions Valid() => new()
     {
         Enabled = true, KeyDirectory = Path.GetTempPath(),
-        ReaderConnectionString = "Server=localhost;User ID=bc_auth_reader;Password=placeholder;Database=synthetic;SslMode=VerifyFull;Connection Timeout=3;MaximumPoolSize=4" // ci-allow-secret: fake placeholder configuration for validator tests only.
+        ReaderConnectionString = "Server=localhost;User ID=bc_auth_reader;Password=placeholder;Database=synthetic;SslMode=VerifyFull;Connection Timeout=3;MaximumPoolSize=4", // ci-allow-secret: fake placeholder configuration for validator tests only.
+        WriterConnectionString = "Server=localhost;User ID=bc_auth_attempt_writer;Password=placeholder-writer;Database=synthetic;SslMode=VerifyFull;Connection Timeout=3;MaximumPoolSize=4" // ci-allow-secret: fake placeholder configuration for validator tests only.
     };
 }

@@ -176,7 +176,6 @@ public sealed class SessionAuthorizationApiTests(WebApplicationFactory<Program> 
 
     [Theory]
     [InlineData("disabled")]
-    [InlineData("locked")]
     [InlineData("stamp")]
     [InlineData("role")]
     [InlineData("deleted")]
@@ -195,7 +194,6 @@ public sealed class SessionAuthorizationApiTests(WebApplicationFactory<Program> 
         switch (change)
         {
             case "disabled": host.Users.Put("u-1", active: false); break;
-            case "locked": host.Users.Put("u-1", lockout: host.Clock.Now.AddHours(1)); break;
             case "stamp": host.Users.Put("u-1", stamp: "S2"); break;
             case "role": host.Users.Put("u-1", role: BcRoles.Admin); break;
             case "deleted": host.Users.Users.TryRemove("u-1", out _); break;

@@ -56,10 +56,9 @@ public static class SessionValidator
             return SessionCheck.Reject(SessionRejectReason.UserDisabled);
         }
 
-        if (user.LockoutEnd is { } lockoutEnd && lockoutEnd > now)
-        {
-            return SessionCheck.Reject(SessionRejectReason.UserLocked);
-        }
+        // A lockout (BE-005: 5 failed passwords, 15 minutes) only blocks new sign-ins. It does not end sessions that are
+        // already signed in: otherwise anyone who knows a username could sign its owner out with 5 wrong passwords.
+        // Administrators end sessions by disabling the account or rotating its security stamp (checked here).
 
         // Password, status or permission changes rotate the stamp: every older session ends.
         if (!string.Equals(user.SecurityStamp, session.SecurityStamp, StringComparison.Ordinal))

@@ -96,8 +96,9 @@ dotnet test .\BC-LocalAI.slnx
 
 Basic MySQL account authentication is implemented behind `Authentication:Enabled=false` by default.
 Login/Logout/Me use HTTPS, framework Cookie Authentication, antiforgery and a bounded login-attempt limiter.
+Failures/lockout persist in MySQL through a separate least-privilege writer:5 consecutive failures lock15 minutes; success resets failures.
 See [configuration, API and FE-003/BE-006 handoff](docs/authentication/BE-005-INTEGRATION.md)
-and [verification evidence / remaining gates](docs/authentication/BE-005-IMPLEMENTATION-VERIFICATION.md).
+and [current verification evidence / remaining gates](docs/authentication/BE-005-LOCKOUT-VERIFICATION.md).
 Sessions, account revalidation and Chat authorization come from BE-006 (below); everything stays off until `Authentication:Enabled=true`.
 No production deployment or account-administration UI/API is included.
 

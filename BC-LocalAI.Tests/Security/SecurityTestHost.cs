@@ -95,7 +95,8 @@ internal sealed record SecurityHost(WebApplicationFactory<Program> Factory, Fake
                 ["Authentication:Enabled"] = enabled ? "true" : "false",
                 // BE-005 validates these when enabled; no database is contacted (the user store is replaced below).
                 ["Authentication:KeyDirectory"] = keyPath,
-                ["Authentication:ReaderConnectionString"] = "Server=localhost;Database=synthetic;User ID=bc_auth_reader;Password=placeholder;SslMode=VerifyFull;Connection Timeout=3;MaximumPoolSize=4" // ci-allow-secret: fake placeholder test configuration, no database is contacted.
+                ["Authentication:ReaderConnectionString"] = "Server=localhost;Database=synthetic;User ID=bc_auth_reader;Password=placeholder;SslMode=VerifyFull;Connection Timeout=3;MaximumPoolSize=4", // ci-allow-secret: fake placeholder test configuration, no database is contacted.
+                ["Authentication:WriterConnectionString"] = "Server=localhost;Database=synthetic;User ID=bc_auth_attempt_writer;Password=placeholder-writer;SslMode=VerifyFull;Connection Timeout=3;MaximumPoolSize=4" // ci-allow-secret: fake placeholder writer configuration, no database is contacted.
             }));
             builder.ConfigureLogging(logging => logging.AddProvider(logs));
             builder.ConfigureTestServices(services =>

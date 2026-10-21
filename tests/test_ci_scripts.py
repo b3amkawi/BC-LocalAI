@@ -251,11 +251,16 @@ class TestLiveEvidenceScript(unittest.TestCase):
 
         cls.server = http.server.HTTPServer(("127.0.0.1", 0), Handler)
         cls.port = cls.server.server_address[1]
-        threading.Thread(target=cls.server.serve_forever, daemon=True).start()
+        cls.thread = threading.Thread(target=cls.server.serve_forever, daemon=True)
+        cls.thread.start()
 
     @classmethod
     def tearDownClass(cls):
-        cls.server.shutdown()
+        try:
+            cls.server.shutdown()
+        finally:
+            cls.server.server_close()
+            cls.thread.join(timeout=5)
 
     def run_script(self, *args):
         return subprocess.run([PWSH, "-NoProfile", "-File", str(self.SCRIPT), *args], capture_output=True, text=True, timeout=60)
@@ -278,6 +283,20 @@ class TestLiveEvidenceScript(unittest.TestCase):
         out = self.run_script("-Files", __file__, "-OllamaUrl", "http://192.0.2.10:11434")
         self.assertNotEqual(out.returncode, 0)
         self.assertIn("non-loopback", out.stderr)
+
+
+class TestLiveEvidenceCleanup(unittest.TestCase):
+    def test_server_cleanup_closes_the_listening_socket(self):
+        # A separate fixture class cannot interfere with the script tests' shared server.
+        fixture = type("IsolatedLiveEvidenceServer", (TestLiveEvidenceScript,), {})
+        fixture.setUpClass()
+        try:
+            listener = fixture.server.socket
+            self.assertGreaterEqual(listener.fileno(), 0)
+        finally:
+            fixture.tearDownClass()
+        self.assertEqual(listener.fileno(), -1)
+        self.assertFalse(fixture.thread.is_alive())
 
 
 class TestWorkflowFile(unittest.TestCase):

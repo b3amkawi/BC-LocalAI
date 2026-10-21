@@ -30,13 +30,13 @@ caught `https://localhost` vs `localhost:443`). See section 6.
 New tests:
 
 - **Unit (50):** every session rule including exact boundaries (idle 29/30/31 min, absolute 479/480/600 min while active),
-  revoked, cookie/user mismatch, deleted / disabled / locked (and lock expiry), stamp change, role change up and down, unknown roles;
+  revoked, cookie/user mismatch, deleted / disabled / locked (kept since 2026-10-21, section 8), stamp change, role change up and down, unknown roles;
   options (defaults = decision, ranges, idle ≤ absolute, shipped appsettings off); store (256-bit unique ids, touch never moves CreatedAt or
   goes back, revoke final, revoke-all only that user, unknown role refused, 100 concurrent creates); same-site detection (13 cases).
 - **Integration (24, real pipeline, auth on):** anonymous chat and stream → 401 JSON with no redirect and no SSE; page still loads;
   signed-in User chats; cookie flags (`__Host-`, Secure, HttpOnly, SameSite=Lax, Path=/, no Domain, no Expires, no stamp or user id visible);
   User → admin-only 403 JSON, Admin → 200 and may chat; copied cookie useless after sign-out; revoke-all ends both devices of one user
-  and not another user; disable / lock / stamp / role / delete each end a **copied** cookie at the next request and it stays dead after
+  and not another user; disable / stamp / role / delete each end a **copied** cookie at the next request and it stays dead after
   the account is restored; account read on every request; idle 30 min; active use still ends at 8 h; user store down → 401 (not 500) and
   works again after recovery; auth on without a user store → app refuses to start; cross-site POST (Fetch Metadata or Origin) → 403
   `AUTH_CSRF_INVALID` even with a valid session; same-origin POST allowed; disabled mode keeps chat open but admin-only still needs sign-in;
@@ -121,7 +121,7 @@ Decisions taken by watzapon on Claude Code's recommendation (delegated by the pr
 Implemented: `StreamSessionGuard` (section 2 of the guide). Maximum revocation delay: next piece for sign-out / revoke-all / 8 h;
 5 s for account changes in MySQL (one query per 5 s per running answer). `/api/chat` does not hand over an answer that finished after the
 session ended. Tests `MidStreamRevocationTests` (12): sign-out and revoke-all from another tab, disabled (not noticed before 5 s, noticed
-at 5 s, session revoked and stays dead after restore), stamp / role / deleted / locked, 8 h reached mid-answer, user store down (stops, not
+at 5 s, session revoked and stays dead after restore), stamp / role / deleted (locked: section 8), 8 h reached mid-answer, user store down (stops, not
 revoked, works again), idle timeout does not cut a 40-minute answer, no account query per piece, `/api/chat` answer withheld, auth off
 unchanged. Mutation check (each made tests fail): guard always passes (10) · no account check (7) · not revoked (1) · revoked when the
 store is down (1) · idle timeout cuts an active answer (1) · account queried for every piece (2) · `/api/chat` final check removed (1) ·
@@ -149,3 +149,35 @@ missing sections so the TC list can be checked. BE-011 (Document ACL) named unde
 
 **CI** — runs only for pull requests to `main`. The Python benchmark test that fails on this machine (section 6) also fails on a clean
 `main` here, while the last CI runs on `main` (ubuntu) passed, so it is local to this machine.
+
+## 8. After merging `main` 0cb07ff (BE-005 PR #34, lockout) — 2026-10-21
+
+`main` received BE-005 through PR #34, including a new commit `aefd73e` (failed attempts and lockout persisted in MySQL through a
+separate attempt writer, `WriterConnectionString`). Merged into `watzapon_BE-006` (no rebase, no force push) and checked again.
+
+| Finding | Severity | Resolution |
+|---|---|---|
+| **Lockout signed the owner out.** BE-005 locks an account after 5 wrong passwords typed by anyone; BE-006 treated an active lockout as a reason to end every open session of that account (at the next request and within 5 s mid-answer). Anyone who knows a username could therefore sign its owner out every 15 minutes. | High (DoS on users) | Decision (Claude Code's recommendation, same as ASP.NET Core Identity): **lockout only blocks new sign-ins**; open sessions continue. Administrators end sessions by disabling the account or rotating `security_stamp`, which BE-005's documentation already requires for every admin change. `SessionValidator` no longer rejects on lockout (`SessionRejectReason.UserLocked` removed); `SessionService` still refuses to sign a locked account in. |
+| Merge conflicts | — | `README.md` (kept main's lockout link and the BE-006 sentence), `docs/devops/test-baseline.json` (kept the higher count, raised to 652). |
+| BE-006 integration tests with auth on failed at startup | Test only | Main now validates `WriterConnectionString` when auth is enabled; `SecurityHost` gets the same fake placeholder as BE-005's tests. |
+| BE-006 live tests used the old fixture | Test only | Moved to main's dedicated BE-005 fixture (`-InstanceName be005-mysql`, loopback port 3319, reader + attempt writer + admin). |
+| Python benchmark test failed locally | Fixed upstream | Main's `aefd73e` fixed the benchmark sample race: 143/143 now pass on this machine. |
+
+Tests added or changed for the lockout decision: unit (locked user keeps a valid session), integration (`FailedPasswordLockout_KeepsTheSignedInSession_ButRefusesANewSignIn`,
+`FailedPasswordLockoutDuringTheAnswer_DoesNotStopIt`), live MySQL (`FiveWrongPasswordsFromSomeoneElse_LockNewSignIns_ButDoNotSignTheOwnerOut`:
+5 real wrong passwords from another app host lock the account in MySQL, a correct password from a third host is refused, the owner's
+open session still answers 200; lock reset in `finally`). The "locked" cases were removed from the tests that expect a session to end.
+Mutation: restoring "lockout ends the session" makes 3 unit/integration tests and the live test fail.
+
+| Suite (after the merge) | Result |
+|---|---|
+| `dotnet test BC-LocalAI.slnx` Development / Production | **652** passed, 0 warnings (baseline 641 → 652) |
+| `dotnet test` hostile environment (`Authentication__Enabled=true`, idle 999, absolute 1, `MaxSessions=1`) | **652** passed |
+| `node --test "tests/ui/*.test.mjs"` | 61 passed |
+| `python -m unittest discover -s tests` | **143** passed |
+| `check_test_counts.py` (all three suites) | all gates passed |
+| Live MySQL `tests/BE005.MySqlTests` (fixture `be005-mysql`, 127.0.0.1:3319) | **16** passed (BE-005 attempts/lockout + BE-006 account changes + lockout) |
+| Secret scan / doc links / CI script tests | clean / OK / OK |
+
+No remaining known defect. Unchanged limits: sessions in memory (single instance, restart signs out); not enabled until FE-003 and HTTPS;
+admin account script is a follow-up; Issue #22 sections 4.7–7 still missing upstream.

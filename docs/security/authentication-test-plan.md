@@ -81,6 +81,8 @@ logs/temporary root password/generated SQL/hash ทั้งหมดอยู�
 
 Scope decided by the owner (2026-10-20): BC-LocalAI's own accounts on MySQL, no legacy integration.
 Decided (watzapon, delegated): Admin manages accounts by script; idle 30 min / absolute 8 h; roles User/Admin, Admin cannot read others' chats.
-Still open: exact lockout/rate-limit numbers and audit retention (proposed and tested in BE-005/006, approved in their PRs).
+Follow-up 2026-10-21: watzapon confirmed lockout5 failures/15 minutes, success reset, rates5/account,30/IP,120/global per minute
+and2 concurrent verifications in the BE-005 chat. [BE-005 execution evidence](../authentication/BE-005-LOCKOUT-VERIFICATION.md).
+Audit retention and independent implementation/PR approval remain separate; policy confirmation is not a claim of PR approval.
 BE-005 uses `bc_auth_reader` for lookups and a separate least-privilege writer for lockout/attempts (Architecture section 3).
 Full automated Authentication Integration Tests belong to BE-005/006; this issue supplies plan and local evidence only.

@@ -40,6 +40,23 @@ public sealed class LoginIntegrationTests
     }
 
     [Fact]
+    public async Task FailedPasswordLockout_KeepsTheSignedInSession_ButRefusesANewSignIn()
+    {
+        var accounts = new FakeUserStore();
+        accounts.Put(Id);
+        await using var factory = AuthenticationApiTests.Factory(Backend(), accounts: accounts);
+        using var owner = AuthenticationApiTests.Client(factory);
+        Assert.Equal(HttpStatusCode.OK, (await AuthenticationApiTests.Login(owner)).StatusCode);
+
+        // BE-005 locks the account after 5 wrong passwords typed by anyone; the owner, already signed in, keeps working.
+        accounts.Put(Id, lockout: DateTimeOffset.UtcNow.AddMinutes(15));
+
+        Assert.Equal(HttpStatusCode.OK, (await owner.GetAsync("/api/auth/me")).StatusCode);
+        using var someoneElse = AuthenticationApiTests.Client(factory);
+        Assert.Equal(HttpStatusCode.Unauthorized, (await AuthenticationApiTests.Login(someoneElse)).StatusCode);
+    }
+
+    [Fact]
     public async Task Login_TheRoleComesFromTheAccount_NotFromTheLoginBackend()
     {
         var accounts = new FakeUserStore();

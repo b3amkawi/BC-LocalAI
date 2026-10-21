@@ -13,6 +13,7 @@ public sealed class AuthenticationAccount
     public required string PasswordHash { get; init; }
     public required bool IsActive { get; init; }
     public required string Role { get; init; }
+    public required string SecurityStamp { get; init; }
     public DateTimeOffset? LockoutEndUtc { get; init; }
     public override string ToString() => "AuthenticationAccount [REDACTED]";
 }
@@ -37,7 +38,7 @@ public sealed class MySqlAuthenticationRepository(IOptions<AuthenticationOptions
             await connection.OpenAsync(cancellationToken);
             await using var command = connection.CreateCommand();
             // Schema and identifiers are fixed from SEC-001, not input/configuration. No SELECT *, writes or retry.
-            command.CommandText = "SELECT id, username, display_name, password_hash, is_active, role, lockout_end_utc FROM users WHERE normalized_username = @username LIMIT 1";
+            command.CommandText = "SELECT id, username, display_name, password_hash, is_active, role, lockout_end_utc, security_stamp FROM users WHERE normalized_username = @username LIMIT 1";
             command.CommandTimeout = options.Value.CommandTimeoutSeconds;
             command.Parameters.Add("@username", MySqlDbType.VarChar, 128).Value = normalizedUsername;
             await using var reader = await command.ExecuteReaderAsync(cancellationToken);
@@ -46,7 +47,8 @@ public sealed class MySqlAuthenticationRepository(IOptions<AuthenticationOptions
             {
                 Id = reader.GetGuid(0).ToString("D"), Username = reader.GetString(1), DisplayName = reader.GetString(2),
                 PasswordHash = reader.GetString(3), IsActive = reader.GetBoolean(4), Role = reader.GetString(5),
-                LockoutEndUtc = reader.IsDBNull(6) ? null : new DateTimeOffset(DateTime.SpecifyKind(reader.GetDateTime(6), DateTimeKind.Utc))
+                LockoutEndUtc = reader.IsDBNull(6) ? null : new DateTimeOffset(DateTime.SpecifyKind(reader.GetDateTime(6), DateTimeKind.Utc)),
+                SecurityStamp = reader.GetString(7)
             };
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested) { throw; }

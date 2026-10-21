@@ -54,7 +54,6 @@ public enum SessionRejectReason
     IdleTimeoutExceeded,
     UserNotFound,
     UserDisabled,
-    UserLocked,
     SecurityStampChanged,
     RoleChanged,
     UnknownRole,

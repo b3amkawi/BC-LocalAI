@@ -72,9 +72,10 @@ public sealed class SessionValidatorTests
     public void DisabledUser_IsRefused() => Assert.Equal(SessionRejectReason.UserDisabled, Reason(Session(), User(active: false), T0));
 
     [Fact]
-    public void LockedUser_IsRefused_UntilTheLockoutEnds()
+    public void LockedUser_KeepsTheOpenSession_LockoutOnlyBlocksNewSignIns()
     {
-        Assert.Equal(SessionRejectReason.UserLocked, Reason(Session(), User(lockout: T0.AddMinutes(1)), T0));
+        // Failed-password lockout must not let a stranger sign the owner out (sign-in refusal is tested in SessionServiceTests).
+        Assert.True(SessionValidator.Check(Session(), "u-1", User(lockout: T0.AddMinutes(15)), T0, Options).IsValid);
         Assert.True(SessionValidator.Check(Session(), "u-1", User(lockout: T0.AddMinutes(-1)), T0, Options).IsValid);
     }
 
