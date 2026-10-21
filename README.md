@@ -194,6 +194,17 @@ sessions are checked against the account on every request, and cross-site API po
 BE-005's login signs in through these sessions and the account (status, stamp, role) is read from MySQL on every request. Enabling it without a user store stops the app at startup on purpose. Details: [docs/security/BE-006-DEVELOPER-GUIDE.md](docs/security/BE-006-DEVELOPER-GUIDE.md),
 [authorization matrix](docs/security/BE-006-AUTHORIZATION-MATRIX.md), [verification](docs/security/BE-006-VERIFICATION.md).
 
+### Chat history (BE-007)
+
+`appsettings.json` section `ChatHistory`: `Enabled` (**false**; needs `Authentication:Enabled`), `ConnectionString` (secret, its own
+MySQL account with SELECT/INSERT/UPDATE on the two history tables only), `ContextTokenBudget` (1500), `StreamCheckpointSeconds` (2).
+When enabled: `/api/conversations` (create, list, get, rename, delete, messages) for the signed-in user only, and `/api/chat` /
+`/api/chat/stream` accept an optional `conversationId` to save the turn and send earlier turns as context. Without `conversationId`
+the chat works exactly as before. Tables are created by an operator with `scripts/chat-history/migrate.ps1`, never at startup;
+retention (deleted: 30 days, closed accounts: 90 days) is applied by `scripts/chat-history/purge.ps1`.
+Details: [API contract](docs/chat-history/BE-007-API-CONTRACT.md), [design](docs/chat-history/BE-007-DESIGN.md),
+[migration](docs/chat-history/BE-007-MIGRATION-PLAN.md), [verification](docs/chat-history/BE-007-VERIFICATION.md).
+
 ### Error contract
 
 All errors use `{ "error": { "code": "...", "message": "..." } }` and never include exceptions, stack traces or provider details.
