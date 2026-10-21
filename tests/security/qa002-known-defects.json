@@ -1,0 +1,9 @@
+{
+  "_comment": "Cases whose Expected result the product does not meet yet. QA records the mismatch as FAIL with the defect id (docs/qa/qa-002-defects.md) and keeps the test green; the product is not changed by QA. When the product is fixed the same case records PASS and its line can be removed.",
+  "QA2-H-10-html-pages-frame": "QA2-D02",
+  "QA2-H-11-api-nosniff": "QA2-D01",
+  "QA2-L-01-ollama-500": "QA2-D04",
+  "QA2-L-07-unhandled-exception": "QA2-D03",
+  "QA2-MS-stalled-model": "QA2-D05",
+  "QA2-Q-03-per-user-cap": "QA2-D06"
+}
