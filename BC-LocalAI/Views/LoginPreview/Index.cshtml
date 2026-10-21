@@ -1,0 +1,73 @@
+@{
+    Layout = null;
+}
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#16386a" />
+    <title>Login Preview — BC-LocalAI</title>
+    <link rel="stylesheet" href="~/css/auth-preview.css" asp-append-version="true" />
+</head>
+<body>
+    <main class="preview">
+        <header class="brand">
+            <span class="brand__mark" aria-hidden="true">AI</span>
+            <div><p class="eyebrow">BC-LOCALAI · FE-003</p><h1>เข้าสู่ระบบ</h1></div>
+        </header>
+        <aside class="notice" aria-label="ข้อจำกัดของโหมดทดสอบ">
+            <strong>Mock Preview — ไม่ใช่ระบบ Login จริง</strong>
+            <p>ใช้ชื่อบัญชีและรหัสผ่านสมมติเท่านั้น ข้อมูลไม่ถูกส่งไป backend ไม่สร้าง cookie หรือสิทธิ์ใช้งานจริง</p>
+            <p>หน้า Chat เดิมยังไม่ผูกกับ preview นี้ การเชื่อม session จริงและ Chat History ยังไม่รวมใน preview</p>
+        </aside>
+        <section class="card" aria-labelledby="login-title">
+            <h2 id="login-title">ทดลองการเข้าสู่ระบบ</h2>
+            <p id="auth-status" class="status" role="status" aria-live="polite">กำลังตรวจสอบเซสชันทดสอบ…</p>
+            <p id="auth-error" class="error" role="alert" hidden></p>
+            <form id="login-form" action="#" method="post" novalidate aria-busy="true" autocomplete="off">
+                <label for="login-username">ชื่อบัญชีสมมติ</label>
+                <input id="login-username" name="demoUsername" type="text" maxlength="128" required
+                       autocomplete="off" autocapitalize="none" spellcheck="false" placeholder="demo.user"
+                       aria-describedby="username-hint auth-error" disabled />
+                <p id="username-hint" class="hint">ใช้ A–Z, a–z, 0–9 และ . _ - ไม่เกิน 128 ตัวอักษร</p>
+                <label for="login-password">รหัสผ่านสมมติ</label>
+                <input id="login-password" name="demoPassword" type="password" maxlength="1024" required
+                       autocomplete="off" aria-describedby="password-hint auth-error" disabled />
+                <p id="password-hint" class="hint">ไม่ใช้รหัสผ่านจริง · ช่องนี้จะถูกล้างเมื่อส่ง · ไม่ตัดช่องว่างของรหัสผ่าน</p>
+                <button id="login-submit" class="primary" type="submit" disabled>เข้าสู่ระบบตัวอย่าง</button>
+            </form>
+            <section id="user-profile" class="profile" aria-label="ข้อมูลผู้ใช้ตัวอย่าง" hidden>
+                <p class="eyebrow">ตัวอย่างสถานะ AUTHENTICATED</p>
+                <h3 id="display-name"></h3>
+                <dl><dt>ชื่อบัญชี</dt><dd id="account-name"></dd><dt>บทบาทตัวอย่าง</dt><dd id="user-role"></dd></dl>
+                <p class="hint">ส่วนนี้เป็น UI จำลอง ไม่ใช่หลักฐานว่า server อนุญาตให้เข้าถึงข้อมูลแล้ว</p>
+            </section>
+            <div class="actions">
+                <button id="check-session" type="button" disabled>ตรวจสอบเซสชันทดสอบ</button>
+                <button id="logout" type="button" disabled>ออกจากระบบตัวอย่าง</button>
+            </div>
+        </section>
+        <section class="scenario" aria-labelledby="scenario-title">
+            <h2 id="scenario-title">สถานการณ์จำลอง</h2>
+            <label for="scenario">เลือกผลตอบกลับ แล้วลอง Login หรือตรวจสอบเซสชัน</label>
+            <select id="scenario" disabled>
+                <option value="success">สำเร็จ</option>
+                <option value="invalid">401 — ชื่อบัญชีหรือรหัสผ่านไม่ถูกต้อง</option>
+                <option value="forbidden">403 — ไม่มีสิทธิ์</option>
+                <option value="csrf">403 — CSRF ไม่ผ่าน</option>
+                <option value="limited">429 — จำกัดคำขอ</option>
+                <option value="unavailable">503 — ระบบไม่พร้อม</option>
+                <option value="network">เชื่อมต่อไม่ได้</option>
+                <option value="expired">เซสชันหมดอายุ (กดตรวจสอบหลัง Login)</option>
+            </select>
+            <p class="hint">Mock เก็บเฉพาะสถานะในหน้านี้ เมื่อ refresh จะเริ่มใหม่ ไม่ใช่การทดสอบ cookie/session persistence จริง</p>
+        </section>
+        <noscript><p class="notice">ต้องเปิด JavaScript เพื่อทดลองหน้านี้ ไม่มีการส่งฟอร์มไปยัง server</p></noscript>
+        <footer><a href="/">กลับหน้า Chat เดิม (ไม่เชื่อมกับ Mock Login)</a></footer>
+    </main>
+    <script src="~/js/auth-core.js" asp-append-version="true"></script>
+    <script src="~/js/auth-mock.js" asp-append-version="true"></script>
+    <script src="~/js/auth-preview.js" asp-append-version="true"></script>
+</body>
+</html>

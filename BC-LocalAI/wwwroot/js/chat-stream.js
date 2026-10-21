@@ -247,8 +247,11 @@
         var reader = response.body.getReader();
         var decoder = new TextDecoder('utf-8');
         var parser = createSseParser(function (sseEvent) {
+            if (typeof settings.onEvent === 'function' && !isTerminal(session.snapshot().state)) settings.onEvent(sseEvent);
             report(session.handle(sseEvent));
         });
+
+        var bytesRead = 0;
 
         try {
             for (;;) {
@@ -256,6 +259,10 @@
                 if (chunk.done) {
                     parser.feed(decoder.decode());
                     break;
+                }
+                bytesRead += chunk.value.byteLength;
+                if (bytesRead > 2 * 1024 * 1024) {
+                    var tooLarge = session.fail('AI_RESPONSE_TOO_LARGE'); report(tooLarge); return tooLarge;
                 }
                 parser.feed(decoder.decode(chunk.value, { stream: true }));
                 if (isTerminal(session.snapshot().state)) {
@@ -268,7 +275,7 @@
                 ? session.fail('AI_TIMEOUT')
                 : aborted
                     ? session.cancel()
-                    : session.fail('STREAM_INTERRUPTED');
+                    : session.fail(error && error.code ? error.code : 'STREAM_INTERRUPTED');
             report(final);
             return final;
         } finally {

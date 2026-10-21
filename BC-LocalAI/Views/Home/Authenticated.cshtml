@@ -1,0 +1,87 @@
+@inject Microsoft.Extensions.Options.IOptions<BC_LocalAI.Configuration.OllamaOptions> Ollama
+@inject Microsoft.Extensions.Options.IOptions<BC_LocalAI.Configuration.ChatHistoryOptions> History
+@inject Microsoft.Extensions.Options.IOptions<BC_LocalAI.Security.BcAuthenticationOptions> Authentication
+@{ Layout = null; }
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="theme-color" content="#16386a" />
+    <title>บทสนทนา — BC LocalAI</title>
+    <link rel="stylesheet" href="~/css/chat.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/authenticated.css" asp-append-version="true" />
+</head>
+<body class="authenticated-page" data-page="chat" data-history-enabled="@History.Value.Enabled.ToString().ToLowerInvariant()" data-idle-minutes="@Authentication.Value.IdleTimeoutMinutes">
+    <a href="#message" class="skip-link">ไปช่องพิมพ์ข้อความ</a>
+    <div id="session-boundary" class="session-boundary" role="status" aria-live="polite">
+        <h1>BC LocalAI</h1><p id="auth-status">กำลังตรวจสอบเซสชัน…</p>
+        <p id="auth-error" class="notice notice--error" role="alert" hidden></p>
+        <button id="auth-retry" type="button" class="primary" hidden>ตรวจสอบเซสชันอีกครั้ง</button>
+        <a id="login-link" class="button-link" href="/login" hidden>กลับไปเข้าสู่ระบบ</a>
+    </div>
+    <div id="protected-app" class="workspace" hidden>
+        <aside class="history-sidebar" aria-label="รายการบทสนทนา">
+            <div class="sidebar-brand"><span class="app__mark" aria-hidden="true">AI</span><strong>BC LocalAI</strong></div>
+            <button id="new-chat" type="button" class="primary">＋ บทสนทนาใหม่</button>
+            <p id="history-notice" class="notice" role="status" hidden></p>
+            <p id="history-error" class="notice notice--error" role="alert" hidden></p>
+            <p id="history-loading" role="status" aria-live="polite" hidden>กำลังโหลดประวัติ…</p>
+            <nav aria-label="เลือกบทสนทนา"><ul id="conversation-list" class="conversation-list"></ul></nav>
+            <button id="previous-conversations" type="button" class="quiet" hidden>บทสนทนาก่อนหน้า</button>
+            <button id="more-conversations" type="button" class="quiet" hidden>บทสนทนาถัดไป</button>
+            <div class="sidebar-profile">
+                <strong id="display-name"></strong><span id="account-name"></span><span id="user-role" class="muted"></span>
+                <button id="logout" type="button" class="quiet">ออกจากระบบ</button>
+            </div>
+        </aside>
+        <section class="chat-panel" aria-label="บทสนทนาปัจจุบัน">
+            <header class="chat-toolbar">
+                <div><p class="brand-kicker">พื้นที่ส่วนตัวของคุณ</p><h1 id="conversation-title">เริ่มบทสนทนาใหม่</h1></div>
+                <div class="toolbar-actions">
+                    <button id="rename-chat" type="button" class="quiet" disabled>เปลี่ยนชื่อ</button>
+                    <button id="delete-chat" type="button" class="quiet danger" disabled>ลบ</button>
+                    <button id="refresh-history" type="button" class="quiet">รีเฟรช</button>
+                </div>
+            </header>
+            <div class="message-pager" aria-label="หน้าประวัติข้อความ">
+                <button id="previous-messages" type="button" class="quiet" disabled>ก่อนหน้า</button>
+                <span id="message-page" role="status"></span>
+                <button id="next-messages" type="button" class="quiet" disabled>ถัดไป</button>
+                <button id="latest-messages" type="button" class="quiet" disabled>ไปข้อความล่าสุด</button>
+            </div>
+            <main id="conversation" class="conversation" tabindex="0" aria-label="พื้นที่การสนทนา">
+                <ol id="messages" class="messages" role="log" aria-label="ข้อความในบทสนทนา" aria-relevant="additions"></ol>
+                <p id="empty-state" class="empty">เลือกบทสนทนาเดิม หรือเริ่มบทสนทนาใหม่เพื่อคุยกับ AI</p>
+            </main>
+            <form id="composer" class="composer" action="#" method="post" novalidate data-timeout-seconds="@(Ollama.Value.TimeoutSeconds + 20)">
+                <p id="hint" class="composer__hint" role="alert"></p>
+                <div class="composer__row">
+                    <label for="message" class="visually-hidden">ข้อความของคุณ</label>
+                    <textarea id="message" class="composer__input" rows="1" placeholder="พิมพ์คำถามของคุณ…" autocomplete="off" aria-describedby="keys" disabled></textarea>
+                    <button id="send" class="composer__send" type="submit" disabled>ส่ง</button>
+                    <button id="stop" class="composer__stop" type="button" hidden aria-keyshortcuts="Escape">หยุดสร้างคำตอบ</button>
+                </div>
+                <p id="keys" class="composer__keys">Enter เพื่อส่ง · Shift+Enter เพื่อขึ้นบรรทัดใหม่ · Esc เพื่อหยุด</p>
+                <span id="model-chip" class="muted">โมเดล: —</span>
+            </form>
+        </section>
+    </div>
+    <dialog id="conversation-dialog" aria-labelledby="dialog-title" aria-describedby="dialog-description">
+        <form id="dialog-form" action="#" method="post" novalidate>
+            <h2 id="dialog-title"></h2><p id="dialog-description"></p>
+            <label id="title-label" for="conversation-name">ชื่อบทสนทนา</label>
+            <input id="conversation-name" maxlength="200" autocomplete="off" />
+            <p id="dialog-error" class="notice notice--error" role="alert" hidden></p>
+            <div class="dialog-actions"><button id="dialog-cancel" type="button" class="quiet">ยกเลิก</button><button id="dialog-confirm" type="submit" class="primary">ยืนยัน</button></div>
+        </form>
+    </dialog>
+    <noscript><p>กรุณาเปิด JavaScript เพื่อใช้งาน Chat และประวัติอย่างปลอดภัย</p></noscript>
+    <script src="~/js/chat-core.js" asp-append-version="true"></script>
+    <script src="~/js/chat-stream.js" asp-append-version="true"></script>
+    <script src="~/js/auth-core.js" asp-append-version="true"></script>
+    <script src="~/js/frontend-http.js" asp-append-version="true"></script>
+    <script src="~/js/history-core.js" asp-append-version="true"></script>
+    <script src="~/js/authenticated-chat.js" asp-append-version="true"></script>
+</body>
+</html>

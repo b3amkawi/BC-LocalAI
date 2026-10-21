@@ -58,14 +58,17 @@ public sealed class SessionAuthorizationApiTests(WebApplicationFactory<Program> 
         Assert.Equal("AUTH_REQUIRED", await ErrorCode(response));
     }
 
-    [Fact]
-    public async Task ChatPage_StaysReachable_WithoutSignIn()
+    [Theory]
+    [InlineData(true)]
+    [InlineData(false)]
+    public async Task ChatPage_RequiresLoginOnlyWhenAuthenticationIsEnabled(bool enabled)
     {
-        var host = SecurityHost.Create(factory);
+        var host = SecurityHost.Create(factory, enabled: enabled);
 
         var response = await host.Browser().GetAsync("/");
 
-        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal(enabled ? HttpStatusCode.Redirect : HttpStatusCode.OK, response.StatusCode);
+        Assert.Equal(enabled ? "/login" : null, response.Headers.Location?.OriginalString);
     }
 
     // ---------------------------------------------------------------- signed in

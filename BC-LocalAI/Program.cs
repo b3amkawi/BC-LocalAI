@@ -81,6 +81,7 @@ if (!app.Environment.IsDevelopment())
 }
 
 // Auth rejects HTTP itself instead of redirecting a submitted password. Other routes retain existing behaviour.
+app.UseFrontendApiHttpsGuard();
 app.UseWhen(context => !context.Request.Path.StartsWithSegments("/api/auth"), branch => branch.UseHttpsRedirection());
 app.UseRouting();
 
@@ -90,6 +91,7 @@ app.UseChatHistoryGate();
 app.UseBcLocalAiSecurity();
 // Antiforgery must see the authenticated principal, not an anonymous pre-authentication context.
 app.UseMiddleware<AuthenticationBoundaryMiddleware>();
+app.UseFrontendApiIdentityBoundary();
 app.UseAuthorization();
 
 app.MapStaticAssets();

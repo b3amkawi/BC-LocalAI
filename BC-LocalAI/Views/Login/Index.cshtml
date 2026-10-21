@@ -1,0 +1,35 @@
+@{ Layout = null; }
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>เข้าสู่ระบบ — BC LocalAI</title>
+    <link rel="stylesheet" href="~/css/chat.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/authenticated.css" asp-append-version="true" />
+</head>
+<body class="login-page" data-page="login">
+    <main class="login-card">
+        <p class="brand-kicker">BETTERCODE · LOCAL AI</p>
+        <h1>ยินดีต้อนรับกลับมา</h1>
+        <p class="muted">เข้าสู่ระบบเพื่อกลับไปยังบทสนทนาของคุณ</p>
+        <p id="auth-status" role="status" aria-live="polite">กำลังตรวจสอบเซสชัน…</p>
+        <p id="auth-error" class="notice notice--error" role="alert" hidden></p>
+        <form id="login-form" action="#" method="post" novalidate aria-busy="true">
+            <label for="login-username">ชื่อบัญชีพนักงาน</label>
+            <input id="login-username" type="text" autocomplete="username" autocapitalize="none" spellcheck="false"
+                   maxlength="128" required aria-describedby="auth-error" disabled />
+            <label for="login-password">รหัสผ่าน</label>
+            <input id="login-password" type="password" autocomplete="current-password" maxlength="1024"
+                   required aria-describedby="auth-error" disabled />
+            <button id="login-submit" class="primary" type="submit" disabled>เข้าสู่ระบบ</button>
+        </form>
+        <button id="auth-retry" type="button" class="quiet" hidden>ตรวจสอบเซสชันอีกครั้ง</button>
+        <p class="login-footnote">ข้อมูลประมวลผลผ่านระบบภายใน · ไม่บันทึกรหัสผ่านในแอปบนเบราว์เซอร์</p>
+        <noscript><p>กรุณาเปิด JavaScript เพื่อเข้าสู่ระบบอย่างปลอดภัย</p></noscript>
+    </main>
+    <script src="~/js/auth-core.js" asp-append-version="true"></script>
+    <script src="~/js/frontend-http.js" asp-append-version="true"></script>
+    <script src="~/js/login.js" asp-append-version="true"></script>
+</body>
+</html>

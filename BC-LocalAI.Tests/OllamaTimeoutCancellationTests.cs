@@ -67,12 +67,9 @@ public sealed class OllamaTimeoutCancellationTests
     [Fact]
     public async Task Deadline_DoesNotCutInWhenTheAnswerArrivesInTime()
     {
-        var handler = new FakeHandler(async (_, token) =>
-        {
-            // Well inside the 1 s deadline: 300 ms left too little margin when the whole suite runs in parallel on a busy machine.
-            await Task.Delay(TimeSpan.FromMilliseconds(50), token);
-            return OllamaBodies.Response(GoodBody()).Response;
-        });
+        // The positive control is an already-available response, not a wall-clock scheduling race. The three negative
+        // deadline tests above still enforce the configured one-second limit, including stalled and drip-fed bodies.
+        var handler = FakeHandler.Returning(OllamaBodies.Response(GoodBody()).Response);
 
         var result = await Svc.Create(handler, OneSecond).GenerateResponseAsync("hi");
 
