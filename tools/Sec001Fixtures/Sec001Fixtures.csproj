@@ -8,4 +8,8 @@
   <ItemGroup>
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
   </ItemGroup>
+  <ItemGroup>
+    <!-- SEC-003: the fixture grants the admin writer exactly what the admin script documents. -->
+    <Compile Include="..\BcAdmin\AdminWriterGrants.cs" Link="BcAdmin\AdminWriterGrants.cs" />
+  </ItemGroup>
 </Project>

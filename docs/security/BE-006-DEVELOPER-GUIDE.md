@@ -57,4 +57,4 @@ BE-005 (dc477f7) ถูก merge เข้า `watzapon_BE-006` แล้ว ท
 - ตรวจบัญชี **ทุก request** (ไม่ cache) ตามการตัดสินใจ: 1 query เล็กต่อ request + ระหว่างคำตอบยาว 1 query ทุก 5 วินาที
 - ตัวเลข lockout/rate limit ของ login เป็นของ BE-005 (ใส่รหัสผิด 5 ครั้ง ล็อก 15 นาที)
 - **Lockout กันแค่การ login ใหม่** ไม่ตัด session ที่ login อยู่แล้ว (ไม่อย่างนั้นใครก็ได้ที่รู้ username พิมพ์รหัสผิด 5 ครั้งก็เตะเจ้าของออกได้);
-  ถ้า Admin ต้องการตัด session ให้ปิดบัญชี (`is_active = 0`) หรือหมุน `security_stamp`
+  ถ้า Admin ต้องการตัด session ให้ปิดบัญชี (`is_active = 0`) หรือหมุน `security_stamp` — ทำผ่านสคริปต์ SEC-003 (`disable` / `revoke-sessions`, ดู [SEC-003-ADMIN-GUIDE.md](SEC-003-ADMIN-GUIDE.md))

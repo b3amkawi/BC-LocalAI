@@ -23,8 +23,8 @@ if (args.Length == 2 && args[0] == "verify-db")
 }
 
 // Paths are provided by scripts/security/local-mysql.ps1 after ACL protection is applied.
-if (args.Length is not (2 or 3 or 4) || (args.Length == 4 && args[3] != "be005-attempt-writer"))
-    throw new ArgumentException("Expected private output directory, schema path, optional port and optional BE-005 writer flag.");
+if (args.Length is not (2 or 3 or 4) || (args.Length == 4 && args[3] is not ("be005-attempt-writer" or "sec003-admin-writer")))
+    throw new ArgumentException("Expected private output directory, schema path, optional port and optional BE-005/SEC-003 writer flag.");
 var output = Path.GetFullPath(args[0]);
 var schema = Path.GetFullPath(args[1]);
 var port = 3307;
@@ -40,8 +40,18 @@ var schemaSql = string.Join(" ", File.ReadAllLines(schema)
 var bootstrap = BootstrapScript.Create(secrets, schemaSql, fixtures);
 var writerSecret = args.Length == 4 ? FixtureFactory.RandomSecret() : null;
 if (writerSecret is not null) bootstrap.AddRange(AttemptWriterBootstrap.Create(writerSecret));
+// SEC-003 adds the audit table (same file the DBA runs) and the admin writer on top of the BE-005 writer, since the
+// live tests also sign in through the real app.
+var adminWriterSecret = args.Length == 4 && args[3] == "sec003-admin-writer" ? FixtureFactory.RandomSecret() : null;
+if (adminWriterSecret is not null)
+{
+    var auditSql = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(schema)!, "..", "sec003", "admin-audit.sql"));
+    bootstrap.Add(string.Join(" ", File.ReadAllLines(auditSql).Where(line => !line.TrimStart().StartsWith("--"))));
+    bootstrap.AddRange(AdminWriterBootstrap.Create(adminWriterSecret));
+}
 File.WriteAllLines(Path.Combine(output, "bootstrap.sql"), bootstrap, new UTF8Encoding(false));
 if (writerSecret is not null) File.WriteAllText(Path.Combine(output, "writer.cnf"), BootstrapScript.OptionFile("bc_auth_attempt_writer", writerSecret, port), new UTF8Encoding(false));
+if (adminWriterSecret is not null) File.WriteAllText(Path.Combine(output, "admin-writer.cnf"), BootstrapScript.OptionFile(BcAdmin.AdminWriterGrants.DefaultUser, adminWriterSecret, port), new UTF8Encoding(false));
 // The root secret is never stored: root@localhost cannot connect over TCP under skip-name-resolve, so nobody needs it,
 // and the admin account (this schema + SHUTDOWN) covers every lifecycle step. Recovery of this dev instance = new Initialize.
 foreach (var (name, user, password) in new[]

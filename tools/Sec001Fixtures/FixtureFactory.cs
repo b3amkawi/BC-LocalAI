@@ -106,3 +106,17 @@ internal static class AttemptWriterBootstrap
         ];
     }
 }
+
+// Opt-in SEC-003 fixture only. The grants are the script's own (AdminWriterGrants), so the fixture tests what the DBA is given.
+internal static class AdminWriterBootstrap
+{
+    internal static string[] Create(string secret)
+    {
+        if (secret.Length != 64 || !secret.All(Uri.IsHexDigit)) throw new ArgumentException("Only generated secrets may be used.");
+        return
+        [
+            $"CREATE USER '{BcAdmin.AdminWriterGrants.DefaultUser}'@'127.0.0.1' IDENTIFIED BY '{secret}' REQUIRE SSL;",
+            .. BcAdmin.AdminWriterGrants.Create(BcAdmin.AdminWriterGrants.DefaultUser, "127.0.0.1")
+        ];
+    }
+}
