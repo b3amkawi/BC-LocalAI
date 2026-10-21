@@ -6,8 +6,10 @@ answered by a local Ollama model (`qwen3:4b`) through `OllamaAIService` (BE-002)
 
 > **Known limitations (read before merging / deploying):** an answer longer than the output limit (`Ollama:MaxOutputTokens`, default 1024 tokens) returns `502 AI_RESPONSE_TOO_LARGE`;
 > Ollama answers one request at a time, so many simultaneous users queue and can receive `504 AI_TIMEOUT`; there is no
-> authentication, rate limit or conversation history. The backend streaming endpoint exists, but the current FE-001 page still uses the
-> non-streaming endpoint until FE-002. Details and measurements: [docs/KNOWN-LIMITATIONS.md](docs/KNOWN-LIMITATIONS.md).
+> global AI queue admission control. Authentication and conversation history are opt-in (off by default); FE-002 streams answers.
+> With Authentication enabled, FE-003 provides a protected Login/History UI over HTTPS using the existing server-side sessions.
+> Details: [FE-003 setup](docs/FE-003-REAL-UI.md), [verification](docs/FE-003-REAL-VERIFICATION.md),
+> and historical AI measurements: [docs/KNOWN-LIMITATIONS.md](docs/KNOWN-LIMITATIONS.md).
 
 ## Requirements
 
@@ -22,6 +24,10 @@ dotnet run --project .\BC-LocalAI\BC-LocalAI.csproj --launch-profile http
 
 Open <http://localhost:5290> in a browser: this is the Chat page.
 
+For the authenticated FE-003 UI, do not use the HTTP profile. Use the existing BE-005/006 authentication configuration,
+HTTPS and the BE-007 history configuration. An isolated synthetic-data walkthrough is in
+[FE-003 real UI](docs/FE-003-REAL-UI.md); no company database or production deployment is configured by this walkthrough.
+
 The page works in every environment, including `ASPNETCORE_ENVIRONMENT=Production` with `dotnet run`
 (before this fix the CSS and JavaScript arrived empty there; see `docs/BE-003-VERIFICATION.md` section 5b).
 
@@ -34,6 +40,9 @@ dotnet BC-LocalAI.dll
 ```
 
 ## Chat web page (FE-001, streaming since FE-002)
+
+This section describes the original anonymous page with Authentication disabled. For authenticated, server-persisted history,
+use [the FE-003 workflow](docs/FE-003-REAL-UI.md).
 
 Type a question and press **Enter** (or the **ส่ง** button) to send it; **Shift+Enter** starts a new line. Since FE-002 the answer
 **appears while it is being written** (`POST /api/chat/stream`), in one bubble with the model name. While the AI is working the
@@ -91,6 +100,13 @@ dotnet build .\BC-LocalAI.slnx
 ```powershell
 dotnet test .\BC-LocalAI.slnx
 ```
+
+## Login UI preparation (FE-003, offline Mock only)
+
+An opt-in Development/loopback preview is available at `/preview/login`; it is off by default.
+It demonstrates Login/profile/Logout/auth errors with synthetic data, **not real authentication or protected Chat**.
+No credentials are sent to the backend. Session integration and Chat History still require BE-006/BE-007.
+See [scope and run instructions](docs/FE-003-PREPARATION.md) and [verification evidence](docs/FE-003-VERIFICATION.md).
 
 ## Authentication (BE-005, opt-in validation only)
 
@@ -186,6 +202,8 @@ The configuration is validated at startup; an invalid value (bad URL, a URL that
 sessions are checked against the account on every request, and cross-site API posts are refused (`AUTH_CSRF_INVALID`).
 BE-005's login signs in through these sessions and the account (status, stamp, role) is read from MySQL on every request. Enabling it without a user store stops the app at startup on purpose. Details: [docs/security/BE-006-DEVELOPER-GUIDE.md](docs/security/BE-006-DEVELOPER-GUIDE.md),
 [authorization matrix](docs/security/BE-006-AUTHORIZATION-MATRIX.md), [verification](docs/security/BE-006-VERIFICATION.md).
+
+Accounts are managed with the SEC-003 admin script (create, disable/enable, reset password, change role, revoke sessions; separate least-privilege MySQL writer, audited): [docs/security/SEC-003-ADMIN-GUIDE.md](docs/security/SEC-003-ADMIN-GUIDE.md).
 
 ### Chat history (BE-007)
 

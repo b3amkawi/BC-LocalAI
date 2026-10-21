@@ -83,6 +83,7 @@ public sealed class OllamaCookieIsolationTests(WebApplicationFactory<Program> fa
         // The browser also sends an unrelated cookie and an Authorization header: none of it may travel on.
         request.Headers.Add("Cookie", cookie + "; theme=dark");
         request.Headers.TryAddWithoutValidation("Authorization", "Bearer browser-token-sentinel");
+        request.Headers.Add(BC_LocalAI.Security.FrontendApiIntegration.ExpectedUserHeader, "u-1");
 
         var response = await client.SendAsync(request);
         await response.Content.ReadAsStringAsync();
@@ -91,6 +92,8 @@ public sealed class OllamaCookieIsolationTests(WebApplicationFactory<Program> fa
         var call = Assert.Single(seen);   // Ollama was really called, once
         Assert.DoesNotContain("Cookie:", call.Headers, StringComparison.OrdinalIgnoreCase);
         Assert.DoesNotContain("Authorization:", call.Headers, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain(BC_LocalAI.Security.FrontendApiIntegration.ExpectedUserHeader, call.Headers, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain(BC_LocalAI.Security.FrontendApiIntegration.ActorHeader, call.Headers, StringComparison.OrdinalIgnoreCase);
         foreach (var leaked in new[] { value, BC_LocalAI.Security.BcAuthentication.CookieName, "theme=dark", "browser-token-sentinel" })
         {
             Assert.DoesNotContain(leaked, call.Uri, StringComparison.Ordinal);

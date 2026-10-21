@@ -53,6 +53,8 @@ public sealed class Be007LiveOllamaTests : IAsyncLifetime
             };
             login.Headers.Add("X-CSRF-TOKEN", csrf.RootElement.GetProperty("token").GetString());
             Assert.Equal(HttpStatusCode.OK, (await client.SendAsync(login)).StatusCode);
+            using var signedInCsrf = JsonDocument.Parse(await (await client.GetAsync("/api/auth/csrf")).Content.ReadAsStringAsync());
+            client.DefaultRequestHeaders.Add("X-CSRF-TOKEN", signedInCsrf.RootElement.GetProperty("token").GetString());
         }
 
         var id = JsonDocument.Parse(await (await client.PostAsJsonAsync("/api/conversations", new { title = "live" })).Content.ReadAsStringAsync())

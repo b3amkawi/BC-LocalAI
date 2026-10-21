@@ -12,6 +12,7 @@ namespace BC_LocalAI.Controllers;
 [Route("api/[controller]")]
 [Authorize(Policy = BcPolicies.ChatUser)]
 [ChatHistoryErrors]
+[FrontendHistoryMutation]
 public sealed class ChatController(IAIService aiService, StreamSessionGuard sessionGuard, ChatTurnService turns) : ControllerBase
 {
     [HttpPost]

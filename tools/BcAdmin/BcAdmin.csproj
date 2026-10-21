@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <RootNamespace>BcAdmin</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- PasswordHasher (IdentityV3), the same framework code the app verifies with. -->
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+    <!-- Same driver and version as the app; no new dependency. -->
+    <PackageReference Include="MySqlConnector" Version="2.6.2" />
+  </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="BC-LocalAI.Tests" />
+    <InternalsVisibleTo Include="SEC003.AdminTests" />
+  </ItemGroup>
+</Project>

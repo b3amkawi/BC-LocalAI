@@ -107,6 +107,22 @@ internal static class AttemptWriterBootstrap
     }
 }
 
+// Opt-in SEC-003 fixture only. The grants are the script's own (AdminWriterGrants), so the fixture tests what the DBA is given.
+internal static class AdminWriterBootstrap
+{
+    internal static string[] Create(string secret)
+    {
+        if (secret.Length != 64 || !secret.All(Uri.IsHexDigit)) throw new ArgumentException("Only generated secrets may be used.");
+        const string user = BcAdmin.AdminWriterGrants.DefaultUser;
+        return
+        [
+            $"CREATE USER '{user}'@'127.0.0.1' IDENTIFIED WITH caching_sha2_password BY '{secret}';",
+            BcAdmin.AdminWriterGrants.AccountSettings(user, "127.0.0.1"),
+            .. BcAdmin.AdminWriterGrants.Create(user, "127.0.0.1")
+        ];
+    }
+}
+
 // Opt-in BE-007 fixture only: the chat history runtime account. Table-level SELECT/INSERT/UPDATE on the two history tables;
 // nothing on users, no DELETE (deletion is a soft delete), no DDL. The tables are created here with the BE-007 migration so the
 // grants have something to apply to; MySQL keeps table grants by name, so a rehearsed rollback and re-apply keeps them.
