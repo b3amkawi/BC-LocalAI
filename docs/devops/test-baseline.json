@@ -4,7 +4,7 @@
   "min_tests": {
     "dotnet": 1137,
     "node": 177,
-    "python": 183
+    "python": 187
   },
   "allowed_skips": {
     "python": [
