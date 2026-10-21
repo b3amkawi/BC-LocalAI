@@ -5,7 +5,7 @@ Date: 2026-10-21. Machine: Windows 11, RTX 4060 Laptop 8 GB (GPU not used by thi
 Every result below comes from a run on this machine; nothing was run against a company or production database.
 
 Two rounds: the first implementation (commit ae73725), then fixes after three specialist reviews (security code review,
-identity/password policy, MySQL DBA) — section 2. Sections 1, 3 and 5 describe the current code.
+identity/password policy, MySQL DBA) — section 2. Sections 1, 3, 5 and 6 describe the current code.
 
 ## 1. Scope delivered
 
@@ -128,7 +128,29 @@ removed, `--nologo` forwarded by `dotnet run`) are fixed as described in commit 
 Same command without `--local-dev-database` → exit 5 ("Add 'ssl-ca' …"). `print-grants` prints a commented CREATE USER with a
 `<secret>` placeholder, the `ALTER USER … REQUIRE SSL …` and the 3 grants. Test account and audit rows deleted afterwards.
 
-## 5. Risks and remaining work
+## 5. Interaction with BE-007 chat history retention
+
+BE-007's purge (`scripts/chat-history/purge.ps1`, approved retention policy in [BE-007-DESIGN.md](../chat-history/BE-007-DESIGN.md))
+permanently erases all chat history of a closed account (`users.is_active = 0`) once its `users` row has not changed for 90 days,
+measured from `updated_at_utc`. Every command of this script sets `updated_at_utc` (`MySqlAdminAccountStore.ChangeAsync` /
+`CreateAsync`), so:
+
+| Command on a closed account | Effect on the purge |
+|---|---|
+| `disable` | starts the 90-day count |
+| `reset-password`, `set-role`, `revoke-sessions` | restart the count: postpone the purge, never bring it forward (as BE-007's design states) |
+| `enable` | stops the purge if done before day 90; history already purged cannot be recovered |
+
+BE-005's failed-login bookkeeping only updates active accounts (`WHERE … is_active = 1`), so it does not move the count. The script never
+reads or deletes chat history: its writer has no privilege on `Conversations` / `Messages` (live-tested, section 3, item 13); erasure is
+done only by `purge.ps1` with `bc_history_purge`.
+
+Documented for administrators in [SEC-003-ADMIN-GUIDE.md](SEC-003-ADMIN-GUIDE.md) ("`disable` เริ่มนับเวลาลบประวัติแชต (BE-007)"):
+warn the data owner before disabling an account whose chats may still be needed, and do not use script commands only to extend
+retention. Verification: documentation review against BE-007's design and `purge.ps1` (the 90-day rule itself is tested by BE-007's
+live `Be007PurgeTests`, 53 passed in section 3); no SEC-003 test exercises the purge, because the script does not take part in it.
+
+## 6. Risks and remaining work
 
 | # | Item | Status |
 |---|---|---|
@@ -142,5 +164,6 @@ Same command without `--local-dev-database` → exit 5 ("Add 'ssl-ca' …"). `pr
 | 8 | Live suites are not in CI (need the local fixture), same as BE-005 | run locally per this report |
 | 9 | Interactive hidden prompt (`ConsolePasswordSource`) is not covered by automated tests | manual check recommended |
 | 10 | Triggers with binary logging on may need `log_bin_trust_function_creators` or SUPER for the definer | DBA decision (guide §3) |
+| 11 | `disable` starts BE-007's 90-day erasure of the account's chats; later admin changes postpone it (section 5) | warning in the admin guide; data owner informed before disabling |
 
 Not done (needs the owner's word): merge.
