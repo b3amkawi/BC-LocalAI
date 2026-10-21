@@ -187,6 +187,8 @@ sessions are checked against the account on every request, and cross-site API po
 BE-005's login signs in through these sessions and the account (status, stamp, role) is read from MySQL on every request. Enabling it without a user store stops the app at startup on purpose. Details: [docs/security/BE-006-DEVELOPER-GUIDE.md](docs/security/BE-006-DEVELOPER-GUIDE.md),
 [authorization matrix](docs/security/BE-006-AUTHORIZATION-MATRIX.md), [verification](docs/security/BE-006-VERIFICATION.md).
 
+Accounts are managed with the SEC-003 admin script (create, disable/enable, reset password, change role, revoke sessions; separate least-privilege MySQL writer, audited): [docs/security/SEC-003-ADMIN-GUIDE.md](docs/security/SEC-003-ADMIN-GUIDE.md).
+
 ### Chat history (BE-007)
 
 `appsettings.json` section `ChatHistory`: `Enabled` (**false**; needs `Authentication:Enabled`), `ConnectionString` (secret, its own

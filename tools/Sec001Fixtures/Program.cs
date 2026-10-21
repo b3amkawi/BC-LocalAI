@@ -23,10 +23,10 @@ if (args.Length == 2 && args[0] == "verify-db")
 }
 
 // Paths are provided by scripts/security/local-mysql.ps1 after ACL protection is applied.
-string[] knownFlags = ["be005-attempt-writer", "be007-history"];
+string[] knownFlags = ["be005-attempt-writer", "be007-history", "sec003-admin-writer"];
 var flags = args.Skip(3).ToArray();
-if (args.Length is < 2 or > 5 || flags.Any(flag => !knownFlags.Contains(flag)) || flags.Distinct().Count() != flags.Length)
-    throw new ArgumentException("Expected private output directory, schema path, optional port and optional flags be005-attempt-writer / be007-history.");
+if (args.Length is < 2 or > 6 || flags.Any(flag => !knownFlags.Contains(flag)) || flags.Distinct().Count() != flags.Length)
+    throw new ArgumentException("Expected private output directory, schema path, optional port and optional flags be005-attempt-writer / be007-history / sec003-admin-writer.");
 var output = Path.GetFullPath(args[0]);
 var schema = Path.GetFullPath(args[1]);
 var port = 3307;
@@ -51,10 +51,16 @@ if (historySecret is not null)
     bootstrap.AddRange(ChatHistoryBootstrap.Create(historySecret, string.Join(" ", File.ReadAllLines(migration)
         .Where(line => !line.TrimStart().StartsWith("--"))), purgeSecret!));
 }
+// SEC-003 adds the admin writer (after the history tables, so its grants are checked against a database that has chats).
+// The audit table and triggers are applied after the first start by local-mysql.ps1 with the mysql client, from the same
+// database/sec003/admin-audit.sql a DBA runs (triggers need DELIMITER, which --init-file does not support).
+var adminWriterSecret = flags.Contains("sec003-admin-writer") ? FixtureFactory.RandomSecret() : null;
+if (adminWriterSecret is not null) bootstrap.AddRange(AdminWriterBootstrap.Create(adminWriterSecret));
 File.WriteAllLines(Path.Combine(output, "bootstrap.sql"), bootstrap, new UTF8Encoding(false));
 if (writerSecret is not null) File.WriteAllText(Path.Combine(output, "writer.cnf"), BootstrapScript.OptionFile("bc_auth_attempt_writer", writerSecret, port), new UTF8Encoding(false));
 if (historySecret is not null) File.WriteAllText(Path.Combine(output, "history.cnf"), BootstrapScript.OptionFile(ChatHistoryBootstrap.User, historySecret, port), new UTF8Encoding(false));
 if (purgeSecret is not null) File.WriteAllText(Path.Combine(output, "purge.cnf"), BootstrapScript.OptionFile(ChatHistoryBootstrap.PurgeUser, purgeSecret, port), new UTF8Encoding(false));
+if (adminWriterSecret is not null) File.WriteAllText(Path.Combine(output, "admin-writer.cnf"), BootstrapScript.OptionFile(BcAdmin.AdminWriterGrants.DefaultUser, adminWriterSecret, port), new UTF8Encoding(false));
 // The root secret is never stored: root@localhost cannot connect over TCP under skip-name-resolve, so nobody needs it,
 // and the admin account (this schema + SHUTDOWN) covers every lifecycle step. Recovery of this dev instance = new Initialize.
 foreach (var (name, user, password) in new[]

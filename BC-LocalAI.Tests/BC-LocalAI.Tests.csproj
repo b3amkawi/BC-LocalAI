@@ -18,6 +18,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\BC-LocalAI\BC-LocalAI.csproj" />
+    <!-- SEC-003 admin account script (internals visible to this project). -->
+    <ProjectReference Include="..\tools\BcAdmin\BcAdmin.csproj" />
     <None Include="..\database\chat-history\*.sql" Link="ChatHistorySchema\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <!-- Offline fixture tool only: no authentication implementation is added to the app. -->
     <Compile Include="..\tools\Sec001Fixtures\FixtureFactory.cs" Link="Sec001\FixtureFactory.cs" />
