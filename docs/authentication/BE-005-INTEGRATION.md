@@ -133,6 +133,10 @@ No credentialed CORS is enabled. Inbound proxy headers are not trusted; reverse-
 
 ## Basic session and BE-006 boundaries
 
+> **Superseded after the BE-006 merge (branch `watzapon_BE-006`):** the basic ticket store below was replaced by BE-006 server-side
+> sessions (same `MaxSessions` cap, idle 30 min / absolute 8 h, account re-read on every request, Chat protected by policy).
+> See `docs/security/BE-006-DEVELOPER-GUIDE.md`. The text below describes BE-005 as delivered on its own.
+
 Bounded in-process store has random per-login ID, 30-minute ticket/idle lifetime and 8-hour absolute ceiling.
 Renewal occurs after half the idle lifetime and never exceeds absolute expiry. Logout and renewal races cannot recreate a removed entry.
 Restart logs everyone out; multiple app processes are **not supported for this basic store/limiter**.

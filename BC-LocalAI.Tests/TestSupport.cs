@@ -72,7 +72,12 @@ internal static class TestApp
                 ["Ollama:Model"] = model,
                 ["Ollama:TimeoutSeconds"] = timeoutSeconds,
                 ["Ollama:MaxOutputTokens"] = maxOutputTokens,
-                ["Ollama:MaxResponseBytes"] = maxResponseBytes
+                ["Ollama:MaxResponseBytes"] = maxResponseBytes,
+                // BE-006: an Authentication__Enabled environment variable must not change unrelated tests.
+                ["Authentication:Enabled"] = "false",
+                ["Authentication:IdleTimeoutMinutes"] = "30",
+                ["Authentication:AbsoluteLifetimeMinutes"] = "480",
+                ["Authentication:MaxSessions"] = "1024"
             }));
 
     /// <summary>App whose Ollama HttpClient is backed by <paramref name="handler"/>.</summary>
@@ -134,4 +139,15 @@ internal static class Check
             }
         }
     }
+}
+
+internal static class SessionGuards
+{
+    /// <summary>The guard as the app builds it while Authentication:Enabled is false (the default): it never stops an answer.</summary>
+    public static BC_LocalAI.Security.StreamSessionGuard Off() => new(
+        new BC_LocalAI.Security.InMemorySessionStore(),
+        new Microsoft.Extensions.DependencyInjection.ServiceCollection().BuildServiceProvider(),
+        TimeProvider.System,
+        Microsoft.Extensions.Options.Options.Create(new BC_LocalAI.Security.BcAuthenticationOptions()),
+        Microsoft.Extensions.Logging.Abstractions.NullLogger<BC_LocalAI.Security.StreamSessionGuard>.Instance);
 }

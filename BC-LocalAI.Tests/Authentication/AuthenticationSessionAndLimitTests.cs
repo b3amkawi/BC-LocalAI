@@ -8,52 +8,7 @@ namespace BC_LocalAI.Tests.Authentication;
 
 public sealed class AuthenticationSessionAndLimitTests
 {
-    private static AuthenticationTicket Ticket() => new(new ClaimsPrincipal(new ClaimsIdentity([
-        new Claim(ClaimTypes.NameIdentifier, "synthetic-id")], AuthenticationRegistration.Scheme)), new AuthenticationProperties(), AuthenticationRegistration.Scheme);
-
-    [Fact]
-    public async Task ExpiredOrRevokedTicketCannotBeReplayedOrRenewed()
-    {
-        var clock = new AuthenticationServiceTests.Clock();
-        var store = new BasicAuthenticationTicketStore(Options.Create(new AuthOptions()), clock);
-        var key = await store.StoreAsync(Ticket());
-        Assert.NotNull(await store.RetrieveAsync(key));
-        await store.RemoveAsync(key);
-        await store.RenewAsync(key, Ticket());
-        Assert.Null(await store.RetrieveAsync(key));
-        key = await store.StoreAsync(Ticket());
-        clock.Now += TimeSpan.FromMinutes(30);
-        Assert.Null(await store.RetrieveAsync(key));
-        await store.RenewAsync(key, Ticket());
-        Assert.Null(await store.RetrieveAsync(key));
-    }
-
-    [Fact]
-    public async Task SlidingRenewalCannotExtendTheEightHourAbsoluteCeiling()
-    {
-        var clock = new AuthenticationServiceTests.Clock();
-        var store = new BasicAuthenticationTicketStore(Options.Create(new AuthOptions()), clock);
-        var key = await store.StoreAsync(Ticket());
-        for (var minute = 20; minute <= 460; minute += 20)
-        {
-            clock.Now += TimeSpan.FromMinutes(20);
-            await store.RenewAsync(key, Ticket());
-            Assert.NotNull(await store.RetrieveAsync(key));
-        }
-        clock.Now += TimeSpan.FromMinutes(20);
-        Assert.Null(await store.RetrieveAsync(key));
-    }
-
-    [Fact]
-    public async Task SessionCapacityFailsClosedAndExpiredSlotsAreReclaimed()
-    {
-        var clock = new AuthenticationServiceTests.Clock();
-        var store = new BasicAuthenticationTicketStore(Options.Create(new AuthOptions { MaxSessions = 1 }), clock);
-        await store.StoreAsync(Ticket());
-        await Assert.ThrowsAsync<AuthenticationDependencyException>(() => store.StoreAsync(Ticket()));
-        clock.Now += TimeSpan.FromMinutes(30);
-        Assert.NotNull(await store.StoreAsync(Ticket()));
-    }
+    // BE-005's ticket-store tests moved to BE-006 (Tests/Security): the store was replaced by server-side sessions.
 
     [Fact]
     public void AccountLimitIsCaseInsensitiveAndRefillsAtTheNextWindow()

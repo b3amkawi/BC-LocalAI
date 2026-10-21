@@ -16,7 +16,7 @@ namespace BC_LocalAI.Tests.Authentication;
 public sealed class AuthenticationApiTests
 {
     internal const string Secret = "synthetic-secret-not-real";
-    internal static WebApplicationFactory<Program> Factory(IAuthenticationBackend? backend = null, string environment = "Development", CapturingLoggerProvider? logs = null)
+    internal static WebApplicationFactory<Program> Factory(IAuthenticationBackend? backend = null, string environment = "Development", CapturingLoggerProvider? logs = null, BC_LocalAI.Tests.Security.FakeUserStore? accounts = null)
     {
         var keyPath = Path.Combine(Path.GetTempPath(), "bc-be005-test-keys");
         Directory.CreateDirectory(keyPath);
@@ -36,6 +36,14 @@ public sealed class AuthenticationApiTests
                 services.AddSingleton(backend ?? new StubAuthenticationBackend(AuthenticationResult.Succeeded(
                     new("00000000-0000-0000-0000-000000000005", "ผู้ใช้สมมติ", "synthetic", ["User"]))));
                 services.AddSingleton<Microsoft.AspNetCore.DataProtection.IDataProtectionProvider>(new Microsoft.AspNetCore.DataProtection.EphemeralDataProtectionProvider());
+                // BE-006: sessions re-read the account on every request; the stub user exists, is active and is a User.
+                if (accounts is null)
+                {
+                    accounts = new BC_LocalAI.Tests.Security.FakeUserStore();
+                    accounts.Put("00000000-0000-0000-0000-000000000005");
+                }
+                services.RemoveAll<BC_LocalAI.Security.IUserSecurityStateSource>();
+                services.AddSingleton<BC_LocalAI.Security.IUserSecurityStateSource>(accounts);
                 if (logs is not null) services.AddLogging(logging => logging.AddProvider(logs));
             });
         });
