@@ -41,8 +41,10 @@ internal static class Be007Fixture
     public static string Reader => Connection("reader.cnf");
     public static string Writer => Connection("writer.cnf");
 
-    public static Account Active => JsonSerializer.Deserialize<Account[]>(File.ReadAllText(Path.Combine(Directory, "test-accounts.json")))!
-        .Single(a => a.State == "active");
+    public static Account Active => AccountsByState("active");
+
+    public static Account AccountsByState(string state) =>
+        JsonSerializer.Deserialize<Account[]>(File.ReadAllText(Path.Combine(Directory, "test-accounts.json")))!.Single(a => a.State == state);
 
     public static MySqlChatHistoryRepository Repository(Func<DateTimeOffset>? clock = null) => new(
         Options.Create(new ChatHistoryOptions { Enabled = true, ConnectionString = History }),

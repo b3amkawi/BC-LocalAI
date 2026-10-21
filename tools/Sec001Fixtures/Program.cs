@@ -43,16 +43,18 @@ var bootstrap = BootstrapScript.Create(secrets, schemaSql, fixtures);
 var writerSecret = flags.Contains("be005-attempt-writer") ? FixtureFactory.RandomSecret() : null;
 if (writerSecret is not null) bootstrap.AddRange(AttemptWriterBootstrap.Create(writerSecret));
 var historySecret = flags.Contains("be007-history") ? FixtureFactory.RandomSecret() : null;
+var purgeSecret = historySecret is null ? null : FixtureFactory.RandomSecret();
 if (historySecret is not null)
 {
     // The BE-007 migration that operators apply, read from the repository next to the SEC-001 schema.
     var migration = Path.Combine(Path.GetDirectoryName(schema)!, "..", "chat-history", "001-initial.up.sql");
     bootstrap.AddRange(ChatHistoryBootstrap.Create(historySecret, string.Join(" ", File.ReadAllLines(migration)
-        .Where(line => !line.TrimStart().StartsWith("--")))));
+        .Where(line => !line.TrimStart().StartsWith("--"))), purgeSecret!));
 }
 File.WriteAllLines(Path.Combine(output, "bootstrap.sql"), bootstrap, new UTF8Encoding(false));
 if (writerSecret is not null) File.WriteAllText(Path.Combine(output, "writer.cnf"), BootstrapScript.OptionFile("bc_auth_attempt_writer", writerSecret, port), new UTF8Encoding(false));
 if (historySecret is not null) File.WriteAllText(Path.Combine(output, "history.cnf"), BootstrapScript.OptionFile(ChatHistoryBootstrap.User, historySecret, port), new UTF8Encoding(false));
+if (purgeSecret is not null) File.WriteAllText(Path.Combine(output, "purge.cnf"), BootstrapScript.OptionFile(ChatHistoryBootstrap.PurgeUser, purgeSecret, port), new UTF8Encoding(false));
 // The root secret is never stored: root@localhost cannot connect over TCP under skip-name-resolve, so nobody needs it,
 // and the admin account (this schema + SHUTDOWN) covers every lifecycle step. Recovery of this dev instance = new Initialize.
 foreach (var (name, user, password) in new[]

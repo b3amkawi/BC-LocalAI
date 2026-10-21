@@ -113,17 +113,26 @@ internal static class AttemptWriterBootstrap
 internal static class ChatHistoryBootstrap
 {
     internal const string User = "bc_history_rw";
+    internal const string PurgeUser = "bc_history_purge";
 
-    internal static string[] Create(string secret, string migrationSql)
+    internal static string[] Create(string secret, string migrationSql, string purgeSecret)
     {
-        if (secret.Length != 64 || !secret.All(Uri.IsHexDigit)) throw new ArgumentException("Only generated secrets may be used.");
+        foreach (var value in new[] { secret, purgeSecret })
+            if (value.Length != 64 || !value.All(Uri.IsHexDigit)) throw new ArgumentException("Only generated secrets may be used.");
+        if (secret == purgeSecret) throw new ArgumentException("Each database account needs its own secret.");
         return
         [
             "USE bc_localai_sec001;",
             migrationSql,
             $"CREATE USER '{User}'@'127.0.0.1' IDENTIFIED BY '{secret}' REQUIRE SSL;",
             $"GRANT SELECT, INSERT, UPDATE ON bc_localai_sec001.Conversations TO '{User}'@'127.0.0.1';",
-            $"GRANT SELECT, INSERT, UPDATE ON bc_localai_sec001.Messages TO '{User}'@'127.0.0.1';"
+            $"GRANT SELECT, INSERT, UPDATE ON bc_localai_sec001.Messages TO '{User}'@'127.0.0.1';",
+            // Retention purge (operator script only): read and delete history; on users only the columns that say whether
+            // and since when an account is closed. No INSERT/UPDATE, no password hash, no DDL.
+            $"CREATE USER '{PurgeUser}'@'127.0.0.1' IDENTIFIED BY '{purgeSecret}' REQUIRE SSL;",
+            $"GRANT SELECT, DELETE ON bc_localai_sec001.Conversations TO '{PurgeUser}'@'127.0.0.1';",
+            $"GRANT SELECT, DELETE ON bc_localai_sec001.Messages TO '{PurgeUser}'@'127.0.0.1';",
+            $"GRANT SELECT (id, is_active, updated_at_utc) ON bc_localai_sec001.users TO '{PurgeUser}'@'127.0.0.1';"
         ];
     }
 }

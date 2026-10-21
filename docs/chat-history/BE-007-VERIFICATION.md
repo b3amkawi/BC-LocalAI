@@ -30,7 +30,7 @@ without a conversation), `tools/Sec001Fixtures` + `scripts/security/local-mysql.
 | `node --test "tests/ui/*.test.mjs"` | 61 passed |
 | `python -m unittest discover -s tests` | 143 passed |
 | `check_test_counts.py` / secret scan / doc links / CI script tests | all gates passed / clean / OK / OK |
-| Live MySQL `tests/BE007.MySqlTests` (fixture `be007-mysql`, 127.0.0.1:3320) | **44** passed, 1 skipped by default (real-model check below) |
+| Live MySQL `tests/BE007.MySqlTests` (fixture `be007-mysql`, 127.0.0.1:3320) | **53** passed, 1 skipped by default (real-model check below) |
 | Real model: same suite with `BE007_LIVE_OLLAMA=1`, Ollama qwen3:4b | **1** passed, 3 runs |
 | Live MySQL `tests/BE005.MySqlTests` on a **fresh** `be005-mysql` fixture built with the changed fixture tool | 16 passed (BE-005 + BE-006 unaffected) |
 | Fixture checks (`local-mysql.ps1 -Action Verify`) | 11/11 on both fixtures |
@@ -64,6 +64,12 @@ What the tests cover:
 - **Real stack** (`Be007LiveApiTests`): BE-005 login against MySQL → conversation → two chats with context → a new application host
   (restart) still lists the same 4 completed messages; a conversation of another user inserted in the database → 404 on every route,
   unchanged, no message written.
+- **Retention purge** (`Be007PurgeTests`, real fixture): Preview counts only and changes nothing; Purge erases exactly the
+  conversation deleted 31 days ago (not 29), all history of an account closed 91 days ago (not 89), a conversation whose owner no
+  longer exists after 91 days (not 10), and keeps an active (only locked) account's history even when its row is 200 days old and an
+  active user's 1000-day-old conversation; no orphan messages; audit line has the counts and no ids, titles or text; a second run
+  finds nothing; refusals (no audit file, missing audit folder, wrong target) change nothing; the purge account cannot read
+  `password_hash` / `security_stamp` (1143), cannot UPDATE / INSERT history or DELETE users or DROP (1142).
 - **Real model** (`Be007LiveOllamaTests`, qwen3:4b, temperature 0): told "ฉันชื่อสมชาย … ชอบสีเขียว", the next `/api/chat` answer contains
   "สมชาย" and a following `/api/chat/stream` answer contains "เขียว"; all 6 messages stored `completed`, so the JSON answer format of
   AI-002 still holds with the context template. This shows the template works on this model and machine; it is not a quality
@@ -78,6 +84,9 @@ added, then 1).
 MySQL (live): owner filter removed (4) · deleted conversations visible (2) · no row lock for sequence numbers (1) · update of any
 owner's message (1) · times not truncated to microseconds (1) · turn insert advances the sequence counter by 1 instead of 2 (2).
 Follow-up round: abandoned answer not shown as interrupted (1) · abandoned answer not closed at the next question (1).
+Purge script: deleted conversations measured with 90 days (1) · closed accounts measured from the conversation instead of the account
+(2) · conversations of removed owners ignored (1) · active accounts purged when their row is old (**survived first**; test extended with
+an active 200-day-old account, then 1).
 
 ### Migration / rollback rehearsal
 
@@ -100,16 +109,17 @@ non-empty tables (guard routine cleaned up), Down on empty tables, Up again with
 | Incomplete response never stored as completed | ✅ code, CHECK constraints, tests, mutations |
 | Ownership authorization / IDOR prevention | ✅ in every SQL statement; same 404; live + in-process tests |
 | Pagination | ✅ keyset cursors |
-| Data retention / deletion policy | ⚠️ soft delete implemented; **retention period and physical erasure await the data owner** |
+| Data retention / deletion policy | ✅ approved 2026-10-21 (30 days after delete, 90 days after account closed, backups ≤ 30 days); operator purge script, own account, audit, tested live |
 | Safe error handling | ✅ 400/404/409/503 codes, no database details |
 | Unit / integration tests, security verification | ✅ sections 2 |
 | No cross-user data leakage | ✅ tested in-process and on MySQL |
 | Existing chat API not regressed | ✅ all existing chat tests pass; without `conversationId` no new fields and nothing stored |
-| Code reviewed per AGENTS.md | ⚠️ author self-review; independent review in the pull request |
+| Code reviewed per AGENTS.md | ✅ Claude Code review (this report, mutation checks) accepted by watzapon on 2026-10-21, with CI on the pull request |
 
 ## 4. Limitations / remaining
 
-- **Retention**: no automatic purge, no restore; the data owner must set the retention period and how deleted data (and backups) are erased.
+- **Retention**: the purge is an operator job (schedule it daily); backup rotation (≤ 30 days) must be configured where backups are made;
+  no restore API (an administrator can recover a deleted conversation in the database within 30 days).
 - **AI Engineer review**: the prompt template and the 1500-token estimate (system + template + history + question + 1024 output must fit
   the model's context window); the real-model check is one scenario on one machine.
 - **Crash recovery**: an answer interrupted by a process crash is shown as `failed INTERRUPTED` after the AI deadline + 60 s and is

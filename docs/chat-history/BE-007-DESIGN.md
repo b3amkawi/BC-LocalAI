@@ -122,13 +122,22 @@ DDL implicit commits, partial-apply recovery, empty-only rollback guard แล�
 Feature flag `ChatHistory:Enabled` (false): ปิดอยู่ = route 404 และไม่แตะฐาน; เปิดได้เมื่อ auth เปิด, migration apply แล้ว
 และมี connection string ของ `bc_history_rw` (ตรวจตอนเริ่มแอป) — rollback ของแอป = ปิด flag, ข้อมูลยังอยู่
 
-### Retention / deletion (soft delete now; period pending the data owner)
+### Retention / deletion policy (approved by watzapon, delegated by the project owner, 2026-10-21)
 
-- Soft delete ซ่อน conversation และ messages จากทุก owner query ทันที; ไม่เท่ากับลบข้อมูลจริง
-- ไม่มี admin-read-all, sharing, restore/purge API หรือ background purge job (runtime account ไม่มีสิทธิ์ DELETE)
-- ไม่ตั้ง automatic purge และไม่อ้างว่า retention แบบไม่มีกำหนดได้รับอนุมัติ
-- Leader/data owner ต้องยืนยันระยะเก็บ, grace period, physical erasure ของ messages/backups/audit และ legal constraints ก่อนใช้กับพนักงาน
-- Physical deletion ต้องอยู่ใน transaction/approved job พร้อมสิทธิ์เฉพาะ ไม่แจก DELETE/DDL ให้ runtime โดยไม่จำเป็น
+| Data | Kept | Then |
+|---|---|---|
+| Conversations of an active account | as long as the account is active | — |
+| A conversation the user deleted (soft delete, hidden at once) | 30 days | erased with all its messages |
+| All history of a closed account (`users.is_active = 0`) | 90 days after the account row last changed | erased |
+| Backups that contain history | at most 30 days of rotation | erased data is gone from every backup within 30 days of the purge |
+
+- Erasure is done by an operator with `scripts/chat-history/purge.ps1` (`Preview` counts only; `Purge` deletes in one transaction
+  and appends one audit line: time, operator, target, rules, counts, never ids, titles or text). Run it daily (scheduled task).
+- It uses its own account `bc_history_purge`: SELECT/DELETE on the two history tables and SELECT on `users.id`, `is_active`,
+  `updated_at_utc` only. The application account still has no DELETE.
+- "Closed for 90 days" is measured from `users.updated_at_utc`: a closed account cannot sign in, so only an administrator changes its
+  row; such a change postpones the purge, it never brings it forward. Re-opening the account (is_active = 1) stops the purge.
+- No restore API: within the 30 days a deleted conversation can only be recovered by an administrator in the database.
 
 ## 6. Decisions (2026-10-21, watzapon on Claude Code's recommendation, delegated by the project owner)
 
@@ -136,7 +145,7 @@ Feature flag `ChatHistory:Enabled` (false): ปิดอยู่ = route 404 �
 |---|----------|----------|
 | 1 | Where is history stored? | The BC-LocalAI MySQL database (`bc_localai_sec001`, same server as the accounts), own tables, own runtime account `bc_history_rw` with SELECT/INSERT/UPDATE on the two tables only (no DELETE, no DDL, no access to `users`), TLS required. Migrations by a separate migrator account. |
 | 2 | Stable user id | `users.id` (UUID) from the BE-006 session claim `NameIdentifier`; never from the request. No foreign key to `users` (accounts are disabled, not deleted). |
-| 3 | Retention / deletion | Soft delete (`DeletedAt`); no automatic purge and no restore API yet. Retention period and physical erasure (including backups) are for the data owner to decide before go-live. |
+| 3 | Retention / deletion | Soft delete at once; erased after 30 days; closed accounts' history erased after 90 days; backups rotate within 30 days; operator purge script with its own account and audit (approved 2026-10-21, see section 5). |
 | 4 | Admin reads other users' history? | No (out of scope in the issue; matches SEC-001). |
 | 5 | How is context sent to Ollama? | The AI-002 request is unchanged: one prompt to `/api/generate`, same system prompt and JSON answer format. Earlier completed pairs are written before the question in a fixed template (`ConversationPrompt`); with no earlier pair the prompt is exactly the question. **For review by the AI Engineer.** |
 | 6 | Context budget / message size | `ChatHistory:ContextTokenBudget` 1500 estimated tokens for earlier turns (heuristic estimator; answers keep `MaxOutputTokens` 1024). Stored message ceiling 1 MiB. |
