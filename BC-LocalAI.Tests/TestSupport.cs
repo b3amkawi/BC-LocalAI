@@ -140,3 +140,14 @@ internal static class Check
         }
     }
 }
+
+internal static class SessionGuards
+{
+    /// <summary>The guard as the app builds it while Authentication:Enabled is false (the default): it never stops an answer.</summary>
+    public static BC_LocalAI.Security.StreamSessionGuard Off() => new(
+        new BC_LocalAI.Security.InMemorySessionStore(),
+        new Microsoft.Extensions.DependencyInjection.ServiceCollection().BuildServiceProvider(),
+        TimeProvider.System,
+        Microsoft.Extensions.Options.Options.Create(new BC_LocalAI.Security.BcAuthenticationOptions()),
+        Microsoft.Extensions.Logging.Abstractions.NullLogger<BC_LocalAI.Security.StreamSessionGuard>.Instance);
+}

@@ -87,8 +87,8 @@ the settings.
 ## 5. Limitations / remaining
 
 - Sessions in memory: restart signs everyone out; single instance only (MySQL store later through `ISessionStore`).
-- Data Protection keys use ASP.NET Core defaults; must be configured for multi-instance or machine moves.
-- An answer already streaming when the account is disabled finishes (at most the 180 s Ollama deadline); the next request is refused.
+- Data Protection keys: BE-005's `Authentication:KeyDirectory` (DPAPI, survives restarts); multi-instance needs a shared approved key store.
+- An answer in progress stops at the next piece after sign-out / revoke-all / 8 h, and within 5 s after an account change in MySQL (section 7).
 - Not enabled in the real app until FE-003 (login page) exists and HTTPS is used.
 - Login lockout / rate-limit numbers are BE-005.
 
@@ -96,8 +96,8 @@ the settings.
 
 | Suite | Result |
 |---|---|
-| `dotnet test` (all, after the merge) Development / Production | **627** passed, 0 warnings (baseline raised 535 → 627) |
-| `dotnet test` with hostile environment (`Authentication__Enabled=true`, idle 999, absolute 1, `MaxSessions=1`) | **627** passed (`MaxSessions` now pinned in `TestSupport.cs` too) |
+| `dotnet test` (all, after the merge) Development / Production | **641** passed, 0 warnings (baseline raised 535 → 641) |
+| `dotnet test` with hostile environment (`Authentication__Enabled=true`, idle 999, absolute 1, `MaxSessions=1`) | **641** passed (`MaxSessions` now pinned in `TestSupport.cs` too) |
 | `node --test "tests/ui/*.test.mjs"` / CI secret scan / doc links / `check_test_counts.py` for .NET and Node | 61 passed / clean / OK / pass |
 | `python -m unittest discover -s tests` | 140 of 141: `test_resource_samples_are_attached_to_scenarios` (benchmark script, no auth code) fails on this machine **and on a clean `main` 8bffcc8** — not caused by this branch, not fixed here |
 | New: `LoginIntegrationTests` (real BE-005 login endpoints) | disabled after login → next `/me` 401; role from the account, not the backend; account disabled / missing / unknown role between password check and sign-in → same 401 `AUTH_INVALID_CREDENTIALS`, no cookie |
@@ -112,3 +112,40 @@ chat client forwards the browser `Cookie` to Ollama (1) · stream client forward
 
 BE-005 files changed in this branch: `AuthenticationController.cs`, `AuthenticationRegistration.cs`, `BasicAuthenticationTicketStore.cs` (removed),
 `AuthenticationApiTests.cs` / `AuthenticationSessionAndLimitTests.cs` (ticket-store tests removed; user store added to the factory).
+
+## 7. Review against AGENTS.md and decisions (2026-10-21)
+
+Decisions taken by watzapon on Claude Code's recommendation (delegated by the project owner).
+
+**Stopping an answer when the session ends** (review note on Issue #22: the stream must end with a defined error and send nothing more).
+Implemented: `StreamSessionGuard` (section 2 of the guide). Maximum revocation delay: next piece for sign-out / revoke-all / 8 h;
+5 s for account changes in MySQL (one query per 5 s per running answer). `/api/chat` does not hand over an answer that finished after the
+session ended. Tests `MidStreamRevocationTests` (12): sign-out and revoke-all from another tab, disabled (not noticed before 5 s, noticed
+at 5 s, session revoked and stays dead after restore), stamp / role / deleted / locked, 8 h reached mid-answer, user store down (stops, not
+revoked, works again), idle timeout does not cut a 40-minute answer, no account query per piece, `/api/chat` answer withheld, auth off
+unchanged. Mutation check (each made tests fail): guard always passes (10) · no account check (7) · not revoked (1) · revoked when the
+store is down (1) · idle timeout cuts an active answer (1) · account queried for every piece (2) · `/api/chat` final check removed (1) ·
+stream skips pieces silently instead of ending (9). Bug found by these tests and fixed: the 5 s interval first counted from the first
+piece, so a slow first piece hid an account change; it now counts from the start of the request.
+
+**Code review (AGENTS.md sections 6–12) of the production diff against `main`:** no blocking issue found. Fixed: stale comments that
+still said BE-005 implements the user store. Added end-to-end tests for two fail-closed paths that were only unit-tested:
+sessions full → login 503 `AUTH_UNAVAILABLE` while the signed-in user keeps their session; account database down at sign-in → 503, no
+cookie (`LoginFailClosedTests`; the capacity mutation makes it fail). Checked: parameterized SQL only; no password, hash, stamp, session
+id or cookie in logs or responses; 401/403/503 use the shared JSON error format; options validated at startup; no new dependency.
+
+**Admin account script (create / disable / reset / revoke)** — not in BE-006. It needs a separate MySQL writer account, grants and
+audit, which are their own high-risk change; Issue #22 lists it under the role model only. Until it exists, an administrator ends a
+user's sessions by setting `is_active = 0` or rotating `security_stamp` in MySQL: refused at the next request, within 5 s for an answer
+in progress (next request tested against the live MySQL fixture; mid-answer tested with the in-process user store). Recommended follow-up issue: "Admin account management script (writer account, audit, revoke)".
+
+**Merge order** — BE-005 (#21) has no pull request and this branch already contains it (dc477f7) with its ticket store replaced. One
+pull request from `watzapon_BE-006` to `main` (Refs #21, Refs #22) avoids reviewing BE-005's session code that no longer exists;
+`watzapon_BE-005` should not be merged separately afterwards.
+
+**Issue #22 text** — sections 4.7 to 7 (and the TC table that TC-16 refers to) are missing from the issue body (also noted in the issue's
+comment). Verification is mapped to the acceptance criteria (section 4) and the objectives instead; the owner should restore the
+missing sections so the TC list can be checked. BE-011 (Document ACL) named under dependencies has no issue yet.
+
+**CI** — runs only for pull requests to `main`. The Python benchmark test that fails on this machine (section 6) also fails on a clean
+`main` here, while the last CI runs on `main` (ubuntu) passed, so it is local to this machine.

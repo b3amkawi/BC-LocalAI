@@ -36,7 +36,7 @@ public sealed record SessionRecord(
     DateTimeOffset LastSeenAt,
     DateTimeOffset? RevokedAt);
 
-/// <summary>The account as it is now in the user store (BE-005 reads it from MySQL with the reader account).</summary>
+/// <summary>The account as it is now in the user store (read from MySQL with BE-005's reader account).</summary>
 public sealed record UserSecurityState(
     string UserId,
     bool IsActive,

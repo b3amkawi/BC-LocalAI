@@ -18,8 +18,8 @@ role ที่ไม่รู้จัก (เช่น `KnowledgeManager`, `adm
 | Endpoint | Policy | Anonymous | User | Admin | หมายเหตุ |
 |---|---|---|---|---|---|
 | `GET /` (หน้าแชต), static files | ไม่มี | ✅ | ✅ | ✅ | หน้าเว็บโหลดได้; FE-003 จะแสดงหน้า login เอง |
-| `POST /api/chat` | `ChatUser` | **401** | ✅ | ✅ | |
-| `POST /api/chat/stream` | `ChatUser` | **401** (JSON ก่อนเริ่ม SSE) | ✅ | ✅ | |
+| `POST /api/chat` | `ChatUser` | **401** | ✅ | ✅ | session จบระหว่างรอคำตอบ → 401 `AUTH_SESSION_ENDED` |
+| `POST /api/chat/stream` | `ChatUser` | **401** (JSON ก่อนเริ่ม SSE) | ✅ | ✅ | session จบกลาง stream → `event: error` `AUTH_SESSION_ENDED` แล้วหยุด |
 | Admin endpoints (อนาคต) | `Admin` | **401** | **403** | ✅ | ไม่มี endpoint ใดให้ Admin อ่านแชตผู้อื่น |
 | `/api/auth/login`, `/csrf` (BE-005) | `[AllowAnonymous]` | ✅ | ✅ | ✅ | BE-005 กำหนด |
 | `/api/auth/me`, `/logout` (BE-005) | authenticated | 401 | ✅ | ✅ | BE-005 กำหนด |

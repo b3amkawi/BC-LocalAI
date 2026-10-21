@@ -11,7 +11,7 @@ public sealed class BcAuthenticationOptions
     public const string SectionName = "Authentication";
 
     /// <summary>
-    /// When false (default until BE-005 login and FE-003 login page exist) the chat APIs stay open as before.
+    /// When false (default until the FE-003 login page exists) the chat APIs stay open as before.
     /// When true they require a signed-in User or Admin, and unsafe API requests must come from this site.
     /// </summary>
     public bool Enabled { get; set; }

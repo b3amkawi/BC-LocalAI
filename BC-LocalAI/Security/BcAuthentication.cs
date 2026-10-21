@@ -34,6 +34,7 @@ public static class BcAuthentication
         services.TryAddScoped<IUserSecurityStateSource, MySqlUserSecurityStateSource>();
         services.AddScoped<SessionService>();
         services.AddScoped<BcCookieEvents>();
+        services.AddScoped<StreamSessionGuard>();
 
         // PostConfigure: these settings win over BE-005's cookie configuration, so there is one cookie and one session model.
         services.AddOptions<CookieAuthenticationOptions>(Scheme)

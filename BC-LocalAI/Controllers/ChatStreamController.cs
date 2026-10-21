@@ -16,6 +16,7 @@ namespace BC_LocalAI.Controllers;
 [Authorize(Policy = BcPolicies.ChatUser)] // checked before any SSE header is written
 public sealed class ChatStreamController(
     IStreamingAIService streamingService,
+    StreamSessionGuard sessionGuard,
     IOptions<OllamaOptions> options,
     ILogger<ChatStreamController> logger) : ControllerBase
 {
@@ -48,6 +49,12 @@ public sealed class ChatStreamController(
                 request.Message,
                 async (delta, token) =>
                 {
+                    // The session is re-checked before each piece: once it ends, nothing more of the answer is sent.
+                    if (!await sessionGuard.IsStillValidAsync(User, token))
+                    {
+                        throw new SessionEndedException();
+                    }
+
                     if (!await TryWriteEventAsync("delta", new StreamDeltaEvent(delta), token))
                     {
                         token.ThrowIfCancellationRequested();
@@ -74,6 +81,12 @@ public sealed class ChatStreamController(
         catch (DownstreamClosedException)
         {
             return;
+        }
+        catch (SessionEndedException)
+        {
+            // Throwing out of the callback already stopped reading from Ollama and closed that connection.
+            terminalEvent = "error";
+            terminalData = new StreamErrorEvent(SessionEndedCode, SessionEndedMessage, partial);
         }
         catch (Exception exception)
         {
@@ -105,5 +118,10 @@ public sealed class ChatStreamController(
         }
     }
 
+    public const string SessionEndedCode = "AUTH_SESSION_ENDED";
+    public const string SessionEndedMessage = "เซสชันสิ้นสุดแล้ว กรุณาเข้าสู่ระบบใหม่";
+
     private sealed class DownstreamClosedException : Exception;
+
+    private sealed class SessionEndedException : Exception;
 }

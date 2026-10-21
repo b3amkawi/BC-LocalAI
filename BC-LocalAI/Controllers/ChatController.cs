@@ -9,11 +9,12 @@ namespace BC_LocalAI.Controllers;
 [ApiController]
 [Route("api/[controller]")]
 [Authorize(Policy = BcPolicies.ChatUser)]
-public sealed class ChatController(IAIService aiService) : ControllerBase
+public sealed class ChatController(IAIService aiService, StreamSessionGuard sessionGuard) : ControllerBase
 {
     [HttpPost]
     [ProducesResponseType<ChatResponse>(StatusCodes.Status200OK)]
     [ProducesResponseType<ApiErrorResponse>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<ApiErrorResponse>(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType<ApiErrorResponse>(StatusCodes.Status500InternalServerError)]
     [ProducesResponseType<ApiErrorResponse>(StatusCodes.Status502BadGateway)]
     [ProducesResponseType<ApiErrorResponse>(StatusCodes.Status503ServiceUnavailable)]
@@ -31,6 +32,13 @@ public sealed class ChatController(IAIService aiService) : ControllerBase
         var response = await aiService.GenerateResponseAsync(
             request.Message,
             cancellationToken);
+
+        // The answer can take up to the Ollama deadline: do not hand it to a session that ended meanwhile.
+        if (!await sessionGuard.IsStillValidAsync(User, cancellationToken))
+        {
+            return Unauthorized(new ApiErrorResponse(new ApiError(
+                ChatStreamController.SessionEndedCode, ChatStreamController.SessionEndedMessage)));
+        }
 
         return Ok(response);
     }

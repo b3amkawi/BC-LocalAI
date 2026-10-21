@@ -6,7 +6,11 @@ using BC_LocalAI.Security;
 using BC_LocalAI.Services.Authentication;
 using BC_LocalAI.Tests.Authentication;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging.Abstractions;
 using Microsoft.Extensions.Options;
 
@@ -71,6 +75,61 @@ public sealed class LoginIntegrationTests
         Assert.DoesNotContain(login.Headers.TryGetValues("Set-Cookie", out var cookies) ? cookies : [],
             cookie => cookie.StartsWith(BcAuthentication.CookieName + "=", StringComparison.Ordinal) && !cookie.StartsWith(BcAuthentication.CookieName + "=;", StringComparison.Ordinal));
         Assert.Equal(HttpStatusCode.Unauthorized, (await client.GetAsync("/api/auth/me")).StatusCode);
+    }
+}
+
+public sealed class LoginFailClosedTests
+{
+    private const string Id = "00000000-0000-0000-0000-000000000005";
+
+    /// <summary>The MySQL source turns every database failure into this exception (no SQL or connection details).</summary>
+    private sealed class DownUserStore : IUserSecurityStateSource
+    {
+        public Task<UserSecurityState?> GetAsync(string userId, CancellationToken cancellationToken = default) =>
+            throw new AuthenticationDependencyException();
+    }
+
+    private static async Task<string> Code(HttpResponseMessage response)
+    {
+        using var body = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+        return body.RootElement.GetProperty("error").GetProperty("code").GetString()!;
+    }
+
+    [Fact]
+    public async Task SessionsFull_LoginIs503_AndTheSignedInUserKeepsTheirSession()
+    {
+        await using var factory = AuthenticationApiTests.Factory().WithWebHostBuilder(builder =>
+            builder.ConfigureAppConfiguration((_, configuration) => configuration.AddInMemoryCollection(
+                new Dictionary<string, string?> { ["Authentication:MaxSessions"] = "1" })));
+        using var first = AuthenticationApiTests.Client(factory);
+        using var second = AuthenticationApiTests.Client(factory);
+        Assert.Equal(HttpStatusCode.OK, (await AuthenticationApiTests.Login(first)).StatusCode);
+
+        var refused = await AuthenticationApiTests.Login(second);
+
+        Assert.Equal(HttpStatusCode.ServiceUnavailable, refused.StatusCode);
+        Assert.Equal("AUTH_UNAVAILABLE", await Code(refused));
+        Assert.Equal(HttpStatusCode.Unauthorized, (await second.GetAsync("/api/auth/me")).StatusCode);
+        Assert.Equal(HttpStatusCode.OK, (await first.GetAsync("/api/auth/me")).StatusCode);
+    }
+
+    [Fact]
+    public async Task AccountDatabaseDownAtSignIn_LoginIs503_NoCookie()
+    {
+        await using var factory = AuthenticationApiTests.Factory().WithWebHostBuilder(builder =>
+            builder.ConfigureTestServices(services =>
+            {
+                services.RemoveAll<IUserSecurityStateSource>();
+                services.AddSingleton<IUserSecurityStateSource, DownUserStore>();
+            }));
+        using var client = AuthenticationApiTests.Client(factory);
+
+        var login = await AuthenticationApiTests.Login(client);
+
+        Assert.Equal(HttpStatusCode.ServiceUnavailable, login.StatusCode);
+        Assert.Equal("AUTH_UNAVAILABLE", await Code(login));
+        Assert.DoesNotContain(login.Headers.TryGetValues("Set-Cookie", out var cookies) ? cookies : [],
+            cookie => cookie.StartsWith(BcAuthentication.CookieName + "=", StringComparison.Ordinal) && !cookie.StartsWith(BcAuthentication.CookieName + "=;", StringComparison.Ordinal));
     }
 }
 

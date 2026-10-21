@@ -166,7 +166,7 @@ public sealed class InMemorySessionStore : ISessionStore
 }
 
 /// <summary>
-/// The current state of an account, read on every authenticated request. BE-005 implements it with the MySQL
+/// The current state of an account, read on every authenticated request. <see cref="MySqlUserSecurityStateSource"/> implements it with BE-005's MySQL
 /// reader account (SEC-001 schema). Returning null means the account no longer exists.
 /// Throwing means the store is unavailable: the request is then refused (fail closed).
 /// </summary>
