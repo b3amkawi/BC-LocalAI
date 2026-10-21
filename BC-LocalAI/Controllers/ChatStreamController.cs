@@ -17,6 +17,7 @@ namespace BC_LocalAI.Controllers;
 [ApiController]
 [Route("api/chat/stream")]
 [Authorize(Policy = BcPolicies.ChatUser)] // checked before any SSE header is written
+[FrontendHistoryMutation]
 public sealed class ChatStreamController(
     IStreamingAIService streamingService,
     StreamSessionGuard sessionGuard,
