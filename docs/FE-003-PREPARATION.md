@@ -3,6 +3,10 @@
 วันที่2026-10-21 · [Issue24](https://github.com/b3amkawi/BC-LocalAI/issues/24)
 · branch `watzapon_FE-003` · base `origin/main` = `0cb07ff20308feb0c3ac50686cbf8c96d85a322e`
 
+อัปเดตตามคำสั่งผู้ใช้รอบถัดมา: pull `main` ที่ `babbd610f64932065410b753a1d654b81677eed9`
+(BE-006 / PR35) เข้ามาแล้ว จึงมี session backend พร้อมใน source แต่ยังไม่เปิด Authentication
+และยังไม่เปลี่ยน Mock preview ให้เชื่อมระบบจริง ส่วน BE-007 ยังต้องทำ/ตกลง contract ต่อ
+
 ## ขอบเขตที่ทำล่วงหน้า
 
 **ยังไม่ใช่ FE-003 ที่เสร็จครบ และไม่ใช่ Login สำหรับใช้งานจริง**
@@ -16,7 +20,7 @@ auth state, profile, Logout และ error handling ตาม [BE-005 contract]
 | Deliverable | สิ่งที่มีใน branch นี้ | สิ่งที่ยังรอ |
 |---|---|---|
 | D1 Login UI / Authentication State | ฟอร์ม, validation, loading, กัน submit ซ้ำ, five-state controller แบบ Mock | ต่อ API จริงและทดสอบ cookie/session |
-| D2 Authenticated Layout | ตัวอย่าง profile/Logout ที่แยกจาก Chat | Protected Views, authenticated Chat และ session จริง BE-006 |
+| D2 Authenticated Layout | ตัวอย่าง profile/Logout ที่แยกจาก Chat | Protected Views, authenticated Chat และเชื่อม session ของ BE-006 ที่มีใน main แล้ว |
 | D3 Conversation Sidebar | ยังไม่ทำ | contract ที่ตกลงและ BE-007 |
 | D4 Message History | ยังไม่ทำ | BE-007 persistence/API และ resource authorization |
 | D5 Streaming Integration | ไม่เปลี่ยน FE-002 เดิม | Conversation ID, Resume Chat และ BE-007 |
@@ -67,7 +71,7 @@ Mock ไม่ตรวจรหัสจริง จึงไม่ต้อ�
 
 ## ขั้นถัดไปเมื่อ dependency พร้อม
 
-1. ทบทวน BE-006 contract ที่ merge จริงก่อนต่อ HTTPS transport, antiforgery และ cookie/session
+1. ใช้ [BE-006 contract ที่ pull มาแล้ว](security/BE-006-DEVELOPER-GUIDE.md) ก่อนต่อ HTTPS transport, antiforgery และ cookie/session
 2. เพิ่ม timeout/cancellation และ real integration tests รวม refresh, Logout, expiry,401/403,CSRF และหลาย tab
 3. ทำ protected layout/Chat โดยยังบังคับสิทธิ์บน server และทดสอบการสลับบัญชี/ยกเลิก stream
 4. เมื่อตกลง BE-007 API แล้วจึงทำ Sidebar/History/Resume/Conversation ID และ cross-user resource tests

@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using System.Text.Json;
 using BC_LocalAI.Models.Authentication;
+using BC_LocalAI.Security;
 using BC_LocalAI.Services.Authentication;
 using Microsoft.AspNetCore.Antiforgery;
 using Microsoft.AspNetCore.Authentication;
@@ -11,7 +12,7 @@ namespace BC_LocalAI.Controllers;
 
 [Route("api/auth")]
 public sealed class AuthenticationController(IAuthenticationBackend backend, LoginAttemptLimiter limiter, IAntiforgery antiforgery,
-    BasicAuthenticationTicketStore sessions) : ControllerBase
+    SessionService sessions) : ControllerBase
 {
     public const int MaxBodyBytes = 16 * 1024;
 
@@ -40,19 +41,16 @@ public sealed class AuthenticationController(IAuthenticationBackend backend, Log
         if (result.Outcome != AuthenticationOutcome.Success || result.User is null)
         { await Error(401, "AUTH_INVALID_CREDENTIALS", "ชื่อบัญชีหรือรหัสผ่านไม่ถูกต้อง"); return; }
         var user = result.User;
-        var identity = new ClaimsIdentity([
-            new Claim(ClaimTypes.NameIdentifier, user.UserId), new Claim(ClaimTypes.Name, user.Username),
-            new Claim("display_name", user.DisplayName)
-        ], AuthenticationRegistration.Scheme);
-        foreach (var role in user.Roles ?? []) identity.AddClaim(new Claim(ClaimTypes.Role, role));
         // Re-login replaces the current server-side session; no session fixation or orphaned old cookie.
-        await RevokeCurrentSession();
-        await HttpContext.SignOutAsync(AuthenticationRegistration.Scheme);
-        var properties = new AuthenticationProperties { IsPersistent = false, AllowRefresh = true };
-        var principal = new ClaimsPrincipal(identity);
-        var session = await sessions.StoreAsync(new AuthenticationTicket(principal, properties, AuthenticationRegistration.Scheme));
-        identity.AddClaim(new Claim(AuthenticationRegistration.SessionClaim, session));
-        await HttpContext.SignInAsync(AuthenticationRegistration.Scheme, principal, properties);
+        await sessions.SignOutAsync(HttpContext, cancellationToken);
+        // BE-006: a new server-side session; role and security stamp come from the account's current state in MySQL.
+        Claim[] profile = [new Claim(ClaimTypes.Name, user.Username), new Claim("display_name", user.DisplayName)];
+        if (!await sessions.SignInAsync(HttpContext, user.UserId, profile, cancellationToken))
+        {
+            // The account changed between the password check and sign-in (disabled, locked, role): same generic answer.
+            await Error(401, "AUTH_INVALID_CREDENTIALS", "ชื่อบัญชีหรือรหัสผ่านไม่ถูกต้อง");
+            return;
+        }
         ClearCsrf();
         await Response.WriteAsJsonAsync(new CurrentUserResponse(user), cancellationToken);
     }
@@ -65,14 +63,11 @@ public sealed class AuthenticationController(IAuthenticationBackend backend, Log
     [HttpPost("logout"), AllowAnonymous]
     public async Task<IActionResult> Logout()
     {
-        await RevokeCurrentSession();
-        await HttpContext.SignOutAsync(AuthenticationRegistration.Scheme);
+        // BE-006: revokes the server-side session (a copied cookie stops working) and clears the cookie.
+        await sessions.SignOutAsync(HttpContext);
         ClearCsrf();
         return NoContent();
     }
-
-    private Task RevokeCurrentSession() => User.FindFirstValue(AuthenticationRegistration.SessionClaim) is { } key
-        ? sessions.RemoveAsync(key) : Task.CompletedTask;
 
     private void ClearCsrf() => Response.Cookies.Delete("__Host-BC.Csrf", new CookieOptions
     { Secure = true, HttpOnly = true, SameSite = SameSiteMode.Strict, Path = "/" });

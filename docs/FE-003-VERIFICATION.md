@@ -3,7 +3,30 @@
 วันที่2026-10-21 · branch `watzapon_FE-003` · base `0cb07ff`
 · [ขอบเขตและวิธีรัน](FE-003-PREPARATION.md)
 
-## ผลที่รันจริง
+## การ pull main รอบถัดมา
+
+ผู้ใช้สั่ง pull เพิ่มหลังทำ groundwork: เก็บงานใน local commit `2fcdb92` ก่อน pull
+`main` = `babbd610f64932065410b753a1d654b81677eed9` (BE-006 / PR35)
+conflict มีเฉพาะ `docs/devops/test-baseline.json`: รวม floorของmain652 + FE-003ใหม่12 =664
+และคง Node115/Python143 ไม่ทิ้งเทสต์ของฝั่งใด
+Authentication ยังfalse และไม่เปลี่ยนเป็น real Login โดยอัตโนมัติ
+ภาพด้านล่างเป็นหลักฐานก่อน pull; หลัง pull เปลี่ยนเฉพาะคำเตือนให้ไม่กล่าวว่า BE-006ยังไม่เข้ามา
+ผลหลัง pull ที่รันจริง:
+
+| การตรวจ | ผล |
+|---|---|
+| Release build |0 warnings/0 errors |
+| .NET Development |664ผ่าน/0ล้ม/0ข้าม (38s) |
+| .NET Production |664ผ่าน/0ล้ม/0ข้าม (1m2s) |
+| Node ทั้งชุด |115ผ่าน/0ล้ม/0cancelled/0ข้าม |
+| Secret scan / Markdown links |357ไฟล์สะอาด /68 Markdownผ่าน |
+
+Pythonใช้ผล143ผ่านของรอบก่อน pull ด้านล่าง **ไม่ได้รันทั้งชุดใหม่หลัง pull**
+ตรวจ diff `0cb07ff..babbd61` แล้วไม่มี Python test/CI helper หรือ AI PowerShell script เปลี่ยน
+test-count gateหลังpull ใช้ .NET/Node logใหม่กับ Python logที่เสร็จก่อนpull (664/115/143)
+และไม่ได้ปิดบัง failure ที่เคยเกิดก่อนหน้านั้น
+
+## ผลที่รันจริงก่อน pull รอบถัดมา
 
 Windows / .NET10 / Node native test runner / Python3.11 / PowerShell7
 ใช้ synthetic user เท่านั้น ไม่ใช้ข้อมูลบริษัทและไม่ต่อฐานข้อมูลจริง
@@ -97,6 +120,7 @@ Raw logs และสำเนา mutation อยู่ใน ignored `artifacts
 ใช้ coding/testing skill และ code-review ตรวจ correctness, XSS/CSRF, state races, credential handling,
 compatibility และ regression จึงแยก preview แบบ offline + Development opt-in แทนการเปิด Loginจริง
 ไม่มี dependency/backend/session/schema/Chat/Ollama change
+ข้อความข้างต้นหมายถึง patch FE-003 เอง; session/authorization backendของ BE-006 ถูกนำเข้าตามmainที่ผู้ใช้สั่ง pull
 
 **อนุมัติได้เฉพาะ groundwork เพื่อ review ไม่ใช่การอนุมัติเปิด FE-003 จริง**
 ยังต้องต่อ BE-006/BE-007, Protected Chat, Sidebar/History/Resume และทดสอบข้อมูลข้ามผู้ใช้บน backendจริง

@@ -9,7 +9,6 @@ namespace BC_LocalAI.Services.Authentication;
 public static class AuthenticationRegistration
 {
     public const string Scheme = "BC.LocalAI";
-    public const string SessionClaim = "bc_session_key";
 
     public static IServiceCollection AddLocalAuthentication(this IServiceCollection services, IConfiguration configuration)
     {
@@ -33,37 +32,13 @@ public static class AuthenticationRegistration
             options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
             options.Cookie.SameSite = SameSiteMode.Lax;
             options.Cookie.Path = "/";
-            options.ExpireTimeSpan = BasicAuthenticationTicketStore.IdleLifetime;
-            // The server store controls renewal and clamps it to absolute expiry; never rely on cookie-only sliding.
+            // Expiry, renewal and per-request session checks are configured by BE-006 (BcAuthentication.AddBcLocalAiSecurity).
             options.SlidingExpiration = false;
             options.Events.OnRedirectToLogin = context => Error(context.Response, 401, "AUTH_REQUIRED", "กรุณาเข้าสู่ระบบ");
             options.Events.OnRedirectToAccessDenied = context => Error(context.Response, 403, "AUTH_FORBIDDEN", "ไม่มีสิทธิ์เข้าถึง");
         });
-        services.AddSingleton<BasicAuthenticationTicketStore>();
-        services.AddOptions<CookieAuthenticationOptions>(Scheme).Configure<BasicAuthenticationTicketStore, TimeProvider>((cookie, store, clock) =>
-        {
-            cookie.TimeProvider = clock;
-            cookie.Events.OnValidatePrincipal = async context =>
-            {
-                var key = context.Principal?.FindFirst(SessionClaim)?.Value;
-                var ticket = key is null ? null : await store.RetrieveAsync(key);
-                if (ticket is null || ticket.Principal.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value !=
-                    context.Principal?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value)
-                {
-                    context.RejectPrincipal();
-                    return;
-                }
-                if (clock.GetUtcNow() - ticket.Properties.IssuedUtc >= TimeSpan.FromMinutes(15))
-                {
-                    await store.RenewAsync(key!, ticket);
-                    var renewed = await store.RetrieveAsync(key!);
-                    if (renewed is null) { context.RejectPrincipal(); return; }
-                    context.Properties.IssuedUtc = renewed.Properties.IssuedUtc;
-                    context.Properties.ExpiresUtc = renewed.Properties.ExpiresUtc;
-                    context.ShouldRenew = true;
-                }
-            };
-        });
+        // Sessions: BE-006 (BC_LocalAI.Security) replaced BE-005's basic in-memory ticket store with server-side sessions that
+        // re-check the account (active, lockout, role, security stamp) on every request.
         services.AddSingleton<LoginAttemptLimiter>();
         services.AddSingleton<IAuthenticationPasswordVerifier, IdentityPasswordVerifier>();
         services.AddScoped<IAuthenticationRepository, MySqlAuthenticationRepository>();
