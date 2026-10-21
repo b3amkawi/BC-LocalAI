@@ -1,0 +1,12 @@
+{
+  "schema_version": 1,
+  "command": "python -X utf8 -m unittest discover -s tests -v",
+  "tests": 217,
+  "failed": 0,
+  "skipped": 0,
+  "duration_seconds": 231.474,
+  "observed_exit_code": 0,
+  "scope": "mock_and_fixture_regression_not_live_model_answers",
+  "local_log": "artifacts/ai010-preparation/python-full-units.txt",
+  "log_sha256": "d9fd5e675513de9b545d3564ecc9bb8d5113bbafb8f85fe58e63dc9970bf0328"
+}

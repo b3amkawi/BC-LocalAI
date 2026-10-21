@@ -1,0 +1,142 @@
+{
+  "schema_version": 1,
+  "synthetic_only": true,
+  "hardware": "NVIDIA GeForce RTX 4050 Laptop GPU",
+  "vram_total_mib": 6141,
+  "ollama_version": "0.40.5",
+  "notes": "Observed exit codes from executed processes. Synthetic requests and response envelopes retained except opaque provider context token-ID arrays, to limit repository size. Original local artifacts remain unchanged. No production-readiness claim.",
+  "artifacts": [
+    {
+      "file": "live-pilot-20261021.json",
+      "sha256": "c32840ca9e77e783157c05b8f6508ce1c3b8aaad6d46be705b63e10544e1fb0b",
+      "bytes": 26658,
+      "observed_exit_code": 1,
+      "observed_provider_responses": 4,
+      "row_count": 4,
+      "scope": "exploratory_live_synthetic",
+      "original_sha256": "b7c79468e5901017d2f20f81d1ce94505af4d941c9fa6cf3f5176d8f0c2b7a6b",
+      "original_bytes": 59479
+    },
+    {
+      "file": "live-pilot-v2-20261021.json",
+      "sha256": "8d8cd8cbf60842c12f7431b528591433299fc7924fe7d1cd6fc86e3ba6e3f6da",
+      "bytes": 19424,
+      "observed_exit_code": 1,
+      "observed_provider_responses": 4,
+      "row_count": 4,
+      "scope": "exploratory_live_synthetic",
+      "original_sha256": "092e7e73e0941ae5bd88a8d69d8b1adb88dab5411536d5029287333de406959a",
+      "original_bytes": 46024
+    },
+    {
+      "file": "live-pilot-constrained-20261021.json",
+      "sha256": "eca4724607829790ae20fddb39dc87ec19143d76efe4761191a1abe890abfd15",
+      "bytes": 20571,
+      "observed_exit_code": 1,
+      "observed_provider_responses": 4,
+      "row_count": 4,
+      "scope": "exploratory_live_synthetic",
+      "original_sha256": "922b58ea8d8a62d620a6a21c0b5435600f66bb2f61df027e3e83935059726520",
+      "original_bytes": 49720
+    },
+    {
+      "file": "live-quality-20261021.json",
+      "sha256": "7cfd2a7427250a24f7ca9dd80ef55c39ad0ab175dc274c5bb467841fb159f79c",
+      "bytes": 251837,
+      "observed_exit_code": 1,
+      "observed_provider_responses": 60,
+      "row_count": 60,
+      "scope": "exploratory_live_synthetic",
+      "original_sha256": "e0e2cde321260c19589a68200a8d03010a468785c1cf5cd2be8ee80fcb63ef73",
+      "original_bytes": 615308
+    },
+    {
+      "file": "live-quality-constrained-20261021.json",
+      "sha256": "a033730f05057f410f4d6743de8073fdeed33a20b6c8e32a55de5f60ad0bb347",
+      "bytes": 270401,
+      "observed_exit_code": 1,
+      "observed_provider_responses": 59,
+      "row_count": 60,
+      "scope": "exploratory_live_synthetic",
+      "original_sha256": "943c8d15432fb12400a7b8724688687ee9e7f9be12eb126290916ca5c2fd6512",
+      "original_bytes": 676398
+    },
+    {
+      "file": "live-quality-constrained-repeat-20261021.json",
+      "sha256": "e0c376120ce567e6fd857a44d92e4b72e584d1001c116995344342fdc25aaac7",
+      "bytes": 272318,
+      "observed_exit_code": 1,
+      "observed_provider_responses": 59,
+      "row_count": 60,
+      "scope": "exploratory_live_synthetic",
+      "original_sha256": "8db7b857249855c63ff91a76e841eebd3281b87dc23179b660c00f2d1bb45174",
+      "original_bytes": 678297
+    },
+    {
+      "file": "live-injection-20261021.json",
+      "sha256": "c0da2a81f09c73414d5e6b85a5557213554e8ef36beaaeb06665f576db980a13",
+      "bytes": 48731,
+      "observed_exit_code": 1,
+      "observed_provider_responses": 10,
+      "row_count": 10,
+      "scope": "exploratory_live_synthetic",
+      "original_sha256": "563e16e6338146574270cd15790d2321487385f763b4584dfa756cf10eaed0f8",
+      "original_bytes": 119087
+    },
+    {
+      "file": "live-context-20261021.json",
+      "sha256": "1ad994896c1bb197eff0887c0a974c16e480b727a6b6e996ae5c81f68cba9414",
+      "bytes": 240119,
+      "observed_exit_code": 1,
+      "observed_provider_responses": 18,
+      "row_count": 18,
+      "scope": "synthetic_context_stress_not_production",
+      "original_sha256": "b950b6dffa99e1959ebc8f0e2cd4ed9b5e8adc85fd66fa6afea7e22cedf4a957",
+      "original_bytes": 1210000
+    },
+    {
+      "file": "live-pilot-units-20261021.json",
+      "sha256": "96492dec89ec8fcf8e712a20e1cdc5c42082531ccf4f7b3b2508ff1ce3f9c291",
+      "bytes": 21057,
+      "original_sha256": "3921816dff1e64b9e5aeb4cef710eb9218de962e6461f0281ef5c399a4e5fa77",
+      "original_bytes": 50949,
+      "observed_exit_code": 0,
+      "observed_provider_responses": 4,
+      "row_count": 4,
+      "scope": "exploratory_live_synthetic"
+    },
+    {
+      "file": "live-quality-units-20261021.json",
+      "sha256": "20dcae98bb2a79949f72fe30372a7fb1e6b43b8f405d5b97384fd6f944e486cd",
+      "bytes": 278193,
+      "original_sha256": "4d8f1e017f70b4f2c763a5623233dfabb2aa3506d5ef86be5e0cffdcc037716d",
+      "original_bytes": 694727,
+      "observed_exit_code": 0,
+      "observed_provider_responses": 60,
+      "row_count": 60,
+      "scope": "exploratory_live_synthetic"
+    },
+    {
+      "file": "live-quality-units-repeat-20261021.json",
+      "sha256": "fa60f317e4709d520e06b6daca7b7326c9a0d5eae0387c0618c73da9fb3623e5",
+      "bytes": 278187,
+      "original_sha256": "e3bdcbb2bbea1a52444f38be4ad8f2a293721481ba6e1259b3a136255fc26717",
+      "original_bytes": 694721,
+      "observed_exit_code": 0,
+      "observed_provider_responses": 60,
+      "row_count": 60,
+      "scope": "exploratory_live_synthetic"
+    },
+    {
+      "file": "live-injection-units-20261021.json",
+      "sha256": "07ccba042d5ae9ca6ae3e405131c50b6b956378bd2755084786d49a6fa7d2efa",
+      "bytes": 49228,
+      "original_sha256": "34d20aceae18820bc199acce1dcd0324f235f02e4a7d8234f43658a03b7d618f",
+      "original_bytes": 120366,
+      "observed_exit_code": 0,
+      "observed_provider_responses": 10,
+      "row_count": 10,
+      "scope": "exploratory_live_synthetic"
+    }
+  ]
+}

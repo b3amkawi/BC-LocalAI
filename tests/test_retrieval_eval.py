@@ -26,6 +26,12 @@ class FixtureSetup:
 
 
 class FixtureTests(FixtureSetup, unittest.TestCase):
+    def test_explicit_lookup_excludes_unrelated_same_subject_documents(self):
+        selected = evaluation.retrieve(self.dataset['cases'][0]['question'], self.corpus, 'engineer')
+        self.assertEqual([doc['id'] for doc in selected['documents']], ['SYN-S01'])
+        denied = evaluation.retrieve('Read SYN-R03', self.corpus, 'reader')
+        self.assertEqual(denied['documents'], [])
+
     def test_distribution_and_sources_are_validated(self):
         result = evaluation.validate_dataset(self.dataset, self.corpus)
         self.assertEqual(result["cases"], 60)

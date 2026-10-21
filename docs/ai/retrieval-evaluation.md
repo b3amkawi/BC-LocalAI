@@ -1,12 +1,15 @@
-# AI-010 — Offline preparation and Backend handoff
+# AI-010 — Synthetic retrieval evaluation and Backend handoff
 
-Status on 21 October 2026: **preparation only; live model evaluation NOT RUN**.
+Status on 21 October 2026: **exploratory live runs recorded; NOT ready for production**.
+See [measured results and raw evidence](retrieval-live-results.md). The offline
+preparation below remains available; it must not be confused with live evaluation.
 Issue: [AI-010 #43](https://github.com/b3amkawi/BC-LocalAI/issues/43).
 Base: `d636b4f`, local branch `codex/ai010-preparation`.
 
-This work can run while Claude measures AI-008: it has no network client, GPU
-work, model downloads, database calls or changes to the application. It does not
-change the running system prompt, AI-002 contract or Ollama configuration.
+The offline tools use no network or GPU. Separately opted-in live tools call
+Ollama on loopback, with synthetic data and per-request context options only.
+Neither path changes the application's system prompt, AI-002 contract, database
+or global Ollama configuration. No model was downloaded.
 
 ## What is ready
 
@@ -16,8 +19,11 @@ change the running system prompt, AI-002 contract or Ollama configuration.
 - 60 frozen questions in `tests/retrieval/questions.json`: 15 single-source,
   15 missing-information, 15 multi-source sums and 15 conflicting-source cases;
   exactly 30 Thai and 30 English questions.
-- 10 distinct **planned** injection payloads in
-  `tests/retrieval/injection-cases.json`. These are not successful live tests.
+- 10 frozen injection payload definitions in `tests/retrieval/injection-cases.json`.
+  Their `live_tested: false` records preparation provenance; observed results
+  belong in the separate evidence, not in mutated ground truth. Latest measured
+  sources-only full-answer pass rate was 1/10; the later unit-constrained profile
+  passes 10/10. Both results are retained, without claiming general immunity.
 - A standard-library lexical retrieval baseline. Documents are filtered by
   fixture ACL **before** computing frequencies, scores or prompt content.
 - Whole-answer grading and exact source-set checks; duplicates, wrong sources,
@@ -113,14 +119,18 @@ of reference answers is not live model evidence.
    valid paraphrases not on the frozen list. It is suitable for these short,
    closed-answer fixtures, not universal semantic correctness.
 5. JSON separation keeps injected text in the document-data field. It does not
-   prove that a model will ignore that text. All 10 attacks need real model runs.
+   prove that a model will ignore that text. All 10 attacks have now been sent;
+   their mixed quality results are recorded in the separate live report.
 6. A status `not_found` alone does not prove correct abstention; expected answers
    and empty citations are checked together. Conflict cases require the explicit
    conflict response and both sources, with no assumed newer/higher authority.
 7. The prototype cannot establish GPU capacity, embedding co-residency, hardware
    performance or the application's authentication strength.
 
-## Gates before real model evaluation
+## Gates before approved integration/readiness evaluation
+
+The user authorized isolated synthetic GPU experiments after Claude stopped.
+Those exploratory runs do not waive the policy/permission gates below.
 
 | Gate | Owner/dependency | Current status |
 |---|---|---|
@@ -128,11 +138,12 @@ of reference answers is not live model evidence.
 | Approve retrieval permissions and injection threat model | ARCH-001 / Leader + เติ้ล | Pending |
 | Map fixture access sets to server-authenticated identity/ACL | BE-006 owner | Not integrated |
 | Choose an embedding candidate and approve isolated model trial | Leader + AI owner | Not selected/downloaded here |
-| Reserve GPU time after AI-008; pin runtime/model digests | AI owner | No live runs scheduled by this tool |
+| Reserve GPU time after AI-008; pin runtime/model digests | AI owner | Exploratory runs recorded after GPU handoff; digests in evidence |
 | Evaluate natural questions without IDs, languages and document lengths | AI owner + reviewer | Not measured by the 60 identifier fixtures |
 
-Proposed live go/no-go thresholds must be signed off **before** seeing live
-answers. Record numerical thresholds for answer accuracy, supported citations,
+Production go/no-go thresholds still need reviewer sign-off and a new held-out
+evaluation. No threshold was signed off for these exploratory development runs;
+they cannot serve as retrospective acceptance. Record numerical thresholds for answer accuracy, supported citations,
 correct abstention, conflict handling and latency. Any unauthorized source in
 retrieved context is a blocker. A blocked model run must be reported as blocked,
 not passed or silently removed from the denominator.

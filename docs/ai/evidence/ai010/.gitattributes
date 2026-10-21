@@ -1,0 +1,2 @@
+# Preserve evidence hashes across Windows/Linux checkouts.
+*.json text eol=lf

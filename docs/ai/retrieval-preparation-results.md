@@ -1,7 +1,9 @@
 # AI-010 — Preparation verification, 21 October 2026
 
-**Offline preparation only. Ollama runs: 0. Embedding runs: 0. GPU changes: 0.**
-This is not the final AI-010 readiness report and does not close #43.
+**Historical offline preparation checkpoint (12:18 Bangkok).** At that checkpoint:
+Ollama runs 0, embedding runs 0, GPU changes 0. Subsequent GPU work is reported
+separately in [live results](retrieval-live-results.md); this page preserves the
+earlier checks and does not close #43.
 
 | Check | Actual result |
 |---|---|
