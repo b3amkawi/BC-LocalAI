@@ -26,6 +26,19 @@ public sealed class AuthenticationServiceTests
         public bool Verify(string? hash, string password) { Calls++; Password = password; return valid; }
     }
 
+    private sealed class Attempts(bool allowed = true, bool unavailable = false) : IAuthenticationAttemptStore
+    {
+        public int Calls { get; private set; }
+        public string? UserId { get; private set; }
+        public bool Verified { get; private set; }
+        public Task<bool> RecordAsync(string? userId, string? stamp, bool verified, CancellationToken cancellationToken)
+        {
+            cancellationToken.ThrowIfCancellationRequested(); Calls++; UserId = userId; Verified = verified;
+            if (unavailable) throw new AuthenticationDependencyException();
+            return Task.FromResult(allowed && userId is not null);
+        }
+    }
+
     [Theory]
     [InlineData("active", true, AuthenticationOutcome.Success)]
     [InlineData("active", false, AuthenticationOutcome.InvalidCredentials)]
@@ -40,14 +53,18 @@ public sealed class AuthenticationServiceTests
         {
             Id = state == "bad-id" ? "not-a-uuid" : Guid.NewGuid().ToString(), Username = "Synthetic.User", DisplayName = "สมมติ",
             PasswordHash = "synthetic-hash", IsActive = state != "disabled", Role = state == "bad-role" ? "forged" : "User",
-            LockoutEndUtc = state == "locked" ? DateTimeOffset.MaxValue : null
+            LockoutEndUtc = state == "locked" ? DateTimeOffset.MaxValue : null, SecurityStamp = new string('A', 64)
         });
         var verifier = new Verifier(valid);
-        var backend = new MySqlAuthenticationBackend(repository, verifier, new Clock(), NullLogger<MySqlAuthenticationBackend>.Instance);
+        var attempts = new Attempts();
+        var backend = new MySqlAuthenticationBackend(repository, verifier, new Clock(), NullLogger<MySqlAuthenticationBackend>.Instance, attempts);
         var result = await backend.AuthenticateAsync(new LoginRequest { Username = "Synthetic.User", Password = " รหัส😀\n " });
         Assert.Equal(expected, result.Outcome);
         Assert.Equal("SYNTHETIC.USER", repository.LookedUp);
         Assert.Equal(1, verifier.Calls);
+        Assert.Equal(1, attempts.Calls);
+        Assert.Equal(state == "active", attempts.UserId is not null);
+        Assert.Equal(state == "active" && valid, attempts.Verified);
         Assert.Equal(" รหัส😀\n ", verifier.Password);
         if (expected != AuthenticationOutcome.Success) Assert.Null(result.User);
         else Assert.Equal(["User"], result.User!.Roles);
@@ -56,7 +73,7 @@ public sealed class AuthenticationServiceTests
     [Fact]
     public async Task CancellationIsNotReclassifiedAsInvalidCredentials()
     {
-        var backend = new MySqlAuthenticationBackend(new Repository(null), new Verifier(false), new Clock(), NullLogger<MySqlAuthenticationBackend>.Instance);
+        var backend = new MySqlAuthenticationBackend(new Repository(null), new Verifier(false), new Clock(), NullLogger<MySqlAuthenticationBackend>.Instance, new Attempts());
         await Assert.ThrowsAnyAsync<OperationCanceledException>(() => backend.AuthenticateAsync(new LoginRequest(), new CancellationToken(true)));
     }
 
@@ -64,11 +81,27 @@ public sealed class AuthenticationServiceTests
     public async Task DependencyFailureIsSafeUnavailableAndNeverFallsBackToMockAuthentication()
     {
         var verifier = new Verifier(true);
-        var backend = new MySqlAuthenticationBackend(new UnavailableRepository(), verifier, new Clock(), NullLogger<MySqlAuthenticationBackend>.Instance);
+        var backend = new MySqlAuthenticationBackend(new UnavailableRepository(), verifier, new Clock(), NullLogger<MySqlAuthenticationBackend>.Instance, new Attempts());
         var result = await backend.AuthenticateAsync(new LoginRequest { Username = "synthetic", Password = "synthetic" });
         Assert.Equal(AuthenticationOutcome.Unavailable, result.Outcome);
         Assert.Null(result.User);
         Assert.Equal(0, verifier.Calls);
+    }
+
+    [Theory]
+    [InlineData(false, AuthenticationOutcome.InvalidCredentials)]
+    [InlineData(true, AuthenticationOutcome.Unavailable)]
+    public async Task StaleSuccessOrWriterFailureCannotIssueAuthentication(bool unavailable, AuthenticationOutcome expected)
+    {
+        var repository = new Repository(new AuthenticationAccount
+        {
+            Id = Guid.NewGuid().ToString(), Username = "synthetic", DisplayName = "synthetic", PasswordHash = "synthetic",
+            IsActive = true, Role = "User", SecurityStamp = new string('A', 64)
+        });
+        var backend = new MySqlAuthenticationBackend(repository, new Verifier(true), new Clock(),
+            NullLogger<MySqlAuthenticationBackend>.Instance, new Attempts(allowed: false, unavailable: unavailable));
+        var result = await backend.AuthenticateAsync(new LoginRequest { Username = "synthetic", Password = "synthetic" });
+        Assert.Equal(expected, result.Outcome); Assert.Null(result.User);
     }
 
     private sealed class UnavailableRepository : IAuthenticationRepository

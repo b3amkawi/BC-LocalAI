@@ -2,6 +2,11 @@
 
 2026-10-20 · branch `watzapon_BE-005` · Refs [#21](https://github.com/b3amkawi/BC-LocalAI/issues/21)
 
+> Historical snapshot of the initial implementation/results, not current guidance. The 2026-10-21 completion
+> adds the previously missing persisted writer/lockout and confirms policy numbers. See
+> [current verification and remaining boundaries](BE-005-LOCKOUT-VERIFICATION.md) and [current configuration](BE-005-INTEGRATION.md).
+> Statements below about no writer, deferred lockout, port3318 and535 tests apply only to this earlier snapshot.
+
 ## Scope and source
 
 User requested pull main, continue BE-005, test/fix repeatedly, then push only this issue branch.

@@ -279,15 +279,11 @@ function Invoke-RequestBatch {
     return $all
 }
 
-function Get-ScenarioSummary {
-    param([object[]]$Rows, [object[]]$Samples, [double]$WallSeconds)
+function Get-ScenarioResourceSummary {
+    param([object[]]$Rows, [object[]]$Samples)
 
-    $measured = @($Rows)
-    $success = @($measured | Where-Object outcome -eq 'success')
-    $latency = [double[]]@($success | ForEach-Object elapsed_ms | Sort-Object)
-    $count = { param($name) @($measured | Where-Object outcome -eq $name).Count }
-    $first = $measured | ForEach-Object { [DateTimeOffset]$_.start_utc } | Sort-Object | Select-Object -First 1
-    $last = $measured | ForEach-Object { [DateTimeOffset]$_.end_utc } | Sort-Object | Select-Object -Last 1
+    $first = $Rows | ForEach-Object { [DateTimeOffset]$_.start_utc } | Sort-Object | Select-Object -First 1
+    $last = $Rows | ForEach-Object { [DateTimeOffset]$_.end_utc } | Sort-Object | Select-Object -Last 1
     $window = @($Samples | Where-Object { $null -ne $_ -and $_.time_utc -ge $first.AddSeconds(-1) -and $_.time_utc -le $last.AddSeconds(1) })
     $stat = {
         param($name, $kind)
@@ -296,9 +292,26 @@ function Get-ScenarioSummary {
         $measure = $values | Measure-Object -Average -Maximum -Minimum
         switch ($kind) { 'avg' { [math]::Round($measure.Average, 1) } 'max' { $measure.Maximum } 'min' { $measure.Minimum } }
     }
+    return [ordered]@{
+        cpu_percent_avg = & $stat 'cpu_percent' 'avg'; cpu_percent_max = & $stat 'cpu_percent' 'max'
+        ram_available_mb_min = & $stat 'ram_available_mb' 'min'
+        ollama_working_set_mb_max = & $stat 'ollama_working_set_mb' 'max'
+        gpu_percent_avg = & $stat 'gpu_percent' 'avg'; gpu_percent_max = & $stat 'gpu_percent' 'max'
+        vram_used_mb_max = & $stat 'vram_used_mb' 'max'
+        resource_sample_count = $window.Count
+    }
+}
+
+function Get-ScenarioSummary {
+    param([object[]]$Rows, [object[]]$Samples, [double]$WallSeconds)
+
+    $measured = @($Rows)
+    $success = @($measured | Where-Object outcome -eq 'success')
+    $latency = [double[]]@($success | ForEach-Object elapsed_ms | Sort-Object)
+    $count = { param($name) @($measured | Where-Object outcome -eq $name).Count }
     $tokens = @($success | Where-Object { $null -ne $_.eval_count })
     $total = $measured.Count
-    return [ordered]@{
+    $summary = [ordered]@{
         requests = $total; success = $success.Count
         success_rate = if ($total) { [math]::Round($success.Count / $total, 4) } else { $null }
         client_timeout = & $count 'client_timeout'; server_timeout = & $count 'server_timeout'
@@ -318,13 +331,10 @@ function Get-ScenarioSummary {
         output_tokens_per_sec = if ($tokens.Count -and $WallSeconds -gt 0) { [math]::Round((($tokens | Measure-Object eval_count -Sum).Sum) / $WallSeconds, 1) } else { $null }
         generation_tokens_per_sec_mean = if ($tokens.Count) { [math]::Round(($tokens | Where-Object tokens_per_sec | Measure-Object tokens_per_sec -Average).Average, 1) } else { $null }
         queue_wait_p95_ms = Get-Percentile ([double[]]@($tokens | Where-Object { $null -ne $_.queue_wait_ms } | ForEach-Object queue_wait_ms | Sort-Object)) 95
-        cpu_percent_avg = & $stat 'cpu_percent' 'avg'; cpu_percent_max = & $stat 'cpu_percent' 'max'
-        ram_available_mb_min = & $stat 'ram_available_mb' 'min'
-        ollama_working_set_mb_max = & $stat 'ollama_working_set_mb' 'max'
-        gpu_percent_avg = & $stat 'gpu_percent' 'avg'; gpu_percent_max = & $stat 'gpu_percent' 'max'
-        vram_used_mb_max = & $stat 'vram_used_mb' 'max'
-        resource_sample_count = $window.Count
     }
+    $resources = Get-ScenarioResourceSummary -Rows $measured -Samples $Samples
+    foreach ($key in $resources.Keys) { $summary[$key] = $resources[$key] }
+    return $summary
 }
 
 function Invoke-ChatBenchmark {
@@ -369,6 +379,7 @@ function Invoke-ChatBenchmark {
     $sampler = if ($ResourceIntervalMs -gt 0) { Start-ResourceSampler $ResourceIntervalMs } else { $null }
     $rows = [Collections.Generic.List[object]]::new()
     $scenarios = [Collections.Generic.List[object]]::new()
+    $resourceContexts = [Collections.Generic.List[object]]::new()
     $aborted = $null
     $memoryPauseSeconds = 0.0
     $memoryPauseCount = 0
@@ -451,6 +462,7 @@ function Invoke-ChatBenchmark {
                     $scenario = [ordered]@{ target = $Target; profile = $profile; concurrency = $level; rounds = $roundsForLevel }
                     foreach ($key in $summary.Keys) { $scenario[$key] = $summary[$key] }
                     $scenarios.Add($scenario)
+                    $resourceContexts.Add([pscustomobject]@{ Scenario = $scenario; Rows = $scenarioRows.ToArray() })
                     Write-Host ("SCENARIO {0} {1} c={2}: {3}/{4} success, p50={5} p95={6} ms, {7} req/s" -f $Target, $profile, $level,
                         $summary.success, $summary.requests, $summary.latency_p50_ms, $summary.latency_p95_ms, $summary.throughput_rps)
                 }
@@ -460,6 +472,13 @@ function Invoke-ChatBenchmark {
     } finally {
         $samples = Stop-ResourceSampler $sampler
         $client.Dispose()
+    }
+
+    # A collector can timestamp a sample during a scenario but enqueue it only during shutdown.
+    # Reattach resources from the drained queue, retaining the exact original window and request metrics.
+    foreach ($context in $resourceContexts) {
+        $resources = Get-ScenarioResourceSummary -Rows $context.Rows -Samples @($samples)
+        foreach ($key in $resources.Keys) { $context.Scenario[$key] = $resources[$key] }
     }
 
     $csvRows = $rows | Select-Object *

@@ -1,6 +1,6 @@
 # BE-005 — Configuration, API and BE-006 / FE-003 Handoff
 
-2026-10-20 · Refs [#21](https://github.com/b3amkawi/BC-LocalAI/issues/21)
+Updated 2026-10-21 · Refs [#21](https://github.com/b3amkawi/BC-LocalAI/issues/21)
 
 ## Scope / authority
 
@@ -18,6 +18,8 @@ No company schema/password migration, Login UI, self-registration or admin HTTP 
 
 - `MySqlAuthenticationRepository`: fixed, parameterized SELECT of required fields; `bc_auth_reader` only. No writes, transaction retry or admin credential.
 - `MySqlAuthenticationBackend`: uppercase-invariant ASCII username lookup; exact password; verify before checking active/lockout/role; safe result only.
+- `MySqlAuthenticationAttemptStore`: separate column-scoped writer, one conditional atomic UPDATE before authentication can succeed.
+  Persists failed counts/lockout, resets on success; stale stamp/disabled/locked/deleted rows cannot be accepted.
 - `IdentityPasswordVerifier`: framework IdentityV3, HMAC-SHA512 / 220,000 iterations / 16-byte salt / 32-byte subkey, matching SEC-001 fixtures.
   Unknown or unsupported/malformed hashes perform a dummy KDF and fail. Unbounded/other work factors are not silently accepted.
   No custom cryptographic password comparison, automatic rehash, password reset or duplicate hash store.
@@ -37,28 +39,58 @@ Set through environment/approved secret provider, never screenshots/CLI argument
 |---|---|
 | `Enabled` | false; explicit opt-in only |
 | `ReaderConnectionString` | secret provider; non-admin read-only DB account; database/host authorized by operator |
+| `WriterConnectionString` | separate username AND secret on the same server/port/database; column grants below; UseAffectedRows=false |
 | `KeyDirectory` | existing absolute private directory outside wwwroot; restrict filesystem ACL to service identity/SYSTEM before use |
 | `AllowLocalDevelopmentDatabase` | false; true allowed only Development + literal loopback IP + encrypted TLS (Required or VerifyFull) |
 | Connection-string TLS | VerifyFull in Production, approved CA + matching hostname; no trust-all callback/public-key-retrieval bypass |
 | Connection-string bounds | ConnectionTimeout 1–15 seconds, MaximumPoolSize 1–32; recommend 3 seconds / 4 for local testing; PersistSecurityInfo/AllowLoadLocalInfile false |
 | `CommandTimeoutSeconds` | 5 (allowed 1–15), cancellation propagated, no retry |
-| `AccountAttemptsPerMinute` | proposed 5, case-insensitive bucket across IPs |
-| `IpAttemptsPerMinute` | proposed 30; socket peer address, not untrusted forwarded headers |
-| `GlobalAttemptsPerMinute` | proposed 120 |
-| `ConcurrentLogins` | proposed 2 (max4); zero queue, before password verification |
+| `AccountAttemptsPerMinute` | confirmed 5, case-insensitive bucket across IPs |
+| `IpAttemptsPerMinute` | confirmed 30; socket peer address, not untrusted forwarded headers |
+| `GlobalAttemptsPerMinute` | confirmed 120 |
+| `ConcurrentLogins` | confirmed 2 (max4); zero queue, before password verification |
 | `MaxSessions` | proposed 1024 (max4096); full capacity fails closed503 |
+| `LockoutThreshold` / `LockoutMinutes` | confirmed 5 consecutive failures /15 minutes; success clears count; expired lock starts a new sequence |
 
 Rate limits are fixed 60-second windows, include successful/failed attempts, and use fixed HMAC-indexed arrays
 (4096 account buckets / 1024 peer buckets), not attacker-grown dictionaries. Collisions may conservatively throttle unrelated callers.
-Window boundaries can allow two adjacent bursts. Counts reset on restart, are not shared across processes, and are **not durable account lockout**.
+Window boundaries can allow two adjacent bursts. Rate-budget counts reset on restart and are not shared across processes;
+the **separate account lockout/counter is persisted in MySQL** and survives new application hosts/restarts.
 Rate rejection is generic429 with Retry-After60; there is no username/DB record existence check before admission.
-Numbers are an implementation proposal awaiting watzapon's review, not a claim of approved company policy.
+The user/watzapon explicitly confirmed 5 failures/15 minutes, success reset,5 account/30 IP/120 global attempts per minute and2 concurrent verifications in this task's chat.
+This is the approved BC-LocalAI policy, not a claim about a nonexistent legacy system. Changes require another policy review.
 
 The application rejects root/admin-named database logins as a guard, but this does not prove arbitrary reader grants:
 DBA/operator must also verify SELECT-only permissions (local negative grant test is in the separate MySQL suite).
 Only Windows DPAPI-protected keys are wired for enabled auth in this increment; another platform requires an approved key encryptor,
 not plaintext keys. DPAPI is tied to the service OS identity; key backup/ACL/restore still require an operational review.
-Do not copy an admin.cnf into application configuration. The .local SEC-001 instance is development data only.
+Do not copy an admin.cnf into application configuration. The .local fixture is development data only.
+
+### Writer grants / persistence semantics
+
+The reader remains SELECT-only. The writer must have only these permissions on the approved `users` table:
+
+- SELECT: `id,is_active,security_stamp,access_failed_count,lockout_end_utc`
+- UPDATE: `access_failed_count,lockout_end_utc,updated_at_utc`
+- No hash/password access, no username/role/active/stamp UPDATE, no INSERT/DELETE/DDL/GRANT or account administration.
+
+Provisioning code: `AttemptWriterBootstrap` in [FixtureFactory](../../tools/Sec001Fixtures/FixtureFactory.cs), opt-in isolated fixture only.
+DBA/operator must provision equivalent column grants and distinct secrets for a real installation; the app never grants itself access/admin fallback.
+Enabled installations from the earlier draft must provide the writer secret: missing/unsafe writer configuration fails startup, not silently disables persistence.
+
+One parameterized UPDATE checks UUID + expected security stamp + active status + no active lock under the InnoDB row lock.
+MySQL evaluates single-table SET assignments left-to-right: compute count from old expiry first, then expiry from the new count.
+[MySQL UPDATE semantics](https://dev.mysql.com/doc/refman/8.0/en/update.html).
+No app-memory read-modify-write counter or automatic retry of ambiguous/cancelled writes. Reader/writer unavailable =>503/no session.
+Unknown/ineligible accounts execute a null-id/stamp, non-matching writer operation too: one bounded KDF and writer roundtrip for each valid-shaped attempt.
+
+At failure5, DB UTC expiry becomes now+15 minutes. Locked attempts neither extend lock nor increment count.
+After expiry, a failure starts count1; correct password resets count0/expiryNULL only if active/stamp/lock predicates still match.
+Admin credential/status/role changes must rotate security_stamp as SEC-001 requires; stale verification is rejected, never retried.
+`updated_at_utc` changes on attempts; BE-006 must not treat every updated timestamp as a password change.
+Counters are consecutive since last success/expired lock, not a rolling observation window. Account-lockout DoS is a trade-off of the
+user-approved policy; rate/concurrency limits bound work, not a guarantee against distributed abuse.
+[OWASP authentication throttling/lockout guidance](https://cheatsheetseries.owasp.org/cheatsheets/Authentication_Cheat_Sheet.html).
 
 ## API usage for FE-003
 
@@ -106,12 +138,12 @@ Renewal occurs after half the idle lifetime and never exceeds absolute expiry. L
 Restart logs everyone out; multiple app processes are **not supported for this basic store/limiter**.
 Cookie ticket is framework-protected; server validates its session key exists before Me and before renewal.
 
-BE-006 must supply durable/shared session + attempt stores as needed, status/stamp/role revalidation, all-device revocation,
+BE-006 must supply durable/shared sessions and fleet-wide rate budgets as needed, status/stamp/role revalidation, all-device revocation,
 Chat/stream auth/CSRF enforcement, SSE revocation bounds, policy decisions and relevant tests.
 **Existing `/api/chat` and `/api/chat/stream` are intentionally unchanged and remain anonymous in this increment**.
 Do not expose the app to untrusted users merely because auth endpoints exist. Full account disable/reset effects on existing sessions
 are not implemented here (only new Login checks account status). Admin provisioning scripts/audit are also BE-006 follow-up,
-not a covert writer or admin API in BE-005. No writer connection/grants/counter updates are added by this read-only increment.
+not an admin API in BE-005. BE-005 now supplies persisted attempts/lockout through a metadata-only writer; these are not deferred to BE-006.
 
 ## Run / verify / recovery
 
@@ -121,19 +153,20 @@ Set the Authentication settings privately, then run the existing HTTPS launch pr
 For repeatable MySQL verification in this branch's worktree (new isolated fixture only):
 
 ```powershell
-pwsh -NoProfile -File scripts/security/local-mysql.ps1 -Action Initialize -Port 3318
-$env:BE005_MYSQL_PRIVATE_DIRECTORY = Join-Path (Get-Location) '.local/sec001-mysql-v2/private'
+pwsh -NoProfile -File scripts/security/local-mysql.ps1 -Action Initialize -Port 3319 -InstanceName be005-mysql
+$env:BE005_MYSQL_PRIVATE_DIRECTORY = Join-Path (Get-Location) '.local/be005-mysql/private'
 dotnet test tests/BE005.MySqlTests/BE005.MySqlTests.csproj -c Release
-pwsh -NoProfile -File scripts/security/local-mysql.ps1 -Action Stop -Port 3318
+pwsh -NoProfile -File scripts/security/local-mysql.ps1 -Action Stop -Port 3319 -InstanceName be005-mysql
 ```
 
-Initialize only on a previously absent .local instance directory; it refuses overwrite. Start an existing fixture with `-Action Start -Port 3318`.
+Initialize only on a previously absent .local instance directory; it refuses overwrite. Start an existing fixture with `-Action Start -Port 3319 -InstanceName be005-mysql`.
 Do not change a pre-existing instance to this port or reset it to make tests run.
 The explicit MySQL project is not in the default solution/CI: it requires local authorized secrets and deliberately fails if unconfigured,
-never silently skips. It checks fixed loopback3318/reader account, not arbitrary external databases. Default tests need no MySQL/Ollama.
+never silently skips. It checks fixed loopback3319/reader+writer identities, not arbitrary external databases. Default tests need no MySQL/Ollama.
 
 Rollback: set Enabled=false and restart; auth endpoints404 and in-memory sessions gone. No DB rollback/data migration required:
-application performs no writes. Keep private keys and fixture data private; Stop preserves them, does not delete/reset/rotate accounts.
-Production enablement/deployment, policy sign-off, backup/restore and live company integration are **not authorized/performed** in this task.
+no schema/hash/account migration was performed. Attempt metadata is intentionally retained, not reset on disable/restart.
+Keep private keys/fixture data private; Stop preserves them. Production deployment, backup/restore and live company integration are **not performed** here.
 
-Evidence: [Implementation verification](BE-005-IMPLEMENTATION-VERIFICATION.md).
+Current evidence: [Attempts/lockout completion and review](BE-005-LOCKOUT-VERIFICATION.md).
+Earlier implementation evidence: [Initial verification](BE-005-IMPLEMENTATION-VERIFICATION.md).

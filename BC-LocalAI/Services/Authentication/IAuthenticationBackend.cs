@@ -10,7 +10,8 @@ public interface IAuthenticationBackend
 {
     /// <summary>
     /// Future implementation must validate inputs, preserve the exact password, perform approved read-only
-    /// parameterized lookup/verification, check account status and return only the safe user projection.
+    /// parameterized lookup/verification, check account status and atomically record attempts through the separate
+    /// least-privilege writer before returning the safe user projection. A failed/stale write must never issue a session.
     /// Unknown/wrong/disabled/locked share InvalidCredentials; dependency failure returns safe Unavailable.
     /// Never log the request or raw exception/DB/hash; cancellation propagates, with no automatic credential retry.
     /// Success is not a session: the future controller must also establish the approved ASP.NET authentication mechanism.

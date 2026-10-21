@@ -13,22 +13,26 @@ using Xunit;
 namespace BE005.MySqlTests;
 
 // Explicit separate suite: fails (does not silently skip/pass) unless an isolated, authorized fixture directory is provided.
-public sealed class MySqlAuthenticationTests
+public sealed partial class MySqlAuthenticationTests
 {
-    private static (string Connection, Account[] Accounts, string Private) Settings()
+    private static (string Connection, string Writer, Account[] Accounts, string Private) Settings()
     {
         var directory = Environment.GetEnvironmentVariable("BE005_MYSQL_PRIVATE_DIRECTORY") ??
             throw new InvalidOperationException("Set BE005_MYSQL_PRIVATE_DIRECTORY to the isolated fixture private directory. Do not supply credentials on the command line.");
         var fields = File.ReadAllLines(Path.Combine(directory, "reader.cnf")).Where(line => line.Contains('=')).Select(line => line.Split('=', 2)).ToDictionary(parts => parts[0], parts => parts[1]);
-        if (fields["host"] != "127.0.0.1" || fields["port"] != "3318" || fields["user"] != "bc_auth_reader")
-            throw new InvalidOperationException("This suite only permits the dedicated BE-005 fixture reader at loopback port3318.");
+        if (fields["host"] != "127.0.0.1" || fields["port"] != "3319" || fields["user"] != "bc_auth_reader")
+            throw new InvalidOperationException("This suite only permits the dedicated BE-005 fixture reader at loopback port3319.");
         var connection = new MySqlConnectionStringBuilder
         {
-            Server = "127.0.0.1", Port = 3318, UserID = fields["user"], Password = fields["password"],
+            Server = "127.0.0.1", Port = 3319, UserID = fields["user"], Password = fields["password"],
             Database = "bc_localai_sec001", SslMode = MySqlSslMode.Required, ConnectionTimeout = 3, MaximumPoolSize = 4
         };
         var accounts = JsonSerializer.Deserialize<Account[]>(File.ReadAllText(Path.Combine(directory, "test-accounts.json")))!;
-        return (connection.ConnectionString, accounts, directory);
+        var writerFields = File.ReadAllLines(Path.Combine(directory, "writer.cnf")).Where(line => line.Contains('=')).Select(line => line.Split('=', 2)).ToDictionary(parts => parts[0], parts => parts[1]);
+        if (writerFields["user"] != "bc_auth_attempt_writer" || writerFields["host"] != "127.0.0.1" || writerFields["port"] != "3319")
+            throw new InvalidOperationException("Unexpected fixture writer identity/instance.");
+        var writer = new MySqlConnectionStringBuilder(connection.ConnectionString) { UserID = writerFields["user"], Password = writerFields["password"] };
+        return (connection.ConnectionString, writer.ConnectionString, accounts, directory);
     }
 
     [Fact]
@@ -39,7 +43,7 @@ public sealed class MySqlAuthenticationTests
         await connection.OpenAsync();
         await using var command = connection.CreateCommand();
         command.CommandText = "SELECT @@port";
-        Assert.Equal(3318, Convert.ToInt32(await command.ExecuteScalarAsync()));
+        Assert.Equal(3319, Convert.ToInt32(await command.ExecuteScalarAsync()));
         command.CommandText = "UPDATE users SET is_active = is_active WHERE 1 = 0";
         var denied = await Assert.ThrowsAsync<MySqlException>(() => command.ExecuteNonQueryAsync());
         Assert.Equal(1142, denied.Number);
@@ -54,13 +58,15 @@ public sealed class MySqlAuthenticationTests
     {
         var settings = Settings();
         var before = await Fingerprints(settings.Connection);
+        await AdminCommand(settings, "UPDATE users SET access_failed_count=0, lockout_end_utc=NULL WHERE normalized_username='SEC001.ACTIVE'");
         await using var factory = new WebApplicationFactory<Program>().WithWebHostBuilder(builder =>
         {
             builder.UseEnvironment("Development");
             builder.ConfigureAppConfiguration((_, configuration) => configuration.AddInMemoryCollection(new Dictionary<string, string?>
             {
                 ["Authentication:Enabled"] = "true", ["Authentication:AllowLocalDevelopmentDatabase"] = "true",
-                ["Authentication:ReaderConnectionString"] = settings.Connection, ["Authentication:KeyDirectory"] = settings.Private
+                ["Authentication:ReaderConnectionString"] = settings.Connection, ["Authentication:WriterConnectionString"] = settings.Writer,
+                ["Authentication:KeyDirectory"] = settings.Private
             }));
         });
         using var client = factory.CreateClient(new WebApplicationFactoryClientOptions { BaseAddress = new Uri("https://localhost"), AllowAutoRedirect = false });
@@ -111,6 +117,7 @@ public sealed class MySqlAuthenticationTests
     public async Task BlockedQueryHonoursCommandDeadlineAndMidQueryCancellation()
     {
         var settings = Settings();
+        await using var account = await TestAccount.Create();
         var fields = File.ReadAllLines(Path.Combine(settings.Private, "admin.cnf")).Where(line => line.Contains('=')).Select(line => line.Split('=', 2)).ToDictionary(parts => parts[0], parts => parts[1]);
         var connection = new MySqlConnectionStringBuilder(settings.Connection) { UserID = fields["user"], Password = fields["password"] };
         await using var admin = new MySqlConnection(connection.ConnectionString); await admin.OpenAsync();
@@ -122,8 +129,13 @@ public sealed class MySqlAuthenticationTests
             await Assert.ThrowsAsync<AuthenticationDependencyException>(() => repository.FindAsync("SEC001.ACTIVE", default));
             using var cancellation = new CancellationTokenSource(TimeSpan.FromMilliseconds(100));
             await Assert.ThrowsAnyAsync<OperationCanceledException>(() => repository.FindAsync("SEC001.ACTIVE", cancellation.Token));
+            var writer = new MySqlAuthenticationAttemptStore(Options.Create(new AuthenticationOptions { WriterConnectionString = settings.Writer, CommandTimeoutSeconds = 1 }));
+            await Assert.ThrowsAsync<AuthenticationDependencyException>(() => writer.RecordAsync(account.Id, account.Stamp, false, default));
+            using var writerCancellation = new CancellationTokenSource(TimeSpan.FromMilliseconds(100));
+            await Assert.ThrowsAnyAsync<OperationCanceledException>(() => writer.RecordAsync(account.Id, account.Stamp, false, writerCancellation.Token));
         }
         finally { command.CommandText = "UNLOCK TABLES"; await command.ExecuteNonQueryAsync(); }
+        Assert.Equal(0, (await account.State()).Count);
     }
 
     private static async Task<string> Token(HttpClient client)

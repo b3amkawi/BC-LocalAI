@@ -67,6 +67,7 @@ public static class AuthenticationRegistration
         services.AddSingleton<LoginAttemptLimiter>();
         services.AddSingleton<IAuthenticationPasswordVerifier, IdentityPasswordVerifier>();
         services.AddScoped<IAuthenticationRepository, MySqlAuthenticationRepository>();
+        services.AddScoped<IAuthenticationAttemptStore, MySqlAuthenticationAttemptStore>();
         services.AddScoped<IAuthenticationBackend, MySqlAuthenticationBackend>();
         // Disabled-by-default gates all Auth routes before these services are used. Key directory must already have restricted ACL.
         services.AddDataProtection().SetApplicationName("BC-LocalAI.Authentication");
