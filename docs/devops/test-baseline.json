@@ -1,0 +1,15 @@
+{
+  "_comment": "Minimum number of tests each suite must run. Lower it only in a PR that explains why. Raise it when tests are added.",
+  "allowed_skipped": 0,
+  "min_tests": {
+    "dotnet": 652,
+    "node": 23,
+    "python": 143
+  },
+  "allowed_skips": {
+    "python": [
+      "test_bundled_runtime_preserves_child_exit_code"
+    ]
+  },
+  "_allowed_skips_note": "tests/test_ai_helpers.py ChatLauncherTests.test_bundled_runtime_preserves_child_exit_code needs the Codex bundled PowerShell and is skipped on every other machine, CI included. Any other skip fails the gate."
+}

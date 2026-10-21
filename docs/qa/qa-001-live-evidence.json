@@ -1,0 +1,1542 @@
+{
+  "generated_utc": "2026-10-20 11:57:56",
+  "ollama_version": "0.40.5",
+  "model": "qwen3:4b",
+  "main_instance_model_loaded_at_start": false,
+  "repeats": 2,
+  "cases": 33,
+  "case_runs": 65,
+  "passed_cases": 33,
+  "failed_cases": [],
+  "duration_s": 127.0,
+  "results": [
+    {
+      "id": "L-N-thai-1",
+      "group": "3.1",
+      "title": "ภาษาไทย 1",
+      "expected": "completed ครั้งเดียว ไม่มีเศษ JSON/ความคิดของโมเดล ข้อความไม่ว่าง และคำตอบมีอักษรไทย",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "terminal": [
+              [
+                "completed",
+                {
+                  "finishReason": "stop",
+                  "evalCount": 13
+                }
+              ]
+            ],
+            "text_preview": "77 จังหวัด",
+            "started_s": 0.125,
+            "first_delta_s": 5.890999999999849,
+            "completed_s": 6.03
+          },
+          "elapsed_s": 6.05
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "terminal": [
+              [
+                "completed",
+                {
+                  "finishReason": "stop",
+                  "evalCount": 13
+                }
+              ]
+            ],
+            "text_preview": "77 จังหวัด",
+            "started_s": 0.0,
+            "first_delta_s": 0.2969999999997981,
+            "completed_s": 0.42
+          },
+          "elapsed_s": 0.42
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "L-N-thai-2",
+      "group": "3.1",
+      "title": "ภาษาไทย 2",
+      "expected": "completed ครั้งเดียว ไม่มีเศษ JSON/ความคิดของโมเดล ข้อความไม่ว่าง และคำตอบมีอักษรไทย",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "terminal": [
+              [
+                "completed",
+                {
+                  "finishReason": "stop",
+                  "evalCount": 140
+                }
+              ]
+            ],
+            "text_preview": "Local AI คือระบบปัญญาประดิษฐ์ที่ทำงานบนอุปกรณ์ของคุณเอง ไม่ต้องส่งข้อมูลไปยังเซิ",
+            "started_s": 0.0,
+            "first_delta_s": 0.17200000000002547,
+            "completed_s": 2.67
+          },
+          "elapsed_s": 2.67
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "terminal": [
+              [
+                "completed",
+                {
+                  "finishReason": "stop",
+                  "evalCount": 140
+                }
+              ]
+            ],
+            "text_preview": "Local AI คือระบบปัญญาประดิษฐ์ที่ทำงานบนอุปกรณ์ของคุณเอง ไม่ต้องส่งข้อมูลไปยังเซิ",
+            "started_s": 0.016000000000076398,
+            "first_delta_s": 0.1870000000001255,
+            "completed_s": 2.67
+          },
+          "elapsed_s": 2.67
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "L-N-english-1",
+      "group": "3.1",
+      "title": "ภาษาอังกฤษ 1",
+      "expected": "completed ครั้งเดียว ไม่มีเศษ JSON/ความคิดของโมเดล ข้อความไม่ว่าง",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "terminal": [
+              [
+                "completed",
+                {
+                  "finishReason": "stop",
+                  "evalCount": 11
+                }
+              ]
+            ],
+            "text_preview": "Tokyo",
+            "started_s": 0.015000000000100044,
+            "first_delta_s": 0.32799999999997453,
+            "completed_s": 0.33
+          },
+          "elapsed_s": 0.34
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "terminal": [
+              [
+                "completed",
+                {
+                  "finishReason": "stop",
+                  "evalCount": 11
+                }
+              ]
+            ],
+            "text_preview": "Tokyo",
+            "started_s": 0.0,
+            "first_delta_s": 0.28099999999994907,
+            "completed_s": 0.28
+          },
+          "elapsed_s": 0.28
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "L-N-english-2",
+      "group": "3.1",
+      "title": "ภาษาอังกฤษ 2",
+      "expected": "completed ครั้งเดียว ไม่มีเศษ JSON/ความคิดของโมเดล ข้อความไม่ว่าง",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "terminal": [
+              [
+                "completed",
+                {
+                  "finishReason": "stop",
+                  "evalCount": 53
+                }
+              ]
+            ],
+            "text_preview": "An API (Application Programming Interface) is a set of rules and protocols that ",
+            "started_s": 0.0,
+            "first_delta_s": 0.25,
+            "completed_s": 1.03
+          },
+          "elapsed_s": 1.03
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "terminal": [
+              [
+                "completed",
+                {
+                  "finishReason": "stop",
+                  "evalCount": 53
+                }
+              ]
+            ],
+            "text_preview": "An API (Application Programming Interface) is a set of rules and protocols that ",
+            "started_s": 0.0,
+            "first_delta_s": 0.21900000000005093,
+            "completed_s": 1.03
+          },
+          "elapsed_s": 1.03
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "L-N-emoji-1",
+      "group": "3.1",
+      "title": "emoji ในคำถาม 1",
+      "expected": "completed ครั้งเดียว ไม่มีเศษ JSON/ความคิดของโมเดล ข้อความไม่ว่าง",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "terminal": [
+              [
+                "completed",
+                {
+                  "finishReason": "stop",
+                  "evalCount": 13
+                }
+              ]
+            ],
+            "text_preview": "Hello! 😄",
+            "started_s": 0.015999999999849024,
+            "first_delta_s": 0.265999999999849,
+            "completed_s": 0.36
+          },
+          "elapsed_s": 0.36
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "terminal": [
+              [
+                "completed",
+                {
+                  "finishReason": "stop",
+                  "evalCount": 13
+                }
+              ]
+            ],
+            "text_preview": "Hello! 😄",
+            "started_s": 0.015000000000100044,
+            "first_delta_s": 0.25,
+            "completed_s": 0.33
+          },
+          "elapsed_s": 0.33
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "L-N-emoji-2",
+      "group": "3.1",
+      "title": "emoji ในคำถาม 2",
+      "expected": "completed ครั้งเดียว ไม่มีเศษ JSON/ความคิดของโมเดล ข้อความไม่ว่าง",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "terminal": [
+              [
+                "completed",
+                {
+                  "finishReason": "stop",
+                  "evalCount": 25
+                }
+              ]
+            ],
+            "text_preview": "พร้อมแล้ว! 🚀 CANARY-LIVE-5e1a77",
+            "started_s": 0.03099999999994907,
+            "first_delta_s": 0.21900000000005093,
+            "completed_s": 0.7
+          },
+          "elapsed_s": 0.72
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "terminal": [
+              [
+                "completed",
+                {
+                  "finishReason": "stop",
+                  "evalCount": 25
+                }
+              ]
+            ],
+            "text_preview": "พร้อมแล้ว! 🚀 CANARY-LIVE-5e1a77",
+            "started_s": 0.015000000000100044,
+            "first_delta_s": 0.18699999999989814,
+            "completed_s": 0.66
+          },
+          "elapsed_s": 0.66
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "L-N-multiline-1",
+      "group": "3.1",
+      "title": "ข้อความหลายบรรทัด 1",
+      "expected": "completed ครั้งเดียว ไม่มีเศษ JSON/ความคิดของโมเดล ข้อความไม่ว่าง",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "terminal": [
+              [
+                "completed",
+                {
+                  "finishReason": "stop",
+                  "evalCount": 10
+                }
+              ]
+            ],
+            "text_preview": "4",
+            "started_s": 0.0,
+            "first_delta_s": 0.29700000000002547,
+            "completed_s": 0.3
+          },
+          "elapsed_s": 0.3
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "terminal": [
+              [
+                "completed",
+                {
+                  "finishReason": "stop",
+                  "evalCount": 10
+                }
+              ]
+            ],
+            "text_preview": "4",
+            "started_s": 0.0,
+            "first_delta_s": 0.28099999999994907,
+            "completed_s": 0.28
+          },
+          "elapsed_s": 0.28
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "L-N-multiline-2",
+      "group": "3.1",
+      "title": "ข้อความหลายบรรทัด 2",
+      "expected": "completed ครั้งเดียว ไม่มีเศษ JSON/ความคิดของโมเดล ข้อความไม่ว่าง",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "terminal": [
+              [
+                "completed",
+                {
+                  "finishReason": "stop",
+                  "evalCount": 7
+                }
+              ]
+            ],
+            "text_preview": "2",
+            "started_s": 0.0,
+            "first_delta_s": 0.2660000000000764,
+            "completed_s": 0.27
+          },
+          "elapsed_s": 0.27
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "terminal": [
+              [
+                "completed",
+                {
+                  "finishReason": "stop",
+                  "evalCount": 7
+                }
+              ]
+            ],
+            "text_preview": "2",
+            "started_s": 0.0,
+            "first_delta_s": 0.25,
+            "completed_s": 0.25
+          },
+          "elapsed_s": 0.25
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "L-N-special-1",
+      "group": "3.1",
+      "title": "อักขระพิเศษ 1",
+      "expected": "completed ครั้งเดียว ไม่มีเศษ JSON/ความคิดของโมเดล ข้อความไม่ว่าง",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "terminal": [
+              [
+                "completed",
+                {
+                  "finishReason": "stop",
+                  "evalCount": 34
+                }
+              ]
+            ],
+            "text_preview": "quoted \"<b>tag</b> & ampersand. CANARY-LIVE-5e1a77\"",
+            "started_s": 0.0,
+            "first_delta_s": 0.20299999999997453,
+            "completed_s": 0.7
+          },
+          "elapsed_s": 0.7
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "terminal": [
+              [
+                "completed",
+                {
+                  "finishReason": "stop",
+                  "evalCount": 33
+                }
+              ]
+            ],
+            "text_preview": "quoted\" <b>tag</b> & ampersand. CANARY-LIVE-5e1a77",
+            "started_s": 0.0,
+            "first_delta_s": 0.2339999999999236,
+            "completed_s": 0.67
+          },
+          "elapsed_s": 0.67
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "L-N-special-2",
+      "group": "3.1",
+      "title": "อักขระพิเศษ 2",
+      "expected": "completed ครั้งเดียว ไม่มีเศษ JSON/ความคิดของโมเดล ข้อความไม่ว่าง",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "terminal": [
+              [
+                "completed",
+                {
+                  "finishReason": "stop",
+                  "evalCount": 43
+                }
+              ]
+            ],
+            "text_preview": "The HTML tag <script> can be written as plain text in a sentence as <script>, an",
+            "started_s": 0.015000000000100044,
+            "first_delta_s": 0.2339999999999236,
+            "completed_s": 0.89
+          },
+          "elapsed_s": 0.89
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "terminal": [
+              [
+                "completed",
+                {
+                  "finishReason": "stop",
+                  "evalCount": 40
+                }
+              ]
+            ],
+            "text_preview": "The HTML tag <script> can be written as plain text in a sentence as <script>, an",
+            "started_s": 0.015999999999849024,
+            "first_delta_s": 0.20299999999997453,
+            "completed_s": 0.8
+          },
+          "elapsed_s": 0.8
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "L-N-short-1",
+      "group": "3.1",
+      "title": "คำตอบสั้น 1",
+      "expected": "completed ครั้งเดียว ไม่มีเศษ JSON/ความคิดของโมเดล ข้อความไม่ว่าง",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "terminal": [
+              [
+                "completed",
+                {
+                  "finishReason": "stop",
+                  "evalCount": 11
+                }
+              ]
+            ],
+            "text_preview": "42",
+            "started_s": 0.016000000000076398,
+            "first_delta_s": 0.34400000000005093,
+            "completed_s": 0.34
+          },
+          "elapsed_s": 0.34
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "terminal": [
+              [
+                "completed",
+                {
+                  "finishReason": "stop",
+                  "evalCount": 11
+                }
+              ]
+            ],
+            "text_preview": "42",
+            "started_s": 0.015000000000100044,
+            "first_delta_s": 0.3120000000001255,
+            "completed_s": 0.31
+          },
+          "elapsed_s": 0.31
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "L-N-short-2",
+      "group": "3.1",
+      "title": "คำตอบสั้น 2",
+      "expected": "completed ครั้งเดียว ไม่มีเศษ JSON/ความคิดของโมเดล ข้อความไม่ว่าง",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "terminal": [
+              [
+                "completed",
+                {
+                  "finishReason": "stop",
+                  "evalCount": 7
+                }
+              ]
+            ],
+            "text_preview": "2",
+            "started_s": 0.0,
+            "first_delta_s": 0.265999999999849,
+            "completed_s": 0.27
+          },
+          "elapsed_s": 0.28
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "terminal": [
+              [
+                "completed",
+                {
+                  "finishReason": "stop",
+                  "evalCount": 7
+                }
+              ]
+            ],
+            "text_preview": "2",
+            "started_s": 0.015000000000100044,
+            "first_delta_s": 0.26500000000010004,
+            "completed_s": 0.27
+          },
+          "elapsed_s": 0.27
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "L-N-medium-1",
+      "group": "3.1",
+      "title": "คำตอบขนาดกลาง 1",
+      "expected": "completed ครั้งเดียว ไม่มีเศษ JSON/ความคิดของโมเดล ข้อความไม่ว่าง",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "terminal": [
+              [
+                "completed",
+                {
+                  "finishReason": "stop",
+                  "evalCount": 83
+                }
+              ]
+            ],
+            "text_preview": "Photosynthesis converts light energy into chemical energy using chlorophyll in p",
+            "started_s": 0.015999999999849024,
+            "first_delta_s": 0.23499999999989996,
+            "completed_s": 1.58
+          },
+          "elapsed_s": 1.58
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "terminal": [
+              [
+                "completed",
+                {
+                  "finishReason": "stop",
+                  "evalCount": 83
+                }
+              ]
+            ],
+            "text_preview": "Photosynthesis converts light energy into chemical energy using chlorophyll in p",
+            "started_s": 0.015999999999849024,
+            "first_delta_s": 0.23499999999989996,
+            "completed_s": 1.59
+          },
+          "elapsed_s": 1.61
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "L-N-medium-2",
+      "group": "3.1",
+      "title": "คำตอบขนาดกลาง 2",
+      "expected": "completed ครั้งเดียว ไม่มีเศษ JSON/ความคิดของโมเดล ข้อความไม่ว่าง",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "terminal": [
+              [
+                "completed",
+                {
+                  "finishReason": "stop",
+                  "evalCount": 233
+                }
+              ]
+            ],
+            "text_preview": "วงจรน้ำในธรรมชาติคือกระบวนการที่น้ำเคลื่อนที่ระหว่างบรรยากาศ น้ำใต้ดิน และพื้นดิ",
+            "started_s": 0.0,
+            "first_delta_s": 0.21800000000007458,
+            "completed_s": 4.5
+          },
+          "elapsed_s": 4.5
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "terminal": [
+              [
+                "completed",
+                {
+                  "finishReason": "stop",
+                  "evalCount": 174
+                }
+              ]
+            ],
+            "text_preview": "วงจรน้ำในธรรมชาติคือกระบวนการที่น้ำเคลื่อนที่ระหว่างบรรยากาศ น้ำใต้ดิน และพื้นดิ",
+            "started_s": 0.0,
+            "first_delta_s": 0.25,
+            "completed_s": 3.28
+          },
+          "elapsed_s": 3.28
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "L-N-long-1",
+      "group": "3.1",
+      "title": "คำตอบยาว 1",
+      "expected": "completed ครั้งเดียว ไม่มีเศษ JSON/ความคิดของโมเดล ข้อความไม่ว่าง (หรือ error AI_RESPONSE_TOO_LARGE ถ้าเกินขีดจำกัด)",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "terminal": [
+              [
+                "completed",
+                {
+                  "finishReason": "stop",
+                  "evalCount": 277
+                }
+              ]
+            ],
+            "text_preview": "The history of the bicycle dates back to the early 19th century. The first pract",
+            "started_s": 0.016000000000076398,
+            "first_delta_s": 0.28100000000017644
+          },
+          "elapsed_s": 5.06
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "terminal": [
+              [
+                "completed",
+                {
+                  "finishReason": "stop",
+                  "evalCount": 273
+                }
+              ]
+            ],
+            "text_preview": "The history of the bicycle dates back to the early 19th century. The first pract",
+            "started_s": 0.0,
+            "first_delta_s": 0.25
+          },
+          "elapsed_s": 4.95
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "L-N-long-2",
+      "group": "3.1",
+      "title": "คำตอบยาว 2",
+      "expected": "completed ครั้งเดียว ไม่มีเศษ JSON/ความคิดของโมเดล ข้อความไม่ว่าง (หรือ error AI_RESPONSE_TOO_LARGE ถ้าเกินขีดจำกัด)",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "terminal": [
+              [
+                "error",
+                {
+                  "code": "AI_RESPONSE_TOO_LARGE",
+                  "message": "AI response was too large",
+                  "partial": true
+                }
+              ]
+            ],
+            "text_preview": "การออกกำลังกายมีประโยชน์มากมายต่อสุขภาพและชีวิตประจำวัน ไม่ว่าจะเป็นการเพิ่มความ",
+            "started_s": 0.015000000000100044,
+            "first_delta_s": 0.21800000000007458
+          },
+          "elapsed_s": 20.52
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "terminal": [
+              [
+                "completed",
+                {
+                  "finishReason": "stop",
+                  "evalCount": 530
+                }
+              ]
+            ],
+            "text_preview": "การออกกำลังกายมีประโยชน์มากมายต่อสุขภาพและชีวิตประจำวัน ไม่ว่าจะเป็นการเพิ่มความ",
+            "started_s": 0.0,
+            "first_delta_s": 0.25
+          },
+          "elapsed_s": 10.11
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "L-N-cold-1",
+      "group": "3.1",
+      "title": "cold start 1: unload แล้วถาม",
+      "expected": "completed ครั้งเดียว ไม่มีเศษ JSON/ความคิดของโมเดล ข้อความไม่ว่าง และ started มาก่อน record แรก",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "terminal": [
+              [
+                "completed",
+                {
+                  "finishReason": "stop",
+                  "evalCount": 10
+                }
+              ]
+            ],
+            "text_preview": "Paris",
+            "started_s": 0.015999999999849024,
+            "first_delta_s": 5.0470000000000255
+          },
+          "elapsed_s": 5.34
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "terminal": [
+              [
+                "completed",
+                {
+                  "finishReason": "stop",
+                  "evalCount": 10
+                }
+              ]
+            ],
+            "text_preview": "Paris",
+            "started_s": 0.015000000000100044,
+            "first_delta_s": 3.1400000000001
+          },
+          "elapsed_s": 3.38
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "L-N-cold-2",
+      "group": "3.1",
+      "title": "cold start 2",
+      "expected": "completed ครั้งเดียว ไม่มีเศษ JSON/ความคิดของโมเดล ข้อความไม่ว่าง และ started มาก่อน record แรก",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "terminal": [
+              [
+                "completed",
+                {
+                  "finishReason": "stop",
+                  "evalCount": 9
+                }
+              ]
+            ],
+            "text_preview": "โตเกียว",
+            "started_s": 0.03099999999994907,
+            "first_delta_s": 3.046000000000049
+          },
+          "elapsed_s": 3.2
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "terminal": [
+              [
+                "completed",
+                {
+                  "finishReason": "stop",
+                  "evalCount": 9
+                }
+              ]
+            ],
+            "text_preview": "โตเกียว",
+            "started_s": 0.0,
+            "first_delta_s": 3.109000000000151
+          },
+          "elapsed_s": 3.25
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "L-C-first-delta-1",
+      "group": "3.3",
+      "title": "ตัด connection หลัง delta แรก (โมเดลจริง)",
+      "expected": "ไม่ completed และคำขอถัดไปได้ delta แรก ≤ 3 วินาที",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "next_first_delta_s": 0.28,
+            "since_close_s": 0.28
+          },
+          "elapsed_s": 0.5
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "next_first_delta_s": 0.31,
+            "since_close_s": 0.31
+          },
+          "elapsed_s": 0.5
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "L-C-started-1",
+      "group": "3.3",
+      "title": "ตัด connection หลัง started (โมเดลจริง)",
+      "expected": "ไม่ completed และคำขอถัดไปได้ delta แรก ≤ 3 วินาที",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "next_first_delta_s": 0.28,
+            "since_close_s": 0.28
+          },
+          "elapsed_s": 0.28
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "next_first_delta_s": 0.3,
+            "since_close_s": 0.3
+          },
+          "elapsed_s": 0.3
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "L-C-1s-1",
+      "group": "3.3",
+      "title": "ตัด connection ที่ 1 วินาที (โมเดลจริง)",
+      "expected": "ไม่ completed และคำขอถัดไปได้ delta แรก ≤ 3 วินาที",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "next_first_delta_s": 0.33,
+            "since_close_s": 0.33
+          },
+          "elapsed_s": 1.33
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "next_first_delta_s": 0.31,
+            "since_close_s": 0.31
+          },
+          "elapsed_s": 1.31
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "L-C-first-delta-2",
+      "group": "3.3",
+      "title": "ตัด connection หลัง delta แรก (โมเดลจริง)",
+      "expected": "ไม่ completed และคำขอถัดไปได้ delta แรก ≤ 3 วินาที",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "next_first_delta_s": 0.31,
+            "since_close_s": 0.31
+          },
+          "elapsed_s": 0.53
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "next_first_delta_s": 0.3,
+            "since_close_s": 0.3
+          },
+          "elapsed_s": 0.52
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "L-C-started-2",
+      "group": "3.3",
+      "title": "ตัด connection หลัง started (โมเดลจริง)",
+      "expected": "ไม่ completed และคำขอถัดไปได้ delta แรก ≤ 3 วินาที",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "next_first_delta_s": 0.28,
+            "since_close_s": 0.28
+          },
+          "elapsed_s": 0.28
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "next_first_delta_s": 0.27,
+            "since_close_s": 0.27
+          },
+          "elapsed_s": 0.27
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "L-C-1s-2",
+      "group": "3.3",
+      "title": "ตัด connection ที่ 1 วินาที (โมเดลจริง)",
+      "expected": "ไม่ completed และคำขอถัดไปได้ delta แรก ≤ 3 วินาที",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "next_first_delta_s": 0.31,
+            "since_close_s": 0.31
+          },
+          "elapsed_s": 1.31
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "next_first_delta_s": 0.3,
+            "since_close_s": 0.3
+          },
+          "elapsed_s": 1.31
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "L-K-2-1",
+      "group": "3.5",
+      "title": "2 คำขอพร้อมกันบนโมเดลจริง",
+      "expected": "ทุกคำขอ completed ไม่มี token ของคำขออื่นในคำตอบ",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "requests": 2,
+            "wall_s": 1.4,
+            "results": [
+              {
+                "i": 0,
+                "contains_own_token": true,
+                "first_delta_s": 0.3,
+                "completed_s": 0.78
+              },
+              {
+                "i": 1,
+                "contains_own_token": true,
+                "first_delta_s": 1.09,
+                "completed_s": 1.36
+              }
+            ]
+          },
+          "elapsed_s": 1.36
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "requests": 2,
+            "wall_s": 1.3,
+            "results": [
+              {
+                "i": 0,
+                "contains_own_token": true,
+                "first_delta_s": 0.81,
+                "completed_s": 1.31
+              },
+              {
+                "i": 1,
+                "contains_own_token": true,
+                "first_delta_s": 0.28,
+                "completed_s": 0.55
+              }
+            ]
+          },
+          "elapsed_s": 1.31
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "L-K-2-2",
+      "group": "3.5",
+      "title": "2 คำขอพร้อมกันบนโมเดลจริง",
+      "expected": "ทุกคำขอ completed ไม่มี token ของคำขออื่นในคำตอบ",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "requests": 2,
+            "wall_s": 1.1,
+            "results": [
+              {
+                "i": 0,
+                "contains_own_token": true,
+                "first_delta_s": 0.28,
+                "completed_s": 0.55
+              },
+              {
+                "i": 1,
+                "contains_own_token": true,
+                "first_delta_s": 0.84,
+                "completed_s": 1.11
+              }
+            ]
+          },
+          "elapsed_s": 1.11
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "requests": 2,
+            "wall_s": 1.3,
+            "results": [
+              {
+                "i": 0,
+                "contains_own_token": true,
+                "first_delta_s": 0.83,
+                "completed_s": 1.31
+              },
+              {
+                "i": 1,
+                "contains_own_token": true,
+                "first_delta_s": 0.28,
+                "completed_s": 0.56
+              }
+            ]
+          },
+          "elapsed_s": 1.31
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "L-K-3-1",
+      "group": "3.5",
+      "title": "3 คำขอพร้อมกันบนโมเดลจริง",
+      "expected": "ทุกคำขอ completed ไม่มี token ของคำขออื่นในคำตอบ",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "requests": 3,
+            "wall_s": 2.1,
+            "results": [
+              {
+                "i": 0,
+                "contains_own_token": true,
+                "first_delta_s": 0.3,
+                "completed_s": 0.56
+              },
+              {
+                "i": 1,
+                "contains_own_token": true,
+                "first_delta_s": 1.58,
+                "completed_s": 2.08
+              },
+              {
+                "i": 2,
+                "contains_own_token": true,
+                "first_delta_s": 0.81,
+                "completed_s": 1.31
+              }
+            ]
+          },
+          "elapsed_s": 2.08
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "requests": 3,
+            "wall_s": 2.1,
+            "results": [
+              {
+                "i": 0,
+                "contains_own_token": true,
+                "first_delta_s": 1.83,
+                "completed_s": 2.08
+              },
+              {
+                "i": 1,
+                "contains_own_token": true,
+                "first_delta_s": 0.25,
+                "completed_s": 0.75
+              },
+              {
+                "i": 2,
+                "contains_own_token": true,
+                "first_delta_s": 1.02,
+                "completed_s": 1.52
+              }
+            ]
+          },
+          "elapsed_s": 2.08
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "L-K-3-2",
+      "group": "3.5",
+      "title": "3 คำขอพร้อมกันบนโมเดลจริง",
+      "expected": "ทุกคำขอ completed ไม่มี token ของคำขออื่นในคำตอบ",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "requests": 3,
+            "wall_s": 2.0,
+            "results": [
+              {
+                "i": 0,
+                "contains_own_token": true,
+                "first_delta_s": 0.3,
+                "completed_s": 0.56
+              },
+              {
+                "i": 1,
+                "contains_own_token": true,
+                "first_delta_s": 0.81,
+                "completed_s": 1.3
+              },
+              {
+                "i": 2,
+                "contains_own_token": true,
+                "first_delta_s": 1.56,
+                "completed_s": 2.05
+              }
+            ]
+          },
+          "elapsed_s": 2.05
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "requests": 3,
+            "wall_s": 2.1,
+            "results": [
+              {
+                "i": 0,
+                "contains_own_token": true,
+                "first_delta_s": 1.08,
+                "completed_s": 1.34
+              },
+              {
+                "i": 1,
+                "contains_own_token": true,
+                "first_delta_s": 0.28,
+                "completed_s": 0.78
+              },
+              {
+                "i": 2,
+                "contains_own_token": true,
+                "first_delta_s": 1.61,
+                "completed_s": 2.11
+              }
+            ]
+          },
+          "elapsed_s": 2.11
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "L-K-5-1",
+      "group": "3.5",
+      "title": "5 คำขอพร้อมกันบนโมเดลจริง",
+      "expected": "ทุกคำขอ completed ไม่มี token ของคำขออื่นในคำตอบ",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "requests": 5,
+            "wall_s": 3.8,
+            "results": [
+              {
+                "i": 0,
+                "contains_own_token": true,
+                "first_delta_s": 1.8,
+                "completed_s": 2.28
+              },
+              {
+                "i": 1,
+                "contains_own_token": true,
+                "first_delta_s": 0.27,
+                "completed_s": 0.77
+              },
+              {
+                "i": 2,
+                "contains_own_token": true,
+                "first_delta_s": 1.03,
+                "completed_s": 1.53
+              },
+              {
+                "i": 3,
+                "contains_own_token": true,
+                "first_delta_s": 2.56,
+                "completed_s": 3.05
+              },
+              {
+                "i": 4,
+                "contains_own_token": true,
+                "first_delta_s": 3.31,
+                "completed_s": 3.81
+              }
+            ]
+          },
+          "elapsed_s": 3.81
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "requests": 5,
+            "wall_s": 3.8,
+            "results": [
+              {
+                "i": 0,
+                "contains_own_token": true,
+                "first_delta_s": 0.3,
+                "completed_s": 0.78
+              },
+              {
+                "i": 1,
+                "contains_own_token": true,
+                "first_delta_s": 2.55,
+                "completed_s": 3.05
+              },
+              {
+                "i": 2,
+                "contains_own_token": true,
+                "first_delta_s": 1.8,
+                "completed_s": 2.28
+              },
+              {
+                "i": 3,
+                "contains_own_token": true,
+                "first_delta_s": 1.05,
+                "completed_s": 1.53
+              },
+              {
+                "i": 4,
+                "contains_own_token": true,
+                "first_delta_s": 3.31,
+                "completed_s": 3.81
+              }
+            ]
+          },
+          "elapsed_s": 3.81
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "L-K-5-2",
+      "group": "3.5",
+      "title": "5 คำขอพร้อมกันบนโมเดลจริง",
+      "expected": "ทุกคำขอ completed ไม่มี token ของคำขออื่นในคำตอบ",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "requests": 5,
+            "wall_s": 3.8,
+            "results": [
+              {
+                "i": 0,
+                "contains_own_token": true,
+                "first_delta_s": 1.03,
+                "completed_s": 1.53
+              },
+              {
+                "i": 1,
+                "contains_own_token": true,
+                "first_delta_s": 0.27,
+                "completed_s": 0.78
+              },
+              {
+                "i": 2,
+                "contains_own_token": true,
+                "first_delta_s": 1.8,
+                "completed_s": 2.3
+              },
+              {
+                "i": 3,
+                "contains_own_token": true,
+                "first_delta_s": 2.55,
+                "completed_s": 3.05
+              },
+              {
+                "i": 4,
+                "contains_own_token": true,
+                "first_delta_s": 3.3,
+                "completed_s": 3.8
+              }
+            ]
+          },
+          "elapsed_s": 3.8
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "requests": 5,
+            "wall_s": 3.8,
+            "results": [
+              {
+                "i": 0,
+                "contains_own_token": true,
+                "first_delta_s": 1.03,
+                "completed_s": 1.53
+              },
+              {
+                "i": 1,
+                "contains_own_token": true,
+                "first_delta_s": 0.27,
+                "completed_s": 0.77
+              },
+              {
+                "i": 2,
+                "contains_own_token": true,
+                "first_delta_s": 2.53,
+                "completed_s": 3.03
+              },
+              {
+                "i": 3,
+                "contains_own_token": true,
+                "first_delta_s": 1.78,
+                "completed_s": 2.27
+              },
+              {
+                "i": 4,
+                "contains_own_token": true,
+                "first_delta_s": 3.3,
+                "completed_s": 3.78
+              }
+            ]
+          },
+          "elapsed_s": 3.78
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "L-R-chat-1",
+      "group": "regression",
+      "title": "POST /api/chat เดิมกับโมเดลจริง",
+      "expected": "200 ตอบถูกรูปแบบ ไม่มี JSON ซ้อน",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200
+          },
+          "elapsed_s": 0.39
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200
+          },
+          "elapsed_s": 0.31
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "L-R-chat-2",
+      "group": "regression",
+      "title": "POST /api/chat ภาษาไทยกับโมเดลจริง",
+      "expected": "200 มีคำตอบ",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200
+          },
+          "elapsed_s": 0.27
+        },
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {
+            "status": 200
+          },
+          "elapsed_s": 0.25
+        }
+      ],
+      "passed": true
+    },
+    {
+      "id": "L-L-log-privacy",
+      "group": "3.4",
+      "title": "log ของ Backend ไม่มีคำถามหรือคำตอบ",
+      "expected": "ไม่พบ canary ใน log",
+      "runs": [
+        {
+          "passed": true,
+          "problems": [],
+          "actual": {},
+          "elapsed_s": 0
+        }
+      ],
+      "passed": true
+    }
+  ]
+}

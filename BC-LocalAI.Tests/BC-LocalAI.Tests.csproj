@@ -19,6 +19,8 @@
   <ItemGroup>
     <ProjectReference Include="..\BC-LocalAI\BC-LocalAI.csproj" />
     <None Include="..\database\chat-history\*.sql" Link="ChatHistorySchema\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <!-- Offline fixture tool only: no authentication implementation is added to the app. -->
+    <Compile Include="..\tools\Sec001Fixtures\FixtureFactory.cs" Link="Sec001\FixtureFactory.cs" />
   </ItemGroup>
 
 </Project>

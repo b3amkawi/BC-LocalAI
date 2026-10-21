@@ -1,0 +1,3730 @@
+{
+  "schema": "ollama-failures-evidence/1",
+  "generated_utc": "2026-10-20T12:06:58.4587264Z",
+  "environment": {
+    "main_instance_model_was_loaded": false,
+    "ollama_version": "0.40.5",
+    "model_digest": "359d7dd4bcda",
+    "dedicated_port": 11436,
+    "server_ready_ms": 4501.0,
+    "gpu": "NVIDIA GeForce RTX 4050 Laptop GPU, 6141 MiB, 1238 MiB"
+  },
+  "expected_revisions": [
+    {
+      "id": "F08",
+      "original": "HTTP 400 within 2 s",
+      "revised": "HTTP error status (400 or 500) within 2 s",
+      "reason": "First run: Ollama 0.40.5 answers 500, not 400, for an invalid format value. Recorded here, not hidden; both statuses map to AI_PROVIDER_ERROR."
+    }
+  ],
+  "repeats": 6,
+  "not_injected": [
+    "memory exhaustion (can freeze the machine)"
+  ],
+  "types": [
+    {
+      "id": "F01",
+      "name": "Model runner killed in the middle of a stream",
+      "expected": [
+        "stream ends with an error record and no done=true",
+        "outcome provider_error, code AI_PROVIDER_ERROR",
+        "message has no loopback endpoint",
+        "Ollama answers a new request within 30 s without any restart"
+      ],
+      "repetitions": [
+        {
+          "repetition": 1,
+          "passed": true,
+          "actual": {
+            "outcome": "provider_error",
+            "error_code": "AI_PROVIDER_ERROR",
+            "http_status": 200,
+            "records": 35,
+            "deltas": 28,
+            "done": false,
+            "done_reason": null,
+            "first_record_ms": 65.7,
+            "total_ms": 759.7,
+            "upstream_error": "an error was encountered while running the model: read tcp <loopback>-><loopback>: wsarecv: An existing connection was forcibly closed by the remote host.",
+            "eval_count": null,
+            "answer": "The history of the bicycle is a fascinating journey through innovation, engineering, and cultural shifts. It began in the early 19th century"
+          },
+          "recovery": {
+            "recovered": true,
+            "recovery_ms": 4077.0,
+            "attempts": 1
+          },
+          "checks": [
+            {
+              "name": "outcome is provider_error",
+              "expected": "provider_error",
+              "actual": "provider_error",
+              "passed": true
+            },
+            {
+              "name": "error code",
+              "expected": "AI_PROVIDER_ERROR",
+              "actual": "AI_PROVIDER_ERROR",
+              "passed": true
+            },
+            {
+              "name": "no done record",
+              "expected": "done=false",
+              "actual": "False",
+              "passed": true
+            },
+            {
+              "name": "upstream message has no loopback endpoint",
+              "expected": "sanitized",
+              "actual": "an error was encountered while running the model: read tcp <loopback>-><loopback>: wsarecv: An existing connection was forcibly closed by the remote host.",
+              "passed": true
+            },
+            {
+              "name": "recovers without restart within 30 s",
+              "expected": "< 30000 ms",
+              "actual": "4077",
+              "passed": true
+            }
+          ]
+        },
+        {
+          "repetition": 2,
+          "passed": true,
+          "actual": {
+            "outcome": "provider_error",
+            "error_code": "AI_PROVIDER_ERROR",
+            "http_status": 200,
+            "records": 26,
+            "deltas": 19,
+            "done": false,
+            "done_reason": null,
+            "first_record_ms": 48.9,
+            "total_ms": 545.6,
+            "upstream_error": "an error was encountered while running the model: read tcp <loopback>-><loopback>: wsarecv: An existing connection was forcibly closed by the remote host.",
+            "eval_count": null,
+            "answer": "The history of the bicycle is a fascinating journey through innovation, engineering, and cultural shifts. It"
+          },
+          "recovery": {
+            "recovered": true,
+            "recovery_ms": 3786.0,
+            "attempts": 1
+          },
+          "checks": [
+            {
+              "name": "outcome is provider_error",
+              "expected": "provider_error",
+              "actual": "provider_error",
+              "passed": true
+            },
+            {
+              "name": "error code",
+              "expected": "AI_PROVIDER_ERROR",
+              "actual": "AI_PROVIDER_ERROR",
+              "passed": true
+            },
+            {
+              "name": "no done record",
+              "expected": "done=false",
+              "actual": "False",
+              "passed": true
+            },
+            {
+              "name": "upstream message has no loopback endpoint",
+              "expected": "sanitized",
+              "actual": "an error was encountered while running the model: read tcp <loopback>-><loopback>: wsarecv: An existing connection was forcibly closed by the remote host.",
+              "passed": true
+            },
+            {
+              "name": "recovers without restart within 30 s",
+              "expected": "< 30000 ms",
+              "actual": "3786",
+              "passed": true
+            }
+          ]
+        },
+        {
+          "repetition": 3,
+          "passed": true,
+          "actual": {
+            "outcome": "provider_error",
+            "error_code": "AI_PROVIDER_ERROR",
+            "http_status": 200,
+            "records": 25,
+            "deltas": 18,
+            "done": false,
+            "done_reason": null,
+            "first_record_ms": 50.3,
+            "total_ms": 517.1,
+            "upstream_error": "an error was encountered while running the model: read tcp <loopback>-><loopback>: wsarecv: An existing connection was forcibly closed by the remote host.",
+            "eval_count": null,
+            "answer": "The history of the bicycle is a fascinating journey through innovation, engineering, and cultural shifts."
+          },
+          "recovery": {
+            "recovered": true,
+            "recovery_ms": 4123.0,
+            "attempts": 1
+          },
+          "checks": [
+            {
+              "name": "outcome is provider_error",
+              "expected": "provider_error",
+              "actual": "provider_error",
+              "passed": true
+            },
+            {
+              "name": "error code",
+              "expected": "AI_PROVIDER_ERROR",
+              "actual": "AI_PROVIDER_ERROR",
+              "passed": true
+            },
+            {
+              "name": "no done record",
+              "expected": "done=false",
+              "actual": "False",
+              "passed": true
+            },
+            {
+              "name": "upstream message has no loopback endpoint",
+              "expected": "sanitized",
+              "actual": "an error was encountered while running the model: read tcp <loopback>-><loopback>: wsarecv: An existing connection was forcibly closed by the remote host.",
+              "passed": true
+            },
+            {
+              "name": "recovers without restart within 30 s",
+              "expected": "< 30000 ms",
+              "actual": "4123",
+              "passed": true
+            }
+          ]
+        },
+        {
+          "repetition": 4,
+          "passed": true,
+          "actual": {
+            "outcome": "provider_error",
+            "error_code": "AI_PROVIDER_ERROR",
+            "http_status": 200,
+            "records": 26,
+            "deltas": 19,
+            "done": false,
+            "done_reason": null,
+            "first_record_ms": 53.4,
+            "total_ms": 528.2,
+            "upstream_error": "an error was encountered while running the model: read tcp <loopback>-><loopback>: wsarecv: An existing connection was forcibly closed by the remote host.",
+            "eval_count": null,
+            "answer": "The history of the bicycle is a fascinating journey through innovation, engineering, and cultural shifts. It"
+          },
+          "recovery": {
+            "recovered": true,
+            "recovery_ms": 3942.0,
+            "attempts": 1
+          },
+          "checks": [
+            {
+              "name": "outcome is provider_error",
+              "expected": "provider_error",
+              "actual": "provider_error",
+              "passed": true
+            },
+            {
+              "name": "error code",
+              "expected": "AI_PROVIDER_ERROR",
+              "actual": "AI_PROVIDER_ERROR",
+              "passed": true
+            },
+            {
+              "name": "no done record",
+              "expected": "done=false",
+              "actual": "False",
+              "passed": true
+            },
+            {
+              "name": "upstream message has no loopback endpoint",
+              "expected": "sanitized",
+              "actual": "an error was encountered while running the model: read tcp <loopback>-><loopback>: wsarecv: An existing connection was forcibly closed by the remote host.",
+              "passed": true
+            },
+            {
+              "name": "recovers without restart within 30 s",
+              "expected": "< 30000 ms",
+              "actual": "3942",
+              "passed": true
+            }
+          ]
+        },
+        {
+          "repetition": 5,
+          "passed": true,
+          "actual": {
+            "outcome": "provider_error",
+            "error_code": "AI_PROVIDER_ERROR",
+            "http_status": 200,
+            "records": 24,
+            "deltas": 17,
+            "done": false,
+            "done_reason": null,
+            "first_record_ms": 48.1,
+            "total_ms": 507.4,
+            "upstream_error": "an error was encountered while running the model: read tcp <loopback>-><loopback>: wsarecv: An existing connection was forcibly closed by the remote host.",
+            "eval_count": null,
+            "answer": "The history of the bicycle is a fascinating journey through innovation, engineering, and cultural shifts"
+          },
+          "recovery": {
+            "recovered": true,
+            "recovery_ms": 4060.0,
+            "attempts": 1
+          },
+          "checks": [
+            {
+              "name": "outcome is provider_error",
+              "expected": "provider_error",
+              "actual": "provider_error",
+              "passed": true
+            },
+            {
+              "name": "error code",
+              "expected": "AI_PROVIDER_ERROR",
+              "actual": "AI_PROVIDER_ERROR",
+              "passed": true
+            },
+            {
+              "name": "no done record",
+              "expected": "done=false",
+              "actual": "False",
+              "passed": true
+            },
+            {
+              "name": "upstream message has no loopback endpoint",
+              "expected": "sanitized",
+              "actual": "an error was encountered while running the model: read tcp <loopback>-><loopback>: wsarecv: An existing connection was forcibly closed by the remote host.",
+              "passed": true
+            },
+            {
+              "name": "recovers without restart within 30 s",
+              "expected": "< 30000 ms",
+              "actual": "4060",
+              "passed": true
+            }
+          ]
+        },
+        {
+          "repetition": 6,
+          "passed": true,
+          "actual": {
+            "outcome": "provider_error",
+            "error_code": "AI_PROVIDER_ERROR",
+            "http_status": 200,
+            "records": 25,
+            "deltas": 18,
+            "done": false,
+            "done_reason": null,
+            "first_record_ms": 51.3,
+            "total_ms": 523.2,
+            "upstream_error": "an error was encountered while running the model: read tcp <loopback>-><loopback>: wsarecv: An existing connection was forcibly closed by the remote host.",
+            "eval_count": null,
+            "answer": "The history of the bicycle is a fascinating journey through innovation, engineering, and cultural shifts."
+          },
+          "recovery": {
+            "recovered": true,
+            "recovery_ms": 3976.0,
+            "attempts": 1
+          },
+          "checks": [
+            {
+              "name": "outcome is provider_error",
+              "expected": "provider_error",
+              "actual": "provider_error",
+              "passed": true
+            },
+            {
+              "name": "error code",
+              "expected": "AI_PROVIDER_ERROR",
+              "actual": "AI_PROVIDER_ERROR",
+              "passed": true
+            },
+            {
+              "name": "no done record",
+              "expected": "done=false",
+              "actual": "False",
+              "passed": true
+            },
+            {
+              "name": "upstream message has no loopback endpoint",
+              "expected": "sanitized",
+              "actual": "an error was encountered while running the model: read tcp <loopback>-><loopback>: wsarecv: An existing connection was forcibly closed by the remote host.",
+              "passed": true
+            },
+            {
+              "name": "recovers without restart within 30 s",
+              "expected": "< 30000 ms",
+              "actual": "3976",
+              "passed": true
+            }
+          ]
+        }
+      ],
+      "recovery_summary": {
+        "n": 6,
+        "min_ms": 3786.0,
+        "median_ms": 3976.0,
+        "max_ms": 4123.0
+      },
+      "passed": true
+    },
+    {
+      "id": "F02",
+      "name": "Whole Ollama process killed in the middle of a stream",
+      "expected": [
+        "stream ends interrupted (no done), code AI_INVALID_RESPONSE",
+        "a request while it is down fails at once with AI_UNAVAILABLE",
+        "after a restart the next request completes"
+      ],
+      "repetitions": [
+        {
+          "repetition": 1,
+          "passed": false,
+          "actual": {
+            "interrupted": {
+              "outcome": "interrupted",
+              "error_code": "AI_INVALID_RESPONSE",
+              "http_status": 200,
+              "records": 12,
+              "deltas": 6,
+              "done": false,
+              "done_reason": null,
+              "first_record_ms": 50.8,
+              "total_ms": 642.6,
+              "upstream_error": null,
+              "eval_count": null,
+              "answer": "The history of the bicycle is"
+            },
+            "while_down": {
+              "outcome": "unavailable",
+              "error_code": "AI_UNAVAILABLE",
+              "http_status": null,
+              "records": 0,
+              "deltas": 0,
+              "done": false,
+              "done_reason": null,
+              "first_record_ms": null,
+              "total_ms": 2053.0,
+              "upstream_error": null,
+              "eval_count": null,
+              "answer": ""
+            },
+            "server_ready_ms": 4539.0
+          },
+          "recovery": {
+            "recovered": true,
+            "recovery_ms": 7613.0,
+            "attempts": 1
+          },
+          "checks": [
+            {
+              "name": "interrupted stream is not completed",
+              "expected": "not completed",
+              "actual": "interrupted",
+              "passed": true
+            },
+            {
+              "name": "interrupted stream error code",
+              "expected": "AI_INVALID_RESPONSE or AI_PROVIDER_ERROR",
+              "actual": "AI_INVALID_RESPONSE",
+              "passed": true
+            },
+            {
+              "name": "request while down is unavailable",
+              "expected": "AI_UNAVAILABLE",
+              "actual": "AI_UNAVAILABLE",
+              "passed": true
+            },
+            {
+              "name": "failure while down is fast",
+              "expected": "< 2000 ms",
+              "actual": "2053",
+              "passed": false
+            },
+            {
+              "name": "restart then answer",
+              "expected": "recovered",
+              "actual": "True",
+              "passed": true
+            }
+          ]
+        },
+        {
+          "repetition": 2,
+          "passed": false,
+          "actual": {
+            "interrupted": {
+              "outcome": "interrupted",
+              "error_code": "AI_INVALID_RESPONSE",
+              "http_status": 200,
+              "records": 12,
+              "deltas": 6,
+              "done": false,
+              "done_reason": null,
+              "first_record_ms": 51.4,
+              "total_ms": 599.2,
+              "upstream_error": null,
+              "eval_count": null,
+              "answer": "The history of the bicycle is"
+            },
+            "while_down": {
+              "outcome": "unavailable",
+              "error_code": "AI_UNAVAILABLE",
+              "http_status": null,
+              "records": 0,
+              "deltas": 0,
+              "done": false,
+              "done_reason": null,
+              "first_record_ms": null,
+              "total_ms": 2047.1,
+              "upstream_error": null,
+              "eval_count": null,
+              "answer": ""
+            },
+            "server_ready_ms": 5188.0
+          },
+          "recovery": {
+            "recovered": true,
+            "recovery_ms": 9651.0,
+            "attempts": 1
+          },
+          "checks": [
+            {
+              "name": "interrupted stream is not completed",
+              "expected": "not completed",
+              "actual": "interrupted",
+              "passed": true
+            },
+            {
+              "name": "interrupted stream error code",
+              "expected": "AI_INVALID_RESPONSE or AI_PROVIDER_ERROR",
+              "actual": "AI_INVALID_RESPONSE",
+              "passed": true
+            },
+            {
+              "name": "request while down is unavailable",
+              "expected": "AI_UNAVAILABLE",
+              "actual": "AI_UNAVAILABLE",
+              "passed": true
+            },
+            {
+              "name": "failure while down is fast",
+              "expected": "< 2000 ms",
+              "actual": "2047.1",
+              "passed": false
+            },
+            {
+              "name": "restart then answer",
+              "expected": "recovered",
+              "actual": "True",
+              "passed": true
+            }
+          ]
+        },
+        {
+          "repetition": 3,
+          "passed": false,
+          "actual": {
+            "interrupted": {
+              "outcome": "interrupted",
+              "error_code": "AI_INVALID_RESPONSE",
+              "http_status": 200,
+              "records": 12,
+              "deltas": 6,
+              "done": false,
+              "done_reason": null,
+              "first_record_ms": 57.8,
+              "total_ms": 608.4,
+              "upstream_error": null,
+              "eval_count": null,
+              "answer": "The history of the bicycle is"
+            },
+            "while_down": {
+              "outcome": "unavailable",
+              "error_code": "AI_UNAVAILABLE",
+              "http_status": null,
+              "records": 0,
+              "deltas": 0,
+              "done": false,
+              "done_reason": null,
+              "first_record_ms": null,
+              "total_ms": 2047.4,
+              "upstream_error": null,
+              "eval_count": null,
+              "answer": ""
+            },
+            "server_ready_ms": 4641.0
+          },
+          "recovery": {
+            "recovered": true,
+            "recovery_ms": 7779.0,
+            "attempts": 1
+          },
+          "checks": [
+            {
+              "name": "interrupted stream is not completed",
+              "expected": "not completed",
+              "actual": "interrupted",
+              "passed": true
+            },
+            {
+              "name": "interrupted stream error code",
+              "expected": "AI_INVALID_RESPONSE or AI_PROVIDER_ERROR",
+              "actual": "AI_INVALID_RESPONSE",
+              "passed": true
+            },
+            {
+              "name": "request while down is unavailable",
+              "expected": "AI_UNAVAILABLE",
+              "actual": "AI_UNAVAILABLE",
+              "passed": true
+            },
+            {
+              "name": "failure while down is fast",
+              "expected": "< 2000 ms",
+              "actual": "2047.4",
+              "passed": false
+            },
+            {
+              "name": "restart then answer",
+              "expected": "recovered",
+              "actual": "True",
+              "passed": true
+            }
+          ]
+        },
+        {
+          "repetition": 4,
+          "passed": false,
+          "actual": {
+            "interrupted": {
+              "outcome": "interrupted",
+              "error_code": "AI_INVALID_RESPONSE",
+              "http_status": 200,
+              "records": 12,
+              "deltas": 6,
+              "done": false,
+              "done_reason": null,
+              "first_record_ms": 48.9,
+              "total_ms": 585.0,
+              "upstream_error": null,
+              "eval_count": null,
+              "answer": "The history of the bicycle is"
+            },
+            "while_down": {
+              "outcome": "unavailable",
+              "error_code": "AI_UNAVAILABLE",
+              "http_status": null,
+              "records": 0,
+              "deltas": 0,
+              "done": false,
+              "done_reason": null,
+              "first_record_ms": null,
+              "total_ms": 2043.7,
+              "upstream_error": null,
+              "eval_count": null,
+              "answer": ""
+            },
+            "server_ready_ms": 4917.0
+          },
+          "recovery": {
+            "recovered": true,
+            "recovery_ms": 7951.0,
+            "attempts": 1
+          },
+          "checks": [
+            {
+              "name": "interrupted stream is not completed",
+              "expected": "not completed",
+              "actual": "interrupted",
+              "passed": true
+            },
+            {
+              "name": "interrupted stream error code",
+              "expected": "AI_INVALID_RESPONSE or AI_PROVIDER_ERROR",
+              "actual": "AI_INVALID_RESPONSE",
+              "passed": true
+            },
+            {
+              "name": "request while down is unavailable",
+              "expected": "AI_UNAVAILABLE",
+              "actual": "AI_UNAVAILABLE",
+              "passed": true
+            },
+            {
+              "name": "failure while down is fast",
+              "expected": "< 2000 ms",
+              "actual": "2043.7",
+              "passed": false
+            },
+            {
+              "name": "restart then answer",
+              "expected": "recovered",
+              "actual": "True",
+              "passed": true
+            }
+          ]
+        },
+        {
+          "repetition": 5,
+          "passed": false,
+          "actual": {
+            "interrupted": {
+              "outcome": "interrupted",
+              "error_code": "AI_INVALID_RESPONSE",
+              "http_status": 200,
+              "records": 12,
+              "deltas": 6,
+              "done": false,
+              "done_reason": null,
+              "first_record_ms": 48.4,
+              "total_ms": 629.0,
+              "upstream_error": null,
+              "eval_count": null,
+              "answer": "The history of the bicycle is"
+            },
+            "while_down": {
+              "outcome": "unavailable",
+              "error_code": "AI_UNAVAILABLE",
+              "http_status": null,
+              "records": 0,
+              "deltas": 0,
+              "done": false,
+              "done_reason": null,
+              "first_record_ms": null,
+              "total_ms": 2035.6,
+              "upstream_error": null,
+              "eval_count": null,
+              "answer": ""
+            },
+            "server_ready_ms": 4518.0
+          },
+          "recovery": {
+            "recovered": true,
+            "recovery_ms": 7558.0,
+            "attempts": 1
+          },
+          "checks": [
+            {
+              "name": "interrupted stream is not completed",
+              "expected": "not completed",
+              "actual": "interrupted",
+              "passed": true
+            },
+            {
+              "name": "interrupted stream error code",
+              "expected": "AI_INVALID_RESPONSE or AI_PROVIDER_ERROR",
+              "actual": "AI_INVALID_RESPONSE",
+              "passed": true
+            },
+            {
+              "name": "request while down is unavailable",
+              "expected": "AI_UNAVAILABLE",
+              "actual": "AI_UNAVAILABLE",
+              "passed": true
+            },
+            {
+              "name": "failure while down is fast",
+              "expected": "< 2000 ms",
+              "actual": "2035.6",
+              "passed": false
+            },
+            {
+              "name": "restart then answer",
+              "expected": "recovered",
+              "actual": "True",
+              "passed": true
+            }
+          ]
+        },
+        {
+          "repetition": 6,
+          "passed": false,
+          "actual": {
+            "interrupted": {
+              "outcome": "interrupted",
+              "error_code": "AI_INVALID_RESPONSE",
+              "http_status": 200,
+              "records": 12,
+              "deltas": 6,
+              "done": false,
+              "done_reason": null,
+              "first_record_ms": 55.9,
+              "total_ms": 612.2,
+              "upstream_error": null,
+              "eval_count": null,
+              "answer": "The history of the bicycle is"
+            },
+            "while_down": {
+              "outcome": "unavailable",
+              "error_code": "AI_UNAVAILABLE",
+              "http_status": null,
+              "records": 0,
+              "deltas": 0,
+              "done": false,
+              "done_reason": null,
+              "first_record_ms": null,
+              "total_ms": 2048.2,
+              "upstream_error": null,
+              "eval_count": null,
+              "answer": ""
+            },
+            "server_ready_ms": 3915.0
+          },
+          "recovery": {
+            "recovered": true,
+            "recovery_ms": 6932.0,
+            "attempts": 1
+          },
+          "checks": [
+            {
+              "name": "interrupted stream is not completed",
+              "expected": "not completed",
+              "actual": "interrupted",
+              "passed": true
+            },
+            {
+              "name": "interrupted stream error code",
+              "expected": "AI_INVALID_RESPONSE or AI_PROVIDER_ERROR",
+              "actual": "AI_INVALID_RESPONSE",
+              "passed": true
+            },
+            {
+              "name": "request while down is unavailable",
+              "expected": "AI_UNAVAILABLE",
+              "actual": "AI_UNAVAILABLE",
+              "passed": true
+            },
+            {
+              "name": "failure while down is fast",
+              "expected": "< 2000 ms",
+              "actual": "2048.2",
+              "passed": false
+            },
+            {
+              "name": "restart then answer",
+              "expected": "recovered",
+              "actual": "True",
+              "passed": true
+            }
+          ]
+        }
+      ],
+      "recovery_summary": {
+        "n": 6,
+        "min_ms": 6932.0,
+        "median_ms": 7613.0,
+        "max_ms": 9651.0
+      },
+      "passed": false
+    },
+    {
+      "id": "F03",
+      "name": "Ollama is not running",
+      "expected": [
+        "request fails within 2 s with AI_UNAVAILABLE",
+        "after start the next request completes"
+      ],
+      "repetitions": [
+        {
+          "repetition": 1,
+          "passed": false,
+          "actual": {
+            "while_down": {
+              "outcome": "unavailable",
+              "error_code": "AI_UNAVAILABLE",
+              "http_status": null,
+              "records": 0,
+              "deltas": 0,
+              "done": false,
+              "done_reason": null,
+              "first_record_ms": null,
+              "total_ms": 2035.7,
+              "upstream_error": null,
+              "eval_count": null,
+              "answer": ""
+            },
+            "server_ready_ms": 4456.0
+          },
+          "recovery": {
+            "recovered": true,
+            "recovery_ms": 8301.0,
+            "attempts": 1
+          },
+          "checks": [
+            {
+              "name": "outcome unavailable",
+              "expected": "unavailable",
+              "actual": "unavailable",
+              "passed": true
+            },
+            {
+              "name": "error code",
+              "expected": "AI_UNAVAILABLE",
+              "actual": "AI_UNAVAILABLE",
+              "passed": true
+            },
+            {
+              "name": "fails fast",
+              "expected": "< 2000 ms",
+              "actual": "2035.7",
+              "passed": false
+            },
+            {
+              "name": "recovers after start",
+              "expected": "recovered",
+              "actual": "True",
+              "passed": true
+            }
+          ]
+        },
+        {
+          "repetition": 2,
+          "passed": false,
+          "actual": {
+            "while_down": {
+              "outcome": "unavailable",
+              "error_code": "AI_UNAVAILABLE",
+              "http_status": null,
+              "records": 0,
+              "deltas": 0,
+              "done": false,
+              "done_reason": null,
+              "first_record_ms": null,
+              "total_ms": 2050.9,
+              "upstream_error": null,
+              "eval_count": null,
+              "answer": ""
+            },
+            "server_ready_ms": 4754.0
+          },
+          "recovery": {
+            "recovered": true,
+            "recovery_ms": 8091.0,
+            "attempts": 1
+          },
+          "checks": [
+            {
+              "name": "outcome unavailable",
+              "expected": "unavailable",
+              "actual": "unavailable",
+              "passed": true
+            },
+            {
+              "name": "error code",
+              "expected": "AI_UNAVAILABLE",
+              "actual": "AI_UNAVAILABLE",
+              "passed": true
+            },
+            {
+              "name": "fails fast",
+              "expected": "< 2000 ms",
+              "actual": "2050.9",
+              "passed": false
+            },
+            {
+              "name": "recovers after start",
+              "expected": "recovered",
+              "actual": "True",
+              "passed": true
+            }
+          ]
+        },
+        {
+          "repetition": 3,
+          "passed": false,
+          "actual": {
+            "while_down": {
+              "outcome": "unavailable",
+              "error_code": "AI_UNAVAILABLE",
+              "http_status": null,
+              "records": 0,
+              "deltas": 0,
+              "done": false,
+              "done_reason": null,
+              "first_record_ms": null,
+              "total_ms": 2038.7,
+              "upstream_error": null,
+              "eval_count": null,
+              "answer": ""
+            },
+            "server_ready_ms": 3812.0
+          },
+          "recovery": {
+            "recovered": true,
+            "recovery_ms": 6807.0,
+            "attempts": 1
+          },
+          "checks": [
+            {
+              "name": "outcome unavailable",
+              "expected": "unavailable",
+              "actual": "unavailable",
+              "passed": true
+            },
+            {
+              "name": "error code",
+              "expected": "AI_UNAVAILABLE",
+              "actual": "AI_UNAVAILABLE",
+              "passed": true
+            },
+            {
+              "name": "fails fast",
+              "expected": "< 2000 ms",
+              "actual": "2038.7",
+              "passed": false
+            },
+            {
+              "name": "recovers after start",
+              "expected": "recovered",
+              "actual": "True",
+              "passed": true
+            }
+          ]
+        },
+        {
+          "repetition": 4,
+          "passed": false,
+          "actual": {
+            "while_down": {
+              "outcome": "unavailable",
+              "error_code": "AI_UNAVAILABLE",
+              "http_status": null,
+              "records": 0,
+              "deltas": 0,
+              "done": false,
+              "done_reason": null,
+              "first_record_ms": null,
+              "total_ms": 2043.8,
+              "upstream_error": null,
+              "eval_count": null,
+              "answer": ""
+            },
+            "server_ready_ms": 3630.0
+          },
+          "recovery": {
+            "recovered": true,
+            "recovery_ms": 6643.0,
+            "attempts": 1
+          },
+          "checks": [
+            {
+              "name": "outcome unavailable",
+              "expected": "unavailable",
+              "actual": "unavailable",
+              "passed": true
+            },
+            {
+              "name": "error code",
+              "expected": "AI_UNAVAILABLE",
+              "actual": "AI_UNAVAILABLE",
+              "passed": true
+            },
+            {
+              "name": "fails fast",
+              "expected": "< 2000 ms",
+              "actual": "2043.8",
+              "passed": false
+            },
+            {
+              "name": "recovers after start",
+              "expected": "recovered",
+              "actual": "True",
+              "passed": true
+            }
+          ]
+        },
+        {
+          "repetition": 5,
+          "passed": false,
+          "actual": {
+            "while_down": {
+              "outcome": "unavailable",
+              "error_code": "AI_UNAVAILABLE",
+              "http_status": null,
+              "records": 0,
+              "deltas": 0,
+              "done": false,
+              "done_reason": null,
+              "first_record_ms": null,
+              "total_ms": 2040.2,
+              "upstream_error": null,
+              "eval_count": null,
+              "answer": ""
+            },
+            "server_ready_ms": 3795.0
+          },
+          "recovery": {
+            "recovered": true,
+            "recovery_ms": 6850.0,
+            "attempts": 1
+          },
+          "checks": [
+            {
+              "name": "outcome unavailable",
+              "expected": "unavailable",
+              "actual": "unavailable",
+              "passed": true
+            },
+            {
+              "name": "error code",
+              "expected": "AI_UNAVAILABLE",
+              "actual": "AI_UNAVAILABLE",
+              "passed": true
+            },
+            {
+              "name": "fails fast",
+              "expected": "< 2000 ms",
+              "actual": "2040.2",
+              "passed": false
+            },
+            {
+              "name": "recovers after start",
+              "expected": "recovered",
+              "actual": "True",
+              "passed": true
+            }
+          ]
+        },
+        {
+          "repetition": 6,
+          "passed": false,
+          "actual": {
+            "while_down": {
+              "outcome": "unavailable",
+              "error_code": "AI_UNAVAILABLE",
+              "http_status": null,
+              "records": 0,
+              "deltas": 0,
+              "done": false,
+              "done_reason": null,
+              "first_record_ms": null,
+              "total_ms": 2042.7,
+              "upstream_error": null,
+              "eval_count": null,
+              "answer": ""
+            },
+            "server_ready_ms": 3704.0
+          },
+          "recovery": {
+            "recovered": true,
+            "recovery_ms": 6719.0,
+            "attempts": 1
+          },
+          "checks": [
+            {
+              "name": "outcome unavailable",
+              "expected": "unavailable",
+              "actual": "unavailable",
+              "passed": true
+            },
+            {
+              "name": "error code",
+              "expected": "AI_UNAVAILABLE",
+              "actual": "AI_UNAVAILABLE",
+              "passed": true
+            },
+            {
+              "name": "fails fast",
+              "expected": "< 2000 ms",
+              "actual": "2042.7",
+              "passed": false
+            },
+            {
+              "name": "recovers after start",
+              "expected": "recovered",
+              "actual": "True",
+              "passed": true
+            }
+          ]
+        }
+      ],
+      "recovery_summary": {
+        "n": 6,
+        "min_ms": 6643.0,
+        "median_ms": 6807.0,
+        "max_ms": 8301.0
+      },
+      "passed": false
+    },
+    {
+      "id": "F04",
+      "name": "Model unloaded between requests (cold start, not a failure)",
+      "expected": [
+        "request completes",
+        "first record within 30 s",
+        "cold first record is slower than a warm one"
+      ],
+      "repetitions": [
+        {
+          "repetition": 1,
+          "passed": true,
+          "actual": {
+            "warm": {
+              "outcome": "completed",
+              "error_code": null,
+              "http_status": 200,
+              "records": 11,
+              "deltas": 2,
+              "done": true,
+              "done_reason": "stop",
+              "first_record_ms": 40.0,
+              "total_ms": 256.8,
+              "upstream_error": null,
+              "eval_count": 11,
+              "answer": "Tokyo"
+            },
+            "cold": {
+              "outcome": "completed",
+              "error_code": null,
+              "http_status": 200,
+              "records": 11,
+              "deltas": 2,
+              "done": true,
+              "done_reason": "stop",
+              "first_record_ms": 2838.1,
+              "total_ms": 3060.4,
+              "upstream_error": null,
+              "eval_count": 11,
+              "answer": "Tokyo"
+            }
+          },
+          "recovery": null,
+          "checks": [
+            {
+              "name": "completed after unload",
+              "expected": "completed",
+              "actual": "completed",
+              "passed": true
+            },
+            {
+              "name": "first record within 30 s",
+              "expected": "< 30000 ms",
+              "actual": "2838.1",
+              "passed": true
+            },
+            {
+              "name": "cold start is slower than warm",
+              "expected": "cold > warm",
+              "actual": "2838.1 vs 40",
+              "passed": true
+            }
+          ]
+        },
+        {
+          "repetition": 2,
+          "passed": true,
+          "actual": {
+            "warm": {
+              "outcome": "completed",
+              "error_code": null,
+              "http_status": 200,
+              "records": 11,
+              "deltas": 2,
+              "done": true,
+              "done_reason": "stop",
+              "first_record_ms": 42.0,
+              "total_ms": 252.7,
+              "upstream_error": null,
+              "eval_count": 11,
+              "answer": "Tokyo"
+            },
+            "cold": {
+              "outcome": "completed",
+              "error_code": null,
+              "http_status": 200,
+              "records": 11,
+              "deltas": 2,
+              "done": true,
+              "done_reason": "stop",
+              "first_record_ms": 2771.4,
+              "total_ms": 3005.1,
+              "upstream_error": null,
+              "eval_count": 11,
+              "answer": "Tokyo"
+            }
+          },
+          "recovery": null,
+          "checks": [
+            {
+              "name": "completed after unload",
+              "expected": "completed",
+              "actual": "completed",
+              "passed": true
+            },
+            {
+              "name": "first record within 30 s",
+              "expected": "< 30000 ms",
+              "actual": "2771.4",
+              "passed": true
+            },
+            {
+              "name": "cold start is slower than warm",
+              "expected": "cold > warm",
+              "actual": "2771.4 vs 42",
+              "passed": true
+            }
+          ]
+        },
+        {
+          "repetition": 3,
+          "passed": true,
+          "actual": {
+            "warm": {
+              "outcome": "completed",
+              "error_code": null,
+              "http_status": 200,
+              "records": 11,
+              "deltas": 2,
+              "done": true,
+              "done_reason": "stop",
+              "first_record_ms": 42.2,
+              "total_ms": 265.4,
+              "upstream_error": null,
+              "eval_count": 11,
+              "answer": "Tokyo"
+            },
+            "cold": {
+              "outcome": "completed",
+              "error_code": null,
+              "http_status": 200,
+              "records": 11,
+              "deltas": 2,
+              "done": true,
+              "done_reason": "stop",
+              "first_record_ms": 3438.3,
+              "total_ms": 3682.7,
+              "upstream_error": null,
+              "eval_count": 11,
+              "answer": "Tokyo"
+            }
+          },
+          "recovery": null,
+          "checks": [
+            {
+              "name": "completed after unload",
+              "expected": "completed",
+              "actual": "completed",
+              "passed": true
+            },
+            {
+              "name": "first record within 30 s",
+              "expected": "< 30000 ms",
+              "actual": "3438.3",
+              "passed": true
+            },
+            {
+              "name": "cold start is slower than warm",
+              "expected": "cold > warm",
+              "actual": "3438.3 vs 42.2",
+              "passed": true
+            }
+          ]
+        },
+        {
+          "repetition": 4,
+          "passed": true,
+          "actual": {
+            "warm": {
+              "outcome": "completed",
+              "error_code": null,
+              "http_status": 200,
+              "records": 11,
+              "deltas": 2,
+              "done": true,
+              "done_reason": "stop",
+              "first_record_ms": 45.1,
+              "total_ms": 278.7,
+              "upstream_error": null,
+              "eval_count": 11,
+              "answer": "Tokyo"
+            },
+            "cold": {
+              "outcome": "completed",
+              "error_code": null,
+              "http_status": 200,
+              "records": 11,
+              "deltas": 2,
+              "done": true,
+              "done_reason": "stop",
+              "first_record_ms": 3120.9,
+              "total_ms": 3352.1,
+              "upstream_error": null,
+              "eval_count": 11,
+              "answer": "Tokyo"
+            }
+          },
+          "recovery": null,
+          "checks": [
+            {
+              "name": "completed after unload",
+              "expected": "completed",
+              "actual": "completed",
+              "passed": true
+            },
+            {
+              "name": "first record within 30 s",
+              "expected": "< 30000 ms",
+              "actual": "3120.9",
+              "passed": true
+            },
+            {
+              "name": "cold start is slower than warm",
+              "expected": "cold > warm",
+              "actual": "3120.9 vs 45.1",
+              "passed": true
+            }
+          ]
+        },
+        {
+          "repetition": 5,
+          "passed": true,
+          "actual": {
+            "warm": {
+              "outcome": "completed",
+              "error_code": null,
+              "http_status": 200,
+              "records": 11,
+              "deltas": 2,
+              "done": true,
+              "done_reason": "stop",
+              "first_record_ms": 41.3,
+              "total_ms": 274.6,
+              "upstream_error": null,
+              "eval_count": 11,
+              "answer": "Tokyo"
+            },
+            "cold": {
+              "outcome": "completed",
+              "error_code": null,
+              "http_status": 200,
+              "records": 11,
+              "deltas": 2,
+              "done": true,
+              "done_reason": "stop",
+              "first_record_ms": 2863.0,
+              "total_ms": 3100.2,
+              "upstream_error": null,
+              "eval_count": 11,
+              "answer": "Tokyo"
+            }
+          },
+          "recovery": null,
+          "checks": [
+            {
+              "name": "completed after unload",
+              "expected": "completed",
+              "actual": "completed",
+              "passed": true
+            },
+            {
+              "name": "first record within 30 s",
+              "expected": "< 30000 ms",
+              "actual": "2863",
+              "passed": true
+            },
+            {
+              "name": "cold start is slower than warm",
+              "expected": "cold > warm",
+              "actual": "2863 vs 41.3",
+              "passed": true
+            }
+          ]
+        },
+        {
+          "repetition": 6,
+          "passed": true,
+          "actual": {
+            "warm": {
+              "outcome": "completed",
+              "error_code": null,
+              "http_status": 200,
+              "records": 11,
+              "deltas": 2,
+              "done": true,
+              "done_reason": "stop",
+              "first_record_ms": 44.9,
+              "total_ms": 259.6,
+              "upstream_error": null,
+              "eval_count": 11,
+              "answer": "Tokyo"
+            },
+            "cold": {
+              "outcome": "completed",
+              "error_code": null,
+              "http_status": 200,
+              "records": 11,
+              "deltas": 2,
+              "done": true,
+              "done_reason": "stop",
+              "first_record_ms": 2912.4,
+              "total_ms": 3148.2,
+              "upstream_error": null,
+              "eval_count": 11,
+              "answer": "Tokyo"
+            }
+          },
+          "recovery": null,
+          "checks": [
+            {
+              "name": "completed after unload",
+              "expected": "completed",
+              "actual": "completed",
+              "passed": true
+            },
+            {
+              "name": "first record within 30 s",
+              "expected": "< 30000 ms",
+              "actual": "2912.4",
+              "passed": true
+            },
+            {
+              "name": "cold start is slower than warm",
+              "expected": "cold > warm",
+              "actual": "2912.4 vs 44.9",
+              "passed": true
+            }
+          ]
+        }
+      ],
+      "recovery_summary": null,
+      "passed": true
+    },
+    {
+      "id": "F05",
+      "name": "Unload requested while a stream is running",
+      "expected": [
+        "the running stream still completes normally (the unload waits)",
+        "the model is unloaded afterwards",
+        "the next request is a cold start that completes"
+      ],
+      "repetitions": [
+        {
+          "repetition": 1,
+          "passed": false,
+          "actual": {
+            "running": {
+              "outcome": "truncated",
+              "error_code": "AI_RESPONSE_TOO_LARGE",
+              "http_status": 200,
+              "records": 301,
+              "deltas": 294,
+              "done": true,
+              "done_reason": "length",
+              "first_record_ms": 64.7,
+              "total_ms": 5374.6,
+              "upstream_error": null,
+              "eval_count": 300,
+              "answer": "The history of the bicycle is a fascinating journey through innovation, engineering, and cultural shifts. It began in the early 19th century with the invention of the 'dandy horse,' a two-wheeled vehicle with a fixed rear wheel and a foot-operated mechanism that allowed the rider to move forward. However, this early design was cumbersome and impractical for most people. The real breakthrough came with the development of the 'penny-farthing' in the 1870s, which featured a large front wheel and a small rear wheel. This design allowed for higher speeds but was dangerous due to its unstable and unbalanced nature. The penny-farthing became popular in Europe and the United States, with many enthusiasts riding it on streets and in parks. However, its dangers led to the creation of the 'velocipede' in the 1880s, which was a more stable and practical design with a chain-driven mechanism that connected the pedals to the rear wheel. The velocipede was a significant improvement over the penny-far. The next major development was the introduction of the 'safety bicycle' in the 1880s, which featured equal-sized wheels and a chain-driven mechanism that made it safer and more accessible to the general public. This design became the standard for bicycles for the next few decades. The safety bicycle was a key innovation that made cycling a practical and popular mode of transportation."
+            },
+            "next": {
+              "outcome": "completed",
+              "error_code": null,
+              "http_status": 200,
+              "records": 11,
+              "deltas": 2,
+              "done": true,
+              "done_reason": "stop",
+              "first_record_ms": 4352.2,
+              "total_ms": 4639.4,
+              "upstream_error": null,
+              "eval_count": 11,
+              "answer": "Tokyo"
+            }
+          },
+          "recovery": null,
+          "checks": [
+            {
+              "name": "running stream completed",
+              "expected": "completed",
+              "actual": "truncated",
+              "passed": false
+            },
+            {
+              "name": "model unloaded afterwards",
+              "expected": "no loaded model",
+              "actual": "0",
+              "passed": true
+            },
+            {
+              "name": "next request completes (cold)",
+              "expected": "completed",
+              "actual": "completed",
+              "passed": true
+            }
+          ]
+        },
+        {
+          "repetition": 2,
+          "passed": false,
+          "actual": {
+            "running": {
+              "outcome": "truncated",
+              "error_code": "AI_RESPONSE_TOO_LARGE",
+              "http_status": 200,
+              "records": 301,
+              "deltas": 294,
+              "done": true,
+              "done_reason": "length",
+              "first_record_ms": 66.6,
+              "total_ms": 5352.7,
+              "upstream_error": null,
+              "eval_count": 300,
+              "answer": "The history of the bicycle is a fascinating journey through innovation, engineering, and cultural shifts. It began in the early 19th century with the invention of the 'dandy horse,' a two-wheeled vehicle with a fixed rear wheel and a foot-operated mechanism that allowed the rider to move forward. However, this early design was cumbersome and impractical for most people. The real breakthrough came with the development of the 'penny-farthing' in the 1870s, which featured a large front wheel and a small rear wheel. This design allowed for higher speeds but was dangerous due to its unstable and unbalanced nature. The penny-farthing became popular in Europe and the United States, with many enthusiasts riding it on streets and in parks. However, its dangers led to the creation of the 'velocipede' in the 1880s, which was a more stable and practical design with a chain-driven mechanism that connected the pedals to the rear wheel. The velocipede was a significant improvement over the penny-far. The next major development was the introduction of the 'safety bicycle' in the 1880s, which featured equal-sized wheels and a chain-driven mechanism that made it safer and more accessible to the general public. This design became the standard for bicycles for the next few decades. The safety bicycle was a key innovation that made cycling a practical and popular mode of transportation."
+            },
+            "next": {
+              "outcome": "completed",
+              "error_code": null,
+              "http_status": 200,
+              "records": 11,
+              "deltas": 2,
+              "done": true,
+              "done_reason": "stop",
+              "first_record_ms": 2904.6,
+              "total_ms": 3128.2,
+              "upstream_error": null,
+              "eval_count": 11,
+              "answer": "Tokyo"
+            }
+          },
+          "recovery": null,
+          "checks": [
+            {
+              "name": "running stream completed",
+              "expected": "completed",
+              "actual": "truncated",
+              "passed": false
+            },
+            {
+              "name": "model unloaded afterwards",
+              "expected": "no loaded model",
+              "actual": "0",
+              "passed": true
+            },
+            {
+              "name": "next request completes (cold)",
+              "expected": "completed",
+              "actual": "completed",
+              "passed": true
+            }
+          ]
+        },
+        {
+          "repetition": 3,
+          "passed": false,
+          "actual": {
+            "running": {
+              "outcome": "truncated",
+              "error_code": "AI_RESPONSE_TOO_LARGE",
+              "http_status": 200,
+              "records": 301,
+              "deltas": 294,
+              "done": true,
+              "done_reason": "length",
+              "first_record_ms": 47.6,
+              "total_ms": 5282.3,
+              "upstream_error": null,
+              "eval_count": 300,
+              "answer": "The history of the bicycle is a fascinating journey through innovation, engineering, and cultural shifts. It began in the early 19th century with the invention of the 'dandy horse,' a two-wheeled vehicle with a fixed rear wheel and a foot-operated mechanism that allowed the rider to move forward. However, this early design was cumbersome and impractical for most people. The real breakthrough came with the development of the 'penny-farthing' in the 1870s, which featured a large front wheel and a small rear wheel. This design allowed for higher speeds but was dangerous due to its unstable and unbalanced nature. The penny-farthing became popular in Europe and the United States, with many enthusiasts riding it on streets and in parks. However, its dangers led to the creation of the 'velocipede' in the 1880s, which was a more stable and practical design with a chain-driven mechanism that connected the pedals to the rear wheel. The velocipede was a significant improvement over the penny-far. The next major development was the introduction of the 'safety bicycle' in the 1880s, which featured equal-sized wheels and a chain-driven mechanism that made it safer and more accessible to the general public. This design became the standard for bicycles for the next few decades. The safety bicycle was a key innovation that made cycling a practical and popular mode of transportation."
+            },
+            "next": {
+              "outcome": "completed",
+              "error_code": null,
+              "http_status": 200,
+              "records": 11,
+              "deltas": 2,
+              "done": true,
+              "done_reason": "stop",
+              "first_record_ms": 2874.2,
+              "total_ms": 3088.8,
+              "upstream_error": null,
+              "eval_count": 11,
+              "answer": "Tokyo"
+            }
+          },
+          "recovery": null,
+          "checks": [
+            {
+              "name": "running stream completed",
+              "expected": "completed",
+              "actual": "truncated",
+              "passed": false
+            },
+            {
+              "name": "model unloaded afterwards",
+              "expected": "no loaded model",
+              "actual": "0",
+              "passed": true
+            },
+            {
+              "name": "next request completes (cold)",
+              "expected": "completed",
+              "actual": "completed",
+              "passed": true
+            }
+          ]
+        },
+        {
+          "repetition": 4,
+          "passed": false,
+          "actual": {
+            "running": {
+              "outcome": "truncated",
+              "error_code": "AI_RESPONSE_TOO_LARGE",
+              "http_status": 200,
+              "records": 301,
+              "deltas": 294,
+              "done": true,
+              "done_reason": "length",
+              "first_record_ms": 52.9,
+              "total_ms": 5368.7,
+              "upstream_error": null,
+              "eval_count": 300,
+              "answer": "The history of the bicycle is a fascinating journey through innovation, engineering, and cultural shifts. It began in the early 19th century with the invention of the 'dandy horse,' a two-wheeled vehicle with a fixed rear wheel and a foot-operated mechanism that allowed the rider to move forward. However, this early design was cumbersome and impractical for most people. The real breakthrough came with the development of the 'penny-farthing' in the 1870s, which featured a large front wheel and a small rear wheel. This design allowed for higher speeds but was dangerous due to its unstable and unbalanced nature. The penny-farthing became popular in Europe and the United States, with many enthusiasts riding it on streets and in parks. However, its dangers led to the creation of the 'velocipede' in the 1880s, which was a more stable and practical design with a chain-driven mechanism that connected the pedals to the rear wheel. The velocipede was a significant improvement over the penny-far. The next major development was the introduction of the 'safety bicycle' in the 1880s, which featured equal-sized wheels and a chain-driven mechanism that made it safer and more accessible to the general public. This design became the standard for bicycles for the next few decades. The safety bicycle was a key innovation that made cycling a practical and popular mode of transportation."
+            },
+            "next": {
+              "outcome": "completed",
+              "error_code": null,
+              "http_status": 200,
+              "records": 11,
+              "deltas": 2,
+              "done": true,
+              "done_reason": "stop",
+              "first_record_ms": 2949.8,
+              "total_ms": 3189.7,
+              "upstream_error": null,
+              "eval_count": 11,
+              "answer": "Tokyo"
+            }
+          },
+          "recovery": null,
+          "checks": [
+            {
+              "name": "running stream completed",
+              "expected": "completed",
+              "actual": "truncated",
+              "passed": false
+            },
+            {
+              "name": "model unloaded afterwards",
+              "expected": "no loaded model",
+              "actual": "0",
+              "passed": true
+            },
+            {
+              "name": "next request completes (cold)",
+              "expected": "completed",
+              "actual": "completed",
+              "passed": true
+            }
+          ]
+        },
+        {
+          "repetition": 5,
+          "passed": false,
+          "actual": {
+            "running": {
+              "outcome": "truncated",
+              "error_code": "AI_RESPONSE_TOO_LARGE",
+              "http_status": 200,
+              "records": 301,
+              "deltas": 294,
+              "done": true,
+              "done_reason": "length",
+              "first_record_ms": 47.1,
+              "total_ms": 5318.8,
+              "upstream_error": null,
+              "eval_count": 300,
+              "answer": "The history of the bicycle is a fascinating journey through innovation, engineering, and cultural shifts. It began in the early 19th century with the invention of the 'dandy horse,' a two-wheeled vehicle with a fixed rear wheel and a foot-operated mechanism that allowed the rider to move forward. However, this early design was cumbersome and impractical for most people. The real breakthrough came with the development of the 'penny-farthing' in the 1870s, which featured a large front wheel and a small rear wheel. This design allowed for higher speeds but was dangerous due to its unstable and unbalanced nature. The penny-farthing became popular in Europe and the United States, with many enthusiasts riding it on streets and in parks. However, its dangers led to the creation of the 'velocipede' in the 1880s, which was a more stable and practical design with a chain-driven mechanism that connected the pedals to the rear wheel. The velocipede was a significant improvement over the penny-far. The next major development was the introduction of the 'safety bicycle' in the 1880s, which featured equal-sized wheels and a chain-driven mechanism that made it safer and more accessible to the general public. This design became the standard for bicycles for the next few decades. The safety bicycle was a key innovation that made cycling a practical and popular mode of transportation."
+            },
+            "next": {
+              "outcome": "completed",
+              "error_code": null,
+              "http_status": 200,
+              "records": 11,
+              "deltas": 2,
+              "done": true,
+              "done_reason": "stop",
+              "first_record_ms": 3192.1,
+              "total_ms": 3435.2,
+              "upstream_error": null,
+              "eval_count": 11,
+              "answer": "Tokyo"
+            }
+          },
+          "recovery": null,
+          "checks": [
+            {
+              "name": "running stream completed",
+              "expected": "completed",
+              "actual": "truncated",
+              "passed": false
+            },
+            {
+              "name": "model unloaded afterwards",
+              "expected": "no loaded model",
+              "actual": "0",
+              "passed": true
+            },
+            {
+              "name": "next request completes (cold)",
+              "expected": "completed",
+              "actual": "completed",
+              "passed": true
+            }
+          ]
+        },
+        {
+          "repetition": 6,
+          "passed": false,
+          "actual": {
+            "running": {
+              "outcome": "truncated",
+              "error_code": "AI_RESPONSE_TOO_LARGE",
+              "http_status": 200,
+              "records": 301,
+              "deltas": 294,
+              "done": true,
+              "done_reason": "length",
+              "first_record_ms": 47.8,
+              "total_ms": 5385.5,
+              "upstream_error": null,
+              "eval_count": 300,
+              "answer": "The history of the bicycle is a fascinating journey through innovation, engineering, and cultural shifts. It began in the early 19th century with the invention of the 'dandy horse,' a two-wheeled vehicle with a fixed rear wheel and a foot-operated mechanism that allowed the rider to move forward. However, this early design was cumbersome and impractical for most people. The real breakthrough came with the development of the 'penny-farthing' in the 1870s, which featured a large front wheel and a small rear wheel. This design allowed for higher speeds but was dangerous due to its unstable and unbalanced nature. The penny-farthing became popular in Europe and the United States, with many enthusiasts riding it on streets and in parks. However, its dangers led to the creation of the 'velocipede' in the 1880s, which was a more stable and practical design with a chain-driven mechanism that connected the pedals to the rear wheel. The velocipede was a significant improvement over the penny-far. The next major development was the introduction of the 'safety bicycle' in the 1880s, which featured equal-sized wheels and a chain-driven mechanism that made it safer and more accessible to the general public. This design became the standard for bicycles for the next few decades. The safety bicycle was a key innovation that made cycling a practical and popular mode of transportation."
+            },
+            "next": {
+              "outcome": "completed",
+              "error_code": null,
+              "http_status": 200,
+              "records": 11,
+              "deltas": 2,
+              "done": true,
+              "done_reason": "stop",
+              "first_record_ms": 3219.1,
+              "total_ms": 3448.5,
+              "upstream_error": null,
+              "eval_count": 11,
+              "answer": "Tokyo"
+            }
+          },
+          "recovery": null,
+          "checks": [
+            {
+              "name": "running stream completed",
+              "expected": "completed",
+              "actual": "truncated",
+              "passed": false
+            },
+            {
+              "name": "model unloaded afterwards",
+              "expected": "no loaded model",
+              "actual": "0",
+              "passed": true
+            },
+            {
+              "name": "next request completes (cold)",
+              "expected": "completed",
+              "actual": "completed",
+              "passed": true
+            }
+          ]
+        }
+      ],
+      "recovery_summary": null,
+      "passed": false
+    },
+    {
+      "id": "F06",
+      "name": "Model name does not exist",
+      "expected": [
+        "HTTP error within 2 s, code AI_PROVIDER_ERROR",
+        "the real model still answers afterwards"
+      ],
+      "repetitions": [
+        {
+          "repetition": 1,
+          "passed": true,
+          "actual": {
+            "missing_model": {
+              "outcome": "http_error",
+              "error_code": "AI_PROVIDER_ERROR",
+              "http_status": 404,
+              "records": 0,
+              "deltas": 0,
+              "done": false,
+              "done_reason": null,
+              "first_record_ms": null,
+              "total_ms": 6.4,
+              "upstream_error": "model 'no-such-model:0b' not found",
+              "eval_count": null,
+              "answer": ""
+            },
+            "after": {
+              "outcome": "completed",
+              "error_code": null,
+              "http_status": 200,
+              "records": 11,
+              "deltas": 2,
+              "done": true,
+              "done_reason": "stop",
+              "first_record_ms": 41.7,
+              "total_ms": 271.3,
+              "upstream_error": null,
+              "eval_count": 11,
+              "answer": "Tokyo"
+            }
+          },
+          "recovery": null,
+          "checks": [
+            {
+              "name": "outcome http_error",
+              "expected": "http_error",
+              "actual": "http_error",
+              "passed": true
+            },
+            {
+              "name": "error code",
+              "expected": "AI_PROVIDER_ERROR",
+              "actual": "AI_PROVIDER_ERROR",
+              "passed": true
+            },
+            {
+              "name": "fails fast",
+              "expected": "< 2000 ms",
+              "actual": "6.4",
+              "passed": true
+            },
+            {
+              "name": "real model still works",
+              "expected": "completed",
+              "actual": "completed",
+              "passed": true
+            }
+          ]
+        },
+        {
+          "repetition": 2,
+          "passed": true,
+          "actual": {
+            "missing_model": {
+              "outcome": "http_error",
+              "error_code": "AI_PROVIDER_ERROR",
+              "http_status": 404,
+              "records": 0,
+              "deltas": 0,
+              "done": false,
+              "done_reason": null,
+              "first_record_ms": null,
+              "total_ms": 2.3,
+              "upstream_error": "model 'no-such-model:0b' not found",
+              "eval_count": null,
+              "answer": ""
+            },
+            "after": {
+              "outcome": "completed",
+              "error_code": null,
+              "http_status": 200,
+              "records": 11,
+              "deltas": 2,
+              "done": true,
+              "done_reason": "stop",
+              "first_record_ms": 55.9,
+              "total_ms": 291.9,
+              "upstream_error": null,
+              "eval_count": 11,
+              "answer": "Tokyo"
+            }
+          },
+          "recovery": null,
+          "checks": [
+            {
+              "name": "outcome http_error",
+              "expected": "http_error",
+              "actual": "http_error",
+              "passed": true
+            },
+            {
+              "name": "error code",
+              "expected": "AI_PROVIDER_ERROR",
+              "actual": "AI_PROVIDER_ERROR",
+              "passed": true
+            },
+            {
+              "name": "fails fast",
+              "expected": "< 2000 ms",
+              "actual": "2.3",
+              "passed": true
+            },
+            {
+              "name": "real model still works",
+              "expected": "completed",
+              "actual": "completed",
+              "passed": true
+            }
+          ]
+        },
+        {
+          "repetition": 3,
+          "passed": true,
+          "actual": {
+            "missing_model": {
+              "outcome": "http_error",
+              "error_code": "AI_PROVIDER_ERROR",
+              "http_status": 404,
+              "records": 0,
+              "deltas": 0,
+              "done": false,
+              "done_reason": null,
+              "first_record_ms": null,
+              "total_ms": 2.5,
+              "upstream_error": "model 'no-such-model:0b' not found",
+              "eval_count": null,
+              "answer": ""
+            },
+            "after": {
+              "outcome": "completed",
+              "error_code": null,
+              "http_status": 200,
+              "records": 11,
+              "deltas": 2,
+              "done": true,
+              "done_reason": "stop",
+              "first_record_ms": 53.5,
+              "total_ms": 288.8,
+              "upstream_error": null,
+              "eval_count": 11,
+              "answer": "Tokyo"
+            }
+          },
+          "recovery": null,
+          "checks": [
+            {
+              "name": "outcome http_error",
+              "expected": "http_error",
+              "actual": "http_error",
+              "passed": true
+            },
+            {
+              "name": "error code",
+              "expected": "AI_PROVIDER_ERROR",
+              "actual": "AI_PROVIDER_ERROR",
+              "passed": true
+            },
+            {
+              "name": "fails fast",
+              "expected": "< 2000 ms",
+              "actual": "2.5",
+              "passed": true
+            },
+            {
+              "name": "real model still works",
+              "expected": "completed",
+              "actual": "completed",
+              "passed": true
+            }
+          ]
+        },
+        {
+          "repetition": 4,
+          "passed": true,
+          "actual": {
+            "missing_model": {
+              "outcome": "http_error",
+              "error_code": "AI_PROVIDER_ERROR",
+              "http_status": 404,
+              "records": 0,
+              "deltas": 0,
+              "done": false,
+              "done_reason": null,
+              "first_record_ms": null,
+              "total_ms": 2.3,
+              "upstream_error": "model 'no-such-model:0b' not found",
+              "eval_count": null,
+              "answer": ""
+            },
+            "after": {
+              "outcome": "completed",
+              "error_code": null,
+              "http_status": 200,
+              "records": 11,
+              "deltas": 2,
+              "done": true,
+              "done_reason": "stop",
+              "first_record_ms": 56.4,
+              "total_ms": 288.3,
+              "upstream_error": null,
+              "eval_count": 11,
+              "answer": "Tokyo"
+            }
+          },
+          "recovery": null,
+          "checks": [
+            {
+              "name": "outcome http_error",
+              "expected": "http_error",
+              "actual": "http_error",
+              "passed": true
+            },
+            {
+              "name": "error code",
+              "expected": "AI_PROVIDER_ERROR",
+              "actual": "AI_PROVIDER_ERROR",
+              "passed": true
+            },
+            {
+              "name": "fails fast",
+              "expected": "< 2000 ms",
+              "actual": "2.3",
+              "passed": true
+            },
+            {
+              "name": "real model still works",
+              "expected": "completed",
+              "actual": "completed",
+              "passed": true
+            }
+          ]
+        },
+        {
+          "repetition": 5,
+          "passed": true,
+          "actual": {
+            "missing_model": {
+              "outcome": "http_error",
+              "error_code": "AI_PROVIDER_ERROR",
+              "http_status": 404,
+              "records": 0,
+              "deltas": 0,
+              "done": false,
+              "done_reason": null,
+              "first_record_ms": null,
+              "total_ms": 2.0,
+              "upstream_error": "model 'no-such-model:0b' not found",
+              "eval_count": null,
+              "answer": ""
+            },
+            "after": {
+              "outcome": "completed",
+              "error_code": null,
+              "http_status": 200,
+              "records": 11,
+              "deltas": 2,
+              "done": true,
+              "done_reason": "stop",
+              "first_record_ms": 49.2,
+              "total_ms": 294.9,
+              "upstream_error": null,
+              "eval_count": 11,
+              "answer": "Tokyo"
+            }
+          },
+          "recovery": null,
+          "checks": [
+            {
+              "name": "outcome http_error",
+              "expected": "http_error",
+              "actual": "http_error",
+              "passed": true
+            },
+            {
+              "name": "error code",
+              "expected": "AI_PROVIDER_ERROR",
+              "actual": "AI_PROVIDER_ERROR",
+              "passed": true
+            },
+            {
+              "name": "fails fast",
+              "expected": "< 2000 ms",
+              "actual": "2",
+              "passed": true
+            },
+            {
+              "name": "real model still works",
+              "expected": "completed",
+              "actual": "completed",
+              "passed": true
+            }
+          ]
+        },
+        {
+          "repetition": 6,
+          "passed": true,
+          "actual": {
+            "missing_model": {
+              "outcome": "http_error",
+              "error_code": "AI_PROVIDER_ERROR",
+              "http_status": 404,
+              "records": 0,
+              "deltas": 0,
+              "done": false,
+              "done_reason": null,
+              "first_record_ms": null,
+              "total_ms": 2.6,
+              "upstream_error": "model 'no-such-model:0b' not found",
+              "eval_count": null,
+              "answer": ""
+            },
+            "after": {
+              "outcome": "completed",
+              "error_code": null,
+              "http_status": 200,
+              "records": 11,
+              "deltas": 2,
+              "done": true,
+              "done_reason": "stop",
+              "first_record_ms": 51.3,
+              "total_ms": 294.3,
+              "upstream_error": null,
+              "eval_count": 11,
+              "answer": "Tokyo"
+            }
+          },
+          "recovery": null,
+          "checks": [
+            {
+              "name": "outcome http_error",
+              "expected": "http_error",
+              "actual": "http_error",
+              "passed": true
+            },
+            {
+              "name": "error code",
+              "expected": "AI_PROVIDER_ERROR",
+              "actual": "AI_PROVIDER_ERROR",
+              "passed": true
+            },
+            {
+              "name": "fails fast",
+              "expected": "< 2000 ms",
+              "actual": "2.6",
+              "passed": true
+            },
+            {
+              "name": "real model still works",
+              "expected": "completed",
+              "actual": "completed",
+              "passed": true
+            }
+          ]
+        }
+      ],
+      "recovery_summary": null,
+      "passed": true
+    },
+    {
+      "id": "F07",
+      "name": "Answer cut by the token limit (done_reason length)",
+      "expected": [
+        "outcome truncated, code AI_RESPONSE_TOO_LARGE",
+        "the same prompt is cut at the same point again (retrying is useless)"
+      ],
+      "repetitions": [
+        {
+          "repetition": 1,
+          "passed": true,
+          "actual": {
+            "first": {
+              "outcome": "truncated",
+              "error_code": "AI_RESPONSE_TOO_LARGE",
+              "http_status": 200,
+              "records": 25,
+              "deltas": 18,
+              "done": true,
+              "done_reason": "length",
+              "first_record_ms": 61.6,
+              "total_ms": 495.0,
+              "upstream_error": null,
+              "eval_count": 24,
+              "answer": "The history of the bicycle is a fascinating journey through innovation, engineering, and cultural shifts."
+            },
+            "retry": {
+              "outcome": "truncated",
+              "error_code": "AI_RESPONSE_TOO_LARGE",
+              "http_status": 200,
+              "records": 25,
+              "deltas": 18,
+              "done": true,
+              "done_reason": "length",
+              "first_record_ms": 52.8,
+              "total_ms": 485.5,
+              "upstream_error": null,
+              "eval_count": 24,
+              "answer": "The history of the bicycle is a fascinating journey through innovation, engineering, and cultural shifts."
+            }
+          },
+          "recovery": null,
+          "checks": [
+            {
+              "name": "outcome truncated",
+              "expected": "truncated",
+              "actual": "truncated",
+              "passed": true
+            },
+            {
+              "name": "error code",
+              "expected": "AI_RESPONSE_TOO_LARGE",
+              "actual": "AI_RESPONSE_TOO_LARGE",
+              "passed": true
+            },
+            {
+              "name": "retry gives the same cut",
+              "expected": "same answer",
+              "actual": "24/24",
+              "passed": true
+            }
+          ]
+        },
+        {
+          "repetition": 2,
+          "passed": true,
+          "actual": {
+            "first": {
+              "outcome": "truncated",
+              "error_code": "AI_RESPONSE_TOO_LARGE",
+              "http_status": 200,
+              "records": 25,
+              "deltas": 18,
+              "done": true,
+              "done_reason": "length",
+              "first_record_ms": 64.0,
+              "total_ms": 502.4,
+              "upstream_error": null,
+              "eval_count": 24,
+              "answer": "The history of the bicycle is a fascinating journey through innovation, engineering, and cultural shifts."
+            },
+            "retry": {
+              "outcome": "truncated",
+              "error_code": "AI_RESPONSE_TOO_LARGE",
+              "http_status": 200,
+              "records": 25,
+              "deltas": 18,
+              "done": true,
+              "done_reason": "length",
+              "first_record_ms": 52.2,
+              "total_ms": 488.3,
+              "upstream_error": null,
+              "eval_count": 24,
+              "answer": "The history of the bicycle is a fascinating journey through innovation, engineering, and cultural shifts."
+            }
+          },
+          "recovery": null,
+          "checks": [
+            {
+              "name": "outcome truncated",
+              "expected": "truncated",
+              "actual": "truncated",
+              "passed": true
+            },
+            {
+              "name": "error code",
+              "expected": "AI_RESPONSE_TOO_LARGE",
+              "actual": "AI_RESPONSE_TOO_LARGE",
+              "passed": true
+            },
+            {
+              "name": "retry gives the same cut",
+              "expected": "same answer",
+              "actual": "24/24",
+              "passed": true
+            }
+          ]
+        },
+        {
+          "repetition": 3,
+          "passed": true,
+          "actual": {
+            "first": {
+              "outcome": "truncated",
+              "error_code": "AI_RESPONSE_TOO_LARGE",
+              "http_status": 200,
+              "records": 25,
+              "deltas": 18,
+              "done": true,
+              "done_reason": "length",
+              "first_record_ms": 59.8,
+              "total_ms": 492.2,
+              "upstream_error": null,
+              "eval_count": 24,
+              "answer": "The history of the bicycle is a fascinating journey through innovation, engineering, and cultural shifts."
+            },
+            "retry": {
+              "outcome": "truncated",
+              "error_code": "AI_RESPONSE_TOO_LARGE",
+              "http_status": 200,
+              "records": 25,
+              "deltas": 18,
+              "done": true,
+              "done_reason": "length",
+              "first_record_ms": 54.4,
+              "total_ms": 493.6,
+              "upstream_error": null,
+              "eval_count": 24,
+              "answer": "The history of the bicycle is a fascinating journey through innovation, engineering, and cultural shifts."
+            }
+          },
+          "recovery": null,
+          "checks": [
+            {
+              "name": "outcome truncated",
+              "expected": "truncated",
+              "actual": "truncated",
+              "passed": true
+            },
+            {
+              "name": "error code",
+              "expected": "AI_RESPONSE_TOO_LARGE",
+              "actual": "AI_RESPONSE_TOO_LARGE",
+              "passed": true
+            },
+            {
+              "name": "retry gives the same cut",
+              "expected": "same answer",
+              "actual": "24/24",
+              "passed": true
+            }
+          ]
+        },
+        {
+          "repetition": 4,
+          "passed": true,
+          "actual": {
+            "first": {
+              "outcome": "truncated",
+              "error_code": "AI_RESPONSE_TOO_LARGE",
+              "http_status": 200,
+              "records": 25,
+              "deltas": 18,
+              "done": true,
+              "done_reason": "length",
+              "first_record_ms": 72.4,
+              "total_ms": 513.9,
+              "upstream_error": null,
+              "eval_count": 24,
+              "answer": "The history of the bicycle is a fascinating journey through innovation, engineering, and cultural shifts."
+            },
+            "retry": {
+              "outcome": "truncated",
+              "error_code": "AI_RESPONSE_TOO_LARGE",
+              "http_status": 200,
+              "records": 25,
+              "deltas": 18,
+              "done": true,
+              "done_reason": "length",
+              "first_record_ms": 53.6,
+              "total_ms": 481.7,
+              "upstream_error": null,
+              "eval_count": 24,
+              "answer": "The history of the bicycle is a fascinating journey through innovation, engineering, and cultural shifts."
+            }
+          },
+          "recovery": null,
+          "checks": [
+            {
+              "name": "outcome truncated",
+              "expected": "truncated",
+              "actual": "truncated",
+              "passed": true
+            },
+            {
+              "name": "error code",
+              "expected": "AI_RESPONSE_TOO_LARGE",
+              "actual": "AI_RESPONSE_TOO_LARGE",
+              "passed": true
+            },
+            {
+              "name": "retry gives the same cut",
+              "expected": "same answer",
+              "actual": "24/24",
+              "passed": true
+            }
+          ]
+        },
+        {
+          "repetition": 5,
+          "passed": true,
+          "actual": {
+            "first": {
+              "outcome": "truncated",
+              "error_code": "AI_RESPONSE_TOO_LARGE",
+              "http_status": 200,
+              "records": 25,
+              "deltas": 18,
+              "done": true,
+              "done_reason": "length",
+              "first_record_ms": 64.4,
+              "total_ms": 499.9,
+              "upstream_error": null,
+              "eval_count": 24,
+              "answer": "The history of the bicycle is a fascinating journey through innovation, engineering, and cultural shifts."
+            },
+            "retry": {
+              "outcome": "truncated",
+              "error_code": "AI_RESPONSE_TOO_LARGE",
+              "http_status": 200,
+              "records": 25,
+              "deltas": 18,
+              "done": true,
+              "done_reason": "length",
+              "first_record_ms": 54.6,
+              "total_ms": 490.0,
+              "upstream_error": null,
+              "eval_count": 24,
+              "answer": "The history of the bicycle is a fascinating journey through innovation, engineering, and cultural shifts."
+            }
+          },
+          "recovery": null,
+          "checks": [
+            {
+              "name": "outcome truncated",
+              "expected": "truncated",
+              "actual": "truncated",
+              "passed": true
+            },
+            {
+              "name": "error code",
+              "expected": "AI_RESPONSE_TOO_LARGE",
+              "actual": "AI_RESPONSE_TOO_LARGE",
+              "passed": true
+            },
+            {
+              "name": "retry gives the same cut",
+              "expected": "same answer",
+              "actual": "24/24",
+              "passed": true
+            }
+          ]
+        },
+        {
+          "repetition": 6,
+          "passed": true,
+          "actual": {
+            "first": {
+              "outcome": "truncated",
+              "error_code": "AI_RESPONSE_TOO_LARGE",
+              "http_status": 200,
+              "records": 25,
+              "deltas": 18,
+              "done": true,
+              "done_reason": "length",
+              "first_record_ms": 55.8,
+              "total_ms": 486.8,
+              "upstream_error": null,
+              "eval_count": 24,
+              "answer": "The history of the bicycle is a fascinating journey through innovation, engineering, and cultural shifts."
+            },
+            "retry": {
+              "outcome": "truncated",
+              "error_code": "AI_RESPONSE_TOO_LARGE",
+              "http_status": 200,
+              "records": 25,
+              "deltas": 18,
+              "done": true,
+              "done_reason": "length",
+              "first_record_ms": 50.5,
+              "total_ms": 497.3,
+              "upstream_error": null,
+              "eval_count": 24,
+              "answer": "The history of the bicycle is a fascinating journey through innovation, engineering, and cultural shifts."
+            }
+          },
+          "recovery": null,
+          "checks": [
+            {
+              "name": "outcome truncated",
+              "expected": "truncated",
+              "actual": "truncated",
+              "passed": true
+            },
+            {
+              "name": "error code",
+              "expected": "AI_RESPONSE_TOO_LARGE",
+              "actual": "AI_RESPONSE_TOO_LARGE",
+              "passed": true
+            },
+            {
+              "name": "retry gives the same cut",
+              "expected": "same answer",
+              "actual": "24/24",
+              "passed": true
+            }
+          ]
+        }
+      ],
+      "recovery_summary": null,
+      "passed": true
+    },
+    {
+      "id": "F08",
+      "name": "Invalid request options (bad format value)",
+      "expected": [
+        "HTTP error status (400 was expected, Ollama answers 500) within 2 s, code AI_PROVIDER_ERROR",
+        "Ollama keeps serving afterwards"
+      ],
+      "repetitions": [
+        {
+          "repetition": 1,
+          "passed": true,
+          "actual": {
+            "invalid": {
+              "outcome": "http_error",
+              "error_code": "AI_PROVIDER_ERROR",
+              "http_status": 500,
+              "records": 0,
+              "deltas": 0,
+              "done": false,
+              "done_reason": null,
+              "first_record_ms": null,
+              "total_ms": 6.6,
+              "upstream_error": "invalid format: \"\\\"xml\\\"\"; expected \"json\" or a valid JSON Schema object",
+              "eval_count": null,
+              "answer": ""
+            },
+            "after": {
+              "outcome": "completed",
+              "error_code": null,
+              "http_status": 200,
+              "records": 11,
+              "deltas": 2,
+              "done": true,
+              "done_reason": "stop",
+              "first_record_ms": 51.1,
+              "total_ms": 291.4,
+              "upstream_error": null,
+              "eval_count": 11,
+              "answer": "Tokyo"
+            }
+          },
+          "recovery": null,
+          "checks": [
+            {
+              "name": "HTTP error status (400 expected, Ollama answers 500)",
+              "expected": "400 or 500",
+              "actual": "500",
+              "passed": true
+            },
+            {
+              "name": "error code",
+              "expected": "AI_PROVIDER_ERROR",
+              "actual": "AI_PROVIDER_ERROR",
+              "passed": true
+            },
+            {
+              "name": "fails fast",
+              "expected": "< 2000 ms",
+              "actual": "6.6",
+              "passed": true
+            },
+            {
+              "name": "still serving",
+              "expected": "completed",
+              "actual": "completed",
+              "passed": true
+            }
+          ]
+        },
+        {
+          "repetition": 2,
+          "passed": true,
+          "actual": {
+            "invalid": {
+              "outcome": "http_error",
+              "error_code": "AI_PROVIDER_ERROR",
+              "http_status": 500,
+              "records": 0,
+              "deltas": 0,
+              "done": false,
+              "done_reason": null,
+              "first_record_ms": null,
+              "total_ms": 6.7,
+              "upstream_error": "invalid format: \"\\\"xml\\\"\"; expected \"json\" or a valid JSON Schema object",
+              "eval_count": null,
+              "answer": ""
+            },
+            "after": {
+              "outcome": "completed",
+              "error_code": null,
+              "http_status": 200,
+              "records": 11,
+              "deltas": 2,
+              "done": true,
+              "done_reason": "stop",
+              "first_record_ms": 51.7,
+              "total_ms": 298.5,
+              "upstream_error": null,
+              "eval_count": 11,
+              "answer": "Tokyo"
+            }
+          },
+          "recovery": null,
+          "checks": [
+            {
+              "name": "HTTP error status (400 expected, Ollama answers 500)",
+              "expected": "400 or 500",
+              "actual": "500",
+              "passed": true
+            },
+            {
+              "name": "error code",
+              "expected": "AI_PROVIDER_ERROR",
+              "actual": "AI_PROVIDER_ERROR",
+              "passed": true
+            },
+            {
+              "name": "fails fast",
+              "expected": "< 2000 ms",
+              "actual": "6.7",
+              "passed": true
+            },
+            {
+              "name": "still serving",
+              "expected": "completed",
+              "actual": "completed",
+              "passed": true
+            }
+          ]
+        },
+        {
+          "repetition": 3,
+          "passed": true,
+          "actual": {
+            "invalid": {
+              "outcome": "http_error",
+              "error_code": "AI_PROVIDER_ERROR",
+              "http_status": 500,
+              "records": 0,
+              "deltas": 0,
+              "done": false,
+              "done_reason": null,
+              "first_record_ms": null,
+              "total_ms": 5.6,
+              "upstream_error": "invalid format: \"\\\"xml\\\"\"; expected \"json\" or a valid JSON Schema object",
+              "eval_count": null,
+              "answer": ""
+            },
+            "after": {
+              "outcome": "completed",
+              "error_code": null,
+              "http_status": 200,
+              "records": 11,
+              "deltas": 2,
+              "done": true,
+              "done_reason": "stop",
+              "first_record_ms": 55.4,
+              "total_ms": 294.0,
+              "upstream_error": null,
+              "eval_count": 11,
+              "answer": "Tokyo"
+            }
+          },
+          "recovery": null,
+          "checks": [
+            {
+              "name": "HTTP error status (400 expected, Ollama answers 500)",
+              "expected": "400 or 500",
+              "actual": "500",
+              "passed": true
+            },
+            {
+              "name": "error code",
+              "expected": "AI_PROVIDER_ERROR",
+              "actual": "AI_PROVIDER_ERROR",
+              "passed": true
+            },
+            {
+              "name": "fails fast",
+              "expected": "< 2000 ms",
+              "actual": "5.6",
+              "passed": true
+            },
+            {
+              "name": "still serving",
+              "expected": "completed",
+              "actual": "completed",
+              "passed": true
+            }
+          ]
+        },
+        {
+          "repetition": 4,
+          "passed": true,
+          "actual": {
+            "invalid": {
+              "outcome": "http_error",
+              "error_code": "AI_PROVIDER_ERROR",
+              "http_status": 500,
+              "records": 0,
+              "deltas": 0,
+              "done": false,
+              "done_reason": null,
+              "first_record_ms": null,
+              "total_ms": 7.5,
+              "upstream_error": "invalid format: \"\\\"xml\\\"\"; expected \"json\" or a valid JSON Schema object",
+              "eval_count": null,
+              "answer": ""
+            },
+            "after": {
+              "outcome": "completed",
+              "error_code": null,
+              "http_status": 200,
+              "records": 11,
+              "deltas": 2,
+              "done": true,
+              "done_reason": "stop",
+              "first_record_ms": 49.7,
+              "total_ms": 277.9,
+              "upstream_error": null,
+              "eval_count": 11,
+              "answer": "Tokyo"
+            }
+          },
+          "recovery": null,
+          "checks": [
+            {
+              "name": "HTTP error status (400 expected, Ollama answers 500)",
+              "expected": "400 or 500",
+              "actual": "500",
+              "passed": true
+            },
+            {
+              "name": "error code",
+              "expected": "AI_PROVIDER_ERROR",
+              "actual": "AI_PROVIDER_ERROR",
+              "passed": true
+            },
+            {
+              "name": "fails fast",
+              "expected": "< 2000 ms",
+              "actual": "7.5",
+              "passed": true
+            },
+            {
+              "name": "still serving",
+              "expected": "completed",
+              "actual": "completed",
+              "passed": true
+            }
+          ]
+        },
+        {
+          "repetition": 5,
+          "passed": true,
+          "actual": {
+            "invalid": {
+              "outcome": "http_error",
+              "error_code": "AI_PROVIDER_ERROR",
+              "http_status": 500,
+              "records": 0,
+              "deltas": 0,
+              "done": false,
+              "done_reason": null,
+              "first_record_ms": null,
+              "total_ms": 7.8,
+              "upstream_error": "invalid format: \"\\\"xml\\\"\"; expected \"json\" or a valid JSON Schema object",
+              "eval_count": null,
+              "answer": ""
+            },
+            "after": {
+              "outcome": "completed",
+              "error_code": null,
+              "http_status": 200,
+              "records": 11,
+              "deltas": 2,
+              "done": true,
+              "done_reason": "stop",
+              "first_record_ms": 49.8,
+              "total_ms": 286.0,
+              "upstream_error": null,
+              "eval_count": 11,
+              "answer": "Tokyo"
+            }
+          },
+          "recovery": null,
+          "checks": [
+            {
+              "name": "HTTP error status (400 expected, Ollama answers 500)",
+              "expected": "400 or 500",
+              "actual": "500",
+              "passed": true
+            },
+            {
+              "name": "error code",
+              "expected": "AI_PROVIDER_ERROR",
+              "actual": "AI_PROVIDER_ERROR",
+              "passed": true
+            },
+            {
+              "name": "fails fast",
+              "expected": "< 2000 ms",
+              "actual": "7.8",
+              "passed": true
+            },
+            {
+              "name": "still serving",
+              "expected": "completed",
+              "actual": "completed",
+              "passed": true
+            }
+          ]
+        },
+        {
+          "repetition": 6,
+          "passed": true,
+          "actual": {
+            "invalid": {
+              "outcome": "http_error",
+              "error_code": "AI_PROVIDER_ERROR",
+              "http_status": 500,
+              "records": 0,
+              "deltas": 0,
+              "done": false,
+              "done_reason": null,
+              "first_record_ms": null,
+              "total_ms": 9.3,
+              "upstream_error": "invalid format: \"\\\"xml\\\"\"; expected \"json\" or a valid JSON Schema object",
+              "eval_count": null,
+              "answer": ""
+            },
+            "after": {
+              "outcome": "completed",
+              "error_code": null,
+              "http_status": 200,
+              "records": 11,
+              "deltas": 2,
+              "done": true,
+              "done_reason": "stop",
+              "first_record_ms": 49.0,
+              "total_ms": 292.3,
+              "upstream_error": null,
+              "eval_count": 11,
+              "answer": "Tokyo"
+            }
+          },
+          "recovery": null,
+          "checks": [
+            {
+              "name": "HTTP error status (400 expected, Ollama answers 500)",
+              "expected": "400 or 500",
+              "actual": "500",
+              "passed": true
+            },
+            {
+              "name": "error code",
+              "expected": "AI_PROVIDER_ERROR",
+              "actual": "AI_PROVIDER_ERROR",
+              "passed": true
+            },
+            {
+              "name": "fails fast",
+              "expected": "< 2000 ms",
+              "actual": "9.3",
+              "passed": true
+            },
+            {
+              "name": "still serving",
+              "expected": "completed",
+              "actual": "completed",
+              "passed": true
+            }
+          ]
+        }
+      ],
+      "recovery_summary": null,
+      "passed": true
+    },
+    {
+      "id": "F09",
+      "name": "Client cancels in the middle of a stream",
+      "expected": [
+        "outcome cancelled",
+        "the next request gets its first record within 3 s (Ollama stopped generating)"
+      ],
+      "repetitions": [
+        {
+          "repetition": 1,
+          "passed": true,
+          "actual": {
+            "cancelled": {
+              "outcome": "cancelled",
+              "error_code": null,
+              "http_status": 200,
+              "records": 10,
+              "deltas": 4,
+              "done": false,
+              "done_reason": null,
+              "first_record_ms": 59.9,
+              "total_ms": 248.4,
+              "upstream_error": null,
+              "eval_count": null,
+              "answer": "The history of the"
+            },
+            "next": {
+              "outcome": "completed",
+              "error_code": null,
+              "http_status": 200,
+              "records": 11,
+              "deltas": 2,
+              "done": true,
+              "done_reason": "stop",
+              "first_record_ms": 83.1,
+              "total_ms": 317.8,
+              "upstream_error": null,
+              "eval_count": 11,
+              "answer": "Tokyo"
+            }
+          },
+          "recovery": {
+            "recovered": true,
+            "recovery_ms": 83.1,
+            "attempts": 1
+          },
+          "checks": [
+            {
+              "name": "outcome cancelled",
+              "expected": "cancelled",
+              "actual": "cancelled",
+              "passed": true
+            },
+            {
+              "name": "next request completes",
+              "expected": "completed",
+              "actual": "completed",
+              "passed": true
+            },
+            {
+              "name": "next first record within 3 s",
+              "expected": "< 3000 ms",
+              "actual": "83.1",
+              "passed": true
+            }
+          ]
+        },
+        {
+          "repetition": 2,
+          "passed": true,
+          "actual": {
+            "cancelled": {
+              "outcome": "cancelled",
+              "error_code": null,
+              "http_status": 200,
+              "records": 10,
+              "deltas": 4,
+              "done": false,
+              "done_reason": null,
+              "first_record_ms": 51.7,
+              "total_ms": 236.0,
+              "upstream_error": null,
+              "eval_count": null,
+              "answer": "The history of the"
+            },
+            "next": {
+              "outcome": "completed",
+              "error_code": null,
+              "http_status": 200,
+              "records": 11,
+              "deltas": 2,
+              "done": true,
+              "done_reason": "stop",
+              "first_record_ms": 78.9,
+              "total_ms": 321.3,
+              "upstream_error": null,
+              "eval_count": 11,
+              "answer": "Tokyo"
+            }
+          },
+          "recovery": {
+            "recovered": true,
+            "recovery_ms": 78.9,
+            "attempts": 1
+          },
+          "checks": [
+            {
+              "name": "outcome cancelled",
+              "expected": "cancelled",
+              "actual": "cancelled",
+              "passed": true
+            },
+            {
+              "name": "next request completes",
+              "expected": "completed",
+              "actual": "completed",
+              "passed": true
+            },
+            {
+              "name": "next first record within 3 s",
+              "expected": "< 3000 ms",
+              "actual": "78.9",
+              "passed": true
+            }
+          ]
+        },
+        {
+          "repetition": 3,
+          "passed": true,
+          "actual": {
+            "cancelled": {
+              "outcome": "cancelled",
+              "error_code": null,
+              "http_status": 200,
+              "records": 10,
+              "deltas": 4,
+              "done": false,
+              "done_reason": null,
+              "first_record_ms": 56.4,
+              "total_ms": 243.6,
+              "upstream_error": null,
+              "eval_count": null,
+              "answer": "The history of the"
+            },
+            "next": {
+              "outcome": "completed",
+              "error_code": null,
+              "http_status": 200,
+              "records": 11,
+              "deltas": 2,
+              "done": true,
+              "done_reason": "stop",
+              "first_record_ms": 85.4,
+              "total_ms": 341.8,
+              "upstream_error": null,
+              "eval_count": 11,
+              "answer": "Tokyo"
+            }
+          },
+          "recovery": {
+            "recovered": true,
+            "recovery_ms": 85.4,
+            "attempts": 1
+          },
+          "checks": [
+            {
+              "name": "outcome cancelled",
+              "expected": "cancelled",
+              "actual": "cancelled",
+              "passed": true
+            },
+            {
+              "name": "next request completes",
+              "expected": "completed",
+              "actual": "completed",
+              "passed": true
+            },
+            {
+              "name": "next first record within 3 s",
+              "expected": "< 3000 ms",
+              "actual": "85.4",
+              "passed": true
+            }
+          ]
+        },
+        {
+          "repetition": 4,
+          "passed": true,
+          "actual": {
+            "cancelled": {
+              "outcome": "cancelled",
+              "error_code": null,
+              "http_status": 200,
+              "records": 10,
+              "deltas": 4,
+              "done": false,
+              "done_reason": null,
+              "first_record_ms": 54.7,
+              "total_ms": 244.2,
+              "upstream_error": null,
+              "eval_count": null,
+              "answer": "The history of the"
+            },
+            "next": {
+              "outcome": "completed",
+              "error_code": null,
+              "http_status": 200,
+              "records": 11,
+              "deltas": 2,
+              "done": true,
+              "done_reason": "stop",
+              "first_record_ms": 88.1,
+              "total_ms": 331.4,
+              "upstream_error": null,
+              "eval_count": 11,
+              "answer": "Tokyo"
+            }
+          },
+          "recovery": {
+            "recovered": true,
+            "recovery_ms": 88.1,
+            "attempts": 1
+          },
+          "checks": [
+            {
+              "name": "outcome cancelled",
+              "expected": "cancelled",
+              "actual": "cancelled",
+              "passed": true
+            },
+            {
+              "name": "next request completes",
+              "expected": "completed",
+              "actual": "completed",
+              "passed": true
+            },
+            {
+              "name": "next first record within 3 s",
+              "expected": "< 3000 ms",
+              "actual": "88.1",
+              "passed": true
+            }
+          ]
+        },
+        {
+          "repetition": 5,
+          "passed": true,
+          "actual": {
+            "cancelled": {
+              "outcome": "cancelled",
+              "error_code": null,
+              "http_status": 200,
+              "records": 10,
+              "deltas": 4,
+              "done": false,
+              "done_reason": null,
+              "first_record_ms": 55.7,
+              "total_ms": 239.0,
+              "upstream_error": null,
+              "eval_count": null,
+              "answer": "The history of the"
+            },
+            "next": {
+              "outcome": "completed",
+              "error_code": null,
+              "http_status": 200,
+              "records": 11,
+              "deltas": 2,
+              "done": true,
+              "done_reason": "stop",
+              "first_record_ms": 88.6,
+              "total_ms": 334.5,
+              "upstream_error": null,
+              "eval_count": 11,
+              "answer": "Tokyo"
+            }
+          },
+          "recovery": {
+            "recovered": true,
+            "recovery_ms": 88.6,
+            "attempts": 1
+          },
+          "checks": [
+            {
+              "name": "outcome cancelled",
+              "expected": "cancelled",
+              "actual": "cancelled",
+              "passed": true
+            },
+            {
+              "name": "next request completes",
+              "expected": "completed",
+              "actual": "completed",
+              "passed": true
+            },
+            {
+              "name": "next first record within 3 s",
+              "expected": "< 3000 ms",
+              "actual": "88.6",
+              "passed": true
+            }
+          ]
+        },
+        {
+          "repetition": 6,
+          "passed": true,
+          "actual": {
+            "cancelled": {
+              "outcome": "cancelled",
+              "error_code": null,
+              "http_status": 200,
+              "records": 10,
+              "deltas": 4,
+              "done": false,
+              "done_reason": null,
+              "first_record_ms": 59.2,
+              "total_ms": 251.7,
+              "upstream_error": null,
+              "eval_count": null,
+              "answer": "The history of the"
+            },
+            "next": {
+              "outcome": "completed",
+              "error_code": null,
+              "http_status": 200,
+              "records": 11,
+              "deltas": 2,
+              "done": true,
+              "done_reason": "stop",
+              "first_record_ms": 82.1,
+              "total_ms": 326.5,
+              "upstream_error": null,
+              "eval_count": 11,
+              "answer": "Tokyo"
+            }
+          },
+          "recovery": {
+            "recovered": true,
+            "recovery_ms": 82.1,
+            "attempts": 1
+          },
+          "checks": [
+            {
+              "name": "outcome cancelled",
+              "expected": "cancelled",
+              "actual": "cancelled",
+              "passed": true
+            },
+            {
+              "name": "next request completes",
+              "expected": "completed",
+              "actual": "completed",
+              "passed": true
+            },
+            {
+              "name": "next first record within 3 s",
+              "expected": "< 3000 ms",
+              "actual": "82.1",
+              "passed": true
+            }
+          ]
+        }
+      ],
+      "recovery_summary": {
+        "n": 6,
+        "min_ms": 78.9,
+        "median_ms": 83.1,
+        "max_ms": 88.6
+      },
+      "passed": true
+    },
+    {
+      "id": "F10",
+      "name": "Queued request abandoned by its client (timeout while waiting)",
+      "expected": [
+        "the queued request times out on the client side",
+        "a later short request completes",
+        "it waits no longer than the running request needs plus 3 s (the abandoned request does not generate)"
+      ],
+      "repetitions": [
+        {
+          "repetition": 1,
+          "passed": false,
+          "actual": {
+            "queued": {
+              "outcome": "timeout",
+              "error_code": "AI_TIMEOUT",
+              "http_status": null,
+              "records": 0,
+              "deltas": 0,
+              "done": false,
+              "done_reason": null,
+              "first_record_ms": null,
+              "total_ms": 2005.1,
+              "upstream_error": null,
+              "eval_count": null,
+              "answer": ""
+            },
+            "later_short": {
+              "outcome": "completed",
+              "error_code": null,
+              "http_status": 200,
+              "records": 11,
+              "deltas": 2,
+              "done": true,
+              "done_reason": "stop",
+              "first_record_ms": 4586.8,
+              "total_ms": 4830.5,
+              "upstream_error": null,
+              "eval_count": 11,
+              "answer": "Tokyo"
+            },
+            "running_a_total_ms": 7141.0,
+            "a_remaining_ms": 4435
+          },
+          "recovery": {
+            "recovered": true,
+            "recovery_ms": 4830.0,
+            "attempts": 1
+          },
+          "checks": [
+            {
+              "name": "queued request times out",
+              "expected": "timeout",
+              "actual": "timeout",
+              "passed": true
+            },
+            {
+              "name": "running request completed",
+              "expected": "completed",
+              "actual": "truncated",
+              "passed": false
+            },
+            {
+              "name": "later short request completes",
+              "expected": "completed",
+              "actual": "completed",
+              "passed": true
+            },
+            {
+              "name": "abandoned request did not delay it",
+              "expected": "<= A remaining (4435 ms) + 3000 ms",
+              "actual": "4830.5",
+              "passed": true
+            }
+          ]
+        },
+        {
+          "repetition": 2,
+          "passed": false,
+          "actual": {
+            "queued": {
+              "outcome": "timeout",
+              "error_code": "AI_TIMEOUT",
+              "http_status": null,
+              "records": 0,
+              "deltas": 0,
+              "done": false,
+              "done_reason": null,
+              "first_record_ms": null,
+              "total_ms": 2001.9,
+              "upstream_error": null,
+              "eval_count": null,
+              "answer": ""
+            },
+            "later_short": {
+              "outcome": "completed",
+              "error_code": null,
+              "http_status": 200,
+              "records": 11,
+              "deltas": 2,
+              "done": true,
+              "done_reason": "stop",
+              "first_record_ms": 4577.8,
+              "total_ms": 4820.2,
+              "upstream_error": null,
+              "eval_count": 11,
+              "answer": "Tokyo"
+            },
+            "running_a_total_ms": 7207.7,
+            "a_remaining_ms": 4505
+          },
+          "recovery": {
+            "recovered": true,
+            "recovery_ms": 4820.0,
+            "attempts": 1
+          },
+          "checks": [
+            {
+              "name": "queued request times out",
+              "expected": "timeout",
+              "actual": "timeout",
+              "passed": true
+            },
+            {
+              "name": "running request completed",
+              "expected": "completed",
+              "actual": "truncated",
+              "passed": false
+            },
+            {
+              "name": "later short request completes",
+              "expected": "completed",
+              "actual": "completed",
+              "passed": true
+            },
+            {
+              "name": "abandoned request did not delay it",
+              "expected": "<= A remaining (4505 ms) + 3000 ms",
+              "actual": "4820.2",
+              "passed": true
+            }
+          ]
+        },
+        {
+          "repetition": 3,
+          "passed": false,
+          "actual": {
+            "queued": {
+              "outcome": "timeout",
+              "error_code": "AI_TIMEOUT",
+              "http_status": null,
+              "records": 0,
+              "deltas": 0,
+              "done": false,
+              "done_reason": null,
+              "first_record_ms": null,
+              "total_ms": 2008.6,
+              "upstream_error": null,
+              "eval_count": null,
+              "answer": ""
+            },
+            "later_short": {
+              "outcome": "completed",
+              "error_code": null,
+              "http_status": 200,
+              "records": 11,
+              "deltas": 2,
+              "done": true,
+              "done_reason": "stop",
+              "first_record_ms": 4500.9,
+              "total_ms": 4747.5,
+              "upstream_error": null,
+              "eval_count": 11,
+              "answer": "Tokyo"
+            },
+            "running_a_total_ms": 7110.1,
+            "a_remaining_ms": 4401
+          },
+          "recovery": {
+            "recovered": true,
+            "recovery_ms": 4748.0,
+            "attempts": 1
+          },
+          "checks": [
+            {
+              "name": "queued request times out",
+              "expected": "timeout",
+              "actual": "timeout",
+              "passed": true
+            },
+            {
+              "name": "running request completed",
+              "expected": "completed",
+              "actual": "truncated",
+              "passed": false
+            },
+            {
+              "name": "later short request completes",
+              "expected": "completed",
+              "actual": "completed",
+              "passed": true
+            },
+            {
+              "name": "abandoned request did not delay it",
+              "expected": "<= A remaining (4401 ms) + 3000 ms",
+              "actual": "4747.5",
+              "passed": true
+            }
+          ]
+        },
+        {
+          "repetition": 4,
+          "passed": false,
+          "actual": {
+            "queued": {
+              "outcome": "timeout",
+              "error_code": "AI_TIMEOUT",
+              "http_status": null,
+              "records": 0,
+              "deltas": 0,
+              "done": false,
+              "done_reason": null,
+              "first_record_ms": null,
+              "total_ms": 2007.8,
+              "upstream_error": null,
+              "eval_count": null,
+              "answer": ""
+            },
+            "later_short": {
+              "outcome": "completed",
+              "error_code": null,
+              "http_status": 200,
+              "records": 11,
+              "deltas": 2,
+              "done": true,
+              "done_reason": "stop",
+              "first_record_ms": 4558.7,
+              "total_ms": 4806.4,
+              "upstream_error": null,
+              "eval_count": 11,
+              "answer": "Tokyo"
+            },
+            "running_a_total_ms": 7181.2,
+            "a_remaining_ms": 4473
+          },
+          "recovery": {
+            "recovered": true,
+            "recovery_ms": 4806.0,
+            "attempts": 1
+          },
+          "checks": [
+            {
+              "name": "queued request times out",
+              "expected": "timeout",
+              "actual": "timeout",
+              "passed": true
+            },
+            {
+              "name": "running request completed",
+              "expected": "completed",
+              "actual": "truncated",
+              "passed": false
+            },
+            {
+              "name": "later short request completes",
+              "expected": "completed",
+              "actual": "completed",
+              "passed": true
+            },
+            {
+              "name": "abandoned request did not delay it",
+              "expected": "<= A remaining (4473 ms) + 3000 ms",
+              "actual": "4806.4",
+              "passed": true
+            }
+          ]
+        },
+        {
+          "repetition": 5,
+          "passed": false,
+          "actual": {
+            "queued": {
+              "outcome": "timeout",
+              "error_code": "AI_TIMEOUT",
+              "http_status": null,
+              "records": 0,
+              "deltas": 0,
+              "done": false,
+              "done_reason": null,
+              "first_record_ms": null,
+              "total_ms": 2008.0,
+              "upstream_error": null,
+              "eval_count": null,
+              "answer": ""
+            },
+            "later_short": {
+              "outcome": "completed",
+              "error_code": null,
+              "http_status": 200,
+              "records": 11,
+              "deltas": 2,
+              "done": true,
+              "done_reason": "stop",
+              "first_record_ms": 4514.5,
+              "total_ms": 4753.0,
+              "upstream_error": null,
+              "eval_count": 11,
+              "answer": "Tokyo"
+            },
+            "running_a_total_ms": 7136.7,
+            "a_remaining_ms": 4428
+          },
+          "recovery": {
+            "recovered": true,
+            "recovery_ms": 4753.0,
+            "attempts": 1
+          },
+          "checks": [
+            {
+              "name": "queued request times out",
+              "expected": "timeout",
+              "actual": "timeout",
+              "passed": true
+            },
+            {
+              "name": "running request completed",
+              "expected": "completed",
+              "actual": "truncated",
+              "passed": false
+            },
+            {
+              "name": "later short request completes",
+              "expected": "completed",
+              "actual": "completed",
+              "passed": true
+            },
+            {
+              "name": "abandoned request did not delay it",
+              "expected": "<= A remaining (4428 ms) + 3000 ms",
+              "actual": "4753",
+              "passed": true
+            }
+          ]
+        },
+        {
+          "repetition": 6,
+          "passed": false,
+          "actual": {
+            "queued": {
+              "outcome": "timeout",
+              "error_code": "AI_TIMEOUT",
+              "http_status": null,
+              "records": 0,
+              "deltas": 0,
+              "done": false,
+              "done_reason": null,
+              "first_record_ms": null,
+              "total_ms": 2014.4,
+              "upstream_error": null,
+              "eval_count": null,
+              "answer": ""
+            },
+            "later_short": {
+              "outcome": "completed",
+              "error_code": null,
+              "http_status": 200,
+              "records": 11,
+              "deltas": 2,
+              "done": true,
+              "done_reason": "stop",
+              "first_record_ms": 4537.9,
+              "total_ms": 4787.2,
+              "upstream_error": null,
+              "eval_count": 11,
+              "answer": "Tokyo"
+            },
+            "running_a_total_ms": 7173.1,
+            "a_remaining_ms": 4458
+          },
+          "recovery": {
+            "recovered": true,
+            "recovery_ms": 4787.0,
+            "attempts": 1
+          },
+          "checks": [
+            {
+              "name": "queued request times out",
+              "expected": "timeout",
+              "actual": "timeout",
+              "passed": true
+            },
+            {
+              "name": "running request completed",
+              "expected": "completed",
+              "actual": "truncated",
+              "passed": false
+            },
+            {
+              "name": "later short request completes",
+              "expected": "completed",
+              "actual": "completed",
+              "passed": true
+            },
+            {
+              "name": "abandoned request did not delay it",
+              "expected": "<= A remaining (4458 ms) + 3000 ms",
+              "actual": "4787.2",
+              "passed": true
+            }
+          ]
+        }
+      ],
+      "recovery_summary": {
+        "n": 6,
+        "min_ms": 4748.0,
+        "median_ms": 4787.0,
+        "max_ms": 4830.0
+      },
+      "passed": false
+    }
+  ],
+  "all_passed": false
+}
