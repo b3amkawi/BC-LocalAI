@@ -16,6 +16,7 @@ public static class ChatHistoryRules
     public const int MaxTitleLength = 200;
     public const string DefaultTitle = "New chat";
     public const int MaxCursorLength = 256;
+    public const int MaxRecentMessages = 200;
     // Draft storage ceiling only. The approved AI input/output budgets may be lower.
     public const int MaxMessageBytes = 1_048_576;
     private static readonly Encoding StrictUtf8 = new UTF8Encoding(false, true);

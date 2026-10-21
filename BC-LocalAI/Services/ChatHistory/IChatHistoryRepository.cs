@@ -54,4 +54,12 @@ public interface IChatHistoryRepository
     /// <exception cref="ChatHistoryValidationException">The limit or the cursor is invalid.</exception>
     Task<Page<ChatMessage>?> ListMessagesAsync(
         string userId, Guid conversationId, PageRequest page, CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// The newest <paramref name="maxCount"/> messages (any status) in conversation order, for the multi-turn context of a new
+    /// question; null when the conversation is not found for this user.
+    /// </summary>
+    /// <exception cref="ArgumentOutOfRangeException"><paramref name="maxCount"/> is outside 1..<see cref="ChatHistoryRules.MaxRecentMessages"/>.</exception>
+    Task<IReadOnlyList<ChatMessage>?> GetRecentMessagesAsync(
+        string userId, Guid conversationId, int maxCount, CancellationToken cancellationToken = default);
 }

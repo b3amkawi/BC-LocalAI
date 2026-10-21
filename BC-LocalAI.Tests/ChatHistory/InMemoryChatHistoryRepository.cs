@@ -182,6 +182,29 @@ internal sealed class InMemoryChatHistoryRepository(Func<DateTimeOffset> clock) 
         }
     }
 
+    public Task<IReadOnlyList<ChatMessage>?> GetRecentMessagesAsync(
+        string userId, Guid conversationId, int maxCount, CancellationToken cancellationToken = default)
+    {
+        cancellationToken.ThrowIfCancellationRequested();
+        ArgumentOutOfRangeException.ThrowIfLessThan(maxCount, 1);
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(maxCount, ChatHistoryRules.MaxRecentMessages);
+        lock (_gate)
+        {
+            if (FindOwned(userId, conversationId) is null)
+            {
+                return Task.FromResult<IReadOnlyList<ChatMessage>?>(null);
+            }
+
+            IReadOnlyList<ChatMessage> recent = _messages.Values
+                .Where(m => m.ConversationId == conversationId)
+                .OrderByDescending(m => m.Sequence)
+                .Take(maxCount)
+                .OrderBy(m => m.Sequence)
+                .ToList();
+            return Task.FromResult<IReadOnlyList<ChatMessage>?>(recent);
+        }
+    }
+
     private StoredConversation? FindOwned(string userId, Guid conversationId) =>
         !string.IsNullOrWhiteSpace(userId)
         && _conversations.TryGetValue(conversationId, out var stored)

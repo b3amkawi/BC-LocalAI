@@ -198,6 +198,25 @@ public sealed class MySqlChatHistoryRepository(IOptions<ChatHistoryOptions> opti
         });
     }
 
+    public Task<IReadOnlyList<ChatMessage>?> GetRecentMessagesAsync(
+        string userId, Guid conversationId, int maxCount, CancellationToken cancellationToken = default)
+    {
+        ArgumentOutOfRangeException.ThrowIfLessThan(maxCount, 1);
+        ArgumentOutOfRangeException.ThrowIfGreaterThan(maxCount, ChatHistoryRules.MaxRecentMessages);
+        return !IsUser(userId) ? WhenCancelled<IReadOnlyList<ChatMessage>?>(cancellationToken, null) : InTransaction(cancellationToken, async (connection, transaction) =>
+        {
+            if (await FindConversation(connection, transaction, userId, conversationId, lockRow: false, cancellationToken) is null)
+                return null;
+            await using var command = Command(connection, transaction,
+                $"SELECT {MessageColumns} FROM Messages m WHERE m.ConversationId = @conversation ORDER BY m.Sequence DESC LIMIT @take");
+            command.Parameters.Add("@conversation", MySqlDbType.Binary).Value = conversationId.ToByteArray(bigEndian: true);
+            command.Parameters.Add("@take", MySqlDbType.Int32).Value = maxCount;
+            var newestFirst = await ReadMessages(command, cancellationToken);
+            newestFirst.Reverse();
+            return (IReadOnlyList<ChatMessage>?)newestFirst;
+        });
+    }
+
     // ------------------------------------------------------------------ helpers
 
     private DateTimeOffset Now()

@@ -326,6 +326,36 @@ public abstract class ChatHistoryRepositoryContractTests
     }
 
     [Fact]
+    public async Task Recent_ReturnsTheNewestMessagesInConversationOrder_OwnerOnly()
+    {
+        var repo = Repo();
+        var conversation = await repo.CreateConversationAsync(Alice, "t");
+        for (var i = 1; i <= 5; i++)
+        {
+            Tick();
+            await repo.AddMessageAsync(Alice, conversation.Id, MessageRole.User, $"m{i}");
+        }
+
+        var recent = await repo.GetRecentMessagesAsync(Alice, conversation.Id, 3);
+
+        Assert.Equal(["m3", "m4", "m5"], recent!.Select(m => m.Content));
+        Assert.Null(await repo.GetRecentMessagesAsync(Bob, conversation.Id, 3));
+        await repo.DeleteConversationAsync(Alice, conversation.Id);
+        Assert.Null(await repo.GetRecentMessagesAsync(Alice, conversation.Id, 3));
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(ChatHistoryRules.MaxRecentMessages + 1)]
+    public async Task Recent_RejectsAnUnboundedCount(int count)
+    {
+        var repo = Repo();
+        var conversation = await repo.CreateConversationAsync(Alice, "t");
+
+        await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => repo.GetRecentMessagesAsync(Alice, conversation.Id, count));
+    }
+
+    [Fact]
     public async Task ACancelledCaller_ChangesNothing()
     {
         var repo = Repo();
