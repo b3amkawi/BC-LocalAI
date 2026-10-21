@@ -88,6 +88,12 @@ switch ($Action) {
         # Marker is local state, never a substitute for the data-directory identity check.
         [IO.File]::WriteAllText($ready, 'SEC-001 isolated development instance')
         Confirm-OwnInstance
+        if ($InstanceName -eq 'sec003-mysql') {
+            # The DBA's own file, run the way the DBA runs it (mysql client, DELIMITER for the triggers).
+            $audit = (Join-Path $repo 'database/sec003/admin-audit.sql').Replace('\', '/')
+            $null = & $client "--defaults-file=$admin" --connect-timeout=3 --batch --database=bc_localai_sec001 "--execute=source $audit" 2>&1
+            if ($LASTEXITCODE -ne 0) { throw 'Applying admin-audit.sql failed. No SQL, credentials or raw error output disclosed.' }
+        }
         Write-Output "Created isolated MySQL at 127.0.0.1:$Port, database bc_localai_sec001, 3 synthetic accounts."
     }
     'Start' {
@@ -137,10 +143,13 @@ switch ($Action) {
         $checks.stored_password_hashes = $LASTEXITCODE -eq 0
         if ($InstanceName -eq 'sec003-mysql') {
             $adminWriter = Join-Path $private 'admin-writer.cnf'
+            # Proves the writer's grants were applied (an error in the init file stops it silently).
+            $checks.admin_writer_can_resolve = (Invoke-Query 'SELECT COUNT(id) FROM bc_localai_sec001.users WHERE id IS NOT NULL;' $adminWriter) -eq '3'
+            $checks.audit_triggers = (Invoke-Query "SELECT COUNT(*) FROM information_schema.triggers WHERE trigger_schema='bc_localai_sec001' AND event_object_table='users' AND trigger_name LIKE 'trg_users_admin_audit_%';") -eq '2'
             $checks.audit_table = (Invoke-Query "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='bc_localai_sec001' AND table_name='admin_audit_log';") -eq '1'
             # The admin writer must not read hashes, read the audit log or touch any other table.
             $hash = & $client "--defaults-file=$adminWriter" --batch --execute='SELECT password_hash FROM bc_localai_sec001.users LIMIT 0;' 2>&1
-            $checks.admin_writer_cannot_read_hash = $LASTEXITCODE -ne 0 -and ($hash -join '') -match '1143'
+            $checks.admin_writer_cannot_read_hash = $LASTEXITCODE -ne 0 -and ($hash -join '') -match '114[23]'
             $audit = & $client "--defaults-file=$adminWriter" --batch --execute='SELECT id FROM bc_localai_sec001.admin_audit_log LIMIT 0;' 2>&1
             $checks.admin_writer_cannot_read_audit = $LASTEXITCODE -ne 0 -and ($audit -join '') -match '114[23]'
         }

@@ -11,21 +11,23 @@ internal interface IPasswordSource
 
 internal static class ExitCodes
 {
-    internal const int Ok = 0, Unexpected = 1, Usage = 2, NotFound = 3, Conflict = 4, Database = 5;
+    internal const int Ok = 0, Unexpected = 1, Usage = 2, NotFound = 3, Conflict = 4, Database = 5, OutcomeUnknown = 6;
 }
 
 /// <summary>
 /// SEC-003 admin account script. Output names the action, the target id and the audit record, never a password, hash or stamp.
 /// </summary>
+/// <param name="stdinIsTerminal">True when standard input is a console: --password-stdin is then refused, because the
+/// password would be echoed on screen.</param>
 internal sealed class AdminCli(TextReader stdin, TextWriter stdout, TextWriter stderr, IPasswordSource passwords,
-    Func<string, IAdminAccountStore> storeFactory, string osUser)
+    Func<string, IAdminAccountStore> storeFactory, string osUser, bool stdinIsTerminal = false)
 {
-    private static readonly string[] Flags = ["--password-stdin"];
+    private static readonly string[] Flags = ["--password-stdin", "--local-dev-database"];
     private static readonly string[] Options =
         ["--db-config", "--database", "--actor", "--user", "--username", "--display-name", "--role", "--writer-user", "--writer-host"];
 
     internal const string Usage = """
-        Usage: bc-admin <command> --db-config <full path> [--database <name>] --actor <your name> [options]
+        Usage: bc-admin <command> --db-config <full path> [--database <name>] [--local-dev-database] --actor <your name> [options]
           create          --username <name> --display-name <text> [--role User|Admin] [--password-stdin]
           disable         --user <id|username>      (also ends every session)
           enable          --user <id|username>
@@ -33,7 +35,8 @@ internal sealed class AdminCli(TextReader stdin, TextWriter stdout, TextWriter s
           set-role        --user <id|username> --role User|Admin    (also ends every session)
           revoke-sessions --user <id|username>
         bc-admin print-grants --writer-host <host> [--writer-user bc_admin_writer]
-        Passwords are typed at a hidden prompt (twice) or read from standard input with --password-stdin; never as arguments.
+        Passwords are typed at a hidden prompt (twice) or piped with --password-stdin; never as arguments.
+        --local-dev-database: loopback development database without certificate checks (TLS still required).
         """;
 
     internal async Task<int> RunAsync(string[] args, CancellationToken cancellationToken = default)
@@ -66,41 +69,44 @@ internal sealed class AdminCli(TextReader stdin, TextWriter stdout, TextWriter s
             if (flags.Contains("--password-stdin") && !needsPassword) return await Fail(ExitCodes.Usage, $"--password-stdin is not used by {command}.");
 
             var audit = new AuditContext(actor, osUser);
-            if (action == AdminAction.Create) return await Create(options, flags, audit, configPath, cancellationToken);
+            var connection = () => DbConfig.Load(configPath, options.GetValueOrDefault("--database"), flags.Contains("--local-dev-database"));
+            if (action == AdminAction.Create) return await Create(options, flags, audit, connection, cancellationToken);
 
             if (!options.TryGetValue("--user", out var target) || !(Guid.TryParseExact(target, "D", out _) || AccountPolicy.IsValidUsername(target)))
                 return await Fail(ExitCodes.Usage, "--user <id|username> is required.");
             string? value = null;
-            if (action == AdminAction.SetRole)
+            if (action == AdminAction.SetRole && (!options.TryGetValue("--role", out value) || !AccountPolicy.IsValidRole(value)))
+                return await Fail(ExitCodes.Usage, "--role must be User or Admin.");
+
+            var store = storeFactory(connection());
+            var account = await store.ResolveAsync(target, cancellationToken);
+            if (account is null) return await Fail(ExitCodes.NotFound, "Account not found. Nothing changed.");
+            if (action == AdminAction.ResetPassword)
             {
-                if (!options.TryGetValue("--role", out value) || !AccountPolicy.IsValidRole(value)) return await Fail(ExitCodes.Usage, "--role must be User or Admin.");
-            }
-            else if (action == AdminAction.ResetPassword)
-            {
-                var password = ReadPassword(flags, Guid.TryParseExact(target, "D", out _) ? null : target, out error);
+                // Asked after the lookup, so the username rule also applies when --user is an id.
+                var password = ReadPassword(flags, account.NormalizedUsername, out error);
                 if (password is null) return await Fail(ExitCodes.Usage, error);
                 value = AccountPolicy.HashPassword(password);
             }
-
-            var store = storeFactory(DbConfig.Load(configPath, options.GetValueOrDefault("--database")));
-            var userId = await store.ResolveUserIdAsync(target, cancellationToken);
-            if (userId is null) return await Fail(ExitCodes.NotFound, "Account not found. Nothing changed.");
-            var result = await store.ChangeAsync(userId, action.Value, value, audit, cancellationToken);
+            var result = await store.ChangeAsync(account.Id, action.Value, value, audit, cancellationToken);
             if (!result.Found) return await Fail(ExitCodes.NotFound, "Account not found. Nothing changed.");
             await stdout.WriteLineAsync($"OK {AdminActionText(action.Value)} user={result.UserId} sessions-revoked=yes audit={result.AuditId}");
             return ExitCodes.Ok;
+        }
+        catch (AdminOutcomeUnknownException)
+        {
+            return await Fail(ExitCodes.OutcomeUnknown, "The connection failed while saving: the change may or may not be saved. Check the account and the audit log before retrying.");
         }
         catch (AdminConfigException exception) { return await Fail(ExitCodes.Database, exception.Message); }
         catch (MySqlException exception) { return await Fail(exception.Number == 1062 ? ExitCodes.Conflict : ExitCodes.Database, DatabaseMessage(exception)); }
         catch (Exception exception) when (exception is not OperationCanceledException)
         {
-            // Type name only: messages may carry connection details. A connection lost during COMMIT leaves the outcome unknown,
-            // so do not promise that nothing changed.
+            // Type name only: messages may carry connection details. Not promised to be harmless: check before retrying.
             return await Fail(ExitCodes.Unexpected, $"Unexpected error ({exception.GetType().Name}). Check the account and the audit log before retrying.");
         }
     }
 
-    private async Task<int> Create(Dictionary<string, string> options, HashSet<string> flags, AuditContext audit, string configPath, CancellationToken cancellationToken)
+    private async Task<int> Create(Dictionary<string, string> options, HashSet<string> flags, AuditContext audit, Func<string> connection, CancellationToken cancellationToken)
     {
         if (!options.TryGetValue("--username", out var username) || !AccountPolicy.IsValidUsername(username))
             return await Fail(ExitCodes.Usage, "--username is required: up to 128 of A-Z a-z 0-9 . _ -");
@@ -111,7 +117,7 @@ internal sealed class AdminCli(TextReader stdin, TextWriter stdout, TextWriter s
         var password = ReadPassword(flags, username, out var error);
         if (password is null) return await Fail(ExitCodes.Usage, error);
 
-        var store = storeFactory(DbConfig.Load(configPath, options.GetValueOrDefault("--database")));
+        var store = storeFactory(connection());
         var result = await store.CreateAsync(new NewAccount(username, displayName, role, AccountPolicy.HashPassword(password)), audit, cancellationToken);
         await stdout.WriteLineAsync($"OK create user={result.UserId} role={role} active=yes audit={result.AuditId}");
         return ExitCodes.Ok;
@@ -124,7 +130,9 @@ internal sealed class AdminCli(TextReader stdin, TextWriter stdout, TextWriter s
         string[] grants;
         try { grants = AdminWriterGrants.Create(user, host); }
         catch (ArgumentException exception) { return await Fail(ExitCodes.Usage, exception.Message); }
-        await stdout.WriteLineAsync($"-- Create the account first with a generated secret: CREATE USER '{user}'@'{host}' IDENTIFIED BY '<secret>' REQUIRE SSL;");
+        // CREATE USER stays a comment: it needs a generated secret, never a placeholder that could be run as a real password.
+        await stdout.WriteLineAsync($"-- First, with a newly generated secret: CREATE USER '{user}'@'{host}' IDENTIFIED WITH caching_sha2_password BY '<secret>';");
+        await stdout.WriteLineAsync(AdminWriterGrants.AccountSettings(user, host));
         foreach (var grant in grants) await stdout.WriteLineAsync(grant);
         return ExitCodes.Ok;
     }
@@ -134,6 +142,7 @@ internal sealed class AdminCli(TextReader stdin, TextWriter stdout, TextWriter s
         string? password;
         if (flags.Contains("--password-stdin"))
         {
+            if (stdinIsTerminal) { error = "--password-stdin needs piped input; at a console use the hidden prompt instead."; return null; }
             password = stdin.ReadLine();
             if (password is null) { error = "No password on standard input."; return null; }
         }

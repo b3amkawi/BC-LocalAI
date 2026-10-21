@@ -17,25 +17,39 @@ public sealed class AdminScriptTests
     // ---- MySQL privileges -------------------------------------------------------------------------------------------
 
     [Fact]
-    public void WriterGrants_AreColumnScoped_OnUsersAndTheAuditLogOnly()
+    public void WriterGrants_AreColumnScoped_OnUsersOnly_AndNothingOnTheAuditLog()
     {
         var grants = AdminWriterGrants.Create("bc_admin_writer", "10.0.0.5");
 
         Assert.Equal(
         [
-            "GRANT SELECT (id, normalized_username, is_active, role) ON users TO 'bc_admin_writer'@'10.0.0.5';",
+            "GRANT SELECT (id, normalized_username) ON users TO 'bc_admin_writer'@'10.0.0.5';",
             "GRANT INSERT (id, username, normalized_username, display_name, password_hash, is_active, role, security_stamp, updated_at_utc) ON users TO 'bc_admin_writer'@'10.0.0.5';",
-            "GRANT UPDATE (password_hash, is_active, role, security_stamp, updated_at_utc) ON users TO 'bc_admin_writer'@'10.0.0.5';",
-            "GRANT INSERT (actor, os_user, db_user, action, target_user_id, detail) ON admin_audit_log TO 'bc_admin_writer'@'10.0.0.5';"
+            "GRANT UPDATE (password_hash, is_active, role, security_stamp, updated_at_utc) ON users TO 'bc_admin_writer'@'10.0.0.5';"
         ], grants);
         var all = string.Join('\n', grants);
-        foreach (var forbidden in new[] { "DELETE", "ALL", "*", "GRANT OPTION", "DROP", "ALTER", "CREATE", "FILE", "SUPER" })
+        foreach (var forbidden in new[] { "DELETE", "ALL", "*", "GRANT OPTION", "DROP", "ALTER", "CREATE", "FILE", "SUPER", "admin_audit_log", "%" })
             Assert.DoesNotContain(forbidden, all, StringComparison.Ordinal);
-        // The writer can never read a hash or a stamp, nor read/change the audit log, nor any other table (chats).
+        // The writer can never read a hash, a stamp, the status or the role; the audit log is written by the triggers only.
         Assert.DoesNotContain("password_hash", grants[0]);
         Assert.DoesNotContain("security_stamp", grants[0]);
-        Assert.All(grants, grant => Assert.Matches(@" ON (users|admin_audit_log) TO ", grant));
-        Assert.StartsWith("GRANT INSERT (", grants[3]);
+        Assert.All(grants, grant => Assert.Contains(" ON users TO ", grant));
+    }
+
+    [Fact]
+    public void WriterAccount_RequiresTls_AndLocksItselfAfterFailedLogins()
+    {
+        Assert.Equal("ALTER USER 'bc_admin_writer'@'10.0.0.0/255.255.255.0' REQUIRE SSL WITH MAX_USER_CONNECTIONS 4 FAILED_LOGIN_ATTEMPTS 5 PASSWORD_LOCK_TIME 1;",
+            AdminWriterGrants.AccountSettings("bc_admin_writer", "10.0.0.0/255.255.255.0"));
+    }
+
+    [Fact]
+    public void GrantsFile_ForTheDba_IsExactlyWhatTheScriptPrints()
+    {
+        var file = File.ReadAllLines(Path.Combine(RepoRoot(), "database", "sec003", "admin-writer-grants.sql"))
+            .Where(line => line.Length > 0 && !line.StartsWith("--")).Select(line => line.Replace("<admin-host>", "10.0.0.5"));
+
+        Assert.Equal([AdminWriterGrants.AccountSettings("bc_admin_writer", "10.0.0.5"), .. AdminWriterGrants.Create("bc_admin_writer", "10.0.0.5")], file);
     }
 
     [Theory]
@@ -43,6 +57,9 @@ public sealed class AdminScriptTests
     [InlineData("BC_ADMIN", "127.0.0.1")]
     [InlineData("bc_admin_writer", "host' OR '1")]
     [InlineData("", "127.0.0.1")]
+    [InlineData("bc_admin_writer", "%")]
+    [InlineData("bc_admin_writer", "10.0.0.%")]
+    [InlineData("bc_admin_writer", "admin_pc")]
     public void WriterGrants_RefuseAnythingButAPlainAccountAndHost(string user, string host) =>
         Assert.Throws<ArgumentException>(() => AdminWriterGrants.Create(user, host));
 
@@ -51,21 +68,34 @@ public sealed class AdminScriptTests
     {
         var sql = AdminWriterBootstrap.Create(Secret());
 
-        Assert.Contains("CREATE USER 'bc_admin_writer'@'127.0.0.1'", sql[0]);
-        Assert.EndsWith("REQUIRE SSL;", sql[0]);
-        Assert.Equal(AdminWriterGrants.Create("bc_admin_writer", "127.0.0.1"), sql.Skip(1));
+        Assert.StartsWith("CREATE USER 'bc_admin_writer'@'127.0.0.1' IDENTIFIED WITH caching_sha2_password BY '", sql[0]);
+        Assert.Equal(AdminWriterGrants.AccountSettings("bc_admin_writer", "127.0.0.1"), sql[1]);
+        Assert.Contains("REQUIRE SSL", sql[1]);
+        Assert.Equal(AdminWriterGrants.Create("bc_admin_writer", "127.0.0.1"), sql.Skip(2));
         Assert.Throws<ArgumentException>(() => AdminWriterBootstrap.Create("x'; DROP USER root; --"));
     }
 
     [Fact]
-    public void AuditTable_IsAdditive_AndHasNoColumnForSecrets()
+    public void AuditSql_IsAdditive_StrictInnoDbUtf8_AndNeverStoresASecret()
     {
-        var sql = File.ReadAllText(Path.Combine(RepoRoot(), "database", "sec003", "admin-audit.sql"));
+        var sql = File.ReadAllText(Path.Combine(RepoRoot(), "database", "sec003", "admin-audit.sql")).Replace("\r", "");
         var statements = string.Join('\n', sql.Split('\n').Where(line => !line.TrimStart().StartsWith("--")));
 
         Assert.Contains("CREATE TABLE IF NOT EXISTS admin_audit_log", statements);
-        foreach (var forbidden in new[] { "DROP", "DELETE", "TRUNCATE", "ALTER", "UPDATE", "INSERT", "password_hash", "security_stamp" })
+        Assert.Contains("ENGINE = InnoDB DEFAULT CHARSET = utf8mb4 COLLATE = utf8mb4_0900_bin", statements);
+        Assert.Contains("SET SESSION sql_mode = 'STRICT_ALL_TABLES,", statements); // triggers keep the mode they were created with
+        Assert.Contains("CREATE TRIGGER IF NOT EXISTS trg_users_admin_audit_insert AFTER INSERT ON users", statements);
+        Assert.Contains("CREATE TRIGGER IF NOT EXISTS trg_users_admin_audit_update AFTER UPDATE ON users", statements);
+        foreach (var forbidden in new[] { "DROP", "DELETE", "TRUNCATE", "ALTER", "UPDATE users", "CURRENT_USER" })
             Assert.DoesNotContain(forbidden, statements, StringComparison.OrdinalIgnoreCase);
+        // Audit rows take db_user from USER() on the server, and no VALUES list ever copies a hash or a stamp.
+        var values = System.Text.RegularExpressions.Regex.Matches(statements, @"VALUES \(([^;]*?)\);").Select(m => m.Groups[1].Value).ToArray();
+        Assert.Equal(5, values.Length);
+        Assert.All(values, v => Assert.Contains("USER()", v));
+        Assert.All(values, v => Assert.DoesNotContain("password_hash", v));
+        Assert.All(values, v => Assert.DoesNotContain("security_stamp", v));
+        var table = statements[statements.IndexOf("CREATE TABLE", StringComparison.Ordinal)..statements.IndexOf("DELIMITER", StringComparison.Ordinal)];
+        statements = table;
         // The exact column list ('reset_password' is only an action name), so a secret column cannot be added unnoticed.
         var columns = System.Text.RegularExpressions.Regex.Matches(statements, @"^\s+([a-z_]+) [A-Z]", System.Text.RegularExpressions.RegexOptions.Multiline)
             .Select(match => match.Groups[1].Value).ToArray();
@@ -112,12 +142,28 @@ public sealed class AdminScriptTests
     [Fact]
     public void CheckPassword_AcceptsTheBoundaries()
     {
-        Assert.Null(AccountPolicy.CheckPassword(new string('a', 12), "bob"));
+        Assert.Null(AccountPolicy.CheckPassword(new string('a', 15), "bob"));
         Assert.Null(AccountPolicy.CheckPassword(new string('a', 1024), "bob"));
-        Assert.NotNull(AccountPolicy.CheckPassword(new string('a', 11), "bob"));
+        Assert.NotNull(AccountPolicy.CheckPassword(new string('a', 14), "bob"));
         Assert.NotNull(AccountPolicy.CheckPassword(new string('a', 1025), "bob"));
         Assert.NotNull(AccountPolicy.CheckPassword(new string('ก', 1024 + 1), "bob"));
     }
+
+    [Fact]
+    public void CheckPassword_CountsCodePoints_NotUtf16Units()
+    {
+        // 14 emoji are 28 UTF-16 units but only 14 characters: refused. 15 are accepted.
+        Assert.NotNull(AccountPolicy.CheckPassword(string.Concat(Enumerable.Repeat("😀", 14)), "bob"));
+        Assert.Null(AccountPolicy.CheckPassword(string.Concat(Enumerable.Repeat("😀", 15)), "bob"));
+    }
+
+    [Theory]
+    [InlineData("bob", "my bob long password", true)]       // shorter than 4: substring allowed
+    [InlineData("al", "AL", false)]                            // ... but still compared as the whole password (too short anyway)
+    [InlineData("anna", "this-has-ANNA-inside", false)]       // 4 or more: contained anywhere, any case
+    [InlineData("anna", "a perfectly fine passphrase", true)]
+    public void CheckPassword_UsernameRule_AppliesFromFourCharacters(string username, string password, bool accepted) =>
+        Assert.Equal(accepted, AccountPolicy.CheckPassword(password, username) is null);
 
     [Theory]
     [InlineData("alice")]
@@ -160,7 +206,7 @@ public sealed class AdminScriptTests
     {
         using var file = PrivateFile.Create("bc_admin_writer", "127.0.0.1", database: "bc_test");
 
-        var builder = new MySqlConnectionStringBuilder(DbConfig.Load(file.Path));
+        var builder = new MySqlConnectionStringBuilder(DbConfig.Load(file.Path, allowLocalDevelopmentDatabase: true));
 
         Assert.Equal("bc_admin_writer", builder.UserID);
         Assert.Equal(file.Password, builder.Password);
@@ -169,7 +215,18 @@ public sealed class AdminScriptTests
         Assert.Equal(MySqlSslMode.Required, builder.SslMode);
         Assert.False(builder.UseAffectedRows);
         Assert.False(builder.AllowLoadLocalInfile);
-        Assert.Equal("other", new MySqlConnectionStringBuilder(DbConfig.Load(file.Path, "other")).Database);
+        Assert.True(builder.AllowUserVariables); // the audit triggers read @bc_admin_actor
+        Assert.Equal("other", new MySqlConnectionStringBuilder(DbConfig.Load(file.Path, "other", true)).Database);
+    }
+
+    [Fact]
+    public void DbConfig_Loopback_WithoutCertificateCheck_OnlyWhenExplicitlyALocalDevelopmentDatabase()
+    {
+        using var file = PrivateFile.Create("bc_admin_writer", "127.0.0.1", database: "bc");
+        Assert.Throws<AdminConfigException>(() => DbConfig.Load(file.Path));
+
+        using var withCa = PrivateFile.Create("bc_admin_writer", "127.0.0.1", database: "bc", extra: "ssl-ca=C:/certs/ca.pem");
+        Assert.Equal(MySqlSslMode.VerifyFull, new MySqlConnectionStringBuilder(DbConfig.Load(withCa.Path)).SslMode);
     }
 
     [Fact]
@@ -214,7 +271,7 @@ public sealed class AdminScriptTests
         Assert.Throws<AdminConfigException>(() => DbConfig.Load("admin-writer.cnf"));
         Assert.Throws<AdminConfigException>(() => DbConfig.Load(Path.Combine(Path.GetTempPath(), Guid.NewGuid() + ".cnf")));
         using var noDatabase = PrivateFile.Create("bc_admin_writer", "127.0.0.1", database: null);
-        Assert.Throws<AdminConfigException>(() => DbConfig.Load(noDatabase.Path));
+        Assert.Throws<AdminConfigException>(() => DbConfig.Load(noDatabase.Path, allowLocalDevelopmentDatabase: true));
     }
 
     [Fact]
@@ -238,7 +295,7 @@ public sealed class AdminScriptTests
         using var file = PrivateFile.Create("bc_admin_writer", "127.0.0.1", database: "bc");
         var run = Run.For(file);
 
-        var code = await run.Cli.RunAsync(["reset-password", "--db-config", file.Path, "--actor", "a", "--user", "alice", option, "S3cretValue!!"]);
+        var code = await run.Cli.RunAsync(["reset-password", "--db-config", file.Path, "--local-dev-database", "--actor", "a", "--user", "alice", option, "S3cretValue!!"]);
 
         Assert.Equal(ExitCodes.Usage, code);
         Assert.Contains("never accepted as arguments", run.Error);
@@ -253,7 +310,7 @@ public sealed class AdminScriptTests
         const string password = "correct horse battery";
         var run = Run.For(file, stdin: password + "\n");
 
-        var code = await run.Cli.RunAsync(["create", "--db-config", file.Path, "--actor", "ผู้ดูแล", "--username", "new.user",
+        var code = await run.Cli.RunAsync(["create", "--db-config", file.Path, "--local-dev-database", "--actor", "ผู้ดูแล", "--username", "new.user",
             "--display-name", "ผู้ใช้ใหม่", "--role", "Admin", "--password-stdin"]);
 
         Assert.Equal(ExitCodes.Ok, code);
@@ -272,21 +329,21 @@ public sealed class AdminScriptTests
         using var file = PrivateFile.Create("bc_admin_writer", "127.0.0.1", database: "bc");
         var run = Run.For(file, prompts: ["a long enough secret", "a long enough secret"]);
 
-        Assert.Equal(ExitCodes.Ok, await run.Cli.RunAsync(["create", "--db-config", file.Path, "--actor", "a", "--username", "u1", "--display-name", "U"]));
+        Assert.Equal(ExitCodes.Ok, await run.Cli.RunAsync(["create", "--db-config", file.Path, "--local-dev-database", "--actor", "a", "--username", "u1", "--display-name", "U"]));
         Assert.Equal("User", run.Store.Created.Single().Role);
         Assert.Equal(2, run.Prompts.Asked);
     }
 
     [Theory]
     [InlineData(new[] { "a long enough secret", "a long enough secreT" }, "do not match")]
-    [InlineData(new[] { "too short", "too short" }, "at least 12")]
+    [InlineData(new[] { "too short", "too short" }, "at least 15")]
     [InlineData(new string[0], "--password-stdin")]
     public async Task Create_RefusesABadOrMissingPassword_AndChangesNothing(string[] prompts, string expected)
     {
         using var file = PrivateFile.Create("bc_admin_writer", "127.0.0.1", database: "bc");
         var run = Run.For(file, prompts: prompts);
 
-        var code = await run.Cli.RunAsync(["create", "--db-config", file.Path, "--actor", "a", "--username", "u1", "--display-name", "U"]);
+        var code = await run.Cli.RunAsync(["create", "--db-config", file.Path, "--local-dev-database", "--actor", "a", "--username", "u1", "--display-name", "U"]);
 
         Assert.Equal(ExitCodes.Usage, code);
         Assert.Contains(expected, run.Error);
@@ -303,7 +360,7 @@ public sealed class AdminScriptTests
         var action = Enum.Parse<AdminAction>(actionName);
         using var file = PrivateFile.Create("bc_admin_writer", "127.0.0.1", database: "bc");
         var run = Run.For(file);
-        string[] args = ["--db-config", file.Path, "--actor", "a", "--user", "Alice"];
+        string[] args = ["--db-config", file.Path, "--local-dev-database", "--actor", "a", "--user", "Alice"];
 
         var code = await run.Cli.RunAsync([command, .. args, .. role is null ? Array.Empty<string>() : ["--role", role]]);
 
@@ -320,7 +377,7 @@ public sealed class AdminScriptTests
         const string password = "brand new passphrase";
         var run = Run.For(file, stdin: password + "\r\n");
 
-        Assert.Equal(ExitCodes.Ok, await run.Cli.RunAsync(["reset-password", "--db-config", file.Path, "--actor", "a", "--user", FakeStore.ExistingId, "--password-stdin"]));
+        Assert.Equal(ExitCodes.Ok, await run.Cli.RunAsync(["reset-password", "--db-config", file.Path, "--local-dev-database", "--actor", "a", "--user", FakeStore.ExistingId, "--password-stdin"]));
 
         var (_, action, value) = run.Store.Changes.Single();
         Assert.Equal(AdminAction.ResetPassword, action);
@@ -335,7 +392,7 @@ public sealed class AdminScriptTests
         using var file = PrivateFile.Create("bc_admin_writer", "127.0.0.1", database: "bc");
         var run = Run.For(file);
 
-        Assert.Equal(ExitCodes.NotFound, await run.Cli.RunAsync(["disable", "--db-config", file.Path, "--actor", "a", "--user", "nobody"]));
+        Assert.Equal(ExitCodes.NotFound, await run.Cli.RunAsync(["disable", "--db-config", file.Path, "--local-dev-database", "--actor", "a", "--user", "nobody"]));
         Assert.Empty(run.Store.Changes);
         Assert.Contains("Nothing changed", run.Error);
     }
@@ -357,7 +414,7 @@ public sealed class AdminScriptTests
         using var file = PrivateFile.Create("bc_admin_writer", "127.0.0.1", database: "bc");
         var run = Run.For(file, stdin: "a long enough secret\n");
 
-        Assert.Equal(ExitCodes.Usage, await run.Cli.RunAsync([args[0], "--db-config", file.Path, .. args.Skip(1)]));
+        Assert.Equal(ExitCodes.Usage, await run.Cli.RunAsync([args[0], "--db-config", file.Path, "--local-dev-database", .. args.Skip(1)]));
         Assert.Empty(run.Store.Calls);
     }
 
@@ -367,7 +424,7 @@ public sealed class AdminScriptTests
         using var file = PrivateFile.Create("bc_auth_reader", "127.0.0.1", database: "bc");
         var run = Run.For(file);
 
-        Assert.Equal(ExitCodes.Database, await run.Cli.RunAsync(["revoke-sessions", "--db-config", file.Path, "--actor", "a", "--user", "alice"]));
+        Assert.Equal(ExitCodes.Database, await run.Cli.RunAsync(["revoke-sessions", "--db-config", file.Path, "--local-dev-database", "--actor", "a", "--user", "alice"]));
         Assert.Contains("separate admin writer", run.Error);
         Assert.Empty(run.Store.Calls);
     }
@@ -379,9 +436,55 @@ public sealed class AdminScriptTests
         var run = Run.For(file);
         run.Store.Throw = new InvalidOperationException($"Server=127.0.0.1;Password={file.Password}");  // ci-allow-secret: generated fake value
 
-        Assert.Equal(ExitCodes.Unexpected, await run.Cli.RunAsync(["disable", "--db-config", file.Path, "--actor", "a", "--user", "alice"]));
+        Assert.Equal(ExitCodes.Unexpected, await run.Cli.RunAsync(["disable", "--db-config", file.Path, "--local-dev-database", "--actor", "a", "--user", "alice"]));
         Assert.Contains("InvalidOperationException", run.Error);
         Assert.DoesNotContain(file.Password, run.Output + run.Error);
+    }
+
+    [Fact]
+    public async Task ResetPassword_ById_StillRefusesAPasswordContainingTheUsername()
+    {
+        using var file = PrivateFile.Create("bc_admin_writer", "127.0.0.1", database: "bc");
+        var run = Run.For(file, stdin: "alice-was-here-2026\n"); // the fake account's normalized username is ALICE
+
+        Assert.Equal(ExitCodes.Usage, await run.Cli.RunAsync(["reset-password", "--db-config", file.Path, "--local-dev-database", "--actor", "a", "--user", FakeStore.ExistingId, "--password-stdin"]));
+        Assert.Contains("must not contain the username", run.Error);
+        Assert.Empty(run.Store.Changes);
+    }
+
+    [Fact]
+    public async Task PasswordStdin_AtAConsole_IsRefused_SoThePasswordIsNotEchoed()
+    {
+        using var file = PrivateFile.Create("bc_admin_writer", "127.0.0.1", database: "bc");
+        var run = Run.For(file, stdin: "a long enough secret\n", terminal: true);
+
+        Assert.Equal(ExitCodes.Usage, await run.Cli.RunAsync(["create", "--db-config", file.Path, "--local-dev-database", "--actor", "a",
+            "--username", "u1", "--display-name", "U", "--password-stdin"]));
+        Assert.Contains("needs piped input", run.Error);
+        Assert.Empty(run.Store.Calls);
+    }
+
+    [Fact]
+    public async Task ConnectionLostDuringCommit_Is6_AndNeverSaysNothingChanged()
+    {
+        using var file = PrivateFile.Create("bc_admin_writer", "127.0.0.1", database: "bc");
+        var run = Run.For(file);
+        run.Store.ThrowOnChange = new AdminOutcomeUnknownException();
+
+        Assert.Equal(ExitCodes.OutcomeUnknown, await run.Cli.RunAsync(["disable", "--db-config", file.Path, "--local-dev-database", "--actor", "a", "--user", "alice"]));
+        Assert.Contains("may or may not be saved", run.Error);
+        Assert.DoesNotContain("Nothing changed", run.Error);
+    }
+
+    [Fact]
+    public async Task LoopbackWithoutTheLocalDevFlag_IsRefused_BeforeAnyDatabaseCall()
+    {
+        using var file = PrivateFile.Create("bc_admin_writer", "127.0.0.1", database: "bc");
+        var run = Run.For(file);
+
+        Assert.Equal(ExitCodes.Database, await run.Cli.RunAsync(["disable", "--db-config", file.Path, "--actor", "a", "--user", "alice"]));
+        Assert.Contains("ssl-ca", run.Error);
+        Assert.Empty(run.Store.Calls);
     }
 
     [Fact]
@@ -391,8 +494,10 @@ public sealed class AdminScriptTests
 
         Assert.Equal(ExitCodes.Ok, await run.Cli.RunAsync(["print-grants", "--writer-host", "10.0.0.5"]));
         var lines = run.Output.Trim().Split(Environment.NewLine);
-        Assert.Contains("IDENTIFIED BY '<secret>' REQUIRE SSL", lines[0]);
-        Assert.Equal(AdminWriterGrants.Create("bc_admin_writer", "10.0.0.5"), lines.Skip(1));
+        Assert.StartsWith("-- ", lines[0]); // CREATE USER with a placeholder is never printed as a runnable statement
+        Assert.Contains("BY '<secret>'", lines[0]);
+        Assert.Equal(AdminWriterGrants.AccountSettings("bc_admin_writer", "10.0.0.5"), lines[1]);
+        Assert.Equal(AdminWriterGrants.Create("bc_admin_writer", "10.0.0.5"), lines.Skip(2));
         Assert.Equal(ExitCodes.Usage, await Run.For(null).Cli.RunAsync(["print-grants", "--writer-host", "x'; DROP"]));
     }
 
@@ -447,12 +552,12 @@ public sealed class AdminScriptTests
         public List<AuditContext> Audits { get; } = [];
         public Exception? Throw { get; set; }
 
-        public Task<string?> ResolveUserIdAsync(string idOrUsername, CancellationToken cancellationToken)
+        public Task<AccountRef?> ResolveAsync(string idOrUsername, CancellationToken cancellationToken)
         {
             Calls.Add("resolve");
             if (Throw is not null) throw Throw;
             Resolved.Add(idOrUsername);
-            return Task.FromResult(idOrUsername is "nobody" ? null : ExistingId);
+            return Task.FromResult(idOrUsername is "nobody" ? null : new AccountRef(ExistingId, "ALICE"));
         }
 
         public Task<AdminResult> CreateAsync(NewAccount account, AuditContext audit, CancellationToken cancellationToken)
@@ -463,9 +568,12 @@ public sealed class AdminScriptTests
             return Task.FromResult(new AdminResult(true, CreatedId, 42));
         }
 
+        public Exception? ThrowOnChange { get; set; }
+
         public Task<AdminResult> ChangeAsync(string userId, AdminAction action, string? value, AuditContext audit, CancellationToken cancellationToken)
         {
             Calls.Add("change");
+            if (ThrowOnChange is not null) throw ThrowOnChange;
             Changes.Add((userId, action, value));
             Audits.Add(audit);
             return Task.FromResult(new AdminResult(true, userId, 42));
@@ -481,7 +589,7 @@ public sealed class AdminScriptTests
         public string Output => output.ToString();
         public string Error => error.ToString();
 
-        private Run(PrivateFile? file, string stdin, string[] prompts)
+        private Run(PrivateFile? file, string stdin, string[] prompts, bool terminal)
         {
             Prompts = new FakePrompts(prompts);
             Cli = new AdminCli(new StringReader(stdin), output, error, Prompts, connection =>
@@ -489,9 +597,9 @@ public sealed class AdminScriptTests
                 // The store only ever receives the connection built from the private file.
                 Assert.Equal(file!.Password, new MySqlConnectionStringBuilder(connection).Password);
                 return Store;
-            }, @"CORP\operator");
+            }, @"CORP\operator", terminal);
         }
 
-        public static Run For(PrivateFile? file, string stdin = "", string[]? prompts = null) => new(file, stdin, prompts ?? []);
+        public static Run For(PrivateFile? file, string stdin = "", string[]? prompts = null, bool terminal = false) => new(file, stdin, prompts ?? [], terminal);
     }
 }

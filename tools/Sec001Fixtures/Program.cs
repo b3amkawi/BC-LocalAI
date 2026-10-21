@@ -40,15 +40,11 @@ var schemaSql = string.Join(" ", File.ReadAllLines(schema)
 var bootstrap = BootstrapScript.Create(secrets, schemaSql, fixtures);
 var writerSecret = args.Length == 4 ? FixtureFactory.RandomSecret() : null;
 if (writerSecret is not null) bootstrap.AddRange(AttemptWriterBootstrap.Create(writerSecret));
-// SEC-003 adds the audit table (same file the DBA runs) and the admin writer on top of the BE-005 writer, since the
-// live tests also sign in through the real app.
+// SEC-003 adds the admin writer on top of the BE-005 writer, since the live tests also sign in through the real app.
+// The audit table and triggers are applied after the first start by local-mysql.ps1 with the mysql client, from the same
+// database/sec003/admin-audit.sql a DBA runs (triggers need DELIMITER, which --init-file does not support).
 var adminWriterSecret = args.Length == 4 && args[3] == "sec003-admin-writer" ? FixtureFactory.RandomSecret() : null;
-if (adminWriterSecret is not null)
-{
-    var auditSql = Path.GetFullPath(Path.Combine(Path.GetDirectoryName(schema)!, "..", "sec003", "admin-audit.sql"));
-    bootstrap.Add(string.Join(" ", File.ReadAllLines(auditSql).Where(line => !line.TrimStart().StartsWith("--"))));
-    bootstrap.AddRange(AdminWriterBootstrap.Create(adminWriterSecret));
-}
+if (adminWriterSecret is not null) bootstrap.AddRange(AdminWriterBootstrap.Create(adminWriterSecret));
 File.WriteAllLines(Path.Combine(output, "bootstrap.sql"), bootstrap, new UTF8Encoding(false));
 if (writerSecret is not null) File.WriteAllText(Path.Combine(output, "writer.cnf"), BootstrapScript.OptionFile("bc_auth_attempt_writer", writerSecret, port), new UTF8Encoding(false));
 if (adminWriterSecret is not null) File.WriteAllText(Path.Combine(output, "admin-writer.cnf"), BootstrapScript.OptionFile(BcAdmin.AdminWriterGrants.DefaultUser, adminWriterSecret, port), new UTF8Encoding(false));

@@ -16,7 +16,11 @@ internal static class DbConfig
     // Accounts that must never run account administration (SEC-001 / BE-005 least privilege).
     private static readonly string[] ReservedUsers = ["root", "bc_auth_reader", "bc_auth_attempt_writer", "bc_sec001_admin"];
 
-    internal static string Load(string path, string? databaseOverride = null)
+    /// <param name="allowLocalDevelopmentDatabase">
+    /// Like the app's Authentication:AllowLocalDevelopmentDatabase: only then may a loopback database skip certificate checks
+    /// (TLS still required). Everything else needs ssl-ca and VerifyFull.
+    /// </param>
+    internal static string Load(string path, string? databaseOverride = null, bool allowLocalDevelopmentDatabase = false)
     {
         if (!Path.IsPathFullyQualified(path) || !File.Exists(path)) throw new AdminConfigException("Database config file not found (use a full path).");
         EnsurePrivate(path);
@@ -35,16 +39,20 @@ internal static class DbConfig
             Database = databaseOverride ?? Field("database"),
             ConnectionTimeout = 5, DefaultCommandTimeout = 10, Pooling = false,
             // Found rows (not changed rows): an UPDATE that matches the account always reports 1.
-            UseAffectedRows = false, AllowLoadLocalInfile = false, AllowPublicKeyRetrieval = false, PersistSecurityInfo = false
+            UseAffectedRows = false, AllowLoadLocalInfile = false, AllowPublicKeyRetrieval = false, PersistSecurityInfo = false,
+            // The audit triggers read @bc_admin_actor / @bc_admin_os_user set by this session.
+            AllowUserVariables = true
         };
-        // Same rule as the app (AuthenticationOptionsValidator): TLS always; certificate and host checked unless loopback.
+        // Same rule as the app (AuthenticationOptionsValidator): TLS always; certificate and host checked unless an
+        // explicitly allowed local development database on loopback.
         var loopback = IPAddress.TryParse(host, out var ip) && IPAddress.IsLoopback(ip);
         if (fields.TryGetValue("ssl-ca", out var ca) && ca.Length > 0)
         {
             builder.SslCa = ca;
             builder.SslMode = MySqlSslMode.VerifyFull;
         }
-        else if (loopback) builder.SslMode = MySqlSslMode.Required;
+        else if (loopback && allowLocalDevelopmentDatabase) builder.SslMode = MySqlSslMode.Required;
+        else if (loopback) throw new AdminConfigException("Add 'ssl-ca' to the config file, or --local-dev-database for a local development database only.");
         else throw new AdminConfigException("A remote database needs 'ssl-ca' in the config file (certificate verification).");
         return builder.ConnectionString;
     }

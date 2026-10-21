@@ -7,12 +7,16 @@ namespace BcAdmin;
 
 /// <summary>
 /// Input rules for accounts written by the admin script. Username and length ceilings match BE-005's login validator, so every
-/// account created here can sign in. The 12-character minimum is a draft until the company password policy is approved.
+/// account created here can sign in. Password minimum: 15 code points (NIST SP 800-63B rev.4 §3.1.1.2, owner decision
+/// 2026-10-21 on the identity-policy review); no composition rules.
 /// </summary>
 internal static class AccountPolicy
 {
-    internal const int MinPasswordCharacters = 12;
+    internal const int MinPasswordCodePoints = 15;
+    // UTF-16 length, the unit BE-005's login validator limits; a longer password could be set but never used.
     internal const int MaxPasswordCharacters = 1024;
+    // The username check only applies to usernames of at least this length; shorter ones are refused only as the whole password.
+    internal const int MinUsernameLengthForContainsCheck = 4;
     internal const int MaxPasswordUtf8Bytes = 4096;
     internal static readonly string[] Roles = ["User", "Admin"];
     private static readonly Encoding StrictUtf8 = new UTF8Encoding(false, true);
@@ -35,11 +39,15 @@ internal static class AccountPolicy
     /// <summary>Returns a reason a password is refused, or null. The reason never contains the password.</summary>
     internal static string? CheckPassword(string password, string? username)
     {
-        if (password.Length < MinPasswordCharacters) return $"Password must have at least {MinPasswordCharacters} characters.";
+        // Valid text first: counting code points needs well-formed UTF-16.
+        if (!IsStrictUtf8(password) || StrictUtf8.GetByteCount(password) > MaxPasswordUtf8Bytes) return "Password is not valid text or is too long.";
+        if (password.EnumerateRunes().Count() < MinPasswordCodePoints) return $"Password must have at least {MinPasswordCodePoints} characters.";
         if (password.Length > MaxPasswordCharacters) return $"Password must have at most {MaxPasswordCharacters} characters.";
         if (string.IsNullOrWhiteSpace(password)) return "Password must not be only spaces.";
-        if (!IsStrictUtf8(password) || StrictUtf8.GetByteCount(password) > MaxPasswordUtf8Bytes) return "Password is not valid text or is too long.";
-        if (username is not null && password.Contains(username, StringComparison.OrdinalIgnoreCase)) return "Password must not contain the username.";
+        if (username is not null && (username.Length >= MinUsernameLengthForContainsCheck
+                ? password.Contains(username, StringComparison.OrdinalIgnoreCase)
+                : password.Equals(username, StringComparison.OrdinalIgnoreCase)))
+            return "Password must not contain the username.";
         return null;
     }
 

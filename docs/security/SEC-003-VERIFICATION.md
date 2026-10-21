@@ -1,56 +1,81 @@
 # SEC-003 — Verification report: Admin account management script
 
-Branch `watzapon_SEC-003` from `main` babbd61 (after PR #35, BE-006). Issue: [#37](https://github.com/b3amkawi/BC-LocalAI/issues/37).
-Date: 2026-10-21. Machine: Windows 11, RTX 4060 Laptop 8 GB (GPU not used by this work), MySQL 8.0 native, .NET SDK 10.0.402.
+Branch `watzapon_SEC-003` from `main` babbd61 (after PR #35, BE-006). Issue: [#37](https://github.com/b3amkawi/BC-LocalAI/issues/37), PR #38.
+Date: 2026-10-21. Machine: Windows 11, RTX 4060 Laptop 8 GB (GPU not used by this work), MySQL 8.0.46 native, .NET SDK 10.0.402.
 Every result below comes from a run on this machine; nothing was run against a company or production database.
+
+Two rounds: the first implementation (commit ae73725), then fixes after three specialist reviews (security code review,
+identity/password policy, MySQL DBA) — section 2. Sections 1, 3 and 5 describe the current code.
 
 ## 1. Scope delivered
 
-| Requirement (brief / issue draft) | Where | Evidence |
+| Requirement (brief / issue #37) | Where | Evidence |
 |---|---|---|
 | create, disable, enable, reset password, set role (User/Admin), revoke all sessions | `tools/BcAdmin`, `scripts/security/bc-admin.ps1` | live tests 1–4, wrapper smoke run (section 4) |
 | SEC-001 schema reused (`users`, IdentityV3 hash, `is_active`, `role`, `security_stamp`) | `AccountPolicy.HashPassword`, `MySqlAdminAccountStore` | hash checked by the app's `IdentityPasswordVerifier`; created accounts sign in through the real app |
-| separate writer `bc_admin_writer`, column-level least privilege, never the reader | `AdminWriterGrants`, `DbConfig` | `SHOW GRANTS` live test; 12 denied statements; reader / attempt writer / fixture admin refused |
-| credentials from a protected file or prompt, never repo/log/argument | `DbConfig.EnsurePrivate`, `AdminCli` | unit tests (ACL, `--password*` refused, no secret in output) |
-| audit for every action: who, what, when, target id; no password/hash/stamp | `database/sec003/admin-audit.sql`, `AuditAsync` | live test: all columns checked against password, hash and stamp |
-| password reset and disable always rotate `security_stamp` | `ChangeAsync` (every change rotates) | live tests + mutation M1, M3 |
-| Admin can never read other users' chats | grants on `users` + `admin_audit_log` only | live: writer refused on a stand-in chat table (`1142`) |
+| separate writer `bc_admin_writer`, column-level least privilege, never the reader | `AdminWriterGrants`, `database/sec003/admin-writer-grants.sql`, `DbConfig` | `SHOW GRANTS` live test; 15 denied statements; reader / attempt writer / fixture admin refused |
+| credentials from a protected file or prompt, never repo/log/argument | `DbConfig.EnsurePrivate`, `AdminCli` | unit tests (ACL, `--password*` refused, `--password-stdin` refused at a console, no secret in output) |
+| audit for every action: who, what, when, target id; no password/hash/stamp | `database/sec003/admin-audit.sql` (table + 2 triggers) | live: every column checked against password, hash, stamp; changes made **without** the script are audited too |
+| password reset and disable always rotate `security_stamp` | `ChangeAsync` (every change rotates) | live tests + mutations |
+| Admin can never read other users' chats | grants on `users` only, nothing on any other table | live: writer refused on a stand-in chat table |
 | tests: unit + live against isolated fixture, data restored in `finally` | `BC-LocalAI.Tests/Admin`, `tests/SEC003.AdminTests` | section 3 |
 
-Design decisions (review welcome):
+Design decisions (current):
 
-- **.NET console tool, not pure PowerShell**: the hash must be byte-compatible with `IdentityPasswordVerifier`; the tool uses the same
-  framework `PasswordHasher` and the same MySQL driver/version as the app. No new third-party dependency.
-- **Change and audit in one transaction**: if the audit row cannot be written the change is rolled back (tested by forcing the audit
-  INSERT to fail with an over-long value, strict mode error 1406).
-- **Every change rotates the stamp** (also `enable` and `set-role`), not only reset and disable: one simple rule, and BE-005's docs
-  already ask for it on every admin change.
-- **`db_user` = `CURRENT_USER()`** is recorded by MySQL, so the audit names the database account even if `--actor` is wrong.
-- **Writer cannot read the audit log** (INSERT only) nor `password_hash` / `security_stamp`. The SELECT on four columns is needed
-  because MySQL requires it for columns used in `WHERE`.
+- **.NET console tool, not pure PowerShell**: the hash must be byte-compatible with `IdentityPasswordVerifier`; same framework
+  `PasswordHasher` and same MySQL driver/version as the app. No new third-party dependency.
+- **The database writes the audit** (AFTER INSERT / AFTER UPDATE triggers on `users`), not the script. Any change to the password,
+  status, role or stamp is recorded, whoever makes it; the writer has **no privilege on `admin_audit_log`**; `db_user` is `USER()` taken
+  by the server. `actor` / `os_user` come from session variables the script sets (`(direct SQL)` / `(unknown)` otherwise) and can be
+  faked by someone holding the writer's credentials — `db_user` cannot.
+- **Change and audit in one statement/transaction**: a failing audit insert fails the change (strict `sql_mode` captured by the
+  triggers; tested with an over-long value, error 1406). The script also refuses to commit if no audit row was produced.
+- **Every change rotates the stamp** (also `enable` and `set-role`). The trigger records what actually changed, one row per kind.
 - **Issue ID SEC-003**: SEC-002 and BE-008 are already used by the Phase 3 drafts in `docs/planning/phase-3/`.
 
-## 2. Files
+## 2. Review round (2026-10-21) — findings and fixes
 
-New: `tools/BcAdmin/*` (6 source files + csproj), `database/sec003/admin-audit.sql`, `scripts/security/bc-admin.ps1`,
-`BC-LocalAI.Tests/Admin/AdminScriptTests.cs`, `tests/SEC003.AdminTests/*`, `docs/security/SEC-003-ADMIN-GUIDE.md`, this report.
-Changed: `tools/Sec001Fixtures` (opt-in `sec003-admin-writer` flag; grants taken from `AdminWriterGrants`, so documented and tested
-grants cannot drift), `scripts/security/local-mysql.ps1` (`-InstanceName sec003-mysql`, port 3318, 3 extra Verify checks),
-`BC-LocalAI.slnx` (tool built and unit-tested in CI), `BC-LocalAI.Tests.csproj`, `docs/devops/test-baseline.json` (652 → 713),
-`README.md` and `BE-006-DEVELOPER-GUIDE.md` (one pointer each). App code (`BC-LocalAI/`) is **not** changed.
+Three reviews were run by specialist AI agents (reports in the session's shared notes, not in the repo). The owner chose which to fix:
+B1, S1–S5, the DBA items below and the recommended password values.
 
-## 3. Tests actually run
+| Finding | Source | Fix | Test that proves it |
+|---|---|---|---|
+| **B1** audit enforced only by the script: with the writer's credentials the `mysql` client could change accounts without audit, and `db_user` was a writable column (docs wrongly said it could not be forged) | security review | triggers write the audit; writer has no privilege on `admin_audit_log`; `db_user = USER()`; docs corrected | live `ChangingAnAccountWithoutTheScript_IsStillAudited_WithTheRealDatabaseUser`; writer INSERT/UPDATE/DELETE on audit and DROP TRIGGER refused |
+| **S1** connection lost during COMMIT reported "Nothing changed", exit 5 | security review | commit errors → `AdminOutcomeUnknownException` → exit **6** "may or may not be saved" | unit `ConnectionLostDuringCommit_Is6_AndNeverSaysNothingChanged` |
+| **S2** `admin-writer-grants.sql` deliverable missing; `REQUIRE SSL` only in a comment | security review | file added; `ALTER USER … REQUIRE SSL …` printed as a real statement; CREATE USER stays a comment (placeholder secret) | unit `GrantsFile_ForTheDba_IsExactlyWhatTheScriptPrints`, `PrintGrants_…` |
+| **S3** `--password-stdin` at a console echoes the password | security review | refused when stdin is a terminal | unit `PasswordStdin_AtAConsole_IsRefused_…` |
+| **S4** `reset-password --user <id>` skipped the username rule | security review | account looked up first, rule applied to its `normalized_username` | unit `ResetPassword_ById_StillRefusesAPasswordContainingTheUsername` |
+| **S5** loopback allowed without certificate checks in every environment (app: Development only) | security review | needs `ssl-ca` (VerifyFull) unless `--local-dev-database` on loopback | unit `DbConfig_Loopback_…`, `LoopbackWithoutTheLocalDevFlag_…` |
+| `SELECT (is_active, role)` granted but never needed | DBA review | removed; writer SELECT = `id, normalized_username` | live `SHOW GRANTS`; `SELECT is_active, role` refused |
+| audit table without `ENGINE` / charset | DBA review | `ENGINE = InnoDB`, `utf8mb4` / `utf8mb4_0900_bin` | unit `AuditSql_…` |
+| rollback relied on server strict mode | DBA review | session `sql_mode` strict in the script; triggers created under strict mode | live rollback tests; unit checks the `SET SESSION sql_mode` line |
+| writer host `%` allowed | DBA review | `%` and `_` wildcards refused; fixed IP or netmask only | unit `WriterGrants_RefuseAnythingButAPlainAccountAndHost` |
+| writer account had no resource / lockout limits | DBA review | `WITH MAX_USER_CONNECTIONS 4 FAILED_LOGIN_ATTEMPTS 5 PASSWORD_LOCK_TIME 1` | unit `WriterAccount_RequiresTls_…`; fixture applies it |
+| minimum 12 counted UTF-16 units | policy review | **15 code points** (owner decision) | unit `CheckPassword_CountsCodePoints_NotUtf16Units`, boundaries 14/15 |
+| username rule for any length | policy review | substring rule from 4 characters; shorter usernames only as the whole password | unit `CheckPassword_UsernameRule_AppliesFromFourCharacters` |
+
+Defect found while fixing: the fixture's init file stopped silently at a wrong clause order in `ALTER USER` (resource options must
+precede the lock options), leaving the writer without grants. Order fixed, and the fixture Verify now has
+`admin_writer_can_resolve`, which fails when the writer's grants are missing. Also, the audit SQL needs the `mysql` client
+(`DELIMITER`), so the fixture applies the DBA's own file after the first start instead of through `--init-file`.
+
+Not taken in this PR (follow-up issues recommended by the policy review): offline common-password list, NFC normalization on both
+sides, self-service password change + must-change flag, cap of 100 consecutive failed logins (BE-005), MFA for Admin, hash benchmark
+at deploy. DBA open questions (production `users` table exists? version ≥ 8.0.29, backup/PITR, per-admin accounts, audit retention
+and reader) remain for the owner/DBA.
+
+## 3. Tests actually run (after the review fixes)
 
 | Suite | Result |
 |---|---|
-| `dotnet test BC-LocalAI.slnx` (unit + integration, includes 61 new SEC-003 unit tests) | **713** passed, 0 failed, 0 skipped |
+| `dotnet test BC-LocalAI.slnx` (unit + integration, 76 SEC-003 unit tests) | **728** passed, 0 failed, 0 skipped |
 | `node --test "tests/ui/*.test.mjs"` | 61 passed |
 | `python -m unittest discover -s tests` | 143 passed |
-| `check_test_counts.py` with the new baseline | all gates passed |
-| `scan_secrets.py` (files staged) / `check_doc_links.py` | clean / OK (one fake test value marked `ci-allow-secret`) |
-| Fixture `sec003-mysql` Initialize + Verify (127.0.0.1:3318) | **14/14** checks (11 SEC-001 + audit table, writer cannot read hash, writer cannot read audit) |
-| Live `tests/SEC003.AdminTests` against `sec003-mysql` | **26** passed |
-| Regression: fresh `be005-mysql` fixture + live `tests/BE005.MySqlTests` | see section 5 |
+| `check_test_counts.py` (baseline 713 → 728) | all gates passed |
+| `scan_secrets.py` (files staged) / `check_doc_links.py` | clean / OK |
+| Fixture `sec003-mysql` rebuilt, Initialize + Verify (127.0.0.1:3318) | **16/16** checks (11 SEC-001 + audit table, 2 triggers, writer grants applied, writer cannot read hash, writer cannot read audit) |
+| Live `tests/SEC003.AdminTests` against `sec003-mysql` | **31** passed |
+| Regression: `be005-mysql` (3319) + live `tests/BE005.MySqlTests` | **16** passed |
 
 Live tests (`AdminScriptLiveTests`), real admin writer + real app login:
 
@@ -59,64 +84,57 @@ Live tests (`AdminScriptLiveTests`), real admin writer + real app login:
 3. `set-role Admin` → open session 401, new login reports role `Admin`
 4. `revoke-sessions` → two sessions 401, only the stamp changed (all other columns equal)
 5. audit row: actor, OS user, `db_user = bc_admin_writer@127.0.0.1`, action, target id, time window; no column contains the password, hash or stamp
-6. audit INSERT fails (disable / reset-password / create) → account unchanged / not created, no audit row
-7. duplicate username (other case) → exit 4, still one account, no audit row
-8. unknown username / id → exit 3, no audit row
-9. `reader.cnf`, `writer.cnf` (attempt writer), `admin.cnf` (fixture admin) → refused, exit 5
-10. `SHOW GRANTS` equals exactly USAGE + the documented column grants
-11. writer refused (MySQL error 1142/1143): read hash, read stamp, `SELECT *`, read/update/delete audit, delete users, update
-    `access_failed_count` / `username`, read a stand-in chat table, create table, read `mysql.user`
+6. audit insert fails (disable / reset-password / create) → account unchanged / not created, no audit row
+7. **writer changes an account with plain SQL and a fake actor** → still one audit row per change with the real `db_user`; without the
+   script's variables `actor = (direct SQL)`
+8. BE-005 failed-login bookkeeping by the attempt writer → no audit row
+9. duplicate username (other case) → exit 4, still one account, no audit row
+10. unknown username / id → exit 3, no audit row
+11. `reader.cnf`, `writer.cnf` (attempt writer), `admin.cnf` (fixture admin) → refused, exit 5
+12. `SHOW GRANTS` equals exactly USAGE + one column-scoped grant on `users`
+13. writer refused (1142/1143): read hash / stamp / status+role / `SELECT *`, read / insert / update / delete audit, drop trigger,
+    delete users, update `access_failed_count` / `username`, read a stand-in chat table, create table, read `mysql.user`
 
-Mutation check (each bug was introduced, tests run, file restored):
+Mutation check, review round (each bug introduced, tests run, file or trigger restored):
 
 | Mutation | Tests that failed |
 |---|---|
-| M1 `disable` does not rotate the stamp | 1 live |
-| M2 audit written after commit (not atomic) | 2 live |
-| M3 `reset-password` does not rotate the stamp | 1 live |
-| M4 `--password <value>` accepted as an argument | 4 unit |
-| M5 writer may `SELECT password_hash` | 1 unit |
-| M6 reader account allowed | 2 unit |
-| M7 credential file ACL not checked | 1 unit |
+| T1 update trigger missing in the database | 8 live |
+| T2 script does not set the audit context | 4 live |
+| U1 commit failure reported as "nothing changed" (exit 5) | 1 unit |
+| U2 `--password-stdin` allowed at a console | 1 unit |
+| U3 reset by id skips the username rule | 1 unit |
+| U4 host `%` / `_` allowed | 3 unit |
+| U5 loopback without `--local-dev-database` | 2 unit |
+| U6 minimum counted in UTF-16 units | 1 unit |
 
-Defect found and fixed during testing: the first live run failed 9 tests on a test-side cast (MySqlConnector returns `CHAR(36)` as
-`Guid`), and 8 synthetic `sec003.test.*` accounts from that run stayed in the fixture because cleanup only knew ids recorded after
-the failing line. Cleanup now records the username **before** creating the account; the 8 rows (isolated fixture, test namespace
-only) were deleted and later runs leave the fixture at 3 accounts and 0 audit rows (checked after each run).
-Also fixed: the wrapper passed `--nologo` to `dotnet run`, which forwards unknown options to the tool (refused, exit 2).
+First round (still valid): M1 disable without stamp rotation (1 live), M3 reset without rotation (1 live), M4 `--password` accepted
+(4 unit), M5 writer may SELECT `password_hash` (1 unit), M6 reader allowed (2 unit), M7 ACL not checked (1 unit) — each failed tests.
+(M2 "audit after commit" no longer applies: the audit is written by the trigger inside the statement.)
+
+After every run the fixture held 3 accounts and 0 audit rows. First-round defects (test-side `Guid` cast, 8 leaked test accounts
+removed, `--nologo` forwarded by `dotnet run`) are fixed as described in commit ae73725's report.
 
 ## 4. Wrapper smoke run (real process, stdin password)
 
-`create` via `scripts/security/bc-admin.ps1 ... --password-stdin` → `OK create ... audit=73`, password not in output;
-`revoke-sessions` → `OK ... audit=74`; audit rows `create` / `revoke_sessions` with `db_user = bc_admin_writer@127.0.0.1`;
-account and audit rows deleted afterwards. `print-grants` prints the 4 grants and a `<secret>` placeholder only;
-`--password hunter2…` → exit 2; reader config → exit 5.
+`create … --local-dev-database --password-stdin` → `OK create … audit=68`; `reset-password` → `OK … audit=69`; `disable` →
+`OK … audit=70`; audit rows `create` / `reset_password` / `disable` with `actor = smoke`, `db_user = bc_admin_writer@127.0.0.1`.
+Same command without `--local-dev-database` → exit 5 ("Add 'ssl-ca' …"). `print-grants` prints a commented CREATE USER with a
+`<secret>` placeholder, the `ALTER USER … REQUIRE SSL …` and the 3 grants. Test account and audit rows deleted afterwards.
 
-## 5. Regression of BE-005 / BE-006 live suite
-
-The fixture generator changed, so the BE-005 fixture was created fresh in this worktree (`be005-mysql`, port 3319, free before start)
-and the existing live suite was run, then the instance was stopped.
-
-| Step | Result |
-|---|---|
-| `Initialize -InstanceName be005-mysql -Port 3319` (new generator) | created; reader, attempt writer, admin; **no** admin writer, no audit table (flag not given) |
-| `Verify` | 11/11 checks |
-| `tests/BE005.MySqlTests` (BE-005 attempts/lockout + BE-006 account changes) | **16** passed — same count as BE-006-VERIFICATION §8 |
-| `Stop` | stopped; MySQL80 service untouched |
-
-## 6. Risks and remaining work
+## 5. Risks and remaining work
 
 | # | Item | Status |
 |---|---|---|
-| 1 | Password policy (12–1024 characters, no username) is a draft | needs company / owner approval |
-| 2 | `--actor` is typed by the operator | mitigated by `os_user` and `db_user`; one MySQL account per Admin recommended |
-| 3 | A DBA (not the writer) can still change or delete audit rows; no retention or export | out of scope (OPS-002) |
-| 4 | Grants and audit table not applied to any real database | DBA runs `database/sec003/admin-audit.sql` and `print-grants` output after approval |
-| 5 | `reset-password --user <id>` cannot check "password contains username" (writer cannot read `username`) | accepted; check applies when `--user` is a username |
-| 6 | No unlock and no delete command | by design (no grants on lockout columns / DELETE) |
+| 1 | Whoever holds the writer's credential file can create an Admin or reset any password (audited, with real `db_user`) | protect the file (ACL check, TLS, fixed host, MySQL lockout); one MySQL account per Admin recommended |
+| 2 | `actor` / `os_user` can be faked by a writer-credential holder | `db_user` from `USER()` cannot; documented |
+| 3 | DBA or the trigger definer can still change or delete audit rows; no retention or export | out of scope (OPS-002); DBA review recommends export to append-only storage |
+| 4 | Audit table, triggers and grants not applied to any real database | DBA follows guide §3; production `users` table (SEC-001) must exist first; MySQL ≥ 8.0.29 |
+| 5 | Password policy follow-ups (common-password list, NFC, must-change on first login, 100-failure cap, Admin MFA) | follow-up issues |
+| 6 | No unlock and no delete command | by design |
 | 7 | No guard against removing the last Admin | does not block recovery (script uses MySQL credentials, not app roles) |
-| 8 | Connection lost during COMMIT → outcome unknown | message tells the operator to check the account and audit before retrying |
-| 9 | Live suites are not in CI (need the local fixture), same as BE-005 | run locally per this report |
-| 10 | Interactive hidden prompt (`ConsolePasswordSource`) is not covered by automated tests | tested only through the fake prompt and `--password-stdin`; manual check recommended |
+| 8 | Live suites are not in CI (need the local fixture), same as BE-005 | run locally per this report |
+| 9 | Interactive hidden prompt (`ConsolePasswordSource`) is not covered by automated tests | manual check recommended |
+| 10 | Triggers with binary logging on may need `log_bin_trust_function_creators` or SUPER for the definer | DBA decision (guide §3) |
 
-Not done (needs the user's word): push, pull request, merge.
+Not done (needs the owner's word): merge.

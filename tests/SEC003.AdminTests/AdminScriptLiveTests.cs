@@ -162,7 +162,7 @@ public sealed class AdminScriptLiveTests : IAsyncLifetime
 
         Assert.Equal("ผู้ทดสอบ SEC-003", values["actor"]);
         Assert.Equal(EntryPoint.OsUser(), values["os_user"]);
-        Assert.Equal("bc_admin_writer@127.0.0.1", values["db_user"]); // from MySQL, not from the operator
+        Assert.Equal("bc_admin_writer@127.0.0.1", values["db_user"]); // USER() in the trigger, not from the client
         Assert.Equal(("create", id, "role=User"), (values["action"], values["target_user_id"], values["detail"]));
         Assert.InRange(DateTime.Parse(values["occurred_at_utc"]), started, DateTime.UtcNow.AddSeconds(5));
         foreach (var value in values.Values)
@@ -178,7 +178,7 @@ public sealed class AdminScriptLiveTests : IAsyncLifetime
     {
         // An OS user name longer than the audit column makes the audit INSERT fail (strict mode) after the account change.
         var badAudit = new AuditContext("tester", new string('x', 300));
-        var store = new MySqlAdminAccountStore(DbConfig.Load(settings.AdminWriterFile, Database));
+        var store = new MySqlAdminAccountStore(DbConfig.Load(settings.AdminWriterFile, Database, allowLocalDevelopmentDatabase: true));
         if (action == "create")
         {
             var username = "sec003.test." + Guid.NewGuid().ToString("N");
@@ -200,6 +200,53 @@ public sealed class AdminScriptLiveTests : IAsyncLifetime
         Assert.Equal(1406, (await Assert.ThrowsAsync<MySqlException>(() => change)).Number);
         Assert.Equal(before, await settings.Row(id));
         await AssertAudit(id, ("create", "role=User"));
+    }
+
+    [Fact]
+    public async Task ChangingAnAccountWithoutTheScript_IsStillAudited_WithTheRealDatabaseUser()
+    {
+        await Create("User");
+        var id = created.Single();
+
+        // Someone with the writer's credentials uses the mysql client directly and even claims to be another admin.
+        await using (var connection = new MySqlConnection(DbConfig.Load(settings.AdminWriterFile, Database, allowLocalDevelopmentDatabase: true)))
+        {
+            await connection.OpenAsync();
+            await using var command = new MySqlCommand(
+                "SET @bc_admin_actor = 'someone else'; UPDATE users SET is_active = 0, password_hash = 'x', security_stamp = REPEAT('C', 64) WHERE id = @id", connection);
+            command.Parameters.AddWithValue("@id", id);
+            Assert.Equal(1, await command.ExecuteNonQueryAsync());
+        }
+        await using (var connection = new MySqlConnection(settings.AdminWriterConnectionWithoutVariables))
+        {
+            await connection.OpenAsync();
+            await using var command = new MySqlCommand("UPDATE users SET security_stamp = REPEAT('D', 64) WHERE id = @id", connection);
+            command.Parameters.AddWithValue("@id", id);
+            Assert.Equal(1, await command.ExecuteNonQueryAsync());
+        }
+
+        await AssertAudit(id, ("create", "role=User"), ("reset_password", null), ("disable", null), ("revoke_sessions", null));
+        var rows = await settings.Rows("SELECT actor, db_user FROM admin_audit_log WHERE target_user_id = @id AND action <> 'create' ORDER BY id", ("@id", id));
+        Assert.Equal([("someone else", "bc_admin_writer@127.0.0.1"), ("someone else", "bc_admin_writer@127.0.0.1"), ("(direct SQL)", "bc_admin_writer@127.0.0.1")], rows);
+    }
+
+    [Fact]
+    public async Task FailedLoginBookkeeping_ByTheAttemptWriter_IsNotAnAdminChange()
+    {
+        await Create("User");
+        var id = created.Single();
+        var before = await settings.Scalar("SELECT COUNT(*) FROM admin_audit_log WHERE target_user_id = @id", ("@id", id));
+
+        await using (var connection = new MySqlConnection(settings.AttemptWriterConnection))
+        {
+            await connection.OpenAsync();
+            await using var command = new MySqlCommand(
+                "UPDATE users SET access_failed_count = access_failed_count + 1, updated_at_utc = UTC_TIMESTAMP(6) WHERE id = @id", connection);
+            command.Parameters.AddWithValue("@id", id);
+            Assert.Equal(1, await command.ExecuteNonQueryAsync());
+        }
+
+        Assert.Equal(before, await settings.Scalar("SELECT COUNT(*) FROM admin_audit_log WHERE target_user_id = @id", ("@id", id)));
     }
 
     // ---- Refusals -------------------------------------------------------------------------------------------------
@@ -245,7 +292,7 @@ public sealed class AdminScriptLiveTests : IAsyncLifetime
     [Fact]
     public async Task AdminWriter_HasExactlyTheDocumentedGrants()
     {
-        await using var connection = new MySqlConnection(DbConfig.Load(settings.AdminWriterFile, Database));
+        await using var connection = new MySqlConnection(DbConfig.Load(settings.AdminWriterFile, Database, allowLocalDevelopmentDatabase: true));
         await connection.OpenAsync();
         await using var command = new MySqlCommand("SHOW GRANTS FOR CURRENT_USER()", connection);
         await using var reader = await command.ExecuteReaderAsync();
@@ -255,34 +302,37 @@ public sealed class AdminScriptLiveTests : IAsyncLifetime
         Assert.Equal(
         [
             "GRANT USAGE ON *.* TO `bc_admin_writer`@`127.0.0.1`",
-            "GRANT SELECT (`id`, `is_active`, `normalized_username`, `role`), INSERT (`display_name`, `id`, `is_active`, `normalized_username`, `password_hash`, `role`, `security_stamp`, `updated_at_utc`, `username`), UPDATE (`is_active`, `password_hash`, `role`, `security_stamp`, `updated_at_utc`) ON `bc_localai_sec001`.`users` TO `bc_admin_writer`@`127.0.0.1`",
-            "GRANT INSERT (`action`, `actor`, `db_user`, `detail`, `os_user`, `target_user_id`) ON `bc_localai_sec001`.`admin_audit_log` TO `bc_admin_writer`@`127.0.0.1`"
-        ], grants.OrderBy(g => g.Contains("USAGE") ? 0 : g.Contains("`users`") ? 1 : 2));
+            "GRANT SELECT (`id`, `normalized_username`), INSERT (`display_name`, `id`, `is_active`, `normalized_username`, `password_hash`, `role`, `security_stamp`, `updated_at_utc`, `username`), UPDATE (`is_active`, `password_hash`, `role`, `security_stamp`, `updated_at_utc`) ON `bc_localai_sec001`.`users` TO `bc_admin_writer`@`127.0.0.1`"
+        ], grants.OrderBy(g => g.Contains("USAGE") ? 0 : 1)); // nothing at all on admin_audit_log
     }
 
     [Theory]
-    [InlineData("SELECT password_hash FROM users LIMIT 1", 1143)]
-    [InlineData("SELECT security_stamp FROM users LIMIT 1", 1143)]
-    [InlineData("SELECT * FROM users LIMIT 1", 1142)]
-    [InlineData("SELECT * FROM admin_audit_log LIMIT 1", 1142)]
-    [InlineData("UPDATE admin_audit_log SET actor = 'x' WHERE 1 = 0", 1142)]
-    [InlineData("DELETE FROM admin_audit_log WHERE 1 = 0", 1142)]
-    [InlineData("DELETE FROM users WHERE 1 = 0", 1142)]
-    [InlineData("UPDATE users SET access_failed_count = 0 WHERE 1 = 0", 1143)]
-    [InlineData("UPDATE users SET username = 'x' WHERE 1 = 0", 1143)]
-    [InlineData("SELECT * FROM sec003_probe_chats", 1142)]
-    [InlineData("CREATE TABLE sec003_probe_new (id INT)", 1142)]
-    [InlineData("SELECT user FROM mysql.user", 1142)]
-    public async Task AdminWriter_IsRefusedEverythingElse_IncludingChats(string sql, int expectedError)
+    [InlineData("SELECT password_hash FROM users LIMIT 1")]
+    [InlineData("SELECT security_stamp FROM users LIMIT 1")]
+    [InlineData("SELECT is_active, role FROM users LIMIT 1")]
+    [InlineData("SELECT * FROM users LIMIT 1")]
+    [InlineData("SELECT * FROM admin_audit_log LIMIT 1")]
+    [InlineData("INSERT INTO admin_audit_log (actor, os_user, db_user, action, target_user_id) VALUES ('x', 'x', 'someone@else', 'create', 'x')")]
+    [InlineData("UPDATE admin_audit_log SET actor = 'x' WHERE 1 = 0")]
+    [InlineData("DELETE FROM admin_audit_log WHERE 1 = 0")]
+    [InlineData("DELETE FROM users WHERE 1 = 0")]
+    [InlineData("UPDATE users SET access_failed_count = 0 WHERE 1 = 0")]
+    [InlineData("UPDATE users SET username = 'x' WHERE 1 = 0")]
+    [InlineData("DROP TRIGGER trg_users_admin_audit_update")]
+    [InlineData("SELECT * FROM sec003_probe_chats")]
+    [InlineData("CREATE TABLE sec003_probe_new (id INT)")]
+    [InlineData("SELECT user FROM mysql.user")]
+    public async Task AdminWriter_IsRefusedEverythingElse_IncludingChatsAndTheAudit(string sql)
     {
         // A stand-in for a chat history table (BE-007): the writer has no grant on any table but users and the audit log.
         await settings.Admin("CREATE TABLE IF NOT EXISTS sec003_probe_chats (id INT PRIMARY KEY, body TEXT)");
         try
         {
-            await using var connection = new MySqlConnection(DbConfig.Load(settings.AdminWriterFile, Database));
+            await using var connection = new MySqlConnection(DbConfig.Load(settings.AdminWriterFile, Database, allowLocalDevelopmentDatabase: true));
             await connection.OpenAsync();
             await using var command = new MySqlCommand(sql, connection);
-            Assert.Equal(expectedError, (await Assert.ThrowsAsync<MySqlException>(() => command.ExecuteNonQueryAsync())).Number);
+            // 1142 = no privilege on the table, 1143 = not on that column.
+            Assert.Contains((await Assert.ThrowsAsync<MySqlException>(() => command.ExecuteNonQueryAsync())).Number, new[] { 1142, 1143 });
         }
         finally { await settings.Admin("DROP TABLE IF EXISTS sec003_probe_chats"); }
     }
@@ -310,7 +360,7 @@ public sealed class AdminScriptLiveTests : IAsyncLifetime
         var error = new StringWriter();
         var cli = new AdminCli(new StringReader(stdin + "\n"), output, error, new NoPrompt(),
             connection => new MySqlAdminAccountStore(connection), EntryPoint.OsUser());
-        var code = await cli.RunAsync([args[0], "--db-config", configFile ?? settings.AdminWriterFile, "--database", Database,
+        var code = await cli.RunAsync([args[0], "--db-config", configFile ?? settings.AdminWriterFile, "--database", Database, "--local-dev-database",
             "--actor", "ผู้ทดสอบ SEC-003", .. args.Skip(1)]);
         return (code, output.ToString(), error.ToString());
     }
@@ -356,7 +406,8 @@ public sealed class AdminScriptLiveTests : IAsyncLifetime
 
     private sealed record Row(bool Active, string Role, string Hash, string Stamp, int Failed, DateTime? Lockout);
 
-    private sealed record Fixture(string Directory, string AdminWriterFile, string ReaderConnection, string AttemptWriterConnection, string AdminConnection)
+    private sealed record Fixture(string Directory, string AdminWriterFile, string ReaderConnection, string AttemptWriterConnection, string AdminConnection,
+        string AdminWriterConnectionWithoutVariables)
     {
         public override string ToString() => "Fixture [REDACTED]";
 
@@ -375,7 +426,7 @@ public sealed class AdminScriptLiveTests : IAsyncLifetime
                 SslMode = MySqlSslMode.Required, ConnectionTimeout = 3, MaximumPoolSize = 4
             }.ConnectionString;
             return new Fixture(directory, Path.Combine(directory, "admin-writer.cnf"), Connection(files["reader.cnf"]),
-                Connection(files["writer.cnf"]), Connection(files["admin.cnf"]));
+                Connection(files["writer.cnf"]), Connection(files["admin.cnf"]), Connection(files["admin-writer.cnf"]));
         }
 
         public async Task Admin(string sql, params (string Name, object Value)[] parameters)
@@ -394,6 +445,18 @@ public sealed class AdminScriptLiveTests : IAsyncLifetime
             await using var command = new MySqlCommand(sql, connection);
             foreach (var (name, value) in parameters) command.Parameters.AddWithValue(name, value);
             return await command.ExecuteScalarAsync();
+        }
+
+        public async Task<List<(string, string)>> Rows(string sql, params (string Name, object Value)[] parameters)
+        {
+            await using var connection = new MySqlConnection(AdminConnection);
+            await connection.OpenAsync();
+            await using var command = new MySqlCommand(sql, connection);
+            foreach (var (name, value) in parameters) command.Parameters.AddWithValue(name, value);
+            await using var reader = await command.ExecuteReaderAsync();
+            var rows = new List<(string, string)>();
+            while (await reader.ReadAsync()) rows.Add((reader.GetString(0), reader.GetString(1)));
+            return rows;
         }
 
         public async Task<long> Scalar(string sql, params (string Name, object Value)[] parameters) =>

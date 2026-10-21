@@ -113,10 +113,12 @@ internal static class AdminWriterBootstrap
     internal static string[] Create(string secret)
     {
         if (secret.Length != 64 || !secret.All(Uri.IsHexDigit)) throw new ArgumentException("Only generated secrets may be used.");
+        const string user = BcAdmin.AdminWriterGrants.DefaultUser;
         return
         [
-            $"CREATE USER '{BcAdmin.AdminWriterGrants.DefaultUser}'@'127.0.0.1' IDENTIFIED BY '{secret}' REQUIRE SSL;",
-            .. BcAdmin.AdminWriterGrants.Create(BcAdmin.AdminWriterGrants.DefaultUser, "127.0.0.1")
+            $"CREATE USER '{user}'@'127.0.0.1' IDENTIFIED WITH caching_sha2_password BY '{secret}';",
+            BcAdmin.AdminWriterGrants.AccountSettings(user, "127.0.0.1"),
+            .. BcAdmin.AdminWriterGrants.Create(user, "127.0.0.1")
         ];
     }
 }
