@@ -30,6 +30,9 @@
         AI_UNAVAILABLE: 'ไม่สามารถเชื่อมต่อ AI ได้ กรุณาตรวจว่า Ollama เปิดอยู่',
         AI_TIMEOUT: 'AI ใช้เวลาตอบนานเกินไป กรุณาลองใหม่',
         AI_PROVIDER_ERROR: 'AI เกิดข้อผิดพลาด กรุณาลองใหม่',
+        // FE-004: queue refusals (BE-008). Distinct from AI_TIMEOUT (slow answer) and AI_UNAVAILABLE (Ollama down).
+        AI_BUSY: 'ตอนนี้มีผู้ใช้จำนวนมาก ระบบยังไม่ว่างรับคำถามนี้ กรุณาลองใหม่ในอีกสักครู่',
+        AI_REQUEST_IN_PROGRESS: 'คุณมีคำถามที่กำลังตอบอยู่ กรุณารอให้เสร็จหรือกดหยุดคำถามเดิมก่อนถามคำถามถัดไป',
         AI_INVALID_RESPONSE: 'ได้รับคำตอบที่ไม่สมบูรณ์ กรุณาลองใหม่',
         AI_RESPONSE_TOO_LARGE: 'คำตอบยาวเกินกว่าที่ระบบรองรับ กรุณาถามให้สั้นลงหรือแบ่งเป็นหลายคำถาม',
         INTERNAL_ERROR: 'ระบบเกิดข้อผิดพลาด กรุณาลองใหม่',
@@ -60,6 +63,19 @@
     /** Text for an error code. Unknown codes fall back to INTERNAL_ERROR; no server detail is ever shown. */
     function messageFor(code) {
         return typeof code === 'string' && hasOwn(MESSAGES, code) ? MESSAGES[code] : MESSAGES.INTERNAL_ERROR;
+    }
+
+    /**
+     * Error text plus, when the backend gave a valid Retry-After, how long it suggests waiting. No countdown and no
+     * automatic retry: the user decides when to send again.
+     */
+    function describeFailure(code, retryAfterSeconds) {
+        var text = messageFor(code);
+        if ((code === 'AI_BUSY' || code === 'AI_REQUEST_IN_PROGRESS') && Number.isInteger(retryAfterSeconds)
+            && retryAfterSeconds >= 1 && retryAfterSeconds <= 3600) {
+            text += ' (ระบบแนะนำให้รออย่างน้อยประมาณ ' + retryAfterSeconds + ' วินาที)';
+        }
+        return text;
     }
 
     function failure(code) {
@@ -123,6 +139,7 @@
     return {
         MESSAGES: MESSAGES,
         messageFor: messageFor,
+        describeFailure: describeFailure,
         failure: failure,
         prepareMessage: prepareMessage,
         isSendKey: isSendKey,

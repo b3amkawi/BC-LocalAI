@@ -18,6 +18,11 @@
     var STATES = Object.freeze({
         IDLE: 'idle',
         CONNECTING: 'connecting',
+        // FE-004: `started` only means the backend accepted the request. The model is known to work on it after
+        // `processing` (when the backend sends it) or the first `delta`.
+        ACCEPTED: 'accepted',
+        QUEUED: 'queued',
+        PROCESSING: 'processing',
         STREAMING: 'streaming',
         COMPLETED: 'completed',
         CANCELLED: 'cancelled',
@@ -27,10 +32,19 @@
     // What the page shows next to the answer while it is being written or when it did not finish.
     var STATUS_TEXT = Object.freeze({
         connecting: 'กำลังเชื่อมต่อ AI…',
+        accepted: 'ได้รับคำถามแล้ว กำลังรอ AI เริ่มตอบ…',
+        queued: 'ระบบมีผู้ใช้หลายคน คำถามของคุณอยู่ในคิว กำลังรอถึงตา…',
+        processing: 'ถึงคิวแล้ว AI กำลังประมวลผล…',
         streaming: 'AI กำลังพิมพ์คำตอบ…',
         cancelled: 'หยุดการสร้างคำตอบแล้ว',
         incomplete: 'คำตอบไม่สมบูรณ์'
     });
+
+    /** True while an answer is on its way (anything between sending and a terminal outcome): Stop applies. */
+    function isActive(state) {
+        return state === STATES.CONNECTING || state === STATES.ACCEPTED || state === STATES.QUEUED
+            || state === STATES.PROCESSING || state === STATES.STREAMING;
+    }
 
     function isTerminal(state) {
         return state === STATES.COMPLETED || state === STATES.CANCELLED || state === STATES.ERROR;
@@ -105,6 +119,19 @@
         };
     }
 
+    /**
+     * Retry-After as the backend sends it: whole seconds. A date, a fraction, a negative, zero, text or an absurdly
+     * large number is treated as "no guidance" (null); nothing is guessed. Capped to one hour.
+     */
+    function parseRetryAfter(value) {
+        var whole = typeof value === 'number' ? Number.isInteger(value) : typeof value === 'string' && /^[0-9]{1,6}$/.test(value.trim());
+        if (!whole) {
+            return null;
+        }
+        var seconds = Number(value);
+        return seconds >= 1 && seconds <= 3600 ? seconds : null;
+    }
+
     function tryParseObject(text) {
         try {
             var value = JSON.parse(text);
@@ -125,6 +152,8 @@
         var model = null;
         var code = null;
         var partial = false;
+        var ahead = null;
+        var retryAfterSeconds = null;
 
         function snapshot() {
             return {
@@ -132,8 +161,12 @@
                 text: text,
                 model: model,
                 code: code,
-                message: code ? core.messageFor(code) : null,
-                partial: partial
+                message: code ? core.describeFailure(code, retryAfterSeconds) : null,
+                partial: partial,
+                // FE-004: only what the backend reported. `ahead` is a snapshot from when the request was accepted,
+                // never an ETA and never updated by the page.
+                ahead: ahead,
+                retryAfterSeconds: retryAfterSeconds
             };
         }
 
@@ -159,13 +192,31 @@
                         return fail('AI_INVALID_RESPONSE');
                     }
                     model = data.model;
-                    state = STATES.STREAMING;
+                    state = STATES.ACCEPTED;
+                    return snapshot();
+
+                case 'queued':
+                    if (state !== STATES.ACCEPTED || !data) {
+                        return fail('AI_INVALID_RESPONSE');
+                    }
+                    ahead = Number.isInteger(data.ahead) && data.ahead >= 0 && data.ahead <= 100000 ? data.ahead : null;
+                    state = STATES.QUEUED;
+                    return snapshot();
+
+                case 'processing':
+                    if (state !== STATES.ACCEPTED && state !== STATES.QUEUED) {
+                        return fail('AI_INVALID_RESPONSE');
+                    }
+                    state = STATES.PROCESSING;
                     return snapshot();
 
                 case 'delta':
-                    if (state !== STATES.STREAMING || !data || typeof data.text !== 'string') {
+                    // A delta cannot arrive while the request is still waiting in the queue.
+                    if ((state !== STATES.ACCEPTED && state !== STATES.PROCESSING && state !== STATES.STREAMING)
+                        || !data || typeof data.text !== 'string') {
                         return fail('AI_INVALID_RESPONSE');
                     }
+                    state = STATES.STREAMING;
                     text += data.text;
                     return snapshot();
 
@@ -177,7 +228,9 @@
                     return snapshot();
 
                 case 'error':
-                    return fail(data && typeof data.code === 'string' ? data.code : 'INTERNAL_ERROR');
+                    fail(data && typeof data.code === 'string' ? data.code : 'INTERNAL_ERROR');
+                    retryAfterSeconds = data && typeof data.retryAfterSeconds === 'number' ? parseRetryAfter(data.retryAfterSeconds) : null; // a JSON number only; the header form is a string
+                    return snapshot();
 
                 case 'cancelled':
                     state = STATES.CANCELLED;
@@ -204,8 +257,13 @@
             },
 
             /** A failure outside the event stream (HTTP error, network, timeout). */
-            fail: function (errorCode) {
-                return isTerminal(state) ? snapshot() : fail(errorCode);
+            fail: function (errorCode, retryAfter) {
+                if (isTerminal(state)) {
+                    return snapshot();
+                }
+                fail(errorCode);
+                retryAfterSeconds = parseRetryAfter(retryAfter);
+                return snapshot();
             }
         };
     }
@@ -233,7 +291,9 @@
             } catch (error) {
                 bodyText = '';
             }
-            var failed = session.fail(core.parseErrorCode(bodyText) || 'INTERNAL_ERROR');
+            // 429 / 503 from the queue arrive here, before any event; Retry-After is used only when it is valid.
+            var retryHeader = response.headers && typeof response.headers.get === 'function' ? response.headers.get('Retry-After') : null;
+            var failed = session.fail(core.parseErrorCode(bodyText) || 'INTERNAL_ERROR', retryHeader);
             report(failed);
             return failed;
         }
@@ -298,6 +358,8 @@
         STATES: STATES,
         STATUS_TEXT: STATUS_TEXT,
         isTerminal: isTerminal,
+        isActive: isActive,
+        parseRetryAfter: parseRetryAfter,
         createSseParser: createSseParser,
         createStreamSession: createStreamSession,
         isEventStream: isEventStream,

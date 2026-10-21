@@ -8,7 +8,7 @@
     const CODES = new Set(['AUTH_REQUIRED', 'AUTH_FORBIDDEN', 'AUTH_CSRF_INVALID', 'AUTH_HTTPS_REQUIRED', 'AUTH_SESSION_CHANGED',
         'AUTH_SESSION_ENDED', 'AUTH_UNAVAILABLE', 'HISTORY_UNAVAILABLE', 'HISTORY_CONFLICT', 'CONVERSATION_NOT_FOUND',
         'INVALID_ID', 'INVALID_TITLE', 'INVALID_CURSOR', 'INVALID_REQUEST', 'INVALID_MESSAGE', 'QUESTION_TOO_LONG',
-        'AI_UNAVAILABLE', 'AI_TIMEOUT', 'AI_INVALID_RESPONSE', 'AI_BUSY', 'AI_RATE_LIMITED']);
+        'AI_UNAVAILABLE', 'AI_TIMEOUT', 'AI_INVALID_RESPONSE', 'AI_BUSY', 'AI_REQUEST_IN_PROGRESS', 'AI_RATE_LIMITED']);
     function fault(code, status = 0) { const e = new Error(code); e.code = code; e.status = status; return e; }
     function wait(promise, signal) {
         if (signal.aborted) return Promise.reject(fault('CANCELLED'));
@@ -118,7 +118,12 @@
                     body: JSON.stringify(body) }, actor, timeout, async (response, deadlineSignal) => {
                     if (!response.ok) {
                         const data = await readJson(response, deadlineSignal);
-                        throw fault(CODES.has(data?.error?.code) ? data.error.code : response.status === 403 ? 'AUTH_FORBIDDEN' : 'HISTORY_UNAVAILABLE', response.status);
+                        const refused = fault(CODES.has(data?.error?.code) ? data.error.code : response.status === 403 ? 'AUTH_FORBIDDEN' : 'HISTORY_UNAVAILABLE', response.status);
+                        // FE-004: guidance only when Retry-After is a plain number of seconds; anything else is ignored.
+                        const header = (response.headers.get('Retry-After') || '').trim();
+                        const seconds = /^[0-9]{1,6}$/.test(header) ? Number(header) : 0;
+                        if (seconds >= 1 && seconds <= 3600) refused.retryAfterSeconds = seconds;
+                        throw refused;
                     }
                     return consume(response, deadlineSignal);
                 });

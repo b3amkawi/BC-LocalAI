@@ -293,6 +293,7 @@ Verification evidence: [`docs/BE-001-evidence.md`](docs/BE-001-evidence.md) (moc
 | `docs/BE-003-ROOT-CAUSE.md`, `docs/BE-003-CONFIGURATION.md`, `docs/BE-003-VERIFICATION.md` | BE-003 root cause analysis, configuration and timeout policy, before/after verification report |
 | `docs/BE-004-SSE-CONTRACT.md`, `docs/BE-004-CONFIGURATION.md`, `docs/BE-004-VERIFICATION.md` | BE-004 SSE contract, runtime behavior and verification evidence |
 | `docs/BE-008-CONFIGURATION.md`, `docs/BE-008-evidence.md`, `docs/BE-008-REVIEW-CHECKLIST.md` | BE-008 bounded queue and per-user limit: configuration, proposed error/event contract, evidence, review guide |
+| `docs/FE-004-evidence.md` | FE-004 queue/busy states in the Chat UI: changes, tests, browser evidence (`docs/FE-004/`), QA handoff |
 | `scripts/test-chat-queue.py` | Live check of the queue against a running backend and real Ollama (synthetic questions) |
 | `docs/KNOWN-LIMITATIONS.md` | Known limitations of the Ollama integration with measured numbers (read before merging) |
 | `docs/BE-002-REVIEW-CHECKLIST.md` | BE-002 (Ollama) reviewer guide and acceptance criteria table |

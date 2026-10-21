@@ -43,7 +43,9 @@
         // No background /me polling: it would keep an idle server session alive forever.
     }
     function notice(text) { el('history-notice').textContent = text; el('history-notice').hidden = !text; }
-    function errorText(error) { return HistoryCore.MESSAGES[error?.code] || AuthCore.MESSAGES[error?.code] || ChatCore.messageFor(error?.code); }
+    function errorText(error) {
+        return HistoryCore.MESSAGES[error?.code] || AuthCore.MESSAGES[error?.code] || ChatCore.describeFailure(error?.code, error?.retryAfterSeconds);
+    }
     function handle(error) {
         if (error?.status === 401 || error?.status === 403 || /^AUTH_/.test(error?.code || '')) {
             auth.invalidate(error.status === 403 && error.code !== 'AUTH_CSRF_INVALID' ? 'AUTH_FORBIDDEN' : error.code || 'AUTH_REQUIRED'); return;
@@ -228,7 +230,10 @@
                     const area = el('conversation'), follow = area.scrollHeight - area.clientHeight - area.scrollTop < 64;
                     answer.text.textContent = snapshot.text;
                     answer.state.textContent = snapshot.state === 'completed' ? 'กำลังตรวจสอบประวัติ…' :
-                        snapshot.state === 'error' ? ChatCore.messageFor(snapshot.code) : ChatStream.STATUS_TEXT[snapshot.state] || '';
+                        snapshot.state === 'error' ? ChatCore.describeFailure(snapshot.code, snapshot.retryAfterSeconds) :
+                        (ChatStream.STATUS_TEXT[snapshot.state] || '') +
+                        (snapshot.state === 'queued' && Number.isInteger(snapshot.ahead) && snapshot.ahead > 0
+                            ? ' (ตอนรับคำถามมี ' + snapshot.ahead + ' คำถามรออยู่ข้างหน้า)' : '');
                     if (snapshot.model) el('model-chip').textContent = 'โมเดล: ' + snapshot.model;
                     if (follow) area.scrollTop = area.scrollHeight;
                 }, { isAborted: () => signal.aborted, onEvent: event => {
@@ -263,7 +268,7 @@
                             notice('ส่งคำขอหยุดแล้ว แต่ยังยืนยันสถานะจากเซิร์ฟเวอร์ไม่ได้ กรุณารีเฟรชประวัติก่อนส่งคำถามใหม่');
                     }
                     else if (answer && outcome) answer.state.textContent = outcome.state === 'completed' ? '' :
-                        outcome.state === 'error' ? ChatCore.messageFor(outcome.code) : 'หยุดสร้างคำตอบแล้ว · อาจยังไม่ครบ';
+                        outcome.state === 'error' ? ChatCore.describeFailure(outcome.code, outcome.retryAfterSeconds) : 'หยุดสร้างคำตอบแล้ว · อาจยังไม่ครบ';
                 } catch (error) { if (cap.current()) handle(error); }
                 if (cap.current()) { activeStream = null; busy = false; controls(); el('message').focus(); }
             }

@@ -93,10 +93,10 @@ test('parser: an event cut off before its blank line is never delivered', () => 
 
 // ---------------------------------------------------------------- answer session (states and contract rules)
 
-test('session: connecting -> streaming -> completed, text appended in order without changes', () => {
+test('session: connecting -> accepted -> streaming -> completed, text appended in order without changes', () => {
     const session = s.createStreamSession();
     assert.equal(session.snapshot().state, 'connecting');
-    assert.equal(session.handle({ event: 'started', data: '{"model":"qwen3:4b"}' }).state, 'streaming');
+    assert.equal(session.handle({ event: 'started', data: '{"model":"qwen3:4b"}' }).state, 'accepted');
     session.handle({ event: 'delta', data: JSON.stringify({ text: '  สวัส' }) });
     session.handle({ event: 'delta', data: JSON.stringify({ text: 'ดี\n\n😊 é ' }) });
     const done = session.handle({ event: 'completed', data: '{"finishReason":"stop","evalCount":9}' });
@@ -164,7 +164,7 @@ test('session: exactly one outcome; nothing after it changes the answer', () => 
 
 test('session: server "cancelled" event and unknown events', () => {
     assert.equal(run([['started', { model: 'm' }], ['cancelled', {}]]).last.state, 'cancelled');
-    assert.equal(run([['started', { model: 'm' }], ['heartbeat', {}]]).last.state, 'streaming');
+    assert.equal(run([['started', { model: 'm' }], ['heartbeat', {}]]).last.state, 'accepted');
 });
 
 test('session: the connection ending without an outcome is STREAM_INTERRUPTED, with the partial text kept', () => {
@@ -204,7 +204,7 @@ test('readAnswer: complete answer, every state reported in order', async () => {
     const final = await s.readAnswer(streamResponse([STARTED, delta('สวัสดี'), delta('ครับ'), COMPLETED]), (snap) => states.push(snap.state));
     assert.equal(final.state, 'completed');
     assert.equal(final.text, 'สวัสดีครับ');
-    assert.deepEqual(states, ['streaming', 'streaming', 'streaming', 'completed']);
+    assert.deepEqual(states, ['accepted', 'streaming', 'streaming', 'completed']);
 });
 
 test('readAnswer: Thai and emoji split in the middle of a character, byte by byte', async () => {

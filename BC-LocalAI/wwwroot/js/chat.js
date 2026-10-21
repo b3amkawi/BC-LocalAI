@@ -141,8 +141,12 @@
 
                 var state = snapshot.state;
                 item.setAttribute('data-state', state);
-                if (state === stream.STATES.CONNECTING || state === stream.STATES.STREAMING) {
+                if (stream.isActive(state)) {
                     statusText.textContent = stream.STATUS_TEXT[state];
+                    // `ahead` is the number of requests that were waiting when this one was accepted, not a live position.
+                    if (state === stream.STATES.QUEUED && Number.isInteger(snapshot.ahead) && snapshot.ahead > 0) {
+                        statusText.textContent += ' (ตอนรับคำถามมี ' + snapshot.ahead + ' คำถามรออยู่ข้างหน้า)';
+                    }
                 } else {
                     item.removeAttribute('aria-busy');
                     item.classList.remove('message--streaming');
@@ -176,7 +180,7 @@
     }
 
     function setState(state) {
-        var busy = state === stream.STATES.CONNECTING || state === stream.STATES.STREAMING;
+        var busy = stream.isActive(state);
         form.setAttribute('data-state', state);
         form.setAttribute('aria-busy', busy ? 'true' : 'false');
         sendButton.disabled = busy;
@@ -249,9 +253,11 @@
                 return;
             }
             view.render(snapshot);
-            if (snapshot.state === stream.STATES.STREAMING) {
-                setState(stream.STATES.STREAMING);
-                modelChip.textContent = 'โมเดล: ' + snapshot.model;
+            if (stream.isActive(snapshot.state)) {
+                setState(snapshot.state);
+                if (snapshot.model) {
+                    modelChip.textContent = 'โมเดล: ' + snapshot.model;
+                }
             }
         }
 
