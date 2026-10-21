@@ -1,0 +1,212 @@
+{
+  "mode": "Cancel",
+  "target": "backend",
+  "profile": "long",
+  "endpoint": "http://localhost:5290/api/chat",
+  "num_predict": 1024,
+  "tested_utc": "2026-10-21T03:05:51.8124428Z",
+  "burst": 6,
+  "cancel_count": 3,
+  "cancel_after_ms": 500,
+  "repeats": 8,
+  "control_median_ms": 17468.4,
+  "control_min_ms": 14025.6,
+  "control_max_ms": 20522.3,
+  "cancel_median_ms": 9789.1,
+  "cancel_min_ms": 6716.3,
+  "cancel_max_ms": 10932.7,
+  "runs": [
+    {
+      "kind": "control",
+      "repetition": 1,
+      "kept_requests": 3,
+      "kept_success": 3,
+      "time_until_kept_requests_finished_ms": 20522.3,
+      "outcomes": [
+        "success",
+        "success",
+        "success"
+      ]
+    },
+    {
+      "kind": "control",
+      "repetition": 2,
+      "kept_requests": 3,
+      "kept_success": 3,
+      "time_until_kept_requests_finished_ms": 19515.4,
+      "outcomes": [
+        "success",
+        "success",
+        "success"
+      ]
+    },
+    {
+      "kind": "control",
+      "repetition": 3,
+      "kept_requests": 3,
+      "kept_success": 3,
+      "time_until_kept_requests_finished_ms": 14025.6,
+      "outcomes": [
+        "success",
+        "success",
+        "success"
+      ]
+    },
+    {
+      "kind": "control",
+      "repetition": 4,
+      "kept_requests": 3,
+      "kept_success": 3,
+      "time_until_kept_requests_finished_ms": 19285.5,
+      "outcomes": [
+        "success",
+        "success",
+        "success"
+      ]
+    },
+    {
+      "kind": "control",
+      "repetition": 5,
+      "kept_requests": 3,
+      "kept_success": 3,
+      "time_until_kept_requests_finished_ms": 17349.9,
+      "outcomes": [
+        "success",
+        "success",
+        "success"
+      ]
+    },
+    {
+      "kind": "control",
+      "repetition": 6,
+      "kept_requests": 3,
+      "kept_success": 3,
+      "time_until_kept_requests_finished_ms": 17468.4,
+      "outcomes": [
+        "success",
+        "success",
+        "success"
+      ]
+    },
+    {
+      "kind": "control",
+      "repetition": 7,
+      "kept_requests": 3,
+      "kept_success": 3,
+      "time_until_kept_requests_finished_ms": 19694.9,
+      "outcomes": [
+        "success",
+        "success",
+        "success"
+      ]
+    },
+    {
+      "kind": "control",
+      "repetition": 8,
+      "kept_requests": 3,
+      "kept_success": 3,
+      "time_until_kept_requests_finished_ms": 14126.3,
+      "outcomes": [
+        "success",
+        "success",
+        "success"
+      ]
+    },
+    {
+      "kind": "cancel",
+      "repetition": 1,
+      "kept_requests": 3,
+      "kept_success": 3,
+      "time_until_kept_requests_finished_ms": 9789.1,
+      "outcomes": [
+        "success",
+        "success",
+        "success"
+      ]
+    },
+    {
+      "kind": "cancel",
+      "repetition": 2,
+      "kept_requests": 3,
+      "kept_success": 3,
+      "time_until_kept_requests_finished_ms": 10932.7,
+      "outcomes": [
+        "success",
+        "success",
+        "success"
+      ]
+    },
+    {
+      "kind": "cancel",
+      "repetition": 3,
+      "kept_requests": 3,
+      "kept_success": 3,
+      "time_until_kept_requests_finished_ms": 7359.1,
+      "outcomes": [
+        "success",
+        "success",
+        "success"
+      ]
+    },
+    {
+      "kind": "cancel",
+      "repetition": 4,
+      "kept_requests": 3,
+      "kept_success": 3,
+      "time_until_kept_requests_finished_ms": 10263.9,
+      "outcomes": [
+        "success",
+        "success",
+        "success"
+      ]
+    },
+    {
+      "kind": "cancel",
+      "repetition": 5,
+      "kept_requests": 3,
+      "kept_success": 3,
+      "time_until_kept_requests_finished_ms": 6716.3,
+      "outcomes": [
+        "success",
+        "success",
+        "success"
+      ]
+    },
+    {
+      "kind": "cancel",
+      "repetition": 6,
+      "kept_requests": 3,
+      "kept_success": 3,
+      "time_until_kept_requests_finished_ms": 9849.6,
+      "outcomes": [
+        "success",
+        "success",
+        "success"
+      ]
+    },
+    {
+      "kind": "cancel",
+      "repetition": 7,
+      "kept_requests": 3,
+      "kept_success": 3,
+      "time_until_kept_requests_finished_ms": 10794.6,
+      "outcomes": [
+        "success",
+        "success",
+        "success"
+      ]
+    },
+    {
+      "kind": "cancel",
+      "repetition": 8,
+      "kept_requests": 3,
+      "kept_success": 3,
+      "time_until_kept_requests_finished_ms": 7491.6,
+      "outcomes": [
+        "success",
+        "success",
+        "success"
+      ]
+    }
+  ]
+}

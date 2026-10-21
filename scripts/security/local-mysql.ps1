@@ -5,13 +5,15 @@ param(
     [string]$MySqlBin = 'C:\Program Files\MySQL\MySQL Server 8.0\bin',
     # Loopback port of this isolated instance. Another port lets a second checkout run its own instance side by side.
     [ValidateRange(1025, 65535)][int]$Port = 3307,
-    [ValidateSet('sec001-mysql-v2', 'be005-mysql', 'be007-mysql')][string]$InstanceName = 'sec001-mysql-v2'
+    [ValidateSet('sec001-mysql-v2', 'be005-mysql', 'be007-mysql', 'sec003-mysql')][string]$InstanceName = 'sec001-mysql-v2'
 )
 $ErrorActionPreference = 'Stop'
 $repo = (Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
 $instance = Join-Path $repo ".local/$InstanceName"
 if ($InstanceName -eq 'be005-mysql' -and $Port -ne 3319) { throw 'BE-005 fixture must use its dedicated loopback port3319.' }
 if ($InstanceName -eq 'be007-mysql' -and $Port -ne 3320) { throw 'BE-007 fixture must use its dedicated loopback port 3320.' }
+# SEC-003: admin account script fixture (reader + BE-005 attempt writer + admin writer + audit table).
+if ($InstanceName -eq 'sec003-mysql' -and $Port -ne 3318) { throw 'SEC-003 fixture must use its dedicated loopback port 3318.' }
 $private = Join-Path $instance 'private'
 $data = Join-Path $instance 'data'
 $ready = Join-Path $instance 'initialized'
@@ -75,6 +77,8 @@ switch ($Action) {
         if ($InstanceName -eq 'be005-mysql') { $fixtureArguments += 'be005-attempt-writer' }
         # BE-007: login (attempt writer) plus the chat history tables and their runtime account.
         if ($InstanceName -eq 'be007-mysql') { $fixtureArguments += 'be005-attempt-writer', 'be007-history' }
+        # SEC-003: login (attempt writer), the BE-007 history tables (to prove the admin writer cannot read chats) and the admin writer.
+        if ($InstanceName -eq 'sec003-mysql') { $fixtureArguments += 'be005-attempt-writer', 'be007-history', 'sec003-admin-writer' }
         & dotnet run --project (Join-Path $repo 'tools/Sec001Fixtures/Sec001Fixtures.csproj') -c Release -- @fixtureArguments
         if ($LASTEXITCODE -ne 0) { throw 'Fixture generation failed. No database initialization attempted.' }
         & $server --no-defaults --initialize "--basedir=$(Split-Path $MySqlBin)" "--datadir=$data" "--log-error=$(Join-Path $instance 'initialize.log')"
@@ -88,6 +92,12 @@ switch ($Action) {
         # Marker is local state, never a substitute for the data-directory identity check.
         [IO.File]::WriteAllText($ready, 'SEC-001 isolated development instance')
         Confirm-OwnInstance
+        if ($InstanceName -eq 'sec003-mysql') {
+            # The DBA's own file, run the way the DBA runs it (mysql client, DELIMITER for the triggers).
+            $audit = (Join-Path $repo 'database/sec003/admin-audit.sql').Replace('\', '/')
+            $null = & $client "--defaults-file=$admin" --connect-timeout=3 --batch --database=bc_localai_sec001 "--execute=source $audit" 2>&1
+            if ($LASTEXITCODE -ne 0) { throw 'Applying admin-audit.sql failed. No SQL, credentials or raw error output disclosed.' }
+        }
         Write-Output "Created isolated MySQL at 127.0.0.1:$Port, database bc_localai_sec001, 3 synthetic accounts."
     }
     'Start' {
@@ -135,6 +145,18 @@ switch ($Action) {
         })
         $stored | ConvertTo-Json -AsArray -Compress | & dotnet run --no-build -c Release --project (Join-Path $repo 'tools/Sec001Fixtures/Sec001Fixtures.csproj') -- verify-db $private
         $checks.stored_password_hashes = $LASTEXITCODE -eq 0
+        if ($InstanceName -eq 'sec003-mysql') {
+            $adminWriter = Join-Path $private 'admin-writer.cnf'
+            # Proves the writer's grants were applied (an error in the init file stops it silently).
+            $checks.admin_writer_can_resolve = (Invoke-Query 'SELECT COUNT(id) FROM bc_localai_sec001.users WHERE id IS NOT NULL;' $adminWriter) -eq '3'
+            $checks.audit_triggers = (Invoke-Query "SELECT COUNT(*) FROM information_schema.triggers WHERE trigger_schema='bc_localai_sec001' AND event_object_table='users' AND trigger_name LIKE 'trg_users_admin_audit_%';") -eq '2'
+            $checks.audit_table = (Invoke-Query "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='bc_localai_sec001' AND table_name='admin_audit_log';") -eq '1'
+            # The admin writer must not read hashes, read the audit log or touch any other table.
+            $hash = & $client "--defaults-file=$adminWriter" --batch --execute='SELECT password_hash FROM bc_localai_sec001.users LIMIT 0;' 2>&1
+            $checks.admin_writer_cannot_read_hash = $LASTEXITCODE -ne 0 -and ($hash -join '') -match '114[23]'
+            $audit = & $client "--defaults-file=$adminWriter" --batch --execute='SELECT id FROM bc_localai_sec001.admin_audit_log LIMIT 0;' 2>&1
+            $checks.admin_writer_cannot_read_audit = $LASTEXITCODE -ne 0 -and ($audit -join '') -match '114[23]'
+        }
         foreach ($check in $checks.GetEnumerator()) { Write-Output "$($check.Key): $($check.Value)" }
         if ($checks.Values -contains $false) { throw 'One or more local MySQL checks failed.' }
         Write-Output "Passed $($checks.Count)/$($checks.Count) local database checks. Login API/session tests are not implemented here."

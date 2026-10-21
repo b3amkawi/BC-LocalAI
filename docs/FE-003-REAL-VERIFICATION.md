@@ -3,11 +3,12 @@
 2026-10-21 (Asia/Bangkok) · [FE-003 #24](https://github.com/b3amkawi/BC-LocalAI/issues/24)
 · branch `watzapon_FE-003` · main base `d121f50`, merge `c0a1d5e`.
 
-Implementation/test evidence is stored in local commit `db98567`. At the final read-only Git check, the shared `origin/main`
-reference had advanced to `d636b4f` (AI-006 benchmark documents/scripts and additional Python tests; its Python floor is158).
-Those later changes were not silently merged into this run. The test counts below apply to the requested `d121f50` base plus FE-003,
-not to a hypothetical merge with that newer main. Before a later PR/merge, synchronize the newer main, retain the higher Python
-floor158 and run the combined regression set. There are no application-runtime changes in the observed main delta.
+Initial implementation/test evidence is stored in local commit `db98567` on base `d121f50`.
+The subsequent user-authorized synchronization integrates `origin/main` at
+`38be745b461f59f56c171497e876f35239bcb1f4` (SEC-003 plus AI-006), not merely the earlier observed `d636b4f`.
+The only merge conflict was the test baseline: retain the combined floors950/.NET,177/Node,158/Python.
+SEC-003 adds the admin tool, its tests and opt-in fixture support; no files under `BC-LocalAI/` changed in the incoming main delta.
+The original results below remain historical evidence; see the synchronization verification section for the combined run.
 
 This supersedes the **Mock-only** scope of [the historical preparation report](FE-003-VERIFICATION.md).
 See [setup, contracts and recovery](FE-003-REAL-UI.md). No actual employee credentials/company schema were supplied or tested.
@@ -140,4 +141,27 @@ This is the implementing agent's self-review, not independent team/Leader approv
 
 Company account/schema mapping, production TLS/proxy/secret configuration, operational retention/purge, deployment and independent
 team review remain external release gates. Main's BE-007 policy/implementation is not replaced by the paused experimental BE-007 branch.
-No push, PR, merge, issue close/comment or deployment was performed. No production data, employee account or other project's branch was changed.
+No push, PR, merge into main, issue close/comment or deployment was performed. No production data, employee account or other project's branch was changed.
+
+## Synchronization verification — main38be745 (2026-10-21)
+
+User authorized integrating main into the existing FE-003 branch, still without push or merge into main.
+Fetched main `38be745b461f59f56c171497e876f35239bcb1f4`; merged SEC-003 and AI-006 locally.
+The baseline conflict was resolved by preserving all additional tests:950/.NET,177/Node,158/Python.
+No application fix, dependency version change, schema migration or authentication-policy change was needed.
+
+| Check rerun on the combined tree | Result | Local ignored log |
+|---|---|---|
+| Release solution build | 0 warnings /0 errors | `artifacts/fe003-sync-build.log` |
+| Release synthetic-fixture helper build | 0 warnings /0 errors | `artifacts/fe003-sync-fixture-build.log` |
+| .NET Development | 950 passed /0 failed /0 skipped | `artifacts/fe003-sync-development.log` |
+| .NET Production | 950 passed /0 failed /0 skipped | `artifacts/fe003-sync-production.log` |
+| JavaScript | 177 passed /0 failed /0 cancelled /0 skipped | `artifacts/fe003-sync-node.log` |
+| Python | 158 passed /0 failures/errors /0 skipped,214.582s | `artifacts/fe003-sync-python.log` |
+| Actual HTTPS/MySQL3338/Ollama qwen3:4b | 38 checks passed | `artifacts/fe003-sync-live.log` |
+
+The existing real-browser screenshots and three mutation results above are from the original FE-003 run, not repeated browser
+or mutation runs after synchronization. The incoming main delta changed no `BC-LocalAI/` runtime files, and the full automated
+UI/API suites plus dedicated real-service verifier were rerun. The separate SEC-003 live admin suite was not rerun; this task
+does not provision an admin writer, run account-management commands or modify other developers' fixtures.
+Actual-company-account UAT and independent team approval remain external gates. No remote write or production deployment occurred.

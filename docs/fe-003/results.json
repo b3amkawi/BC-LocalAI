@@ -5,7 +5,27 @@
   "branch": "watzapon_FE-003",
   "implementationCommit": "db98567",
   "mainBase": "d121f5014b600288fc3cb69f57c22fd8de21f627",
-  "laterObservedMainNotIntegrated": "d636b4f4827e967859341a8b004a7d74e64fa76b",
+  "synchronizedMain": "38be745b461f59f56c171497e876f35239bcb1f4",
+  "synchronizationVerification": {
+    "date": "2026-10-21",
+    "build": { "warnings": 0, "errors": 0 },
+    "fixtureHelperBuild": { "warnings": 0, "errors": 0 },
+    "dotnetDevelopment": { "passed": 950, "failed": 0, "skipped": 0 },
+    "dotnetProduction": { "passed": 950, "failed": 0, "skipped": 0 },
+    "node": { "passed": 177, "failed": 0, "cancelled": 0, "skipped": 0 },
+    "python": { "passed": 158, "failed": 0, "skipped": 0 },
+    "realMySqlOllamaApi": { "checksPassed": 38, "mysqlPort": 3338, "model": "qwen3:4b" },
+    "browserAndMutations": "original evidence below retained; not rerun after sync; incoming main has no BC-LocalAI runtime file changes",
+    "logSha256": {
+      "artifacts/fe003-sync-build.log": "b0ea86475aac34ac5cd024e1a010552540a6fa960b9c6b83b6dd2f5a5e09c9ad",
+      "artifacts/fe003-sync-fixture-build.log": "381bd5ea3500ab0acbc10ffad6922007df7a4ccacc4252fb1102bb6b2f66436f",
+      "artifacts/fe003-sync-development.log": "7771dfc33a2be6006ecadd3549b8da53ab4421e4747d3ea12a5a67103b81cd32",
+      "artifacts/fe003-sync-production.log": "285995697ed2eb23a3d52e14fcf86105109d32fd8596cbf4ac397f70fd1c555e",
+      "artifacts/fe003-sync-node.log": "d669d257b92b81cbd21143afc123c91ab37eb998f487ae61e86902ce7c063a28",
+      "artifacts/fe003-sync-python.log": "fdc73964f026925db9951d038c41ea46268f94984242f50359a2e6920249c891",
+      "artifacts/fe003-sync-live.log": "375b5fb830f998f4ff5c56c298b14339f500a5b026a4d251131212df4de792cd"
+    }
+  },
   "dataScope": "isolated synthetic accounts and history only; no company-account UAT or production deployment",
   "results": {
     "build": { "warnings": 0, "errors": 0 },

@@ -1,0 +1,21 @@
+{
+  "label": "NUM_PARALLEL=2 Direct only",
+  "started": "2026-10-21T10:10:30.5049597+07:00",
+  "finished": "2026-10-21T11:10:22.6246515+07:00",
+  "min_samples_per_scenario_and_target": 188,
+  "slice_requests": 40,
+  "targets": "ollama",
+  "concurrency": [
+    "1",
+    "2",
+    "5",
+    "10"
+  ],
+  "profiles": [
+    "short",
+    "medium",
+    "long"
+  ],
+  "ollama_url": "http://127.0.0.1:11437/",
+  "backend_url": null
+}

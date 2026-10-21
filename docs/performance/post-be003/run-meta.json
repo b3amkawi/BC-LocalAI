@@ -1,0 +1,24 @@
+{
+  "label": "AI-006 post-BE-003, NUM_PARALLEL=1, 1.5x of the 125-sample minimum",
+  "started": "2026-10-21T08:27:32.4631172+07:00",
+  "finished": "2026-10-21T09:02:23.2574767+07:00",
+  "min_samples_per_scenario_and_target": 188,
+  "slice_requests": 40,
+  "targets": [
+    "ollama",
+    "backend"
+  ],
+  "concurrency": [
+    "1",
+    "2",
+    "5",
+    "10"
+  ],
+  "profiles": [
+    "short",
+    "medium",
+    "long"
+  ],
+  "ollama_url": "http://127.0.0.1:11434/",
+  "backend_url": "http://localhost:5290/"
+}
