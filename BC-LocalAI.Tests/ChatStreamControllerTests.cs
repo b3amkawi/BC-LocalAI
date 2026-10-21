@@ -74,7 +74,7 @@ public sealed class ChatStreamControllerTests
     {
         var context = new DefaultHttpContext();
         context.Response.Body = stream;
-        return new ChatStreamController(service, Options.Create(new OllamaOptions()), logs.CreateLogger<ChatStreamController>())
+        return new ChatStreamController(service, SessionGuards.Off(), ChatTurns.Off(), Options.Create(new BC_LocalAI.Configuration.ChatHistoryOptions()), TimeProvider.System, Options.Create(new OllamaOptions()), logs.CreateLogger<ChatStreamController>())
         {
             ControllerContext = new ControllerContext { HttpContext = context }
         };

@@ -1,0 +1,294 @@
+{
+  "generated_utc": "2026-10-21 02:35:20",
+  "model": "qwen3:4b",
+  "template_and_system_overhead_tokens": 41,
+  "estimator": "4 + ceil((utf8_bytes + 2) / 3)",
+  "rows": [
+    {
+      "kind": "english",
+      "chars": 100,
+      "bytes": 100,
+      "real_tokens": 17,
+      "estimated_tokens": 38,
+      "real_over_estimate": 0.45,
+      "chars_per_real_token": 5.88
+    },
+    {
+      "kind": "english",
+      "chars": 400,
+      "bytes": 400,
+      "real_tokens": 69,
+      "estimated_tokens": 138,
+      "real_over_estimate": 0.5,
+      "chars_per_real_token": 5.8
+    },
+    {
+      "kind": "english",
+      "chars": 1500,
+      "bytes": 1500,
+      "real_tokens": 255,
+      "estimated_tokens": 504,
+      "real_over_estimate": 0.51,
+      "chars_per_real_token": 5.88
+    },
+    {
+      "kind": "thai",
+      "chars": 100,
+      "bytes": 296,
+      "real_tokens": 48,
+      "estimated_tokens": 103,
+      "real_over_estimate": 0.47,
+      "chars_per_real_token": 2.08
+    },
+    {
+      "kind": "thai",
+      "chars": 400,
+      "bytes": 1168,
+      "real_tokens": 203,
+      "estimated_tokens": 394,
+      "real_over_estimate": 0.52,
+      "chars_per_real_token": 1.97
+    },
+    {
+      "kind": "thai",
+      "chars": 1500,
+      "bytes": 4370,
+      "real_tokens": 773,
+      "estimated_tokens": 1461,
+      "real_over_estimate": 0.53,
+      "chars_per_real_token": 1.94
+    },
+    {
+      "kind": "mixed_thai_english",
+      "chars": 100,
+      "bytes": 218,
+      "real_tokens": 37,
+      "estimated_tokens": 77,
+      "real_over_estimate": 0.48,
+      "chars_per_real_token": 2.7
+    },
+    {
+      "kind": "mixed_thai_english",
+      "chars": 400,
+      "bytes": 814,
+      "real_tokens": 146,
+      "estimated_tokens": 276,
+      "real_over_estimate": 0.53,
+      "chars_per_real_token": 2.74
+    },
+    {
+      "kind": "mixed_thai_english",
+      "chars": 1500,
+      "bytes": 3098,
+      "real_tokens": 561,
+      "estimated_tokens": 1037,
+      "real_over_estimate": 0.54,
+      "chars_per_real_token": 2.67
+    },
+    {
+      "kind": "digits",
+      "chars": 100,
+      "bytes": 100,
+      "real_tokens": 100,
+      "estimated_tokens": 38,
+      "real_over_estimate": 2.63,
+      "chars_per_real_token": 1.0
+    },
+    {
+      "kind": "digits",
+      "chars": 400,
+      "bytes": 400,
+      "real_tokens": 400,
+      "estimated_tokens": 138,
+      "real_over_estimate": 2.9,
+      "chars_per_real_token": 1.0
+    },
+    {
+      "kind": "digits",
+      "chars": 1500,
+      "bytes": 1500,
+      "real_tokens": 1500,
+      "estimated_tokens": 504,
+      "real_over_estimate": 2.98,
+      "chars_per_real_token": 1.0
+    },
+    {
+      "kind": "punctuation_symbols",
+      "chars": 100,
+      "bytes": 100,
+      "real_tokens": 60,
+      "estimated_tokens": 38,
+      "real_over_estimate": 1.58,
+      "chars_per_real_token": 1.67
+    },
+    {
+      "kind": "punctuation_symbols",
+      "chars": 400,
+      "bytes": 400,
+      "real_tokens": 235,
+      "estimated_tokens": 138,
+      "real_over_estimate": 1.7,
+      "chars_per_real_token": 1.7
+    },
+    {
+      "kind": "punctuation_symbols",
+      "chars": 1500,
+      "bytes": 1500,
+      "real_tokens": 882,
+      "estimated_tokens": 504,
+      "real_over_estimate": 1.75,
+      "chars_per_real_token": 1.7
+    },
+    {
+      "kind": "emoji",
+      "chars": 100,
+      "bytes": 345,
+      "real_tokens": 89,
+      "estimated_tokens": 119,
+      "real_over_estimate": 0.75,
+      "chars_per_real_token": 1.12
+    },
+    {
+      "kind": "emoji",
+      "chars": 400,
+      "bytes": 1380,
+      "real_tokens": 356,
+      "estimated_tokens": 464,
+      "real_over_estimate": 0.77,
+      "chars_per_real_token": 1.12
+    },
+    {
+      "kind": "emoji",
+      "chars": 1500,
+      "bytes": 5170,
+      "real_tokens": 1334,
+      "estimated_tokens": 1728,
+      "real_over_estimate": 0.77,
+      "chars_per_real_token": 1.12
+    },
+    {
+      "kind": "json_code",
+      "chars": 100,
+      "bytes": 100,
+      "real_tokens": 53,
+      "estimated_tokens": 38,
+      "real_over_estimate": 1.39,
+      "chars_per_real_token": 1.89
+    },
+    {
+      "kind": "json_code",
+      "chars": 400,
+      "bytes": 400,
+      "real_tokens": 203,
+      "estimated_tokens": 138,
+      "real_over_estimate": 1.47,
+      "chars_per_real_token": 1.97
+    },
+    {
+      "kind": "json_code",
+      "chars": 1500,
+      "bytes": 1500,
+      "real_tokens": 760,
+      "estimated_tokens": 504,
+      "real_over_estimate": 1.51,
+      "chars_per_real_token": 1.97
+    },
+    {
+      "kind": "url_hex_ids",
+      "chars": 100,
+      "bytes": 100,
+      "real_tokens": 74,
+      "estimated_tokens": 38,
+      "real_over_estimate": 1.95,
+      "chars_per_real_token": 1.35
+    },
+    {
+      "kind": "url_hex_ids",
+      "chars": 400,
+      "bytes": 400,
+      "real_tokens": 293,
+      "estimated_tokens": 138,
+      "real_over_estimate": 2.12,
+      "chars_per_real_token": 1.37
+    },
+    {
+      "kind": "url_hex_ids",
+      "chars": 1500,
+      "bytes": 1500,
+      "real_tokens": 1098,
+      "estimated_tokens": 504,
+      "real_over_estimate": 2.18,
+      "chars_per_real_token": 1.37
+    },
+    {
+      "kind": "chinese",
+      "chars": 100,
+      "bytes": 300,
+      "real_tokens": 56,
+      "estimated_tokens": 104,
+      "real_over_estimate": 0.54,
+      "chars_per_real_token": 1.79
+    },
+    {
+      "kind": "chinese",
+      "chars": 400,
+      "bytes": 1200,
+      "real_tokens": 222,
+      "estimated_tokens": 404,
+      "real_over_estimate": 0.55,
+      "chars_per_real_token": 1.8
+    },
+    {
+      "kind": "chinese",
+      "chars": 1500,
+      "bytes": 4500,
+      "real_tokens": 833,
+      "estimated_tokens": 1504,
+      "real_over_estimate": 0.55,
+      "chars_per_real_token": 1.8
+    },
+    {
+      "kind": "thai_digits_mixed",
+      "chars": 100,
+      "bytes": 182,
+      "real_tokens": 73,
+      "estimated_tokens": 65,
+      "real_over_estimate": 1.12,
+      "chars_per_real_token": 1.37
+    },
+    {
+      "kind": "thai_digits_mixed",
+      "chars": 400,
+      "bytes": 698,
+      "real_tokens": 312,
+      "estimated_tokens": 237,
+      "real_over_estimate": 1.32,
+      "chars_per_real_token": 1.28
+    },
+    {
+      "kind": "thai_digits_mixed",
+      "chars": 1500,
+      "bytes": 2602,
+      "real_tokens": 1177,
+      "estimated_tokens": 872,
+      "real_over_estimate": 1.35,
+      "chars_per_real_token": 1.27
+    }
+  ],
+  "worst": {
+    "kind": "digits",
+    "chars": 1500,
+    "bytes": 1500,
+    "real_tokens": 1500,
+    "estimated_tokens": 504,
+    "real_over_estimate": 2.98,
+    "chars_per_real_token": 1.0
+  },
+  "underestimated_kinds": [
+    "digits",
+    "json_code",
+    "punctuation_symbols",
+    "thai_digits_mixed",
+    "url_hex_ids"
+  ]
+}

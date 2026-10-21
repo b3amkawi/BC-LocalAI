@@ -230,6 +230,51 @@ body {
     color: var(--ink-muted);
 }
 
+/* ---------- Streaming answer (FE-002) ---------- */
+.message__status {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-top: 6px;
+    color: var(--ink-muted);
+    font-size: 0.85rem;
+}
+
+/* While text is still arriving, a blinking bar marks where the next words appear. */
+.message--streaming .message__text:not(:empty)::after {
+    content: "";
+    display: inline-block;
+    width: 0.5em;
+    height: 1em;
+    margin-left: 2px;
+    vertical-align: text-bottom;
+    background: var(--navy);
+    animation: caret 1s steps(1) infinite;
+}
+
+@keyframes caret {
+    50% {
+        opacity: 0;
+    }
+}
+
+/* An answer that did not finish (stopped, interrupted or failed) is kept but clearly marked. */
+.message--incomplete {
+    border-style: dashed;
+}
+
+.message--incomplete .message__status {
+    color: var(--error-ink);
+    font-weight: 600;
+}
+
+.message--note {
+    align-self: center;
+    background: var(--surface-soft);
+    color: var(--ink-muted);
+    font-size: 0.9rem;
+}
+
 .dots {
     display: inline-flex;
     gap: 4px;
@@ -264,7 +309,8 @@ body {
 }
 
 @media (prefers-reduced-motion: reduce) {
-    .dots i {
+    .dots i,
+    .message--streaming .message__text:not(:empty)::after {
         animation: none;
         opacity: 0.7;
     }
@@ -345,6 +391,29 @@ body {
     cursor: not-allowed;
 }
 
+.composer__stop {
+    flex: none;
+    min-width: 76px;
+    min-height: 48px;
+    padding: 0 16px;
+    border: 2px solid var(--red);
+    border-radius: 12px;
+    background: var(--white);
+    color: var(--error-ink);
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.composer__stop:hover:not(:disabled) {
+    background: var(--error-bg);
+}
+
+.composer__send[hidden],
+.composer__stop[hidden] {
+    display: none;
+}
+
 .composer__keys {
     margin: 6px 0 0;
     color: var(--ink-muted);
@@ -353,7 +422,8 @@ body {
 
 /* ---------- Keyboard focus ---------- */
 .composer__input:focus-visible,
-.composer__send:focus-visible {
+.composer__send:focus-visible,
+.composer__stop:focus-visible {
     outline: 3px solid var(--navy);
     outline-offset: 2px;
 }

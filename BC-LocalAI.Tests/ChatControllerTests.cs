@@ -11,7 +11,7 @@ public sealed class ChatControllerTests
     public async Task PostAsync_WithValidMessage_ReturnsContractResponseAndCallsService()
     {
         var aiService = new RecordingAIService();
-        var controller = new ChatController(aiService);
+        var controller = new ChatController(aiService, SessionGuards.Off(), ChatTurns.Off());
         var request = new ChatRequest { Message = "สวัสดี AI" };
 
         var result = await controller.PostAsync(request, CancellationToken.None);
@@ -31,7 +31,7 @@ public sealed class ChatControllerTests
     public async Task PostAsync_WithInvalidMessage_ReturnsContractError(string? message)
     {
         var aiService = new RecordingAIService();
-        var controller = new ChatController(aiService);
+        var controller = new ChatController(aiService, SessionGuards.Off(), ChatTurns.Off());
 
         var result = await controller.PostAsync(
             new ChatRequest { Message = message },
@@ -48,7 +48,7 @@ public sealed class ChatControllerTests
     public async Task PostAsync_WithNullRequest_ReturnsContractError()
     {
         var aiService = new RecordingAIService();
-        var controller = new ChatController(aiService);
+        var controller = new ChatController(aiService, SessionGuards.Off(), ChatTurns.Off());
 
         var result = await controller.PostAsync(null, CancellationToken.None);
 

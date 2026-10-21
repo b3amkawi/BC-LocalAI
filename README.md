@@ -33,11 +33,14 @@ cd <folder>
 dotnet BC-LocalAI.dll
 ```
 
-## Chat web page (FE-001)
+## Chat web page (FE-001, streaming since FE-002)
 
-Type a question and press **Enter** (or the **ส่ง** button) to send it; **Shift+Enter** starts a new line. The answer appears
-with the model name. While the AI is working a "กำลังประมวลผล" bubble is shown and the send button is disabled, so a question
-cannot be sent twice. The page works on desktop and on phones, and everything can be done with the keyboard
+Type a question and press **Enter** (or the **ส่ง** button) to send it; **Shift+Enter** starts a new line. Since FE-002 the answer
+**appears while it is being written** (`POST /api/chat/stream`), in one bubble with the model name. While the AI is working the
+**ส่ง** button becomes **หยุดสร้างคำตอบ** (Stop, also **Esc**): it stops the answer and the server stops generating; the text
+received so far stays, marked "หยุดการสร้างคำตอบแล้ว". Only one answer runs at a time, so a question cannot be sent twice.
+An answer that did not finish (stopped, failed or the connection dropped) is never shown as complete: it is marked
+"คำตอบไม่สมบูรณ์". Behaviour and states: [docs/FE-002-STREAMING-UI.md](docs/FE-002-STREAMING-UI.md). The page works on desktop and on phones, and everything can be done with the keyboard
 (Tab reaches the message area, the input and the button; the arrow keys scroll the message area).
 
 ![Desktop](docs/fe-001/desktop-conversation.jpg)
@@ -52,17 +55,19 @@ cannot be sent twice. The page works on desktop and on phones, and everything ca
 | `AI_RESPONSE_TOO_LARGE` | คำตอบยาวเกินกว่าที่ระบบรองรับ กรุณาถามให้สั้นลงหรือแบ่งเป็นหลายคำถาม |
 | `INTERNAL_ERROR` or anything unknown | ระบบเกิดข้อผิดพลาด กรุณาลองใหม่ |
 | The server cannot be reached at all | ไม่สามารถเชื่อมต่อเซิร์ฟเวอร์ได้ กรุณาตรวจการเชื่อมต่อแล้วลองใหม่ |
+| The stream ended before the answer finished (FE-002) | การเชื่อมต่อขาดก่อนที่คำตอบจะเสร็จ คำตอบที่เห็นอาจไม่ครบ กรุณาลองใหม่ |
 
 After an error the question is put back in the input so it can be sent again. Exceptions, stack traces and server messages are never shown.
 
-Rules the page follows: it calls only `POST /api/chat` (never Ollama on port 11434); every text is written with `textContent`,
+Rules the page follows: it calls only `POST /api/chat/stream` (never Ollama on port 11434; `POST /api/chat` stays available for other clients); every text is written with `textContent`,
 so HTML or script in an answer is shown as plain text; there is no CDN or new dependency; nothing is stored in the browser
 (the conversation is kept in memory only and is gone when the page is reloaded). The page sends a Content-Security-Policy
 header (`script-src 'self'`, `connect-src 'self'`, ...), which also stops the browser from calling anything but this site.
 
-Files: `BC-LocalAI/Views/Home/Index.cshtml`, `BC-LocalAI/wwwroot/js/chat-core.js` (logic), `chat.js` (page wiring), `css/chat.css`.
+Files: `BC-LocalAI/Views/Home/Index.cshtml`, `BC-LocalAI/wwwroot/js/chat-core.js` (texts, validation), `chat-stream.js` (FE-002: SSE parsing and answer states), `chat.js` (page wiring), `css/chat.css`.
 Colors come from the BetterCode logo (navy `#16386A`, yellow `#F9CB00`, red `#ED1C24`, white).
-Review guide and evidence: [docs/FE-001-REVIEW-CHECKLIST.md](docs/FE-001-REVIEW-CHECKLIST.md), [docs/FE-001-evidence.md](docs/FE-001-evidence.md).
+Review guide and evidence: [docs/FE-001-REVIEW-CHECKLIST.md](docs/FE-001-REVIEW-CHECKLIST.md), [docs/FE-001-evidence.md](docs/FE-001-evidence.md),
+[docs/FE-002-REVIEW-CHECKLIST.md](docs/FE-002-REVIEW-CHECKLIST.md), [docs/FE-002-VERIFICATION.md](docs/FE-002-VERIFICATION.md).
 
 ### Tests for the Chat page
 
@@ -86,6 +91,20 @@ dotnet build .\BC-LocalAI.slnx
 ```powershell
 dotnet test .\BC-LocalAI.slnx
 ```
+
+## Authentication (BE-005, opt-in validation only)
+
+Basic MySQL account authentication is implemented behind `Authentication:Enabled=false` by default.
+Login/Logout/Me use HTTPS, framework Cookie Authentication, antiforgery and a bounded login-attempt limiter.
+Failures/lockout persist in MySQL through a separate least-privilege writer:5 consecutive failures lock15 minutes; success resets failures.
+See [configuration, API and FE-003/BE-006 handoff](docs/authentication/BE-005-INTEGRATION.md)
+and [current verification evidence / remaining gates](docs/authentication/BE-005-LOCKOUT-VERIFICATION.md).
+Sessions, account revalidation and Chat authorization come from BE-006 (below); everything stays off until `Authentication:Enabled=true`.
+No production deployment or account-administration UI/API is included.
+
+## Continuous integration (DEVOPS-001)
+
+Every pull request to `main` runs `.github/workflows/ci.yml`: build, .NET, JavaScript and Python tests (with PowerShell 7), a test-count gate, a secret scan and a Markdown link check. No job needs Ollama or a GPU. The live suites (AI-003, AI-004, AI-005) are run on a developer machine and their evidence is pasted in the PR. See [CI quality gates](docs/devops/ci-quality-gates.md) and the [live test procedure](docs/devops/live-test-procedure.md).
 
 ## Chat API
 
@@ -160,6 +179,25 @@ Why these defaults, the timeout policy for every level (browser, Kestrel, servic
 
 The configuration is validated at startup; an invalid value (bad URL, a URL that is not loopback, empty model, a number outside its range) stops the app with a clear error.
 
+### Sessions and authorization (BE-006)
+
+`appsettings.json` section `Authentication`: `Enabled` (**false** until the FE-003 login page exists), `IdleTimeoutMinutes` (30),
+`AbsoluteLifetimeMinutes` (480). When enabled, `/api/chat` and `/api/chat/stream` need a signed-in User or Admin (401/403 JSON otherwise),
+sessions are checked against the account on every request, and cross-site API posts are refused (`AUTH_CSRF_INVALID`).
+BE-005's login signs in through these sessions and the account (status, stamp, role) is read from MySQL on every request. Enabling it without a user store stops the app at startup on purpose. Details: [docs/security/BE-006-DEVELOPER-GUIDE.md](docs/security/BE-006-DEVELOPER-GUIDE.md),
+[authorization matrix](docs/security/BE-006-AUTHORIZATION-MATRIX.md), [verification](docs/security/BE-006-VERIFICATION.md).
+
+### Chat history (BE-007)
+
+`appsettings.json` section `ChatHistory`: `Enabled` (**false**; needs `Authentication:Enabled`), `ConnectionString` (secret, its own
+MySQL account with SELECT/INSERT/UPDATE on the two history tables only), `ContextTokenBudget` (1500), `StreamCheckpointSeconds` (2).
+When enabled: `/api/conversations` (create, list, get, rename, delete, messages) for the signed-in user only, and `/api/chat` /
+`/api/chat/stream` accept an optional `conversationId` to save the turn and send earlier turns as context. Without `conversationId`
+the chat works exactly as before. Tables are created by an operator with `scripts/chat-history/migrate.ps1`, never at startup;
+retention (deleted: 30 days, closed accounts: 90 days) is applied by `scripts/chat-history/purge.ps1`.
+Details: [API contract](docs/chat-history/BE-007-API-CONTRACT.md), [design](docs/chat-history/BE-007-DESIGN.md),
+[migration](docs/chat-history/BE-007-MIGRATION-PLAN.md), [verification](docs/chat-history/BE-007-VERIFICATION.md).
+
 ### Error contract
 
 All errors use `{ "error": { "code": "...", "message": "..." } }` and never include exceptions, stack traces or provider details.
@@ -211,7 +249,7 @@ See [docs/KNOWN-LIMITATIONS.md](docs/KNOWN-LIMITATIONS.md) for the full list wit
 - Ollama handles one request at a time. Under a burst, requests queue and later ones can time out with `504 AI_TIMEOUT`
   (measured on the development laptop: 15 simultaneous 3-sentence answers with a 12 s timeout -> 4 succeeded, 11 got 504,
   and the API recovered immediately).
-- No authentication, rate limit or conversation history. FE-001 remains non-streaming until FE-002 adopts `/api/chat/stream`.
+- No authentication, rate limit or conversation history. The Chat page uses `/api/chat/stream` since FE-002.
 
 ### Live smoke test (needs Ollama)
 
@@ -326,3 +364,7 @@ plus a JSON summary (latency percentiles, throughput, success/timeout rate, CPU/
 and are loopback only. See the [test plan](docs/performance/benchmark-plan.md),
 the [performance report](docs/performance/benchmark-report.md) (preliminary results) and the
 [handoff for BE-003/BE-004](docs/performance/benchmark-handoff.md).
+
+## AI failure policy (AI-007)
+
+`scripts/test-ollama-failures.ps1` (PowerShell 7, loopback only) injects ten kinds of failure into a **dedicated** Ollama instance it starts on port 11436 (runner killed, Ollama killed, Ollama not running, model unloaded, model not found, token limit, invalid request, client cancel, abandoned queued request) and records what the client sees and how long Ollama takes to recover. Your normal Ollama on port 11434 is never stopped. Read the [failure policy](docs/ai/ai-failure-policy.md) (retry rules, queue policy, user messages) and the [results](docs/ai/ai-failure-test-results.md). Tests that need no model: `py -3 -m unittest tests.test_ollama_failures -v`.

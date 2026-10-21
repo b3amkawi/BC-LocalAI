@@ -1,0 +1,39 @@
+{
+  "generated_utc": "2026-10-21 02:39:40",
+  "overflow": [
+    {
+      "case": "old estimator (1500 est = 4500 bytes of digits)",
+      "prompt_eval_count": 2050,
+      "context": 4096,
+      "answer": "เป็นชุดตัวเลข",
+      "recalled_7391": false
+    },
+    {
+      "case": "new estimator (1500 est = 1500 bytes of digits)",
+      "prompt_eval_count": 1640,
+      "context": 4096,
+      "answer": "7391",
+      "recalled_7391": true
+    }
+  ],
+  "recall": [
+    {
+      "case": "thai",
+      "expected": "มะลิ",
+      "hits_of_3": 3,
+      "last_answer": "มะลิ"
+    },
+    {
+      "case": "english",
+      "expected": "Chiang Mai",
+      "hits_of_3": 3,
+      "last_answer": "Chiang Mai"
+    },
+    {
+      "case": "mixed",
+      "expected": "5290",
+      "hits_of_3": 3,
+      "last_answer": "5290"
+    }
+  ]
+}

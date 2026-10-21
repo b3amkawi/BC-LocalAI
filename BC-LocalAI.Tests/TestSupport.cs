@@ -72,7 +72,19 @@ internal static class TestApp
                 ["Ollama:Model"] = model,
                 ["Ollama:TimeoutSeconds"] = timeoutSeconds,
                 ["Ollama:MaxOutputTokens"] = maxOutputTokens,
-                ["Ollama:MaxResponseBytes"] = maxResponseBytes
+                ["Ollama:MaxResponseBytes"] = maxResponseBytes,
+                // BE-006: an Authentication__Enabled environment variable must not change unrelated tests.
+                ["Authentication:Enabled"] = "false",
+                ["Authentication:IdleTimeoutMinutes"] = "30",
+                ["Authentication:AbsoluteLifetimeMinutes"] = "480",
+                ["Authentication:MaxSessions"] = "1024",
+                // BE-007: a ChatHistory__* environment variable must not change unrelated tests either.
+                ["ChatHistory:Enabled"] = "false",
+                ["ChatHistory:ConnectionString"] = "",
+                ["ChatHistory:CommandTimeoutSeconds"] = "5",
+                ["ChatHistory:ContextTokenBudget"] = "1500",
+                ["ChatHistory:MaxQuestionTokens"] = "1200",
+                ["ChatHistory:StreamCheckpointSeconds"] = "2"
             }));
 
     /// <summary>App whose Ollama HttpClient is backed by <paramref name="handler"/>.</summary>
@@ -134,4 +146,27 @@ internal static class Check
             }
         }
     }
+}
+
+internal static class SessionGuards
+{
+    /// <summary>The guard as the app builds it while Authentication:Enabled is false (the default): it never stops an answer.</summary>
+    public static BC_LocalAI.Security.StreamSessionGuard Off() => new(
+        new BC_LocalAI.Security.InMemorySessionStore(),
+        new Microsoft.Extensions.DependencyInjection.ServiceCollection().BuildServiceProvider(),
+        TimeProvider.System,
+        Microsoft.Extensions.Options.Options.Create(new BC_LocalAI.Security.BcAuthenticationOptions()),
+        Microsoft.Extensions.Logging.Abstractions.NullLogger<BC_LocalAI.Security.StreamSessionGuard>.Instance);
+}
+
+internal static class ChatTurns
+{
+    /// <summary>History as the app builds it by default (ChatHistory:Enabled false): never used without a conversation id.</summary>
+    public static BC_LocalAI.Services.ChatHistory.ChatTurnService Off() => new(
+        new BC_LocalAI.Tests.ChatHistory.InMemoryChatHistoryRepository(),
+        new BC_LocalAI.Services.ChatHistory.ConversationContextBuilder(),
+        Microsoft.Extensions.Options.Options.Create(new BC_LocalAI.Configuration.ChatHistoryOptions()),
+        Microsoft.Extensions.Options.Options.Create(new BC_LocalAI.Configuration.OllamaOptions()),
+        TimeProvider.System,
+        Microsoft.Extensions.Logging.Abstractions.NullLogger<BC_LocalAI.Services.ChatHistory.ChatTurnService>.Instance);
 }

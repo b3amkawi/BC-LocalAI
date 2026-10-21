@@ -1,0 +1,91 @@
+name: CI
+
+# Runs on every pull request to main, on pushes to main, and on pushes to ci-trial/**
+# (throwaway branches used to prove that the gates catch failures without opening a PR).
+# No job needs Ollama or a GPU. The live suites run on a developer machine, see
+# docs/devops/live-test-procedure.md.
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main, "ci-trial/**"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  # One run per ref, except on ci-trial/** where every pushed commit keeps its own run, so one
+  # throwaway branch can be pushed several times in a row to try several defects.
+  group: ci-${{ startsWith(github.ref, 'refs/heads/ci-trial/') && github.sha || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  hygiene:
+    name: Secret scan and doc links
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.11"
+      - name: Secret scan
+        run: python scripts/ci/scan_secrets.py
+      - name: Markdown links
+        run: python scripts/ci/check_doc_links.py
+      - name: Tests of the CI scripts themselves
+        run: python -m unittest tests.test_ci_scripts -v
+
+  tests:
+    name: Build and tests (Windows, PowerShell 7)
+    runs-on: windows-latest
+    timeout-minutes: 30
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-dotnet@67a3573c9a986a3f9c594539f4ab511d57bb3ce9 # v4
+        with:
+          dotnet-version: "10.0.x"
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: "22"
+      - uses: actions/setup-python@a26af69be951a213d495a4c3e4e4022e16d87065 # v5
+        with:
+          python-version: "3.11"
+      - name: Tool versions
+        run: |
+          dotnet --version
+          node --version
+          python --version
+          pwsh --version
+      - name: dotnet build and test
+        run: |
+          set -o pipefail
+          dotnet test BC-LocalAI.slnx --nologo 2>&1 | tee dotnet.log
+      - name: JavaScript tests
+        run: |
+          set -o pipefail
+          node --test "tests/ui/*.test.mjs" 2>&1 | tee node.log
+      - name: Python tests
+        run: |
+          set -o pipefail
+          python -m unittest discover -s tests -v 2>&1 | tee python.log
+      - name: Test count gate
+        if: always()
+        run: python scripts/ci/check_test_counts.py --baseline docs/devops/test-baseline.json --dotnet dotnet.log --node node.log --python python.log
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        if: always()
+        with:
+          name: test-logs
+          path: |
+            dotnet.log
+            node.log
+            python.log
+          retention-days: 7

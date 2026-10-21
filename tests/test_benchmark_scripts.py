@@ -124,7 +124,10 @@ class BenchmarkScriptTests(unittest.TestCase):
         command = [PWSH, "-NoProfile", "-File", str(script), "-BaseUrl", base_url,
                    "-OutputCsv", str(csv_path), "-OutputJson", str(json_path), *args]
         result = subprocess.run(command, capture_output=True, encoding="utf-8", errors="replace", timeout=timeout)
-        rows = list(csv.DictReader(csv_path.open(encoding="utf-8"))) if csv_path.exists() else None
+        rows = None
+        if csv_path.exists():
+            with csv_path.open(encoding="utf-8") as source:
+                rows = list(csv.DictReader(source))
         summary = json.loads(json_path.read_text(encoding="utf-8")) if json_path.exists() else None
         return result, rows, summary
 
@@ -309,6 +312,29 @@ class BenchmarkScriptTests(unittest.TestCase):
         self.assertIsNotNone(scenario["ram_available_mb_min"])
         self.assertIsNotNone(scenario["cpu_percent_max"])
 
+    def test_scenario_resource_summary_includes_samples_published_during_sampler_shutdown(self):
+        with MockServer(backend_ok) as server:
+            result, rows, summary = self.run_script(
+                ROOT / "tests" / "fixtures" / "benchmark-delayed-sampler.ps1", server.url)
+        self.assertEqual(result.returncode, 0, result.stdout + result.stderr)
+        self.assertEqual(len(summary["resource_samples"]), 3)
+        scenario = summary["scenarios"][0]
+        self.assertEqual(scenario["resource_sample_count"], 1)
+        self.assertEqual(scenario["cpu_percent_avg"], 25)
+        self.assertEqual(scenario["cpu_percent_max"], 25)
+        self.assertEqual(scenario["ram_available_mb_min"], 2048)
+        self.assertEqual(scenario["ollama_working_set_mb_max"], 512)
+        self.assertEqual(scenario["gpu_percent_avg"], 10)
+        self.assertEqual(scenario["gpu_percent_max"], 10)
+        self.assertEqual(scenario["vram_used_mb_max"], 128)
+        # Draining resource samples must not add requests or replace latency/throughput data.
+        measured = [row for row in rows if row["phase"] == "measured"]
+        self.assertEqual(scenario["requests"], 6)
+        self.assertEqual(scenario["success"], 6)
+        self.assertEqual(scenario["latency_sample_size"], len(measured))
+        self.assertGreater(scenario["throughput_rps"], 0)
+        self.assertGreater(scenario["wall_seconds"], 0)
+
     def test_invalid_input_fails_before_any_request(self):
         with MockServer(backend_ok) as server:
             cases = [
@@ -341,7 +367,10 @@ class BenchmarkScriptTests(unittest.TestCase):
             [PWSH, "-NoProfile", "-File", str(COLD_SCRIPT), "-Target", target, "-Repeats", str(repeats),
              "-BaseUrl", base_url, "-OllamaUrl", ollama_url, "-UnloadWaitSec", "2", "-OutputCsv", str(csv_path)],
             capture_output=True, encoding="utf-8", errors="replace", timeout=180, env=env)
-        rows = list(csv.DictReader(csv_path.open(encoding="utf-8"))) if csv_path.exists() else None
+        rows = None
+        if csv_path.exists():
+            with csv_path.open(encoding="utf-8") as source:
+                rows = list(csv.DictReader(source))
         return result, rows
 
     def test_cold_start_script_records_one_cold_row_per_repetition(self):
