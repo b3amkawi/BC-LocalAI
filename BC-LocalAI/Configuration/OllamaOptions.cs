@@ -8,7 +8,7 @@ public sealed class OllamaOptions
 
     public string BaseUrl { get; set; } = "http://127.0.0.1:11434";
     public string Model { get; set; } = "qwen3:4b";
-    /// <summary>Deadline for the whole exchange with Ollama (queue wait, generation and reading the answer).</summary>
+    /// <summary>Deadline for the exchange with Ollama (connecting, generating and reading the answer). BE-008: time spent waiting in the ChatQueue is not part of it.</summary>
     public int TimeoutSeconds { get; set; } = 180;
 
     /// <summary>

@@ -4,6 +4,7 @@ using System.Text.Json;
 using BC_LocalAI.Models;
 using BC_LocalAI.Models.Streaming;
 using BC_LocalAI.Services;
+using BC_LocalAI.Services.ChatAdmission;
 using BC_LocalAI.Configuration;
 using BC_LocalAI.Security;
 using BC_LocalAI.Services.ChatHistory;
@@ -25,10 +26,13 @@ public sealed class ChatStreamController(
     IOptions<ChatHistoryOptions> historyOptions,
     TimeProvider clock,
     IOptions<OllamaOptions> options,
+    ChatAdmissionQueue admission,
     ILogger<ChatStreamController> logger) : ControllerBase
 {
     [HttpPost]
     [ProducesResponseType<ApiErrorResponse>(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType<ApiErrorResponse>(StatusCodes.Status429TooManyRequests)]
+    [ProducesResponseType<ApiErrorResponse>(StatusCodes.Status503ServiceUnavailable)]
     public async Task PostAsync([FromBody] ChatRequest? request, CancellationToken cancellationToken)
     {
         if (string.IsNullOrWhiteSpace(request?.Message))
@@ -39,6 +43,10 @@ public sealed class ChatStreamController(
                 cancellationToken);
             return;
         }
+
+        // BE-008: a full queue (503) or the user's own quota (429) is answered here as a plain HTTP error, before the question is
+        // saved and before any SSE header is written; ExceptionHandlingMiddleware turns the exception into the JSON error.
+        using var ticket = admission.Admit(ChatAdmissionQueue.UserKey(User));
 
         // BE-007: a turn inside a conversation is set up before any SSE header, so refusals are plain JSON errors.
         ChatTurn? turn = null;
@@ -99,6 +107,21 @@ public sealed class ChatStreamController(
         object terminalData;
         try
         {
+            // Admitted but no slot free yet: wait in line. "started" only means the request was accepted, not that the model runs.
+            var emitQueueEvents = admission.Options.EmitQueueEvents;
+            if (ticket.Queued && emitQueueEvents
+                && !await TryWriteEventAsync("queued", new StreamQueuedEvent(ticket.Ahead), cancellationToken))
+            {
+                throw new DownstreamClosedException();
+            }
+
+            await ticket.WaitAsync(cancellationToken);
+            if (ticket.Queued && emitQueueEvents
+                && !await TryWriteEventAsync("processing", new StreamProcessingEvent(), cancellationToken))
+            {
+                throw new DownstreamClosedException();
+            }
+
             var completion = await streamingService.StreamResponseAsync(
                 turn?.Prompt ?? request.Message,
                 async (delta, token) =>
@@ -141,7 +164,10 @@ public sealed class ChatStreamController(
         {
             if (turn is not null) await turns.FailAsync(turn, answer.ToString(), exception.Code);
             terminalEvent = "error";
-            terminalData = new StreamErrorEvent(exception.Code, exception.Message, partial);
+            terminalData = new StreamErrorEvent(exception.Code, exception.Message, partial)
+            {
+                RetryAfterSeconds = exception.RetryAfterSeconds
+            };
         }
         catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
         {
@@ -176,6 +202,9 @@ public sealed class ChatStreamController(
             terminalEvent = "error";
             terminalData = new StreamErrorEvent("INTERNAL_ERROR", "An unexpected error occurred", partial);
         }
+
+        // The slot and the user's quota are free before the last event goes out, so the next question sent on seeing it is not refused.
+        ticket.Dispose();
 
         // A terminal write failure must never cause a second terminal event on the same stream.
         await TryWriteEventAsync(terminalEvent, terminalData, cancellationToken);

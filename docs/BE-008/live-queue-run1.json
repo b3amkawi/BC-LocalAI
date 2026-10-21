@@ -1,0 +1,112 @@
+{
+  "summary": {
+    "/api/chat/stream -> 503 AI_BUSY": 6,
+    "/api/chat -> 200": 5,
+    "/api/chat -> 503 AI_BUSY": 1
+  },
+  "requests": [
+    {
+      "index": 0,
+      "endpoint": "/api/chat/stream",
+      "status": 503,
+      "retryAfter": "10",
+      "firstByteSeconds": 0.06,
+      "errorCode": "AI_BUSY",
+      "totalSeconds": 0.06
+    },
+    {
+      "index": 1,
+      "endpoint": "/api/chat",
+      "status": 200,
+      "retryAfter": null,
+      "firstByteSeconds": 0.582,
+      "totalSeconds": 0.583
+    },
+    {
+      "index": 2,
+      "endpoint": "/api/chat/stream",
+      "status": 503,
+      "retryAfter": "10",
+      "firstByteSeconds": 0.058,
+      "errorCode": "AI_BUSY",
+      "totalSeconds": 0.059
+    },
+    {
+      "index": 3,
+      "endpoint": "/api/chat",
+      "status": 200,
+      "retryAfter": null,
+      "firstByteSeconds": 0.943,
+      "totalSeconds": 0.944
+    },
+    {
+      "index": 4,
+      "endpoint": "/api/chat/stream",
+      "status": 503,
+      "retryAfter": "10",
+      "firstByteSeconds": 0.059,
+      "errorCode": "AI_BUSY",
+      "totalSeconds": 0.059
+    },
+    {
+      "index": 5,
+      "endpoint": "/api/chat",
+      "status": 200,
+      "retryAfter": null,
+      "firstByteSeconds": 0.768,
+      "totalSeconds": 0.768
+    },
+    {
+      "index": 6,
+      "endpoint": "/api/chat/stream",
+      "status": 503,
+      "retryAfter": "10",
+      "firstByteSeconds": 0.059,
+      "errorCode": "AI_BUSY",
+      "totalSeconds": 0.059
+    },
+    {
+      "index": 7,
+      "endpoint": "/api/chat",
+      "status": 200,
+      "retryAfter": null,
+      "firstByteSeconds": 1.352,
+      "totalSeconds": 1.352
+    },
+    {
+      "index": 8,
+      "endpoint": "/api/chat/stream",
+      "status": 503,
+      "retryAfter": "10",
+      "firstByteSeconds": 0.059,
+      "errorCode": "AI_BUSY",
+      "totalSeconds": 0.059
+    },
+    {
+      "index": 9,
+      "endpoint": "/api/chat",
+      "status": 503,
+      "retryAfter": "10",
+      "firstByteSeconds": 0.059,
+      "errorCode": "AI_BUSY",
+      "totalSeconds": 0.059
+    },
+    {
+      "index": 10,
+      "endpoint": "/api/chat/stream",
+      "status": 503,
+      "retryAfter": "10",
+      "firstByteSeconds": 0.059,
+      "errorCode": "AI_BUSY",
+      "totalSeconds": 0.059
+    },
+    {
+      "index": 11,
+      "endpoint": "/api/chat",
+      "status": 200,
+      "retryAfter": null,
+      "firstByteSeconds": 1.142,
+      "totalSeconds": 1.142
+    }
+  ]
+}

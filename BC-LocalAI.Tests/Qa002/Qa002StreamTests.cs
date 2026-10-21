@@ -402,7 +402,9 @@ public sealed class Qa002StreamTests(WebApplicationFactory<Program> factory) : I
     [Fact]
     public async Task OneUserFlooding_OtherUsersStillGetAnAnswerOrAClearError()
     {
-        var (host, _, alice) = await Signed();
+        // QA2-D06 baseline: the case records what happens WITHOUT a per-user cap, so BE-008's cap is lifted here.
+        // The BE-008 behavior (429 for the extra requests) is tested in ChatAdmission/ChatAdmissionApiTests.
+        var (host, _, alice) = await Signed(settings: new Dictionary<string, string?> { ["ChatQueue:MaxPendingPerUser"] = "16", ["ChatQueue:MaxQueueLength"] = "32" });
         var bob = await host.Login(host.AddUser("bob"));
         SerialOllama(host, TimeSpan.FromMilliseconds(300));
         var timer = Stopwatch.StartNew();

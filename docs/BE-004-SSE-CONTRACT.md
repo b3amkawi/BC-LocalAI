@@ -11,6 +11,7 @@ Request body:
 ```
 
 Blank, missing, malformed or wrong-type input returns HTTP 400 with the existing JSON `INVALID_MESSAGE` contract before SSE starts.
+BE-008 (proposed, see [BE-008-CONFIGURATION.md](BE-008-CONFIGURATION.md)): before SSE starts the request can also be refused with HTTP 429 `AI_REQUEST_IN_PROGRESS` (the user already has the allowed number of requests in flight) or HTTP 503 `AI_BUSY` (queue full), both with `Retry-After`.
 A valid request returns HTTP 200 with:
 
 ```text
@@ -31,6 +32,8 @@ Each event uses `event: <name>` followed by a single JSON `data:` line and a bla
 | `error` | `{"code":"AI_...","message":"...","partial":true}` | Terminal failure. `partial` is true after at least one delta. Provider detail is never exposed. |
 | `cancelled` | `{}` | Best-effort on caller cancellation with a separate 1-second delivery budget. Client disconnect normally makes the connection unwritable, so delivery is not guaranteed. |
 
+`started` means the request was accepted, not that the model is already working: with a busy backend it can wait in the BE-008 queue. Optional events `queued` `{"ahead":N}` and `processing` `{}` exist only when `ChatQueue:EmitQueueEvents` is true (off by default, awaiting FE-004).
+
 There is exactly one terminal outcome: `completed`, `error`, or a client disconnect/cancellation. `completed` is never sent after an error.
 
 ## Error mapping after SSE has started
@@ -42,6 +45,7 @@ There is exactly one terminal outcome: `completed`, `error`, or a client disconn
 | Ollama HTTP error or `{"error":...}` record | `AI_PROVIDER_ERROR` |
 | Invalid NDJSON, wrong model, interrupted stream, invalid answer JSON, unexpected finish reason | `AI_INVALID_RESPONSE` |
 | `done_reason:"length"` or response byte limit | `AI_RESPONSE_TOO_LARGE` |
+| Waited longer than `ChatQueue:MaxQueueWaitSeconds` for a slot (BE-008, proposed; `retryAfterSeconds` is added to the event) | `AI_BUSY` |
 | Unexpected backend failure | `INTERNAL_ERROR` |
 
 HTTP remains 200 after `started`; the error is represented by the terminal SSE event.

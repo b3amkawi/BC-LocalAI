@@ -6,6 +6,7 @@ using Microsoft.Extensions.Options;
 using BC_LocalAI.Services;
 using BC_LocalAI.Security;
 using BC_LocalAI.Services.Authentication;
+using BC_LocalAI.Services.ChatAdmission;
 using BC_LocalAI.Services.ChatHistory;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -34,6 +35,8 @@ builder.Services.AddLocalAuthentication(builder.Configuration);
 builder.Services.AddBcLocalAiSecurity(builder.Configuration);
 // BE-007: persistent chat history (off by default; needs authentication and its own database account).
 builder.Services.AddChatHistory(builder.Configuration);
+// BE-008: bounded queue and per-user quota in front of Ollama, shared by /api/chat and /api/chat/stream.
+builder.Services.AddChatAdmission(builder.Configuration);
 builder.Services.AddSingleton<IValidateOptions<OllamaOptions>, OllamaOptionsValidator>();
 builder.Services.AddOptions<OllamaOptions>()
     .Bind(builder.Configuration.GetSection(OllamaOptions.SectionName))

@@ -1,0 +1,129 @@
+{
+  "summary": {
+    "/api/chat/stream -> 503 AI_BUSY": 4,
+    "/api/chat -> 503 AI_BUSY": 3,
+    "/api/chat/stream -> 200 completed": 2,
+    "/api/chat -> 200": 3
+  },
+  "requests": [
+    {
+      "index": 0,
+      "endpoint": "/api/chat/stream",
+      "status": 503,
+      "retryAfter": "10",
+      "firstByteSeconds": 0.031,
+      "errorCode": "AI_BUSY",
+      "totalSeconds": 0.031
+    },
+    {
+      "index": 1,
+      "endpoint": "/api/chat",
+      "status": 503,
+      "retryAfter": "10",
+      "firstByteSeconds": 0.03,
+      "errorCode": "AI_BUSY",
+      "totalSeconds": 0.03
+    },
+    {
+      "index": 2,
+      "endpoint": "/api/chat/stream",
+      "status": 200,
+      "retryAfter": null,
+      "firstByteSeconds": 0.034,
+      "events": [
+        "started",
+        "queued",
+        "processing",
+        "delta",
+        "completed"
+      ],
+      "terminal": "completed",
+      "totalSeconds": 0.642
+    },
+    {
+      "index": 3,
+      "endpoint": "/api/chat",
+      "status": 200,
+      "retryAfter": null,
+      "firstByteSeconds": 1.175,
+      "totalSeconds": 1.175
+    },
+    {
+      "index": 4,
+      "endpoint": "/api/chat/stream",
+      "status": 200,
+      "retryAfter": null,
+      "firstByteSeconds": 0.034,
+      "events": [
+        "started",
+        "queued",
+        "processing",
+        "delta",
+        "completed"
+      ],
+      "terminal": "completed",
+      "totalSeconds": 0.845
+    },
+    {
+      "index": 5,
+      "endpoint": "/api/chat",
+      "status": 503,
+      "retryAfter": "10",
+      "firstByteSeconds": 0.03,
+      "errorCode": "AI_BUSY",
+      "totalSeconds": 0.03
+    },
+    {
+      "index": 6,
+      "endpoint": "/api/chat/stream",
+      "status": 503,
+      "retryAfter": "10",
+      "firstByteSeconds": 0.029,
+      "errorCode": "AI_BUSY",
+      "totalSeconds": 0.029
+    },
+    {
+      "index": 7,
+      "endpoint": "/api/chat",
+      "status": 200,
+      "retryAfter": null,
+      "firstByteSeconds": 0.397,
+      "totalSeconds": 0.397
+    },
+    {
+      "index": 8,
+      "endpoint": "/api/chat/stream",
+      "status": 503,
+      "retryAfter": "10",
+      "firstByteSeconds": 0.029,
+      "errorCode": "AI_BUSY",
+      "totalSeconds": 0.029
+    },
+    {
+      "index": 9,
+      "endpoint": "/api/chat",
+      "status": 200,
+      "retryAfter": null,
+      "firstByteSeconds": 1.013,
+      "totalSeconds": 1.013
+    },
+    {
+      "index": 10,
+      "endpoint": "/api/chat/stream",
+      "status": 503,
+      "retryAfter": "10",
+      "firstByteSeconds": 0.03,
+      "errorCode": "AI_BUSY",
+      "totalSeconds": 0.03
+    },
+    {
+      "index": 11,
+      "endpoint": "/api/chat",
+      "status": 503,
+      "retryAfter": "10",
+      "firstByteSeconds": 0.032,
+      "errorCode": "AI_BUSY",
+      "totalSeconds": 0.032
+    }
+  ]
+}

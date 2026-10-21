@@ -21,6 +21,10 @@ public sealed class ExceptionHandlingMiddleware(
         {
             // Provider failures were already logged (without prompt/response) by the service.
             context.Response.StatusCode = (int)exception.StatusCode;
+            if (exception.RetryAfterSeconds is { } retryAfter)
+            {
+                context.Response.Headers.RetryAfter = retryAfter.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            }
             await context.Response.WriteAsJsonAsync(
                 new ApiErrorResponse(new ApiError(exception.Code, exception.Message)));
         }

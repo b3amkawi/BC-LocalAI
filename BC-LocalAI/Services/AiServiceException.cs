@@ -24,6 +24,9 @@ public sealed class AiServiceException : Exception
     public string Code { get; }
     public HttpStatusCode StatusCode { get; }
 
+    /// <summary>BE-008: seconds for the Retry-After header (or the stream error event) when the refusal is about load; null otherwise.</summary>
+    public int? RetryAfterSeconds { get; private init; }
+
     /// <summary>Internal, bounded diagnostic category for logs and tests. Never sent to API callers.</summary>
     public string? Reason { get; }
 
@@ -42,4 +45,14 @@ public sealed class AiServiceException : Exception
     /// <summary>The answer is larger than the configured limits (output tokens or response bytes).</summary>
     public static AiServiceException ResponseTooLarge(string reason) =>
         new("AI_RESPONSE_TOO_LARGE", "AI response was too large", HttpStatusCode.BadGateway, null, reason);
+
+    /// <summary>BE-008: the system is full (queue full, or the wait for a slot ran out). Distinct from AI_TIMEOUT, which is slow generation.</summary>
+    public static AiServiceException Busy(int retryAfterSeconds, string reason) =>
+        new("AI_BUSY", "ตอนนี้มีผู้ใช้จำนวนมาก กรุณาลองใหม่ในอีกสักครู่", HttpStatusCode.ServiceUnavailable, null, reason)
+        { RetryAfterSeconds = retryAfterSeconds };
+
+    /// <summary>BE-008: the signed-in user already has the allowed number of requests in flight.</summary>
+    public static AiServiceException RequestInProgress(int retryAfterSeconds) =>
+        new("AI_REQUEST_IN_PROGRESS", "คุณมีคำถามที่กำลังตอบอยู่ กรุณารอให้เสร็จก่อนถามคำถามถัดไป", HttpStatusCode.TooManyRequests, null, "user-quota")
+        { RetryAfterSeconds = retryAfterSeconds };
 }

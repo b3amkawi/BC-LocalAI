@@ -228,6 +228,8 @@ All errors use `{ "error": { "code": "...", "message": "..." } }` and never incl
 | Ollama returns an HTTP error | 502 | `AI_PROVIDER_ERROR` |
 | Malformed / incomplete Ollama response (`done` not true, `done_reason` other than `stop`/`length`, bad or empty `answer`, wrong model) | 502 | `AI_INVALID_RESPONSE` |
 | Answer cut off by the output token limit (`done_reason` = `length`) or response body larger than `MaxResponseBytes` | 502 | `AI_RESPONSE_TOO_LARGE` |
+| Queue full, or waited longer than `ChatQueue:MaxQueueWaitSeconds` for a slot (BE-008, proposed, with `Retry-After`) | 503 | `AI_BUSY` |
+| The signed-in user already has `ChatQueue:MaxPendingPerUser` requests in flight (BE-008, proposed, with `Retry-After`) | 429 | `AI_REQUEST_IN_PROGRESS` |
 | Unexpected error | 500 | `INTERNAL_ERROR` |
 
 ### Streaming Chat API (BE-004)
@@ -264,9 +266,11 @@ See [docs/KNOWN-LIMITATIONS.md](docs/KNOWN-LIMITATIONS.md) for the full list wit
 - An answer that needs more than `Ollama:MaxOutputTokens` (default 1024) is cut off by Ollama and the API returns
   `502 AI_RESPONSE_TOO_LARGE` (before BE-003 the limit was a fixed 256 and the error was `AI_INVALID_RESPONSE`). The longest answers measured need
   about 250 tokens, so this is rare; a runaway answer that uses the whole limit takes about 13 s.
-- Ollama handles one request at a time. Under a burst, requests queue and later ones can time out with `504 AI_TIMEOUT`
-  (measured on the development laptop: 15 simultaneous 3-sentence answers with a 12 s timeout -> 4 succeeded, 11 got 504,
-  and the API recovered immediately).
+- Ollama handles one request at a time. Since BE-008 the backend keeps a bounded FIFO queue in front of it (`ChatQueue`, defaults: 1 request in Ollama,
+  8 waiting, 30 s wait, 1 pending request per user - proposals, not approved capacity figures). A full queue answers `503 AI_BUSY`, a user over
+  quota `429 AI_REQUEST_IN_PROGRESS`, both with `Retry-After`; see [docs/BE-008-CONFIGURATION.md](docs/BE-008-CONFIGURATION.md). With
+  `Authentication:Enabled=false` all callers share one quota, so raise `ChatQueue__MaxPendingPerUser` for concurrent tests. Before BE-008 a burst
+  timed out with `504 AI_TIMEOUT` (15 simultaneous 3-sentence answers with a 12 s timeout -> 4 succeeded, 11 got 504).
 - No authentication, rate limit or conversation history. The Chat page uses `/api/chat/stream` since FE-002.
 
 ### Live smoke test (needs Ollama)
@@ -288,6 +292,8 @@ Verification evidence: [`docs/BE-001-evidence.md`](docs/BE-001-evidence.md) (moc
 | `docs/FE-001-evidence.md` | FE-001 test results, browser test notes and screenshots (`docs/fe-001/`) |
 | `docs/BE-003-ROOT-CAUSE.md`, `docs/BE-003-CONFIGURATION.md`, `docs/BE-003-VERIFICATION.md` | BE-003 root cause analysis, configuration and timeout policy, before/after verification report |
 | `docs/BE-004-SSE-CONTRACT.md`, `docs/BE-004-CONFIGURATION.md`, `docs/BE-004-VERIFICATION.md` | BE-004 SSE contract, runtime behavior and verification evidence |
+| `docs/BE-008-CONFIGURATION.md`, `docs/BE-008-evidence.md`, `docs/BE-008-REVIEW-CHECKLIST.md` | BE-008 bounded queue and per-user limit: configuration, proposed error/event contract, evidence, review guide |
+| `scripts/test-chat-queue.py` | Live check of the queue against a running backend and real Ollama (synthetic questions) |
 | `docs/KNOWN-LIMITATIONS.md` | Known limitations of the Ollama integration with measured numbers (read before merging) |
 | `docs/BE-002-REVIEW-CHECKLIST.md` | BE-002 (Ollama) reviewer guide and acceptance criteria table |
 | `docs/BE-002-evidence.md` | BE-002 build, test, live smoke test and failure-scenario evidence |

@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using BC_LocalAI.Models;
 using BC_LocalAI.Services;
+using BC_LocalAI.Services.ChatAdmission;
 using BC_LocalAI.Security;
 using BC_LocalAI.Services.ChatHistory;
 using Microsoft.AspNetCore.Authorization;
@@ -13,7 +14,7 @@ namespace BC_LocalAI.Controllers;
 [Authorize(Policy = BcPolicies.ChatUser)]
 [ChatHistoryErrors]
 [FrontendHistoryMutation]
-public sealed class ChatController(IAIService aiService, StreamSessionGuard sessionGuard, ChatTurnService turns) : ControllerBase
+public sealed class ChatController(IAIService aiService, StreamSessionGuard sessionGuard, ChatTurnService turns, ChatAdmissionQueue admission) : ControllerBase
 {
     [HttpPost]
     [ProducesResponseType<ChatResponse>(StatusCodes.Status200OK)]
@@ -21,6 +22,7 @@ public sealed class ChatController(IAIService aiService, StreamSessionGuard sess
     [ProducesResponseType<ApiErrorResponse>(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType<ApiErrorResponse>(StatusCodes.Status404NotFound)]
     [ProducesResponseType<ApiErrorResponse>(StatusCodes.Status409Conflict)]
+    [ProducesResponseType<ApiErrorResponse>(StatusCodes.Status429TooManyRequests)]
     [ProducesResponseType<ApiErrorResponse>(StatusCodes.Status500InternalServerError)]
     [ProducesResponseType<ApiErrorResponse>(StatusCodes.Status502BadGateway)]
     [ProducesResponseType<ApiErrorResponse>(StatusCodes.Status503ServiceUnavailable)]
@@ -34,6 +36,10 @@ public sealed class ChatController(IAIService aiService, StreamSessionGuard sess
             return BadRequest(new ApiErrorResponse(
                 new ApiError("INVALID_MESSAGE", "Message is required")));
         }
+
+        // BE-008: refused at once (429 own quota / 503 queue full) before the question is saved or any slot is used.
+        // The authorization policy above already rejected anyone not allowed to chat.
+        using var ticket = admission.Admit(ChatAdmissionQueue.UserKey(User));
 
         // BE-007: inside a conversation the question is saved first and earlier turns become context.
         ChatTurn? turn = null;
@@ -49,6 +55,8 @@ public sealed class ChatController(IAIService aiService, StreamSessionGuard sess
         ChatResponse response;
         try
         {
+            // Waits its turn; leaving the queue (client gone, wait too long) never reaches Ollama.
+            await ticket.WaitAsync(cancellationToken);
             response = await aiService.GenerateResponseAsync(turn?.Prompt ?? request.Message, cancellationToken);
         }
         catch (AiServiceException exception) when (turn is not null)
@@ -60,6 +68,11 @@ public sealed class ChatController(IAIService aiService, StreamSessionGuard sess
         {
             await turns.CancelAsync(turn, "");
             throw;
+        }
+        finally
+        {
+            // The slot and the user's quota are free as soon as Ollama is done, before the answer is saved.
+            ticket.Dispose();
         }
 
         // The answer can take up to the Ollama deadline: do not hand it to a session that ended meanwhile.

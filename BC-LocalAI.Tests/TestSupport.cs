@@ -170,3 +170,19 @@ internal static class ChatTurns
         TimeProvider.System,
         Microsoft.Extensions.Logging.Abstractions.NullLogger<BC_LocalAI.Services.ChatHistory.ChatTurnService>.Instance);
 }
+
+internal static class Admissions
+{
+    /// <summary>The gate with generous limits, for tests that are not about the queue.</summary>
+    public static BC_LocalAI.Services.ChatAdmission.ChatAdmissionQueue Open() => Create(new BC_LocalAI.Configuration.ChatQueueOptions
+    {
+        MaxConcurrentRequests = 16,
+        MaxQueueLength = 256,
+        MaxPendingPerUser = 16
+    });
+
+    public static BC_LocalAI.Services.ChatAdmission.ChatAdmissionQueue Create(BC_LocalAI.Configuration.ChatQueueOptions options) => new(
+        Microsoft.Extensions.Options.Options.Create(options),
+        TimeProvider.System,
+        Microsoft.Extensions.Logging.Abstractions.NullLogger<BC_LocalAI.Services.ChatAdmission.ChatAdmissionQueue>.Instance);
+}
