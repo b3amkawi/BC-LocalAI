@@ -10,16 +10,27 @@ public interface ITokenEstimator
 }
 
 /// <summary>
-/// Heuristic estimate without a tokenizer: one token per 3 UTF-8 bytes plus a per-message overhead.
-/// A sample of Thai text does not establish an upper bound for all prompts or chat-template overhead.
-/// Not a guarantee: the budget (ChatHistory:ContextTokenBudget) is an estimate; the AI Engineer still has to confirm it with the real tokenizer.
+/// Heuristic estimate without a tokenizer, calibrated on qwen3:4b (AI review of BE-007, docs/ai/token-estimate-evidence.json):
+/// a digit or ASCII symbol costs 1 token, an ASCII letter 0.5, any other character 1 token per 3 UTF-8 bytes, plus a per-message overhead.
+/// The first version (1 token per 3 bytes) was up to 3x too low for digits, ids, URLs, JSON and symbols (real tokens 1.4-3.0x the estimate),
+/// so a history filled with such text overflowed the 4096-token context and Ollama truncated the prompt silently.
+/// On the measured samples (10 text kinds x 3 sizes) the real count never exceeded this estimate; still not a guarantee for every text.
 /// </summary>
 public sealed class Utf8TokenEstimator : ITokenEstimator
 {
     public const int PerMessageOverhead = 4;
 
-    public int Estimate(string text) =>
-        PerMessageOverhead + (int)((Encoding.UTF8.GetByteCount(text ?? string.Empty) + 2L) / 3);
+    public int Estimate(string text)
+    {
+        var tokens = 0.0;
+        foreach (var rune in (text ?? string.Empty).EnumerateRunes())
+        {
+            if (rune.IsAscii) tokens += char.IsAsciiLetter((char)rune.Value) ? 0.5 : 1.0;
+            else tokens += rune.Utf8SequenceLength / 3.0;
+        }
+
+        return PerMessageOverhead + (int)Math.Ceiling(tokens - 1e-9);
+    }
 }
 
 /// <summary>Result of <see cref="ConversationContextBuilder.Build"/>.</summary>
@@ -41,6 +52,9 @@ public sealed class ConversationContextBuilder
     private readonly ITokenEstimator _estimator;
 
     public ConversationContextBuilder(ITokenEstimator estimator) => _estimator = estimator ?? throw new ArgumentNullException(nameof(estimator));
+
+    /// <summary>Estimated tokens of one text, for guards outside the history budget (the new question).</summary>
+    public int Estimate(string text) => _estimator.Estimate(text);
 
     public ConversationContextBuilder() : this(new Utf8TokenEstimator())
     {

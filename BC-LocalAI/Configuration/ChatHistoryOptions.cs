@@ -22,6 +22,12 @@ public sealed class ChatHistoryOptions
     /// <summary>Estimated tokens of earlier turns sent to the AI with a new question (newest turns first).</summary>
     public int ContextTokenBudget { get; set; } = 1500;
 
+    /// <summary>
+    /// Estimated tokens a new question may use. The model context is 4096 tokens and 1024 are kept for the answer, so history
+    /// (<see cref="ContextTokenBudget"/>) + question + template (about 100) must stay under 3072; a longer prompt is silently truncated by Ollama.
+    /// </summary>
+    public int MaxQuestionTokens { get; set; } = 1200;
+
     /// <summary>Partial text of a streaming answer is saved at most this often (plus once at the end).</summary>
     public int StreamCheckpointSeconds { get; set; } = 2;
 
@@ -34,8 +40,9 @@ public sealed class ChatHistoryOptionsValidator(IHostEnvironment environment, IO
     public ValidateOptionsResult Validate(string? name, ChatHistoryOptions options)
     {
         if (options.CommandTimeoutSeconds is < 1 or > 30 || options.ContextTokenBudget is < 0 or > 8000
-            || options.StreamCheckpointSeconds is < 1 or > 60)
-            return ValidateOptionsResult.Fail("ChatHistory: CommandTimeoutSeconds 1-30, ContextTokenBudget 0-8000, StreamCheckpointSeconds 1-60.");
+            || options.StreamCheckpointSeconds is < 1 or > 60 || options.MaxQuestionTokens is < 1 or > 8000
+            || options.ContextTokenBudget + options.MaxQuestionTokens > 2900)
+            return ValidateOptionsResult.Fail("ChatHistory: CommandTimeoutSeconds 1-30, ContextTokenBudget 0-8000, StreamCheckpointSeconds 1-60, MaxQuestionTokens 1-8000, and ContextTokenBudget + MaxQuestionTokens at most 2900 (4096 context - 1024 answer - template).");
         if (!options.Enabled) return ValidateOptionsResult.Success;
 
         var auth = authentication.Value;

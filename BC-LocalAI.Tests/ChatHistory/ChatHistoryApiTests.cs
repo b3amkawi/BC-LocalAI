@@ -301,6 +301,23 @@ public sealed class ChatHistoryApiTests(WebApplicationFactory<Program> factory) 
     }
 
     [Fact]
+    public async Task AQuestionOverTheTokenLimit_Is400_AndNothingIsSavedOrSentToTheAI()
+    {
+        var host = Create(factory, settings: new Dictionary<string, string?> { ["ChatHistory:MaxQuestionTokens"] = "100" });
+        var alice = await SignedIn(host, Alice);
+        var id = await NewConversation(alice);
+
+        var tooLong = await alice.PostAsync("/api/chat", Json(new { message = new string('7', 101), conversationId = id }));   // digits: 1 token each
+        var fits = await alice.PostAsync("/api/chat", Json(new { message = new string('7', 90), conversationId = id }));
+
+        Assert.Equal(HttpStatusCode.BadRequest, tooLong.StatusCode);
+        Assert.Equal("QUESTION_TOO_LONG", await Code(tooLong));
+        Assert.Equal(HttpStatusCode.OK, fits.StatusCode);
+        Assert.Single(host.Ai.Prompts);
+        Assert.Equal(2, (await Messages(alice, id)).Count());
+    }
+
+    [Fact]
     public async Task ADoubleSubmit_WhileAnAnswerIsRunning_Is409_AndTheAIIsNotCalled()
     {
         var host = Create(factory);

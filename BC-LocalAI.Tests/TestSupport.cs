@@ -83,6 +83,7 @@ internal static class TestApp
                 ["ChatHistory:ConnectionString"] = "",
                 ["ChatHistory:CommandTimeoutSeconds"] = "5",
                 ["ChatHistory:ContextTokenBudget"] = "1500",
+                ["ChatHistory:MaxQuestionTokens"] = "1200",
                 ["ChatHistory:StreamCheckpointSeconds"] = "2"
             }));
 

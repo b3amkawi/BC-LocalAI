@@ -17,16 +17,16 @@ review), budget 1500 estimated tokens, MySqlConnector (no new package). **Off by
 Files outside chat history: `Program.cs` (registration, 404 gate, history-only model-state code), `ChatController` /
 `ChatStreamController` (optional `conversationId`), `ChatRequest` / `ChatResponse` / `StreamStartedEvent` (optional fields, absent
 without a conversation), `tools/Sec001Fixtures` + `scripts/security/local-mysql.ps1` (opt-in `be007-mysql` fixture),
-`TestSupport.cs` (pins `ChatHistory:*`), `docs/devops/test-baseline.json` (.NET 781 → 821), README.
+`TestSupport.cs` (pins `ChatHistory:*`), `docs/devops/test-baseline.json` (.NET 781 → 835), README.
 
 ## 2. Tests actually run
 
 | Suite | Result |
 |---|---|
 | `dotnet build BC-LocalAI.slnx -c Release --no-incremental` | 0 warnings, 0 errors |
-| `dotnet test BC-LocalAI.slnx` (Development) | **821** passed |
-| Same, `ASPNETCORE_ENVIRONMENT=Production` | **821** passed |
-| Same with hostile environment (`Authentication__Enabled=true`, idle 999, absolute 1, `MaxSessions=1`, `ChatHistory__Enabled=true`, budget 1, checkpoint 60) | **821** passed (settings pinned in tests) |
+| `dotnet test BC-LocalAI.slnx` (Development) | **835** passed (after merging main with the AI review fixes) |
+| Same, `ASPNETCORE_ENVIRONMENT=Production` | **835** passed |
+| Same with hostile environment (`Authentication__Enabled=true`, idle 999, absolute 1, `MaxSessions=1`, `ChatHistory__Enabled=true`, budget 1, checkpoint 60, `MaxQuestionTokens=5`) | **835** passed (settings pinned in tests) |
 | `node --test "tests/ui/*.test.mjs"` | 61 passed |
 | `python -m unittest discover -s tests` | 143 passed |
 | `check_test_counts.py` / secret scan / doc links / CI script tests | all gates passed / clean / OK / OK |
@@ -128,3 +128,12 @@ non-empty tables (guard routine cleaned up), Down on empty tables, Up again with
 - **Concurrency**: one answer per conversation (409); no idempotency key, so a retried request after a lost response creates a new turn.
 - Paging is live, not a snapshot (documented for FE-003).
 - Not enabled in a real deployment until FE-003, HTTPS, the history account and the migration are in place.
+
+## 5. After PR #36 (2026-10-21)
+
+PR #36 was merged by Pao after his AI review (`a6bcd0b`: token estimate calibrated on qwen3:4b, `MaxQuestionTokens`, turn-line
+neutralizing; see [AI review](BE-007-AI-REVIEW.md)). The retention purge (section 2) was finished after that and is merged with `main`
+`3bbdcc4` in this branch. Found while re-testing: `ChatHistory:MaxQuestionTokens` was not pinned in the shared test settings, so an
+environment variable could change unrelated tests (now pinned); `OllamaTimeoutCancellationTests.Deadline_DoesNotCutInWhenTheAnswerArrivesInTime`
+(BE-003) failed once under load because its stub answered after 300 ms of a 1 s deadline (now 50 ms; 3 full runs passed).
+Live suite after the merge: 53 passed; real qwen3:4b check passed.
