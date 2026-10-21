@@ -326,6 +326,55 @@
 | QA2-O-06-history-off-chat-conv | ChatHistory ปิด แต่ส่ง conversationId | 404 CONVERSATION_NOT_FOUND; Ollama 0 | 404 | CONVERSATION_NOT_FOUND | 0 | BE-007 |
 | QA2-O-07-production-default-open | ค่าเริ่มต้นใน appsettings.json | บันทึกเป็นข้อสังเกต: Authentication.Enabled=false เป็นค่าเริ่มต้น จึงต้องเปิดก่อนใช้กับผู้ใช้จริง | - | - | - | BE-006 matrix |
 
+## F. FE-003 / SEC-003 integration: X-BC-Expected-User, history CSRF token, HTTPS guard, login page (44 กรณี)
+
+| ID | กรณี | Expected | HTTP | Code | Ollama | ที่มา |
+| --- | --- | --- | ---: | --- | ---: | --- |
+| QA2-F-01-expected-match | X-BC-Expected-User ตรงกับผู้ล็อกอิน | 200; response มี X-BC-User = id ของตนเอง และ Cache-Control no-store | 200 | - | - | FE-003 (BC-LocalAI/Security/FrontendApiIntegration.cs) |
+| QA2-F-02-expected-mismatch | X-BC-Expected-User เป็นของผู้ใช้อื่น | 401 AUTH_SESSION_CHANGED; session ของผู้เรียกไม่ถูกเพิกถอน (เรียกซ้ำไม่มี header ได้ 200); response ไม่มี X-BC-User ของคนอื่น | 401 | AUTH_SESSION_CHANGED | - | FE-003 (BC-LocalAI/Security/FrontendApiIntegration.cs) |
+| QA2-F-03-mismatch-chat | POST /api/chat ที่ X-BC-Expected-User ไม่ตรง | 401 AUTH_SESSION_CHANGED; Ollama 0 | 401 | AUTH_SESSION_CHANGED | 0 | FE-003 (BC-LocalAI/Security/FrontendApiIntegration.cs) |
+| QA2-F-04-mismatch-stream | POST /api/chat/stream ที่ X-BC-Expected-User ไม่ตรง | 401 JSON AUTH_SESSION_CHANGED ไม่ใช่ SSE; Ollama 0 | 401 | AUTH_SESSION_CHANGED | 0 | FE-003 (BC-LocalAI/Security/FrontendApiIntegration.cs) |
+| QA2-F-05-mismatch-conversations | GET/POST /api/conversations ที่ X-BC-Expected-User ไม่ตรง | 401 AUTH_SESSION_CHANGED ทั้งอ่านและเขียน; ไม่มีสนทนาถูกสร้าง | 401 | AUTH_SESSION_CHANGED | - | FE-003 (BC-LocalAI/Security/FrontendApiIntegration.cs) |
+| QA2-F-06-duplicate-header | X-BC-Expected-User ซ้ำสองค่า (แม้มีค่าที่ถูก) | 401 AUTH_SESSION_CHANGED | 401 | AUTH_SESSION_CHANGED | - | FE-003 (BC-LocalAI/Security/FrontendApiIntegration.cs) |
+| QA2-F-07-empty-header | X-BC-Expected-User ว่าง | 401 AUTH_SESSION_CHANGED (ว่างไม่ถือว่าตรง) | 401 | AUTH_SESSION_CHANGED | - | FE-003 (BC-LocalAI/Security/FrontendApiIntegration.cs) |
+| QA2-F-08-case-sensitive | X-BC-Expected-User เป็น id เดียวกันแต่ตัวพิมพ์ใหญ่ | 401 AUTH_SESSION_CHANGED (เทียบตรงตัว) | 401 | AUTH_SESSION_CHANGED | - | FE-003 (BC-LocalAI/Security/FrontendApiIntegration.cs) |
+| QA2-F-09-alias-mismatch | เส้นทางสำรอง: /API/CHAT, /api/chat/, /Api/Conversations/, /api/CHAT/STREAM/, /api/auth/ME พร้อม header ไม่ตรง | 401 AUTH_SESSION_CHANGED ทุกเส้นทาง (precondition ครอบคลุม case และ trailing slash); Ollama 0 | 401 | AUTH_SESSION_CHANGED | 0 | FE-003 (BC-LocalAI/Security/FrontendApiIntegration.cs) |
+| QA2-F-10-alias-anonymous | เส้นทางสำรองเดียวกันโดยไม่ล็อกอิน | 401 AUTH_REQUIRED ทุกเส้นทาง ไม่มีทางเลี่ยงการตรวจสิทธิ์; Ollama 0 | 401 | AUTH_REQUIRED | 0 | BE-006 matrix |
+| QA2-F-11-alias-no-csrf | สร้างสนทนาที่ /API/CONVERSATIONS และ /api/conversations/ โดยไม่มี X-CSRF-TOKEN | 403 AUTH_CSRF_INVALID ทั้งสองเส้นทาง ไม่มีสนทนาถูกสร้าง | 403 | AUTH_CSRF_INVALID | - | FE-003 (BC-LocalAI/Security/FrontendApiIntegration.cs) |
+| QA2-F-12-http-history | เปลี่ยนแปลงประวัติ/อ่านประวัติผ่าน HTTP (มี cookie) ทั้งตั้งและไม่ตั้งพอร์ต HTTPS | 403 AUTH_HTTPS_REQUIRED ไม่ใช่ redirect ที่พา body ไปส่งซ้ำ; Ollama 0 | 403 | AUTH_HTTPS_REQUIRED | 0 | FE-003 (BC-LocalAI/Security/FrontendApiIntegration.cs) |
+| QA2-F-13-http-expected-header | คำขอผ่าน HTTP ที่มี X-BC-Expected-User ไปที่ /api/chat และ /api/auth/me | 403 AUTH_HTTPS_REQUIRED; Ollama 0 | 403 | AUTH_HTTPS_REQUIRED | 0 | FE-003 (BC-LocalAI/Security/FrontendApiIntegration.cs) |
+| QA2-F-14-legacy-unchanged | /api/chat และ /stream แบบเดิม (ไม่มี conversationId, ไม่มี X-CSRF-TOKEN, ไม่มี X-BC-Expected-User) | ทำงานเหมือนเดิม 200 (ไม่ต้องใช้ token); Ollama 2 (1 ต่อคำขอ) | 200 | - | 2 | FE-003 (BC-LocalAI/Security/FrontendApiIntegration.cs) |
+| QA2-F-15-missing-token-create | สร้างสนทนา โดยไม่มี X-CSRF-TOKEN | 403 AUTH_CSRF_INVALID; ไม่เขียนข้อมูล ไม่เรียก Ollama (ข้อมูลเดิมไม่เปลี่ยน) | 403 | AUTH_CSRF_INVALID | 0 | FE-003 (BC-LocalAI/Security/FrontendApiIntegration.cs) |
+| QA2-F-16-duplicate-token-create | สร้างสนทนา โดย X-CSRF-TOKEN ซ้ำสองค่า (ทั้งสองถูกต้อง) | 403 AUTH_CSRF_INVALID; ไม่เขียนข้อมูล ไม่เรียก Ollama | 403 | AUTH_CSRF_INVALID | 0 | FE-003 (BC-LocalAI/Security/FrontendApiIntegration.cs) |
+| QA2-F-15-missing-token-rename | เปลี่ยนชื่อ โดยไม่มี X-CSRF-TOKEN | 403 AUTH_CSRF_INVALID; ไม่เขียนข้อมูล ไม่เรียก Ollama (ข้อมูลเดิมไม่เปลี่ยน) | 403 | AUTH_CSRF_INVALID | 0 | FE-003 (BC-LocalAI/Security/FrontendApiIntegration.cs) |
+| QA2-F-16-duplicate-token-rename | เปลี่ยนชื่อ โดย X-CSRF-TOKEN ซ้ำสองค่า (ทั้งสองถูกต้อง) | 403 AUTH_CSRF_INVALID; ไม่เขียนข้อมูล ไม่เรียก Ollama | 403 | AUTH_CSRF_INVALID | 0 | FE-003 (BC-LocalAI/Security/FrontendApiIntegration.cs) |
+| QA2-F-15-missing-token-delete | ลบ โดยไม่มี X-CSRF-TOKEN | 403 AUTH_CSRF_INVALID; ไม่เขียนข้อมูล ไม่เรียก Ollama (ข้อมูลเดิมไม่เปลี่ยน) | 403 | AUTH_CSRF_INVALID | 0 | FE-003 (BC-LocalAI/Security/FrontendApiIntegration.cs) |
+| QA2-F-16-duplicate-token-delete | ลบ โดย X-CSRF-TOKEN ซ้ำสองค่า (ทั้งสองถูกต้อง) | 403 AUTH_CSRF_INVALID; ไม่เขียนข้อมูล ไม่เรียก Ollama | 403 | AUTH_CSRF_INVALID | 0 | FE-003 (BC-LocalAI/Security/FrontendApiIntegration.cs) |
+| QA2-F-15-missing-token-chat | POST /api/chat พร้อม conversationId โดยไม่มี X-CSRF-TOKEN | 403 AUTH_CSRF_INVALID; ไม่เขียนข้อมูล ไม่เรียก Ollama (ข้อมูลเดิมไม่เปลี่ยน) | 403 | AUTH_CSRF_INVALID | 0 | FE-003 (BC-LocalAI/Security/FrontendApiIntegration.cs) |
+| QA2-F-16-duplicate-token-chat | POST /api/chat พร้อม conversationId โดย X-CSRF-TOKEN ซ้ำสองค่า (ทั้งสองถูกต้อง) | 403 AUTH_CSRF_INVALID; ไม่เขียนข้อมูล ไม่เรียก Ollama | 403 | AUTH_CSRF_INVALID | 0 | FE-003 (BC-LocalAI/Security/FrontendApiIntegration.cs) |
+| QA2-F-15-missing-token-stream | POST /api/chat/stream พร้อม conversationId โดยไม่มี X-CSRF-TOKEN | 403 AUTH_CSRF_INVALID; ไม่เขียนข้อมูล ไม่เรียก Ollama (ข้อมูลเดิมไม่เปลี่ยน) | 403 | AUTH_CSRF_INVALID | 0 | FE-003 (BC-LocalAI/Security/FrontendApiIntegration.cs) |
+| QA2-F-16-duplicate-token-stream | POST /api/chat/stream พร้อม conversationId โดย X-CSRF-TOKEN ซ้ำสองค่า (ทั้งสองถูกต้อง) | 403 AUTH_CSRF_INVALID; ไม่เขียนข้อมูล ไม่เรียก Ollama | 403 | AUTH_CSRF_INVALID | 0 | FE-003 (BC-LocalAI/Security/FrontendApiIntegration.cs) |
+| QA2-F-17-bad-token-garbage | สร้างสนทนาและส่งแชตเข้าสนทนาด้วย token ปลอม | 403 AUTH_CSRF_INVALID ทั้งสองคำขอ; ไม่เขียนข้อมูล; Ollama 0 | 403 | AUTH_CSRF_INVALID | 0 | FE-003 (BC-LocalAI/Security/FrontendApiIntegration.cs) |
+| QA2-F-17-bad-token-other-user | สร้างสนทนาและส่งแชตเข้าสนทนาด้วย token ที่ออกให้ผู้ใช้อื่น | 403 AUTH_CSRF_INVALID ทั้งสองคำขอ; ไม่เขียนข้อมูล; Ollama 0 | 403 | AUTH_CSRF_INVALID | 0 | FE-003 (BC-LocalAI/Security/FrontendApiIntegration.cs) |
+| QA2-F-17-bad-token-anonymous | สร้างสนทนาและส่งแชตเข้าสนทนาด้วย token ที่ออกให้ผู้ไม่ล็อกอิน | 403 AUTH_CSRF_INVALID ทั้งสองคำขอ; ไม่เขียนข้อมูล; Ollama 0 | 403 | AUTH_CSRF_INVALID | 0 | FE-003 (BC-LocalAI/Security/FrontendApiIntegration.cs) |
+| QA2-F-18-valid-token | token ที่ถูกต้องกับทั้ง 5 การเปลี่ยนแปลงประวัติ | สำเร็จ: สร้าง 201, เปลี่ยนชื่อ 200, chat 200, stream completed, ลบ 204 (รวม 200 ถ้าทั้งหมดสำเร็จ); Ollama 2 | 200 | - | 2 | FE-003 (BC-LocalAI/Security/FrontendApiIntegration.cs) |
+| QA2-F-20-unknown-conversation-no-token | ส่งแชตเข้า conversationId ที่ไม่มีอยู่โดยไม่มี token | 403 AUTH_CSRF_INVALID (ตรวจ token ก่อน ไม่ใช้ 404 เป็นช่องตรวจว่ามี id หรือไม่) | 403 | AUTH_CSRF_INVALID | 0 | FE-003 (BC-LocalAI/Security/FrontendApiIntegration.cs) |
+| QA2-F-21-no-store-actor | response ที่ล็อกอินของ /api/auth/me, /api/chat, /api/chat/stream, /api/conversations (200, 201, 404) | Cache-Control no-store และ X-BC-User = id ของผู้เรียกทุก response | 200 | - | - | FE-003 (BC-LocalAI/Security/FrontendApiIntegration.cs) |
+| QA2-F-22-anonymous-no-actor | 401 ของคำขอไม่ล็อกอิน | ไม่มี X-BC-User และ Cache-Control no-store | 401 | AUTH_REQUIRED | - | FE-003 (BC-LocalAI/Security/FrontendApiIntegration.cs) |
+| QA2-F-23-login-auth-off | GET /login เมื่อ Authentication:Enabled=false | 404 (ไม่เผยหน้า login) | 404 | - | - | FE-003 (BC-LocalAI/Security/FrontendApiIntegration.cs) |
+| QA2-F-24-login-http | GET /login ผ่าน HTTP | 403 ไม่แสดงหน้า login ผ่าน HTTP | 403 | - | - | FE-003 (BC-LocalAI/Security/FrontendApiIntegration.cs) |
+| QA2-F-25-login-page | GET /login ผ่าน HTTPS ไม่ล็อกอิน พร้อม returnUrl ภายนอก | 200; no-store; CSP form-action 'none' และ frame-ancestors 'none'; nosniff; มีช่องรหัสผ่าน; ไม่สะท้อน returnUrl; ไม่โหลดสคริปต์ mock | 200 | - | - | FE-003 (BC-LocalAI/Security/FrontendApiIntegration.cs) |
+| QA2-F-26-login-signed-in | GET /login ขณะล็อกอินอยู่ พร้อม returnUrl ภายนอก | 302 ไปที่ / เท่านั้น (ไม่ตาม returnUrl) | 302 | - | - | FE-003 (BC-LocalAI/Security/FrontendApiIntegration.cs) |
+| QA2-F-27-root-anonymous | GET / ไม่ล็อกอิน (Authentication เปิด) | 302 ไป /login พร้อม no-store (เปลี่ยนจาก 200 ใน BE-006 matrix ตามการออกแบบ FE-003) | 302 | - | - | FE-003 (BC-LocalAI/Security/FrontendApiIntegration.cs) |
+| QA2-F-28-root-http | GET / ผ่าน HTTP (Authentication เปิด) | 403 ไม่ redirect และไม่ส่งหน้าแอป | 403 | - | - | FE-003 (BC-LocalAI/Security/FrontendApiIntegration.cs) |
+| QA2-F-29-root-disabled-account | GET / ด้วย session ของบัญชีที่ถูกปิด | 302 ไป /login ไม่ได้หน้าแอป | 302 | - | - | FE-003 (BC-LocalAI/Security/FrontendApiIntegration.cs) |
+| QA2-F-30-root-no-leak | หน้าแอปหลังล็อกอิน (GET /) | 200 no-store; ไม่มี id ผู้ใช้ security stamp ค่า cookie หรือ token ใน HTML | 200 | - | - | FE-003 (BC-LocalAI/Security/FrontendApiIntegration.cs) |
+| QA2-F-31-preview-not-exposed | GET /preview/login และ /login-preview: Production; Development โดยไม่เปิด FrontendPreview; Development ที่เปิดแต่ไม่ใช่ loopback | 404 ทุกกรณี | 404 | - | - | FE-003 (BC-LocalAI/Security/FrontendApiIntegration.cs) |
+| QA2-F-32-mock-assets | ไฟล์ mock ของ preview (auth-mock.js, auth-preview.js, auth-preview.css) ใน Production | ไม่ถูกเสิร์ฟ 404 (โค้ด mock ไม่ควรอยู่ใน Production) (QA baseline) | 404 | - | - | QA baseline |
+| QA2-F-34-relogin-other-user | แท็บเดิมของ Alice (Expected=Alice) หลัง Bob ล็อกอินทับ session บน browser เดียวกัน | 401 AUTH_SESSION_CHANGED; session ของ Bob ยังใช้ได้ และไม่ได้ทำงานในนามของ Alice; Ollama 0 | 401 | AUTH_SESSION_CHANGED | 0 | FE-003 (BC-LocalAI/Security/FrontendApiIntegration.cs) |
+| QA2-F-35-after-logout | คำขอพร้อม X-BC-Expected-User หลัง logout | 401 AUTH_REQUIRED (ไม่ใช่ SESSION_CHANGED); ไม่มี X-BC-User; Ollama 0 | 401 | AUTH_REQUIRED | 0 | FE-003 (BC-LocalAI/Security/FrontendApiIntegration.cs) |
+| QA2-F-37-auth-off-header-ignored | Authentication:Enabled=false ส่ง X-BC-Expected-User และ X-CSRF-TOKEN ปลอมกับ /api/chat | 200 ไม่ถูกตรวจ ไม่มี X-BC-User; Ollama 1 | 200 | - | 1 | FE-003 (BC-LocalAI/Security/FrontendApiIntegration.cs) |
+
 คอลัมน์ HTTP/Code/Ollama: `-` คือไม่ได้กำหนดค่านั้นเป็นเกณฑ์ (ตัดสินด้วยข้อความ Expected) · Ollama คือจำนวนคำขอที่ fake Ollama ต้องได้รับ
 
-รวม 256 กรณี
+รวม 300 กรณี

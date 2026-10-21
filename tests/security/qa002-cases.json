@@ -10,7 +10,8 @@
   "U": "3.6 Unauthenticated calls never reach Ollama",
   "MS": "3.7 Session ended during a stream",
   "Q": "3.6 One user flooding / queue messages",
-  "O": "Authentication switched off / configuration"
+  "O": "Authentication switched off / configuration",
+  "F": "FE-003 / SEC-003 integration: X-BC-Expected-User, history CSRF token, HTTPS guard, login page"
  },
  "cases": [
   {
@@ -2572,6 +2573,446 @@
    "code": null,
    "ollama": null,
    "basis": "BE-006 matrix"
+  },
+  {
+   "id": "QA2-F-01-expected-match",
+   "group": "F",
+   "title": "X-BC-Expected-User ตรงกับผู้ล็อกอิน",
+   "expected": "200; response มี X-BC-User = id ของตนเอง และ Cache-Control no-store",
+   "status": 200,
+   "code": null,
+   "ollama": null,
+   "basis": "FE-003 (BC-LocalAI/Security/FrontendApiIntegration.cs)"
+  },
+  {
+   "id": "QA2-F-02-expected-mismatch",
+   "group": "F",
+   "title": "X-BC-Expected-User เป็นของผู้ใช้อื่น",
+   "expected": "401 AUTH_SESSION_CHANGED; session ของผู้เรียกไม่ถูกเพิกถอน (เรียกซ้ำไม่มี header ได้ 200); response ไม่มี X-BC-User ของคนอื่น",
+   "status": 401,
+   "code": "AUTH_SESSION_CHANGED",
+   "ollama": null,
+   "basis": "FE-003 (BC-LocalAI/Security/FrontendApiIntegration.cs)"
+  },
+  {
+   "id": "QA2-F-03-mismatch-chat",
+   "group": "F",
+   "title": "POST /api/chat ที่ X-BC-Expected-User ไม่ตรง",
+   "expected": "401 AUTH_SESSION_CHANGED; Ollama 0",
+   "status": 401,
+   "code": "AUTH_SESSION_CHANGED",
+   "ollama": 0,
+   "basis": "FE-003 (BC-LocalAI/Security/FrontendApiIntegration.cs)"
+  },
+  {
+   "id": "QA2-F-04-mismatch-stream",
+   "group": "F",
+   "title": "POST /api/chat/stream ที่ X-BC-Expected-User ไม่ตรง",
+   "expected": "401 JSON AUTH_SESSION_CHANGED ไม่ใช่ SSE; Ollama 0",
+   "status": 401,
+   "code": "AUTH_SESSION_CHANGED",
+   "ollama": 0,
+   "basis": "FE-003 (BC-LocalAI/Security/FrontendApiIntegration.cs)"
+  },
+  {
+   "id": "QA2-F-05-mismatch-conversations",
+   "group": "F",
+   "title": "GET/POST /api/conversations ที่ X-BC-Expected-User ไม่ตรง",
+   "expected": "401 AUTH_SESSION_CHANGED ทั้งอ่านและเขียน; ไม่มีสนทนาถูกสร้าง",
+   "status": 401,
+   "code": "AUTH_SESSION_CHANGED",
+   "ollama": null,
+   "basis": "FE-003 (BC-LocalAI/Security/FrontendApiIntegration.cs)"
+  },
+  {
+   "id": "QA2-F-06-duplicate-header",
+   "group": "F",
+   "title": "X-BC-Expected-User ซ้ำสองค่า (แม้มีค่าที่ถูก)",
+   "expected": "401 AUTH_SESSION_CHANGED",
+   "status": 401,
+   "code": "AUTH_SESSION_CHANGED",
+   "ollama": null,
+   "basis": "FE-003 (BC-LocalAI/Security/FrontendApiIntegration.cs)"
+  },
+  {
+   "id": "QA2-F-07-empty-header",
+   "group": "F",
+   "title": "X-BC-Expected-User ว่าง",
+   "expected": "401 AUTH_SESSION_CHANGED (ว่างไม่ถือว่าตรง)",
+   "status": 401,
+   "code": "AUTH_SESSION_CHANGED",
+   "ollama": null,
+   "basis": "FE-003 (BC-LocalAI/Security/FrontendApiIntegration.cs)"
+  },
+  {
+   "id": "QA2-F-08-case-sensitive",
+   "group": "F",
+   "title": "X-BC-Expected-User เป็น id เดียวกันแต่ตัวพิมพ์ใหญ่",
+   "expected": "401 AUTH_SESSION_CHANGED (เทียบตรงตัว)",
+   "status": 401,
+   "code": "AUTH_SESSION_CHANGED",
+   "ollama": null,
+   "basis": "FE-003 (BC-LocalAI/Security/FrontendApiIntegration.cs)"
+  },
+  {
+   "id": "QA2-F-09-alias-mismatch",
+   "group": "F",
+   "title": "เส้นทางสำรอง: /API/CHAT, /api/chat/, /Api/Conversations/, /api/CHAT/STREAM/, /api/auth/ME พร้อม header ไม่ตรง",
+   "expected": "401 AUTH_SESSION_CHANGED ทุกเส้นทาง (precondition ครอบคลุม case และ trailing slash); Ollama 0",
+   "status": 401,
+   "code": "AUTH_SESSION_CHANGED",
+   "ollama": 0,
+   "basis": "FE-003 (BC-LocalAI/Security/FrontendApiIntegration.cs)"
+  },
+  {
+   "id": "QA2-F-10-alias-anonymous",
+   "group": "F",
+   "title": "เส้นทางสำรองเดียวกันโดยไม่ล็อกอิน",
+   "expected": "401 AUTH_REQUIRED ทุกเส้นทาง ไม่มีทางเลี่ยงการตรวจสิทธิ์; Ollama 0",
+   "status": 401,
+   "code": "AUTH_REQUIRED",
+   "ollama": 0,
+   "basis": "BE-006 matrix"
+  },
+  {
+   "id": "QA2-F-11-alias-no-csrf",
+   "group": "F",
+   "title": "สร้างสนทนาที่ /API/CONVERSATIONS และ /api/conversations/ โดยไม่มี X-CSRF-TOKEN",
+   "expected": "403 AUTH_CSRF_INVALID ทั้งสองเส้นทาง ไม่มีสนทนาถูกสร้าง",
+   "status": 403,
+   "code": "AUTH_CSRF_INVALID",
+   "ollama": null,
+   "basis": "FE-003 (BC-LocalAI/Security/FrontendApiIntegration.cs)"
+  },
+  {
+   "id": "QA2-F-12-http-history",
+   "group": "F",
+   "title": "เปลี่ยนแปลงประวัติ/อ่านประวัติผ่าน HTTP (มี cookie) ทั้งตั้งและไม่ตั้งพอร์ต HTTPS",
+   "expected": "403 AUTH_HTTPS_REQUIRED ไม่ใช่ redirect ที่พา body ไปส่งซ้ำ; Ollama 0",
+   "status": 403,
+   "code": "AUTH_HTTPS_REQUIRED",
+   "ollama": 0,
+   "basis": "FE-003 (BC-LocalAI/Security/FrontendApiIntegration.cs)"
+  },
+  {
+   "id": "QA2-F-13-http-expected-header",
+   "group": "F",
+   "title": "คำขอผ่าน HTTP ที่มี X-BC-Expected-User ไปที่ /api/chat และ /api/auth/me",
+   "expected": "403 AUTH_HTTPS_REQUIRED; Ollama 0",
+   "status": 403,
+   "code": "AUTH_HTTPS_REQUIRED",
+   "ollama": 0,
+   "basis": "FE-003 (BC-LocalAI/Security/FrontendApiIntegration.cs)"
+  },
+  {
+   "id": "QA2-F-14-legacy-unchanged",
+   "group": "F",
+   "title": "/api/chat และ /stream แบบเดิม (ไม่มี conversationId, ไม่มี X-CSRF-TOKEN, ไม่มี X-BC-Expected-User)",
+   "expected": "ทำงานเหมือนเดิม 200 (ไม่ต้องใช้ token); Ollama 2 (1 ต่อคำขอ)",
+   "status": 200,
+   "code": null,
+   "ollama": 2,
+   "basis": "FE-003 (BC-LocalAI/Security/FrontendApiIntegration.cs)"
+  },
+  {
+   "id": "QA2-F-15-missing-token-create",
+   "group": "F",
+   "title": "สร้างสนทนา โดยไม่มี X-CSRF-TOKEN",
+   "expected": "403 AUTH_CSRF_INVALID; ไม่เขียนข้อมูล ไม่เรียก Ollama (ข้อมูลเดิมไม่เปลี่ยน)",
+   "status": 403,
+   "code": "AUTH_CSRF_INVALID",
+   "ollama": 0,
+   "basis": "FE-003 (BC-LocalAI/Security/FrontendApiIntegration.cs)"
+  },
+  {
+   "id": "QA2-F-16-duplicate-token-create",
+   "group": "F",
+   "title": "สร้างสนทนา โดย X-CSRF-TOKEN ซ้ำสองค่า (ทั้งสองถูกต้อง)",
+   "expected": "403 AUTH_CSRF_INVALID; ไม่เขียนข้อมูล ไม่เรียก Ollama",
+   "status": 403,
+   "code": "AUTH_CSRF_INVALID",
+   "ollama": 0,
+   "basis": "FE-003 (BC-LocalAI/Security/FrontendApiIntegration.cs)"
+  },
+  {
+   "id": "QA2-F-15-missing-token-rename",
+   "group": "F",
+   "title": "เปลี่ยนชื่อ โดยไม่มี X-CSRF-TOKEN",
+   "expected": "403 AUTH_CSRF_INVALID; ไม่เขียนข้อมูล ไม่เรียก Ollama (ข้อมูลเดิมไม่เปลี่ยน)",
+   "status": 403,
+   "code": "AUTH_CSRF_INVALID",
+   "ollama": 0,
+   "basis": "FE-003 (BC-LocalAI/Security/FrontendApiIntegration.cs)"
+  },
+  {
+   "id": "QA2-F-16-duplicate-token-rename",
+   "group": "F",
+   "title": "เปลี่ยนชื่อ โดย X-CSRF-TOKEN ซ้ำสองค่า (ทั้งสองถูกต้อง)",
+   "expected": "403 AUTH_CSRF_INVALID; ไม่เขียนข้อมูล ไม่เรียก Ollama",
+   "status": 403,
+   "code": "AUTH_CSRF_INVALID",
+   "ollama": 0,
+   "basis": "FE-003 (BC-LocalAI/Security/FrontendApiIntegration.cs)"
+  },
+  {
+   "id": "QA2-F-15-missing-token-delete",
+   "group": "F",
+   "title": "ลบ โดยไม่มี X-CSRF-TOKEN",
+   "expected": "403 AUTH_CSRF_INVALID; ไม่เขียนข้อมูล ไม่เรียก Ollama (ข้อมูลเดิมไม่เปลี่ยน)",
+   "status": 403,
+   "code": "AUTH_CSRF_INVALID",
+   "ollama": 0,
+   "basis": "FE-003 (BC-LocalAI/Security/FrontendApiIntegration.cs)"
+  },
+  {
+   "id": "QA2-F-16-duplicate-token-delete",
+   "group": "F",
+   "title": "ลบ โดย X-CSRF-TOKEN ซ้ำสองค่า (ทั้งสองถูกต้อง)",
+   "expected": "403 AUTH_CSRF_INVALID; ไม่เขียนข้อมูล ไม่เรียก Ollama",
+   "status": 403,
+   "code": "AUTH_CSRF_INVALID",
+   "ollama": 0,
+   "basis": "FE-003 (BC-LocalAI/Security/FrontendApiIntegration.cs)"
+  },
+  {
+   "id": "QA2-F-15-missing-token-chat",
+   "group": "F",
+   "title": "POST /api/chat พร้อม conversationId โดยไม่มี X-CSRF-TOKEN",
+   "expected": "403 AUTH_CSRF_INVALID; ไม่เขียนข้อมูล ไม่เรียก Ollama (ข้อมูลเดิมไม่เปลี่ยน)",
+   "status": 403,
+   "code": "AUTH_CSRF_INVALID",
+   "ollama": 0,
+   "basis": "FE-003 (BC-LocalAI/Security/FrontendApiIntegration.cs)"
+  },
+  {
+   "id": "QA2-F-16-duplicate-token-chat",
+   "group": "F",
+   "title": "POST /api/chat พร้อม conversationId โดย X-CSRF-TOKEN ซ้ำสองค่า (ทั้งสองถูกต้อง)",
+   "expected": "403 AUTH_CSRF_INVALID; ไม่เขียนข้อมูล ไม่เรียก Ollama",
+   "status": 403,
+   "code": "AUTH_CSRF_INVALID",
+   "ollama": 0,
+   "basis": "FE-003 (BC-LocalAI/Security/FrontendApiIntegration.cs)"
+  },
+  {
+   "id": "QA2-F-15-missing-token-stream",
+   "group": "F",
+   "title": "POST /api/chat/stream พร้อม conversationId โดยไม่มี X-CSRF-TOKEN",
+   "expected": "403 AUTH_CSRF_INVALID; ไม่เขียนข้อมูล ไม่เรียก Ollama (ข้อมูลเดิมไม่เปลี่ยน)",
+   "status": 403,
+   "code": "AUTH_CSRF_INVALID",
+   "ollama": 0,
+   "basis": "FE-003 (BC-LocalAI/Security/FrontendApiIntegration.cs)"
+  },
+  {
+   "id": "QA2-F-16-duplicate-token-stream",
+   "group": "F",
+   "title": "POST /api/chat/stream พร้อม conversationId โดย X-CSRF-TOKEN ซ้ำสองค่า (ทั้งสองถูกต้อง)",
+   "expected": "403 AUTH_CSRF_INVALID; ไม่เขียนข้อมูล ไม่เรียก Ollama",
+   "status": 403,
+   "code": "AUTH_CSRF_INVALID",
+   "ollama": 0,
+   "basis": "FE-003 (BC-LocalAI/Security/FrontendApiIntegration.cs)"
+  },
+  {
+   "id": "QA2-F-17-bad-token-garbage",
+   "group": "F",
+   "title": "สร้างสนทนาและส่งแชตเข้าสนทนาด้วย token ปลอม",
+   "expected": "403 AUTH_CSRF_INVALID ทั้งสองคำขอ; ไม่เขียนข้อมูล; Ollama 0",
+   "status": 403,
+   "code": "AUTH_CSRF_INVALID",
+   "ollama": 0,
+   "basis": "FE-003 (BC-LocalAI/Security/FrontendApiIntegration.cs)"
+  },
+  {
+   "id": "QA2-F-17-bad-token-other-user",
+   "group": "F",
+   "title": "สร้างสนทนาและส่งแชตเข้าสนทนาด้วย token ที่ออกให้ผู้ใช้อื่น",
+   "expected": "403 AUTH_CSRF_INVALID ทั้งสองคำขอ; ไม่เขียนข้อมูล; Ollama 0",
+   "status": 403,
+   "code": "AUTH_CSRF_INVALID",
+   "ollama": 0,
+   "basis": "FE-003 (BC-LocalAI/Security/FrontendApiIntegration.cs)"
+  },
+  {
+   "id": "QA2-F-17-bad-token-anonymous",
+   "group": "F",
+   "title": "สร้างสนทนาและส่งแชตเข้าสนทนาด้วย token ที่ออกให้ผู้ไม่ล็อกอิน",
+   "expected": "403 AUTH_CSRF_INVALID ทั้งสองคำขอ; ไม่เขียนข้อมูล; Ollama 0",
+   "status": 403,
+   "code": "AUTH_CSRF_INVALID",
+   "ollama": 0,
+   "basis": "FE-003 (BC-LocalAI/Security/FrontendApiIntegration.cs)"
+  },
+  {
+   "id": "QA2-F-18-valid-token",
+   "group": "F",
+   "title": "token ที่ถูกต้องกับทั้ง 5 การเปลี่ยนแปลงประวัติ",
+   "expected": "สำเร็จ: สร้าง 201, เปลี่ยนชื่อ 200, chat 200, stream completed, ลบ 204 (รวม 200 ถ้าทั้งหมดสำเร็จ); Ollama 2",
+   "status": 200,
+   "code": null,
+   "ollama": 2,
+   "basis": "FE-003 (BC-LocalAI/Security/FrontendApiIntegration.cs)"
+  },
+  {
+   "id": "QA2-F-20-unknown-conversation-no-token",
+   "group": "F",
+   "title": "ส่งแชตเข้า conversationId ที่ไม่มีอยู่โดยไม่มี token",
+   "expected": "403 AUTH_CSRF_INVALID (ตรวจ token ก่อน ไม่ใช้ 404 เป็นช่องตรวจว่ามี id หรือไม่)",
+   "status": 403,
+   "code": "AUTH_CSRF_INVALID",
+   "ollama": 0,
+   "basis": "FE-003 (BC-LocalAI/Security/FrontendApiIntegration.cs)"
+  },
+  {
+   "id": "QA2-F-21-no-store-actor",
+   "group": "F",
+   "title": "response ที่ล็อกอินของ /api/auth/me, /api/chat, /api/chat/stream, /api/conversations (200, 201, 404)",
+   "expected": "Cache-Control no-store และ X-BC-User = id ของผู้เรียกทุก response",
+   "status": 200,
+   "code": null,
+   "ollama": null,
+   "basis": "FE-003 (BC-LocalAI/Security/FrontendApiIntegration.cs)"
+  },
+  {
+   "id": "QA2-F-22-anonymous-no-actor",
+   "group": "F",
+   "title": "401 ของคำขอไม่ล็อกอิน",
+   "expected": "ไม่มี X-BC-User และ Cache-Control no-store",
+   "status": 401,
+   "code": "AUTH_REQUIRED",
+   "ollama": null,
+   "basis": "FE-003 (BC-LocalAI/Security/FrontendApiIntegration.cs)"
+  },
+  {
+   "id": "QA2-F-23-login-auth-off",
+   "group": "F",
+   "title": "GET /login เมื่อ Authentication:Enabled=false",
+   "expected": "404 (ไม่เผยหน้า login)",
+   "status": 404,
+   "code": null,
+   "ollama": null,
+   "basis": "FE-003 (BC-LocalAI/Security/FrontendApiIntegration.cs)"
+  },
+  {
+   "id": "QA2-F-24-login-http",
+   "group": "F",
+   "title": "GET /login ผ่าน HTTP",
+   "expected": "403 ไม่แสดงหน้า login ผ่าน HTTP",
+   "status": 403,
+   "code": null,
+   "ollama": null,
+   "basis": "FE-003 (BC-LocalAI/Security/FrontendApiIntegration.cs)"
+  },
+  {
+   "id": "QA2-F-25-login-page",
+   "group": "F",
+   "title": "GET /login ผ่าน HTTPS ไม่ล็อกอิน พร้อม returnUrl ภายนอก",
+   "expected": "200; no-store; CSP form-action 'none' และ frame-ancestors 'none'; nosniff; มีช่องรหัสผ่าน; ไม่สะท้อน returnUrl; ไม่โหลดสคริปต์ mock",
+   "status": 200,
+   "code": null,
+   "ollama": null,
+   "basis": "FE-003 (BC-LocalAI/Security/FrontendApiIntegration.cs)"
+  },
+  {
+   "id": "QA2-F-26-login-signed-in",
+   "group": "F",
+   "title": "GET /login ขณะล็อกอินอยู่ พร้อม returnUrl ภายนอก",
+   "expected": "302 ไปที่ / เท่านั้น (ไม่ตาม returnUrl)",
+   "status": 302,
+   "code": null,
+   "ollama": null,
+   "basis": "FE-003 (BC-LocalAI/Security/FrontendApiIntegration.cs)"
+  },
+  {
+   "id": "QA2-F-27-root-anonymous",
+   "group": "F",
+   "title": "GET / ไม่ล็อกอิน (Authentication เปิด)",
+   "expected": "302 ไป /login พร้อม no-store (เปลี่ยนจาก 200 ใน BE-006 matrix ตามการออกแบบ FE-003)",
+   "status": 302,
+   "code": null,
+   "ollama": null,
+   "basis": "FE-003 (BC-LocalAI/Security/FrontendApiIntegration.cs)"
+  },
+  {
+   "id": "QA2-F-28-root-http",
+   "group": "F",
+   "title": "GET / ผ่าน HTTP (Authentication เปิด)",
+   "expected": "403 ไม่ redirect และไม่ส่งหน้าแอป",
+   "status": 403,
+   "code": null,
+   "ollama": null,
+   "basis": "FE-003 (BC-LocalAI/Security/FrontendApiIntegration.cs)"
+  },
+  {
+   "id": "QA2-F-29-root-disabled-account",
+   "group": "F",
+   "title": "GET / ด้วย session ของบัญชีที่ถูกปิด",
+   "expected": "302 ไป /login ไม่ได้หน้าแอป",
+   "status": 302,
+   "code": null,
+   "ollama": null,
+   "basis": "FE-003 (BC-LocalAI/Security/FrontendApiIntegration.cs)"
+  },
+  {
+   "id": "QA2-F-30-root-no-leak",
+   "group": "F",
+   "title": "หน้าแอปหลังล็อกอิน (GET /)",
+   "expected": "200 no-store; ไม่มี id ผู้ใช้ security stamp ค่า cookie หรือ token ใน HTML",
+   "status": 200,
+   "code": null,
+   "ollama": null,
+   "basis": "FE-003 (BC-LocalAI/Security/FrontendApiIntegration.cs)"
+  },
+  {
+   "id": "QA2-F-31-preview-not-exposed",
+   "group": "F",
+   "title": "GET /preview/login และ /login-preview: Production; Development โดยไม่เปิด FrontendPreview; Development ที่เปิดแต่ไม่ใช่ loopback",
+   "expected": "404 ทุกกรณี",
+   "status": 404,
+   "code": null,
+   "ollama": null,
+   "basis": "FE-003 (BC-LocalAI/Security/FrontendApiIntegration.cs)"
+  },
+  {
+   "id": "QA2-F-32-mock-assets",
+   "group": "F",
+   "title": "ไฟล์ mock ของ preview (auth-mock.js, auth-preview.js, auth-preview.css) ใน Production",
+   "expected": "ไม่ถูกเสิร์ฟ 404 (โค้ด mock ไม่ควรอยู่ใน Production) (QA baseline)",
+   "status": 404,
+   "code": null,
+   "ollama": null,
+   "basis": "QA baseline"
+  },
+  {
+   "id": "QA2-F-34-relogin-other-user",
+   "group": "F",
+   "title": "แท็บเดิมของ Alice (Expected=Alice) หลัง Bob ล็อกอินทับ session บน browser เดียวกัน",
+   "expected": "401 AUTH_SESSION_CHANGED; session ของ Bob ยังใช้ได้ และไม่ได้ทำงานในนามของ Alice; Ollama 0",
+   "status": 401,
+   "code": "AUTH_SESSION_CHANGED",
+   "ollama": 0,
+   "basis": "FE-003 (BC-LocalAI/Security/FrontendApiIntegration.cs)"
+  },
+  {
+   "id": "QA2-F-35-after-logout",
+   "group": "F",
+   "title": "คำขอพร้อม X-BC-Expected-User หลัง logout",
+   "expected": "401 AUTH_REQUIRED (ไม่ใช่ SESSION_CHANGED); ไม่มี X-BC-User; Ollama 0",
+   "status": 401,
+   "code": "AUTH_REQUIRED",
+   "ollama": 0,
+   "basis": "FE-003 (BC-LocalAI/Security/FrontendApiIntegration.cs)"
+  },
+  {
+   "id": "QA2-F-37-auth-off-header-ignored",
+   "group": "F",
+   "title": "Authentication:Enabled=false ส่ง X-BC-Expected-User และ X-CSRF-TOKEN ปลอมกับ /api/chat",
+   "expected": "200 ไม่ถูกตรวจ ไม่มี X-BC-User; Ollama 1",
+   "status": 200,
+   "code": null,
+   "ollama": 1,
+   "basis": "FE-003 (BC-LocalAI/Security/FrontendApiIntegration.cs)"
   }
  ]
 }
