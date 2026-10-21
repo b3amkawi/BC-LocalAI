@@ -1,0 +1,2577 @@
+{
+ "groups": {
+  "M": "3.1 Role x endpoint matrix",
+  "A": "3.2 Authentication (login, failure messages, rate limit, lockout, logout)",
+  "S": "3.3 Session (expiry, revocation, cookie flags, fixation)",
+  "I": "3.4 Authorization, IDOR, privilege escalation",
+  "C": "3.5 CSRF and cross-site requests",
+  "H": "3.5 Security headers",
+  "L": "Error bodies and logs do not leak",
+  "U": "3.6 Unauthenticated calls never reach Ollama",
+  "MS": "3.7 Session ended during a stream",
+  "Q": "3.6 One user flooding / queue messages",
+  "O": "Authentication switched off / configuration"
+ },
+ "cases": [
+  {
+   "id": "QA2-M-home-anonymous",
+   "group": "M",
+   "title": "GET / โดย ไม่ล็อกอิน",
+   "expected": "อนุญาต: HTTP 200",
+   "status": 200,
+   "code": null,
+   "ollama": null,
+   "basis": "BE-006 matrix"
+  },
+  {
+   "id": "QA2-M-home-user",
+   "group": "M",
+   "title": "GET / โดย User ที่ล็อกอิน",
+   "expected": "อนุญาต: HTTP 200",
+   "status": 200,
+   "code": null,
+   "ollama": null,
+   "basis": "BE-006 matrix"
+  },
+  {
+   "id": "QA2-M-home-admin",
+   "group": "M",
+   "title": "GET / โดย Admin ที่ล็อกอิน",
+   "expected": "อนุญาต: HTTP 200",
+   "status": 200,
+   "code": null,
+   "ollama": null,
+   "basis": "BE-006 matrix"
+  },
+  {
+   "id": "QA2-M-csrf-anonymous",
+   "group": "M",
+   "title": "GET /api/auth/csrf โดย ไม่ล็อกอิน",
+   "expected": "อนุญาต: HTTP 200",
+   "status": 200,
+   "code": null,
+   "ollama": null,
+   "basis": "BE-006 matrix"
+  },
+  {
+   "id": "QA2-M-csrf-user",
+   "group": "M",
+   "title": "GET /api/auth/csrf โดย User ที่ล็อกอิน",
+   "expected": "อนุญาต: HTTP 200",
+   "status": 200,
+   "code": null,
+   "ollama": null,
+   "basis": "BE-006 matrix"
+  },
+  {
+   "id": "QA2-M-csrf-admin",
+   "group": "M",
+   "title": "GET /api/auth/csrf โดย Admin ที่ล็อกอิน",
+   "expected": "อนุญาต: HTTP 200",
+   "status": 200,
+   "code": null,
+   "ollama": null,
+   "basis": "BE-006 matrix"
+  },
+  {
+   "id": "QA2-M-me-anonymous",
+   "group": "M",
+   "title": "GET /api/auth/me โดย ไม่ล็อกอิน",
+   "expected": "ปฏิเสธ 401: HTTP 401 AUTH_REQUIRED",
+   "status": 401,
+   "code": "AUTH_REQUIRED",
+   "ollama": null,
+   "basis": "BE-006 matrix"
+  },
+  {
+   "id": "QA2-M-me-user",
+   "group": "M",
+   "title": "GET /api/auth/me โดย User ที่ล็อกอิน",
+   "expected": "อนุญาต: HTTP 200",
+   "status": 200,
+   "code": null,
+   "ollama": null,
+   "basis": "BE-006 matrix"
+  },
+  {
+   "id": "QA2-M-me-admin",
+   "group": "M",
+   "title": "GET /api/auth/me โดย Admin ที่ล็อกอิน",
+   "expected": "อนุญาต: HTTP 200",
+   "status": 200,
+   "code": null,
+   "ollama": null,
+   "basis": "BE-006 matrix"
+  },
+  {
+   "id": "QA2-M-me-logged-out",
+   "group": "M",
+   "title": "GET /api/auth/me โดย cookie ของ session ที่ logout แล้ว",
+   "expected": "ปฏิเสธ 401: HTTP 401 AUTH_REQUIRED",
+   "status": 401,
+   "code": "AUTH_REQUIRED",
+   "ollama": null,
+   "basis": "BE-006 matrix"
+  },
+  {
+   "id": "QA2-M-me-disabled",
+   "group": "M",
+   "title": "GET /api/auth/me โดย บัญชีถูกปิดระหว่างล็อกอิน",
+   "expected": "ปฏิเสธ 401: HTTP 401 AUTH_REQUIRED",
+   "status": 401,
+   "code": "AUTH_REQUIRED",
+   "ollama": null,
+   "basis": "BE-006 matrix"
+  },
+  {
+   "id": "QA2-M-me-idle-expired",
+   "group": "M",
+   "title": "GET /api/auth/me โดย session ไม่ได้ใช้งานครบ 30 นาที",
+   "expected": "ปฏิเสธ 401: HTTP 401 AUTH_REQUIRED",
+   "status": 401,
+   "code": "AUTH_REQUIRED",
+   "ollama": null,
+   "basis": "BE-006 matrix"
+  },
+  {
+   "id": "QA2-M-me-absolute-expired",
+   "group": "M",
+   "title": "GET /api/auth/me โดย session ครบ 8 ชั่วโมง",
+   "expected": "ปฏิเสธ 401: HTTP 401 AUTH_REQUIRED",
+   "status": 401,
+   "code": "AUTH_REQUIRED",
+   "ollama": null,
+   "basis": "BE-006 matrix"
+  },
+  {
+   "id": "QA2-M-me-role-changed",
+   "group": "M",
+   "title": "GET /api/auth/me โดย role ถูกเปลี่ยนระหว่างล็อกอิน",
+   "expected": "ปฏิเสธ 401: HTTP 401 AUTH_REQUIRED",
+   "status": 401,
+   "code": "AUTH_REQUIRED",
+   "ollama": null,
+   "basis": "BE-006 matrix"
+  },
+  {
+   "id": "QA2-M-logout-anonymous",
+   "group": "M",
+   "title": "POST /api/auth/logout โดย ไม่ล็อกอิน",
+   "expected": "อนุญาต: HTTP 204",
+   "status": 204,
+   "code": null,
+   "ollama": null,
+   "basis": "BE-006 matrix"
+  },
+  {
+   "id": "QA2-M-logout-user",
+   "group": "M",
+   "title": "POST /api/auth/logout โดย User ที่ล็อกอิน",
+   "expected": "อนุญาต: HTTP 204",
+   "status": 204,
+   "code": null,
+   "ollama": null,
+   "basis": "BE-006 matrix"
+  },
+  {
+   "id": "QA2-M-logout-admin",
+   "group": "M",
+   "title": "POST /api/auth/logout โดย Admin ที่ล็อกอิน",
+   "expected": "อนุญาต: HTTP 204",
+   "status": 204,
+   "code": null,
+   "ollama": null,
+   "basis": "BE-006 matrix"
+  },
+  {
+   "id": "QA2-M-chat-anonymous",
+   "group": "M",
+   "title": "POST /api/chat โดย ไม่ล็อกอิน",
+   "expected": "ปฏิเสธ 401: HTTP 401 AUTH_REQUIRED; fake Ollama รับ 0 คำขอ",
+   "status": 401,
+   "code": "AUTH_REQUIRED",
+   "ollama": 0,
+   "basis": "BE-006 matrix"
+  },
+  {
+   "id": "QA2-M-chat-user",
+   "group": "M",
+   "title": "POST /api/chat โดย User ที่ล็อกอิน",
+   "expected": "อนุญาต: HTTP 200; fake Ollama รับ 1 คำขอ",
+   "status": 200,
+   "code": null,
+   "ollama": 1,
+   "basis": "BE-006 matrix"
+  },
+  {
+   "id": "QA2-M-chat-admin",
+   "group": "M",
+   "title": "POST /api/chat โดย Admin ที่ล็อกอิน",
+   "expected": "อนุญาต: HTTP 200; fake Ollama รับ 1 คำขอ",
+   "status": 200,
+   "code": null,
+   "ollama": 1,
+   "basis": "BE-006 matrix"
+  },
+  {
+   "id": "QA2-M-chat-logged-out",
+   "group": "M",
+   "title": "POST /api/chat โดย cookie ของ session ที่ logout แล้ว",
+   "expected": "ปฏิเสธ 401: HTTP 401 AUTH_REQUIRED; fake Ollama รับ 0 คำขอ",
+   "status": 401,
+   "code": "AUTH_REQUIRED",
+   "ollama": 0,
+   "basis": "BE-006 matrix"
+  },
+  {
+   "id": "QA2-M-chat-disabled",
+   "group": "M",
+   "title": "POST /api/chat โดย บัญชีถูกปิดระหว่างล็อกอิน",
+   "expected": "ปฏิเสธ 401: HTTP 401 AUTH_REQUIRED; fake Ollama รับ 0 คำขอ",
+   "status": 401,
+   "code": "AUTH_REQUIRED",
+   "ollama": 0,
+   "basis": "BE-006 matrix"
+  },
+  {
+   "id": "QA2-M-chat-idle-expired",
+   "group": "M",
+   "title": "POST /api/chat โดย session ไม่ได้ใช้งานครบ 30 นาที",
+   "expected": "ปฏิเสธ 401: HTTP 401 AUTH_REQUIRED; fake Ollama รับ 0 คำขอ",
+   "status": 401,
+   "code": "AUTH_REQUIRED",
+   "ollama": 0,
+   "basis": "BE-006 matrix"
+  },
+  {
+   "id": "QA2-M-chat-absolute-expired",
+   "group": "M",
+   "title": "POST /api/chat โดย session ครบ 8 ชั่วโมง",
+   "expected": "ปฏิเสธ 401: HTTP 401 AUTH_REQUIRED; fake Ollama รับ 0 คำขอ",
+   "status": 401,
+   "code": "AUTH_REQUIRED",
+   "ollama": 0,
+   "basis": "BE-006 matrix"
+  },
+  {
+   "id": "QA2-M-chat-role-changed",
+   "group": "M",
+   "title": "POST /api/chat โดย role ถูกเปลี่ยนระหว่างล็อกอิน",
+   "expected": "ปฏิเสธ 401: HTTP 401 AUTH_REQUIRED; fake Ollama รับ 0 คำขอ",
+   "status": 401,
+   "code": "AUTH_REQUIRED",
+   "ollama": 0,
+   "basis": "BE-006 matrix"
+  },
+  {
+   "id": "QA2-M-stream-anonymous",
+   "group": "M",
+   "title": "POST /api/chat/stream โดย ไม่ล็อกอิน",
+   "expected": "ปฏิเสธ 401: HTTP 401 AUTH_REQUIRED; fake Ollama รับ 0 คำขอ",
+   "status": 401,
+   "code": "AUTH_REQUIRED",
+   "ollama": 0,
+   "basis": "BE-006 matrix"
+  },
+  {
+   "id": "QA2-M-stream-user",
+   "group": "M",
+   "title": "POST /api/chat/stream โดย User ที่ล็อกอิน",
+   "expected": "อนุญาต: HTTP 200; fake Ollama รับ 1 คำขอ",
+   "status": 200,
+   "code": null,
+   "ollama": 1,
+   "basis": "BE-006 matrix"
+  },
+  {
+   "id": "QA2-M-stream-admin",
+   "group": "M",
+   "title": "POST /api/chat/stream โดย Admin ที่ล็อกอิน",
+   "expected": "อนุญาต: HTTP 200; fake Ollama รับ 1 คำขอ",
+   "status": 200,
+   "code": null,
+   "ollama": 1,
+   "basis": "BE-006 matrix"
+  },
+  {
+   "id": "QA2-M-stream-logged-out",
+   "group": "M",
+   "title": "POST /api/chat/stream โดย cookie ของ session ที่ logout แล้ว",
+   "expected": "ปฏิเสธ 401: HTTP 401 AUTH_REQUIRED; fake Ollama รับ 0 คำขอ",
+   "status": 401,
+   "code": "AUTH_REQUIRED",
+   "ollama": 0,
+   "basis": "BE-006 matrix"
+  },
+  {
+   "id": "QA2-M-stream-disabled",
+   "group": "M",
+   "title": "POST /api/chat/stream โดย บัญชีถูกปิดระหว่างล็อกอิน",
+   "expected": "ปฏิเสธ 401: HTTP 401 AUTH_REQUIRED; fake Ollama รับ 0 คำขอ",
+   "status": 401,
+   "code": "AUTH_REQUIRED",
+   "ollama": 0,
+   "basis": "BE-006 matrix"
+  },
+  {
+   "id": "QA2-M-stream-idle-expired",
+   "group": "M",
+   "title": "POST /api/chat/stream โดย session ไม่ได้ใช้งานครบ 30 นาที",
+   "expected": "ปฏิเสธ 401: HTTP 401 AUTH_REQUIRED; fake Ollama รับ 0 คำขอ",
+   "status": 401,
+   "code": "AUTH_REQUIRED",
+   "ollama": 0,
+   "basis": "BE-006 matrix"
+  },
+  {
+   "id": "QA2-M-stream-absolute-expired",
+   "group": "M",
+   "title": "POST /api/chat/stream โดย session ครบ 8 ชั่วโมง",
+   "expected": "ปฏิเสธ 401: HTTP 401 AUTH_REQUIRED; fake Ollama รับ 0 คำขอ",
+   "status": 401,
+   "code": "AUTH_REQUIRED",
+   "ollama": 0,
+   "basis": "BE-006 matrix"
+  },
+  {
+   "id": "QA2-M-stream-role-changed",
+   "group": "M",
+   "title": "POST /api/chat/stream โดย role ถูกเปลี่ยนระหว่างล็อกอิน",
+   "expected": "ปฏิเสธ 401: HTTP 401 AUTH_REQUIRED; fake Ollama รับ 0 คำขอ",
+   "status": 401,
+   "code": "AUTH_REQUIRED",
+   "ollama": 0,
+   "basis": "BE-006 matrix"
+  },
+  {
+   "id": "QA2-M-conv-list-anonymous",
+   "group": "M",
+   "title": "GET /api/conversations โดย ไม่ล็อกอิน",
+   "expected": "ปฏิเสธ 401: HTTP 401 AUTH_REQUIRED",
+   "status": 401,
+   "code": "AUTH_REQUIRED",
+   "ollama": null,
+   "basis": "BE-006 matrix"
+  },
+  {
+   "id": "QA2-M-conv-list-user",
+   "group": "M",
+   "title": "GET /api/conversations โดย User ที่ล็อกอิน",
+   "expected": "อนุญาต: HTTP 200",
+   "status": 200,
+   "code": null,
+   "ollama": null,
+   "basis": "BE-006 matrix"
+  },
+  {
+   "id": "QA2-M-conv-list-admin",
+   "group": "M",
+   "title": "GET /api/conversations โดย Admin ที่ล็อกอิน",
+   "expected": "อนุญาต: HTTP 200",
+   "status": 200,
+   "code": null,
+   "ollama": null,
+   "basis": "BE-006 matrix"
+  },
+  {
+   "id": "QA2-M-conv-list-logged-out",
+   "group": "M",
+   "title": "GET /api/conversations โดย cookie ของ session ที่ logout แล้ว",
+   "expected": "ปฏิเสธ 401: HTTP 401 AUTH_REQUIRED",
+   "status": 401,
+   "code": "AUTH_REQUIRED",
+   "ollama": null,
+   "basis": "BE-006 matrix"
+  },
+  {
+   "id": "QA2-M-conv-list-disabled",
+   "group": "M",
+   "title": "GET /api/conversations โดย บัญชีถูกปิดระหว่างล็อกอิน",
+   "expected": "ปฏิเสธ 401: HTTP 401 AUTH_REQUIRED",
+   "status": 401,
+   "code": "AUTH_REQUIRED",
+   "ollama": null,
+   "basis": "BE-006 matrix"
+  },
+  {
+   "id": "QA2-M-conv-create-anonymous",
+   "group": "M",
+   "title": "POST /api/conversations โดย ไม่ล็อกอิน",
+   "expected": "ปฏิเสธ 401: HTTP 401 AUTH_REQUIRED",
+   "status": 401,
+   "code": "AUTH_REQUIRED",
+   "ollama": null,
+   "basis": "BE-006 matrix"
+  },
+  {
+   "id": "QA2-M-conv-create-user",
+   "group": "M",
+   "title": "POST /api/conversations โดย User ที่ล็อกอิน",
+   "expected": "อนุญาต: HTTP 201",
+   "status": 201,
+   "code": null,
+   "ollama": null,
+   "basis": "BE-006 matrix"
+  },
+  {
+   "id": "QA2-M-conv-create-admin",
+   "group": "M",
+   "title": "POST /api/conversations โดย Admin ที่ล็อกอิน",
+   "expected": "อนุญาต: HTTP 201",
+   "status": 201,
+   "code": null,
+   "ollama": null,
+   "basis": "BE-006 matrix"
+  },
+  {
+   "id": "QA2-M-conv-get-own-anonymous",
+   "group": "M",
+   "title": "GET /api/conversations/{own} โดย ไม่ล็อกอิน",
+   "expected": "ปฏิเสธ 401: HTTP 401 AUTH_REQUIRED",
+   "status": 401,
+   "code": "AUTH_REQUIRED",
+   "ollama": null,
+   "basis": "BE-006 matrix"
+  },
+  {
+   "id": "QA2-M-conv-get-own-user",
+   "group": "M",
+   "title": "GET /api/conversations/{own} โดย User ที่ล็อกอิน",
+   "expected": "อนุญาต: HTTP 200",
+   "status": 200,
+   "code": null,
+   "ollama": null,
+   "basis": "BE-006 matrix"
+  },
+  {
+   "id": "QA2-M-conv-get-own-admin",
+   "group": "M",
+   "title": "GET /api/conversations/{own} โดย Admin ที่ล็อกอิน",
+   "expected": "อนุญาต: HTTP 200",
+   "status": 200,
+   "code": null,
+   "ollama": null,
+   "basis": "BE-006 matrix"
+  },
+  {
+   "id": "QA2-M-conv-get-other-anonymous",
+   "group": "M",
+   "title": "GET /api/conversations/{other user's} โดย ไม่ล็อกอิน",
+   "expected": "ปฏิเสธ 401: HTTP 401 AUTH_REQUIRED",
+   "status": 401,
+   "code": "AUTH_REQUIRED",
+   "ollama": null,
+   "basis": "BE-007 contract (เจ้าของเท่านั้น; Admin ไม่อ่านแชตผู้อื่น)"
+  },
+  {
+   "id": "QA2-M-conv-get-other-user",
+   "group": "M",
+   "title": "GET /api/conversations/{other user's} โดย User ที่ล็อกอิน",
+   "expected": "ปฏิเสธ 404: HTTP 404 CONVERSATION_NOT_FOUND",
+   "status": 404,
+   "code": "CONVERSATION_NOT_FOUND",
+   "ollama": null,
+   "basis": "BE-007 contract (เจ้าของเท่านั้น; Admin ไม่อ่านแชตผู้อื่น)"
+  },
+  {
+   "id": "QA2-M-conv-get-other-admin",
+   "group": "M",
+   "title": "GET /api/conversations/{other user's} โดย Admin ที่ล็อกอิน",
+   "expected": "ปฏิเสธ 404: HTTP 404 CONVERSATION_NOT_FOUND",
+   "status": 404,
+   "code": "CONVERSATION_NOT_FOUND",
+   "ollama": null,
+   "basis": "BE-007 contract (เจ้าของเท่านั้น; Admin ไม่อ่านแชตผู้อื่น)"
+  },
+  {
+   "id": "QA2-M-conv-patch-own-anonymous",
+   "group": "M",
+   "title": "PATCH /api/conversations/{own} โดย ไม่ล็อกอิน",
+   "expected": "ปฏิเสธ 401: HTTP 401 AUTH_REQUIRED",
+   "status": 401,
+   "code": "AUTH_REQUIRED",
+   "ollama": null,
+   "basis": "BE-006 matrix"
+  },
+  {
+   "id": "QA2-M-conv-patch-own-user",
+   "group": "M",
+   "title": "PATCH /api/conversations/{own} โดย User ที่ล็อกอิน",
+   "expected": "อนุญาต: HTTP 200",
+   "status": 200,
+   "code": null,
+   "ollama": null,
+   "basis": "BE-006 matrix"
+  },
+  {
+   "id": "QA2-M-conv-patch-own-admin",
+   "group": "M",
+   "title": "PATCH /api/conversations/{own} โดย Admin ที่ล็อกอิน",
+   "expected": "อนุญาต: HTTP 200",
+   "status": 200,
+   "code": null,
+   "ollama": null,
+   "basis": "BE-006 matrix"
+  },
+  {
+   "id": "QA2-M-conv-patch-other-anonymous",
+   "group": "M",
+   "title": "PATCH /api/conversations/{other user's} โดย ไม่ล็อกอิน",
+   "expected": "ปฏิเสธ 401: HTTP 401 AUTH_REQUIRED",
+   "status": 401,
+   "code": "AUTH_REQUIRED",
+   "ollama": null,
+   "basis": "BE-007 contract (เจ้าของเท่านั้น; Admin ไม่อ่านแชตผู้อื่น)"
+  },
+  {
+   "id": "QA2-M-conv-patch-other-user",
+   "group": "M",
+   "title": "PATCH /api/conversations/{other user's} โดย User ที่ล็อกอิน",
+   "expected": "ปฏิเสธ 404: HTTP 404 CONVERSATION_NOT_FOUND",
+   "status": 404,
+   "code": "CONVERSATION_NOT_FOUND",
+   "ollama": null,
+   "basis": "BE-007 contract (เจ้าของเท่านั้น; Admin ไม่อ่านแชตผู้อื่น)"
+  },
+  {
+   "id": "QA2-M-conv-patch-other-admin",
+   "group": "M",
+   "title": "PATCH /api/conversations/{other user's} โดย Admin ที่ล็อกอิน",
+   "expected": "ปฏิเสธ 404: HTTP 404 CONVERSATION_NOT_FOUND",
+   "status": 404,
+   "code": "CONVERSATION_NOT_FOUND",
+   "ollama": null,
+   "basis": "BE-007 contract (เจ้าของเท่านั้น; Admin ไม่อ่านแชตผู้อื่น)"
+  },
+  {
+   "id": "QA2-M-conv-delete-own-anonymous",
+   "group": "M",
+   "title": "DELETE /api/conversations/{own} โดย ไม่ล็อกอิน",
+   "expected": "ปฏิเสธ 401: HTTP 401 AUTH_REQUIRED",
+   "status": 401,
+   "code": "AUTH_REQUIRED",
+   "ollama": null,
+   "basis": "BE-006 matrix"
+  },
+  {
+   "id": "QA2-M-conv-delete-own-user",
+   "group": "M",
+   "title": "DELETE /api/conversations/{own} โดย User ที่ล็อกอิน",
+   "expected": "อนุญาต: HTTP 204",
+   "status": 204,
+   "code": null,
+   "ollama": null,
+   "basis": "BE-006 matrix"
+  },
+  {
+   "id": "QA2-M-conv-delete-own-admin",
+   "group": "M",
+   "title": "DELETE /api/conversations/{own} โดย Admin ที่ล็อกอิน",
+   "expected": "อนุญาต: HTTP 204",
+   "status": 204,
+   "code": null,
+   "ollama": null,
+   "basis": "BE-006 matrix"
+  },
+  {
+   "id": "QA2-M-conv-delete-other-anonymous",
+   "group": "M",
+   "title": "DELETE /api/conversations/{other user's} โดย ไม่ล็อกอิน",
+   "expected": "ปฏิเสธ 401: HTTP 401 AUTH_REQUIRED",
+   "status": 401,
+   "code": "AUTH_REQUIRED",
+   "ollama": null,
+   "basis": "BE-007 contract (เจ้าของเท่านั้น; Admin ไม่อ่านแชตผู้อื่น)"
+  },
+  {
+   "id": "QA2-M-conv-delete-other-user",
+   "group": "M",
+   "title": "DELETE /api/conversations/{other user's} โดย User ที่ล็อกอิน",
+   "expected": "ปฏิเสธ 404: HTTP 404 CONVERSATION_NOT_FOUND",
+   "status": 404,
+   "code": "CONVERSATION_NOT_FOUND",
+   "ollama": null,
+   "basis": "BE-007 contract (เจ้าของเท่านั้น; Admin ไม่อ่านแชตผู้อื่น)"
+  },
+  {
+   "id": "QA2-M-conv-delete-other-admin",
+   "group": "M",
+   "title": "DELETE /api/conversations/{other user's} โดย Admin ที่ล็อกอิน",
+   "expected": "ปฏิเสธ 404: HTTP 404 CONVERSATION_NOT_FOUND",
+   "status": 404,
+   "code": "CONVERSATION_NOT_FOUND",
+   "ollama": null,
+   "basis": "BE-007 contract (เจ้าของเท่านั้น; Admin ไม่อ่านแชตผู้อื่น)"
+  },
+  {
+   "id": "QA2-M-conv-msgs-own-anonymous",
+   "group": "M",
+   "title": "GET /api/conversations/{own}/messages โดย ไม่ล็อกอิน",
+   "expected": "ปฏิเสธ 401: HTTP 401 AUTH_REQUIRED",
+   "status": 401,
+   "code": "AUTH_REQUIRED",
+   "ollama": null,
+   "basis": "BE-006 matrix"
+  },
+  {
+   "id": "QA2-M-conv-msgs-own-user",
+   "group": "M",
+   "title": "GET /api/conversations/{own}/messages โดย User ที่ล็อกอิน",
+   "expected": "อนุญาต: HTTP 200",
+   "status": 200,
+   "code": null,
+   "ollama": null,
+   "basis": "BE-006 matrix"
+  },
+  {
+   "id": "QA2-M-conv-msgs-own-admin",
+   "group": "M",
+   "title": "GET /api/conversations/{own}/messages โดย Admin ที่ล็อกอิน",
+   "expected": "อนุญาต: HTTP 200",
+   "status": 200,
+   "code": null,
+   "ollama": null,
+   "basis": "BE-006 matrix"
+  },
+  {
+   "id": "QA2-M-conv-msgs-other-anonymous",
+   "group": "M",
+   "title": "GET /api/conversations/{other user's}/messages โดย ไม่ล็อกอิน",
+   "expected": "ปฏิเสธ 401: HTTP 401 AUTH_REQUIRED",
+   "status": 401,
+   "code": "AUTH_REQUIRED",
+   "ollama": null,
+   "basis": "BE-007 contract (เจ้าของเท่านั้น; Admin ไม่อ่านแชตผู้อื่น)"
+  },
+  {
+   "id": "QA2-M-conv-msgs-other-user",
+   "group": "M",
+   "title": "GET /api/conversations/{other user's}/messages โดย User ที่ล็อกอิน",
+   "expected": "ปฏิเสธ 404: HTTP 404 CONVERSATION_NOT_FOUND",
+   "status": 404,
+   "code": "CONVERSATION_NOT_FOUND",
+   "ollama": null,
+   "basis": "BE-007 contract (เจ้าของเท่านั้น; Admin ไม่อ่านแชตผู้อื่น)"
+  },
+  {
+   "id": "QA2-M-conv-msgs-other-admin",
+   "group": "M",
+   "title": "GET /api/conversations/{other user's}/messages โดย Admin ที่ล็อกอิน",
+   "expected": "ปฏิเสธ 404: HTTP 404 CONVERSATION_NOT_FOUND",
+   "status": 404,
+   "code": "CONVERSATION_NOT_FOUND",
+   "ollama": null,
+   "basis": "BE-007 contract (เจ้าของเท่านั้น; Admin ไม่อ่านแชตผู้อื่น)"
+  },
+  {
+   "id": "QA2-M-chat-conv-other-user",
+   "group": "M",
+   "title": "POST /api/chat {conversationId: other user's} โดย User ที่ล็อกอิน",
+   "expected": "ปฏิเสธ 404: HTTP 404 CONVERSATION_NOT_FOUND; fake Ollama รับ 0 คำขอ",
+   "status": 404,
+   "code": "CONVERSATION_NOT_FOUND",
+   "ollama": 0,
+   "basis": "BE-007 contract (เจ้าของเท่านั้น; Admin ไม่อ่านแชตผู้อื่น)"
+  },
+  {
+   "id": "QA2-M-chat-conv-other-admin",
+   "group": "M",
+   "title": "POST /api/chat {conversationId: other user's} โดย Admin ที่ล็อกอิน",
+   "expected": "ปฏิเสธ 404: HTTP 404 CONVERSATION_NOT_FOUND; fake Ollama รับ 0 คำขอ",
+   "status": 404,
+   "code": "CONVERSATION_NOT_FOUND",
+   "ollama": 0,
+   "basis": "BE-007 contract (เจ้าของเท่านั้น; Admin ไม่อ่านแชตผู้อื่น)"
+  },
+  {
+   "id": "QA2-M-stream-conv-other-user",
+   "group": "M",
+   "title": "POST /api/chat/stream {conversationId: other user's} โดย User ที่ล็อกอิน",
+   "expected": "ปฏิเสธ 404: HTTP 404 CONVERSATION_NOT_FOUND; fake Ollama รับ 0 คำขอ",
+   "status": 404,
+   "code": "CONVERSATION_NOT_FOUND",
+   "ollama": 0,
+   "basis": "BE-007 contract (เจ้าของเท่านั้น; Admin ไม่อ่านแชตผู้อื่น)"
+  },
+  {
+   "id": "QA2-M-stream-conv-other-admin",
+   "group": "M",
+   "title": "POST /api/chat/stream {conversationId: other user's} โดย Admin ที่ล็อกอิน",
+   "expected": "ปฏิเสธ 404: HTTP 404 CONVERSATION_NOT_FOUND; fake Ollama รับ 0 คำขอ",
+   "status": 404,
+   "code": "CONVERSATION_NOT_FOUND",
+   "ollama": 0,
+   "basis": "BE-007 contract (เจ้าของเท่านั้น; Admin ไม่อ่านแชตผู้อื่น)"
+  },
+  {
+   "id": "QA2-M-admin-only-anonymous",
+   "group": "M",
+   "title": "GET /api/__test/admin (stand-in for a future Admin-policy endpoint) โดย ไม่ล็อกอิน",
+   "expected": "ปฏิเสธ 401: HTTP 401 AUTH_REQUIRED",
+   "status": 401,
+   "code": "AUTH_REQUIRED",
+   "ollama": null,
+   "basis": "BE-006 matrix"
+  },
+  {
+   "id": "QA2-M-admin-only-user",
+   "group": "M",
+   "title": "GET /api/__test/admin (stand-in for a future Admin-policy endpoint) โดย User ที่ล็อกอิน",
+   "expected": "ปฏิเสธ 403: HTTP 403 AUTH_FORBIDDEN",
+   "status": 403,
+   "code": "AUTH_FORBIDDEN",
+   "ollama": null,
+   "basis": "BE-006 matrix"
+  },
+  {
+   "id": "QA2-M-admin-only-admin",
+   "group": "M",
+   "title": "GET /api/__test/admin (stand-in for a future Admin-policy endpoint) โดย Admin ที่ล็อกอิน",
+   "expected": "อนุญาต: HTTP 200",
+   "status": 200,
+   "code": null,
+   "ollama": null,
+   "basis": "BE-006 matrix"
+  },
+  {
+   "id": "QA2-M-health-anonymous",
+   "group": "M",
+   "title": "GET /health (no health endpoint is mapped) โดย ไม่ล็อกอิน",
+   "expected": "ไม่มี endpoint (404) ไม่เผยรายละเอียดระบบ: HTTP 404",
+   "status": 404,
+   "code": null,
+   "ollama": null,
+   "basis": "BE-006 matrix"
+  },
+  {
+   "id": "QA2-M-health-user",
+   "group": "M",
+   "title": "GET /health (no health endpoint is mapped) โดย User ที่ล็อกอิน",
+   "expected": "ไม่มี endpoint (404) ไม่เผยรายละเอียดระบบ: HTTP 404",
+   "status": 404,
+   "code": null,
+   "ollama": null,
+   "basis": "BE-006 matrix"
+  },
+  {
+   "id": "QA2-M-health-admin",
+   "group": "M",
+   "title": "GET /health (no health endpoint is mapped) โดย Admin ที่ล็อกอิน",
+   "expected": "ไม่มี endpoint (404) ไม่เผยรายละเอียดระบบ: HTTP 404",
+   "status": 404,
+   "code": null,
+   "ollama": null,
+   "basis": "BE-006 matrix"
+  },
+  {
+   "id": "QA2-M-chat-stream-401-is-json",
+   "group": "M",
+   "title": "POST /api/chat/stream โดยไม่ล็อกอิน ตอบ JSON ไม่ใช่ SSE",
+   "expected": "401 AUTH_REQUIRED เป็น application/json ก่อนเริ่ม SSE ไม่มี event-stream",
+   "status": 401,
+   "code": "AUTH_REQUIRED",
+   "ollama": 0,
+   "basis": "BE-006 matrix (Issue #22)"
+  },
+  {
+   "id": "QA2-A-01-login-ok",
+   "group": "A",
+   "title": "login ถูกต้อง",
+   "expected": "200; ตัว body มีเฉพาะ user{id,displayName,username,roles}; ไม่มีรหัสผ่าน/hash/stamp/session; Cache-Control no-store",
+   "status": 200,
+   "code": null,
+   "ollama": null,
+   "basis": "BE-005 contract"
+  },
+  {
+   "id": "QA2-A-02-wrong-password",
+   "group": "A",
+   "title": "รหัสผ่านผิด (ชื่อมีอยู่)",
+   "expected": "401 AUTH_INVALID_CREDENTIALS",
+   "status": 401,
+   "code": "AUTH_INVALID_CREDENTIALS",
+   "ollama": null,
+   "basis": "BE-005 contract"
+  },
+  {
+   "id": "QA2-A-03-unknown-user",
+   "group": "A",
+   "title": "ไม่มีชื่อผู้ใช้นี้",
+   "expected": "401 AUTH_INVALID_CREDENTIALS เหมือนรหัสผ่านผิดทุกไบต์ (body เท่ากัน)",
+   "status": 401,
+   "code": "AUTH_INVALID_CREDENTIALS",
+   "ollama": null,
+   "basis": "BE-005 contract"
+  },
+  {
+   "id": "QA2-A-04-disabled",
+   "group": "A",
+   "title": "บัญชีถูกปิด (รหัสถูก)",
+   "expected": "401 AUTH_INVALID_CREDENTIALS body เท่ากับกรณีรหัสผิด",
+   "status": 401,
+   "code": "AUTH_INVALID_CREDENTIALS",
+   "ollama": null,
+   "basis": "BE-005 contract"
+  },
+  {
+   "id": "QA2-A-05-locked",
+   "group": "A",
+   "title": "บัญชีถูกล็อก (รหัสถูก)",
+   "expected": "401 AUTH_INVALID_CREDENTIALS body เท่ากับกรณีรหัสผิด",
+   "status": 401,
+   "code": "AUTH_INVALID_CREDENTIALS",
+   "ollama": null,
+   "basis": "BE-005 contract"
+  },
+  {
+   "id": "QA2-A-06-no-cookie-on-failure",
+   "group": "A",
+   "title": "login ล้มเหลวทุกแบบไม่ออก cookie session",
+   "expected": "ไม่มี Set-Cookie ของ __Host-BC.LocalAI ที่มีค่า (ยกเว้นการลบ)",
+   "status": null,
+   "code": null,
+   "ollama": null,
+   "basis": "BE-005 contract"
+  },
+  {
+   "id": "QA2-A-07-no-echo",
+   "group": "A",
+   "title": "ข้อความผิดพลาดไม่สะท้อนชื่อผู้ใช้หรือรหัสผ่าน",
+   "expected": "body ของ 401 ไม่มีชื่อผู้ใช้/รหัสผ่านที่ส่งไป",
+   "status": null,
+   "code": null,
+   "ollama": null,
+   "basis": "BE-005 contract"
+  },
+  {
+   "id": "QA2-A-08-same-headers",
+   "group": "A",
+   "title": "header ของ login ล้มเหลวเหมือนกันทุกสาเหตุ",
+   "expected": "ชุดชื่อ header และสถานะเท่ากัน (ไม่นับ Date)",
+   "status": null,
+   "code": null,
+   "ollama": null,
+   "basis": "BE-005 contract"
+  },
+  {
+   "id": "QA2-A-09-same-work",
+   "group": "A",
+   "title": "ชื่อที่ไม่มีก็ทำงาน KDF เท่ากัน (เวลาไม่ต่างจนเดาชื่อได้)",
+   "expected": "เวลามัธยฐานของชื่อที่ไม่มี >= 50% ของรหัสผิดชื่อที่มี",
+   "status": null,
+   "code": null,
+   "ollama": null,
+   "basis": "BE-005 (KDF ทุกกรณี)"
+  },
+  {
+   "id": "QA2-A-10-no-csrf-token",
+   "group": "A",
+   "title": "login ไม่มี CSRF token",
+   "expected": "403 AUTH_CSRF_INVALID",
+   "status": 403,
+   "code": "AUTH_CSRF_INVALID",
+   "ollama": 0,
+   "basis": "BE-005 contract"
+  },
+  {
+   "id": "QA2-A-11-bad-csrf-token",
+   "group": "A",
+   "title": "login ด้วย token ปลอม",
+   "expected": "403 AUTH_CSRF_INVALID",
+   "status": 403,
+   "code": "AUTH_CSRF_INVALID",
+   "ollama": 0,
+   "basis": "BE-005 contract"
+  },
+  {
+   "id": "QA2-A-12-old-csrf-token",
+   "group": "A",
+   "title": "login ซ้ำด้วย token เดิมหลัง login แล้ว",
+   "expected": "403 AUTH_CSRF_INVALID",
+   "status": 403,
+   "code": "AUTH_CSRF_INVALID",
+   "ollama": 0,
+   "basis": "BE-005 contract"
+  },
+  {
+   "id": "QA2-A-13-cross-origin",
+   "group": "A",
+   "title": "login จาก Origin ต่างเว็บ",
+   "expected": "403 AUTH_CSRF_INVALID",
+   "status": 403,
+   "code": "AUTH_CSRF_INVALID",
+   "ollama": 0,
+   "basis": "BE-005 contract"
+  },
+  {
+   "id": "QA2-A-14-cross-site-fetch-metadata",
+   "group": "A",
+   "title": "login ที่ Sec-Fetch-Site: cross-site",
+   "expected": "403 AUTH_CSRF_INVALID",
+   "status": 403,
+   "code": "AUTH_CSRF_INVALID",
+   "ollama": 0,
+   "basis": "BE-005 contract"
+  },
+  {
+   "id": "QA2-A-15-http",
+   "group": "A",
+   "title": "login ผ่าน HTTP (ไม่ใช่ HTTPS)",
+   "expected": "403 AUTH_HTTPS_REQUIRED ไม่รับรหัสผ่านทางข้อความล้วน",
+   "status": 403,
+   "code": "AUTH_HTTPS_REQUIRED",
+   "ollama": 0,
+   "basis": "BE-005 contract"
+  },
+  {
+   "id": "QA2-A-16-bad-input-not-json",
+   "group": "A",
+   "title": "อินพุตผิดรูป: Content-Type ไม่ใช่ JSON",
+   "expected": "400 AUTH_INVALID_REQUEST; ไม่เรียก backend; ไม่ออก cookie",
+   "status": 400,
+   "code": "AUTH_INVALID_REQUEST",
+   "ollama": 0,
+   "basis": "BE-005 contract"
+  },
+  {
+   "id": "QA2-A-17-bad-input-extra-role",
+   "group": "A",
+   "title": "อินพุตผิดรูป: มีฟิลด์ role แถม (mass assignment)",
+   "expected": "400 AUTH_INVALID_REQUEST; ไม่เรียก backend; ไม่ออก cookie",
+   "status": 400,
+   "code": "AUTH_INVALID_REQUEST",
+   "ollama": 0,
+   "basis": "BE-005 contract"
+  },
+  {
+   "id": "QA2-A-18-bad-input-duplicate",
+   "group": "A",
+   "title": "อินพุตผิดรูป: ฟิลด์ซ้ำ",
+   "expected": "400 AUTH_INVALID_REQUEST; ไม่เรียก backend; ไม่ออก cookie",
+   "status": 400,
+   "code": "AUTH_INVALID_REQUEST",
+   "ollama": 0,
+   "basis": "BE-005 contract"
+  },
+  {
+   "id": "QA2-A-19-bad-input-wrong-type",
+   "group": "A",
+   "title": "อินพุตผิดรูป: ชนิดข้อมูลผิด",
+   "expected": "400 AUTH_INVALID_REQUEST; ไม่เรียก backend; ไม่ออก cookie",
+   "status": 400,
+   "code": "AUTH_INVALID_REQUEST",
+   "ollama": 0,
+   "basis": "BE-005 contract"
+  },
+  {
+   "id": "QA2-A-20-bad-input-sql",
+   "group": "A",
+   "title": "อินพุตผิดรูป: ชื่อผู้ใช้เป็น SQL",
+   "expected": "400 AUTH_INVALID_REQUEST; ไม่เรียก backend; ไม่ออก cookie",
+   "status": 400,
+   "code": "AUTH_INVALID_REQUEST",
+   "ollama": 0,
+   "basis": "BE-005 contract"
+  },
+  {
+   "id": "QA2-A-21-bad-input-empty",
+   "group": "A",
+   "title": "อินพุตผิดรูป: ช่องว่าง",
+   "expected": "400 AUTH_INVALID_REQUEST; ไม่เรียก backend; ไม่ออก cookie",
+   "status": 400,
+   "code": "AUTH_INVALID_REQUEST",
+   "ollama": 0,
+   "basis": "BE-005 contract"
+  },
+  {
+   "id": "QA2-A-22-oversized",
+   "group": "A",
+   "title": "body ใหญ่เกิน 16 KB",
+   "expected": "413 REQUEST_TOO_LARGE",
+   "status": 413,
+   "code": "REQUEST_TOO_LARGE",
+   "ollama": 0,
+   "basis": "BE-005 contract"
+  },
+  {
+   "id": "QA2-A-23-rate-limit-account",
+   "group": "A",
+   "title": "ยิงรหัสผิดชื่อเดียวเกิน 5 ครั้ง/นาที",
+   "expected": "ครั้งที่ 1-5 ได้ 401; ครั้งที่ 6 ได้ 429 AUTH_RATE_LIMITED พร้อม Retry-After",
+   "status": 429,
+   "code": "AUTH_RATE_LIMITED",
+   "ollama": null,
+   "basis": "BE-005 contract"
+  },
+  {
+   "id": "QA2-A-24-rate-limit-reset",
+   "group": "A",
+   "title": "หลังครบ 1 นาที ยิงได้ใหม่",
+   "expected": "คำขอถัดไปไม่ใช่ 429 (ได้ 401 ตามปกติ)",
+   "status": 401,
+   "code": "AUTH_INVALID_CREDENTIALS",
+   "ollama": null,
+   "basis": "BE-005 contract"
+  },
+  {
+   "id": "QA2-A-25-rate-limit-same-body",
+   "group": "A",
+   "title": "429 ของชื่อที่มีกับชื่อที่ไม่มี เหมือนกัน",
+   "expected": "body เท่ากัน ไม่เผยว่าชื่อมีอยู่",
+   "status": 429,
+   "code": "AUTH_RATE_LIMITED",
+   "ollama": null,
+   "basis": "BE-005 contract"
+  },
+  {
+   "id": "QA2-A-26-rate-limit-ip",
+   "group": "A",
+   "title": "ยิงหลายชื่อจาก IP เดียว เกิน 30 ครั้ง/นาที",
+   "expected": "ครั้งที่ 31 ได้ 429 AUTH_RATE_LIMITED",
+   "status": 429,
+   "code": "AUTH_RATE_LIMITED",
+   "ollama": null,
+   "basis": "BE-005 contract"
+  },
+  {
+   "id": "QA2-A-27-lockout",
+   "group": "A",
+   "title": "รหัสผิด 5 ครั้ง (ห่างกันเกินกรอบอัตรา) แล้วใส่รหัสถูก",
+   "expected": "ครั้งที่ 6 ที่รหัสถูก ได้ 401 AUTH_INVALID_CREDENTIALS เหมือนรหัสผิด (บัญชีถูกล็อก 15 นาที)",
+   "status": 401,
+   "code": "AUTH_INVALID_CREDENTIALS",
+   "ollama": null,
+   "basis": "BE-005 contract (ตัวแทน SQL แบบจำลอง)"
+  },
+  {
+   "id": "QA2-A-28-lockout-expires",
+   "group": "A",
+   "title": "ล็อกครบ 15 นาที",
+   "expected": "login ด้วยรหัสถูกสำเร็จ 200",
+   "status": 200,
+   "code": null,
+   "ollama": null,
+   "basis": "BE-005 contract"
+  },
+  {
+   "id": "QA2-A-29-lockout-keeps-session",
+   "group": "A",
+   "title": "บัญชีถูกล็อกจากรหัสผิด ขณะเจ้าของล็อกอินอยู่",
+   "expected": "เจ้าของยังใช้ /api/auth/me ได้ 200 (ไม่ถูกเตะออกด้วยการเดารหัส)",
+   "status": 200,
+   "code": null,
+   "ollama": null,
+   "basis": "BE-006 matrix"
+  },
+  {
+   "id": "QA2-A-30-success-resets",
+   "group": "A",
+   "title": "รหัสผิด 4 ครั้ง ถูก 1 ครั้ง ผิดอีก 4 ครั้ง",
+   "expected": "ไม่ล็อก: ล็อกอินด้วยรหัสถูกหลังจากนั้นสำเร็จ 200",
+   "status": 200,
+   "code": null,
+   "ollama": null,
+   "basis": "BE-005 contract (ตัวแทน SQL แบบจำลอง)"
+  },
+  {
+   "id": "QA2-A-31-username-case",
+   "group": "A",
+   "title": "ชื่อผู้ใช้ตัวพิมพ์ต่างกัน",
+   "expected": "ใช้ได้ (normalized) 200",
+   "status": 200,
+   "code": null,
+   "ollama": null,
+   "basis": "SEC-001"
+  },
+  {
+   "id": "QA2-A-32-password-exact",
+   "group": "A",
+   "title": "รหัสผ่านมีช่องว่างท้ายเพิ่ม",
+   "expected": "401: รหัสต้องตรงทุกอักขระ ไม่ถูกตัดช่องว่าง",
+   "status": 401,
+   "code": "AUTH_INVALID_CREDENTIALS",
+   "ollama": null,
+   "basis": "BE-005 (preserve exact password)"
+  },
+  {
+   "id": "QA2-A-33-db-down",
+   "group": "A",
+   "title": "ฐานข้อมูลผู้ใช้ล่มตอน login",
+   "expected": "503 AUTH_UNAVAILABLE; ไม่มี cookie; body ไม่มีรายละเอียดภายใน",
+   "status": 503,
+   "code": "AUTH_UNAVAILABLE",
+   "ollama": null,
+   "basis": "BE-005 contract"
+  },
+  {
+   "id": "QA2-A-34-logout",
+   "group": "A",
+   "title": "logout (มี CSRF token)",
+   "expected": "204; ลบ cookie; ใช้ cookie เดิมซ้ำได้ 401 ทั้ง /me และ /api/chat (Ollama 0)",
+   "status": 204,
+   "code": null,
+   "ollama": 0,
+   "basis": "BE-006 matrix"
+  },
+  {
+   "id": "QA2-A-35-logout-twice",
+   "group": "A",
+   "title": "logout ซ้ำ",
+   "expected": "204 ทั้งสองครั้ง (idempotent)",
+   "status": 204,
+   "code": null,
+   "ollama": null,
+   "basis": "BE-005 contract"
+  },
+  {
+   "id": "QA2-A-36-logout-no-csrf",
+   "group": "A",
+   "title": "logout ไม่มี CSRF token",
+   "expected": "403 AUTH_CSRF_INVALID และ session ยังไม่ถูกเพิกถอน",
+   "status": 403,
+   "code": "AUTH_CSRF_INVALID",
+   "ollama": null,
+   "basis": "BE-005 contract"
+  },
+  {
+   "id": "QA2-A-37-me-shape",
+   "group": "A",
+   "title": "รูป response ของ /api/auth/me",
+   "expected": "มีเฉพาะ user{id,displayName,username,roles}",
+   "status": 200,
+   "code": null,
+   "ollama": null,
+   "basis": "BE-005 contract"
+  },
+  {
+   "id": "QA2-A-38-relogin",
+   "group": "A",
+   "title": "login เป็นอีกคนบน browser เดิม",
+   "expected": "session เดิมถูกเพิกถอน: cookie เก่าใช้ไม่ได้ 401",
+   "status": 401,
+   "code": "AUTH_REQUIRED",
+   "ollama": null,
+   "basis": "BE-005 (re-login replaces session)"
+  },
+  {
+   "id": "QA2-A-39-concurrent-login-cap",
+   "group": "A",
+   "title": "login พร้อมกันเกินเพดาน 2",
+   "expected": "ไม่มีคำขอใดได้ 500; ทุกคำตอบเป็น 200/401/429",
+   "status": null,
+   "code": null,
+   "ollama": null,
+   "basis": "BE-005 contract"
+  },
+  {
+   "id": "QA2-S-01-idle-29m",
+   "group": "S",
+   "title": "ไม่ใช้งาน 29 นาที 59 วินาที",
+   "expected": "session ยังใช้ได้ 200",
+   "status": 200,
+   "code": null,
+   "ollama": null,
+   "basis": "BE-006 matrix"
+  },
+  {
+   "id": "QA2-S-02-idle-30m",
+   "group": "S",
+   "title": "ไม่ใช้งานครบ 30 นาที",
+   "expected": "401 AUTH_REQUIRED และ session ถูกเพิกถอน (ใช้ต่อไม่ได้แม้ย้อนเวลา)",
+   "status": 401,
+   "code": "AUTH_REQUIRED",
+   "ollama": 0,
+   "basis": "BE-006 matrix"
+  },
+  {
+   "id": "QA2-S-03-activity-extends-idle",
+   "group": "S",
+   "title": "ใช้งานทุก 20 นาทีตลอด 7 ชั่วโมง",
+   "expected": "ยังใช้ได้ 200 (idle ต่ออายุตามการใช้งาน)",
+   "status": 200,
+   "code": null,
+   "ollama": null,
+   "basis": "BE-006 matrix"
+  },
+  {
+   "id": "QA2-S-04-absolute-8h",
+   "group": "S",
+   "title": "ใช้งานต่อเนื่องจนครบ 8 ชั่วโมง",
+   "expected": "401 AUTH_REQUIRED (การต่อเนื่องไม่ขยายอายุ)",
+   "status": 401,
+   "code": "AUTH_REQUIRED",
+   "ollama": 0,
+   "basis": "BE-006 matrix"
+  },
+  {
+   "id": "QA2-S-05-absolute-7h59",
+   "group": "S",
+   "title": "7 ชั่วโมง 59 นาทีที่ใช้งานต่อเนื่อง",
+   "expected": "ยังใช้ได้ 200",
+   "status": 200,
+   "code": null,
+   "ollama": null,
+   "basis": "BE-006 matrix"
+  },
+  {
+   "id": "QA2-S-06-disabled",
+   "group": "S",
+   "title": "ปิดบัญชีระหว่างล็อกอิน",
+   "expected": "คำขอถัดไป /api/chat ได้ 401 AUTH_REQUIRED Ollama 0",
+   "status": 401,
+   "code": "AUTH_REQUIRED",
+   "ollama": 0,
+   "basis": "BE-006 matrix"
+  },
+  {
+   "id": "QA2-S-07-reenabled-stays-dead",
+   "group": "S",
+   "title": "เปิดบัญชีคืนหลังถูกปิด",
+   "expected": "session เก่ายังใช้ไม่ได้ 401 (ต้อง login ใหม่)",
+   "status": 401,
+   "code": "AUTH_REQUIRED",
+   "ollama": null,
+   "basis": "BE-006 matrix"
+  },
+  {
+   "id": "QA2-S-08-role-up",
+   "group": "S",
+   "title": "เปลี่ยน User เป็น Admin ระหว่างล็อกอิน",
+   "expected": "session เก่า 401; login ใหม่เข้า endpoint Admin ได้ 200",
+   "status": 401,
+   "code": "AUTH_REQUIRED",
+   "ollama": null,
+   "basis": "BE-006 matrix"
+  },
+  {
+   "id": "QA2-S-09-role-down",
+   "group": "S",
+   "title": "เปลี่ยน Admin เป็น User ระหว่างล็อกอิน",
+   "expected": "endpoint Admin ได้ 401 ทันที (ไม่ใช้สิทธิ์ค้างเดิม) และไม่ได้ 200",
+   "status": 401,
+   "code": "AUTH_REQUIRED",
+   "ollama": null,
+   "basis": "BE-006 matrix"
+  },
+  {
+   "id": "QA2-S-10-stamp",
+   "group": "S",
+   "title": "เปลี่ยน security stamp (เปลี่ยนรหัส/สิทธิ์)",
+   "expected": "session เก่า 401",
+   "status": 401,
+   "code": "AUTH_REQUIRED",
+   "ollama": null,
+   "basis": "BE-006 matrix"
+  },
+  {
+   "id": "QA2-S-11-deleted",
+   "group": "S",
+   "title": "ลบบัญชีระหว่างล็อกอิน",
+   "expected": "401",
+   "status": 401,
+   "code": "AUTH_REQUIRED",
+   "ollama": null,
+   "basis": "BE-006 matrix"
+  },
+  {
+   "id": "QA2-S-12-store-down",
+   "group": "S",
+   "title": "ฐานข้อมูลผู้ใช้ติดต่อไม่ได้ระหว่างใช้งาน",
+   "expected": "ปฏิเสธ 401 (fail closed ไม่ใช่ 500); ฐานกลับมาแล้ว session เดิมใช้ต่อได้ 200",
+   "status": 401,
+   "code": "AUTH_REQUIRED",
+   "ollama": 0,
+   "basis": "BE-006 matrix"
+  },
+  {
+   "id": "QA2-S-13-revoke-all",
+   "group": "S",
+   "title": "เพิกถอนทุก session ของผู้ใช้ (2 เครื่อง)",
+   "expected": "ทั้งสอง cookie 401; ผู้ใช้อื่นไม่กระทบ 200",
+   "status": 401,
+   "code": "AUTH_REQUIRED",
+   "ollama": null,
+   "basis": "BE-006 matrix"
+  },
+  {
+   "id": "QA2-S-14-unknown-role",
+   "group": "S",
+   "title": "บัญชีมี role ที่ไม่รู้จัก (KnowledgeManager)",
+   "expected": "session ที่มีอยู่ 401",
+   "status": 401,
+   "code": "AUTH_REQUIRED",
+   "ollama": null,
+   "basis": "BE-006 matrix"
+  },
+  {
+   "id": "QA2-S-15-cookie-flags",
+   "group": "S",
+   "title": "flag ของ cookie session",
+   "expected": "ชื่อ __Host-BC.LocalAI; Secure; HttpOnly; SameSite=Lax; Path=/; ไม่มี Domain",
+   "status": null,
+   "code": null,
+   "ollama": null,
+   "basis": "BE-006"
+  },
+  {
+   "id": "QA2-S-16-csrf-cookie-flags",
+   "group": "S",
+   "title": "flag ของ cookie CSRF",
+   "expected": "ชื่อ __Host-BC.Csrf; Secure; HttpOnly; SameSite=Strict; Path=/; ไม่มี Domain",
+   "status": null,
+   "code": null,
+   "ollama": null,
+   "basis": "BE-005"
+  },
+  {
+   "id": "QA2-S-17-session-cookie",
+   "group": "S",
+   "title": "cookie ไม่คงอยู่เกินการปิดเบราว์เซอร์",
+   "expected": "ไม่มี Expires/Max-Age (session cookie)",
+   "status": null,
+   "code": null,
+   "ollama": null,
+   "basis": "BE-006 (IsPersistent=false)"
+  },
+  {
+   "id": "QA2-S-18-no-reissue",
+   "group": "S",
+   "title": "คำขอที่ล็อกอินแล้วไม่ออก cookie ใหม่/ต่ออายุ cookie",
+   "expected": "ไม่มี Set-Cookie ของ session ใน response ของ /api/auth/me",
+   "status": null,
+   "code": null,
+   "ollama": null,
+   "basis": "BE-006 (SlidingExpiration=false)"
+  },
+  {
+   "id": "QA2-S-19-fixation-garbage",
+   "group": "S",
+   "title": "session fixation: ฝัง cookie session ปลอมก่อน login",
+   "expected": "login ออก cookie ใหม่ที่ไม่ใช่ค่าที่ฝัง; ค่าที่ฝังไม่เคยกลายเป็น session ที่ใช้ได้ (401)",
+   "status": 401,
+   "code": "AUTH_REQUIRED",
+   "ollama": null,
+   "basis": "BE-006 (session fixation)"
+  },
+  {
+   "id": "QA2-S-20-fixation-valid-cookie",
+   "group": "S",
+   "title": "session fixation: attacker ถือ cookie ที่ valid ของตนแล้วเหยื่อล็อกอินบน browser เดียวกัน",
+   "expected": "cookie เดิมถูกเพิกถอนเมื่อมี login ใหม่ ใช้ต่อ 401",
+   "status": 401,
+   "code": "AUTH_REQUIRED",
+   "ollama": null,
+   "basis": "BE-006 (session fixation)"
+  },
+  {
+   "id": "QA2-S-21-tampered-cookie",
+   "group": "S",
+   "title": "cookie ถูกแก้ (ตัดท้าย / สลับตัวอักษร / ว่าง / ยาวมาก)",
+   "expected": "401 ไม่ใช่ 500 ทุกรูปแบบ",
+   "status": 401,
+   "code": "AUTH_REQUIRED",
+   "ollama": 0,
+   "basis": "BE-006"
+  },
+  {
+   "id": "QA2-S-22-cookie-opaque",
+   "group": "S",
+   "title": "ค่า cookie ไม่เปิดเผยข้อมูล",
+   "expected": "ค่า cookie ไม่มี user id, security stamp หรือ session id แบบข้อความล้วน",
+   "status": null,
+   "code": null,
+   "ollama": null,
+   "basis": "BE-006 (cookie ไม่มีความลับ)"
+  },
+  {
+   "id": "QA2-S-23-two-users-isolated",
+   "group": "S",
+   "title": "สองผู้ใช้ล็อกอินพร้อมกัน",
+   "expected": "logout ของคนหนึ่งไม่กระทบอีกคน (200)",
+   "status": 200,
+   "code": null,
+   "ollama": null,
+   "basis": "BE-006 matrix"
+  },
+  {
+   "id": "QA2-I-01-list-own-only",
+   "group": "I",
+   "title": "รายการสนทนาแสดงเฉพาะของตัวเอง",
+   "expected": "Alice เห็นเฉพาะของ Alice; Bob เห็นเฉพาะของ Bob",
+   "status": 200,
+   "code": null,
+   "ollama": null,
+   "basis": "BE-007 contract"
+  },
+  {
+   "id": "QA2-I-02-other-same-as-missing",
+   "group": "I",
+   "title": "เปิดสนทนาของคนอื่น กับ id ที่ไม่มีอยู่จริง",
+   "expected": "404 CONVERSATION_NOT_FOUND และ body เหมือนกันทุกไบต์ (ถามเดา id ไม่ได้)",
+   "status": 404,
+   "code": "CONVERSATION_NOT_FOUND",
+   "ollama": null,
+   "basis": "BE-007 contract"
+  },
+  {
+   "id": "QA2-I-03-other-unchanged",
+   "group": "I",
+   "title": "แก้/ลบ/อ่านสนทนาของคนอื่นแล้วข้อมูลเจ้าของไม่เปลี่ยน",
+   "expected": "ชื่อ ข้อความ และตัวสนทนาของเจ้าของไม่เปลี่ยนหลังความพยายามของคนอื่น",
+   "status": null,
+   "code": null,
+   "ollama": null,
+   "basis": "BE-007 contract"
+  },
+  {
+   "id": "QA2-I-04-chat-other-conv-no-write",
+   "group": "I",
+   "title": "ส่งแชตเข้าสนทนาของคนอื่น",
+   "expected": "404 และไม่มีข้อความเพิ่มในสนทนาของเจ้าของ; Ollama 0",
+   "status": 404,
+   "code": "CONVERSATION_NOT_FOUND",
+   "ollama": 0,
+   "basis": "BE-007 contract"
+  },
+  {
+   "id": "QA2-I-05-admin-no-read",
+   "group": "I",
+   "title": "Admin อ่าน/แก้/ลบ/ส่งแชตเข้าสนทนาของ User",
+   "expected": "404 ทุกกรณี (Admin ไม่มีสิทธิ์อ่านแชตผู้อื่น)",
+   "status": 404,
+   "code": "CONVERSATION_NOT_FOUND",
+   "ollama": 0,
+   "basis": "SEC-001 decision"
+  },
+  {
+   "id": "QA2-I-06-invalid-ids",
+   "group": "I",
+   "title": "id รูปแบบผิด (ไม่ใช่ GUID, path traversal, SQL, GUID รูปแบบอื่น, ยาวมาก)",
+   "expected": "400 INVALID_ID ทุกรูปแบบ ไม่ใช่ 500",
+   "status": 400,
+   "code": "INVALID_ID",
+   "ollama": null,
+   "basis": "BE-007 contract"
+  },
+  {
+   "id": "QA2-I-07-body-owner-ignored",
+   "group": "I",
+   "title": "สร้างสนทนาพร้อมฟิลด์ userId/ownerId ของคนอื่นใน body",
+   "expected": "สนทนาเป็นของผู้เรียก ไม่ใช่ของ id ที่ใส่มา",
+   "status": 201,
+   "code": null,
+   "ollama": null,
+   "basis": "BE-007 contract (เจ้าของมาจาก session)"
+  },
+  {
+   "id": "QA2-I-08-header-query-ignored",
+   "group": "I",
+   "title": "ใส่ ?userId= / X-User-Id / X-Forwarded-User ของคนอื่น",
+   "expected": "ถูกเมิน: ผู้เรียกเห็นเฉพาะของตัวเอง",
+   "status": 200,
+   "code": null,
+   "ollama": null,
+   "basis": "BE-007 contract"
+  },
+  {
+   "id": "QA2-I-09-cursor-cross-user",
+   "group": "I",
+   "title": "ใช้ cursor ของ Alice กับบัญชี Bob",
+   "expected": "ไม่ได้ข้อมูลของ Alice (ได้ของ Bob หรือ 400)",
+   "status": null,
+   "code": null,
+   "ollama": null,
+   "basis": "BE-007 contract"
+  },
+  {
+   "id": "QA2-I-10-deleted-404",
+   "group": "I",
+   "title": "สนทนาที่ลบแล้ว",
+   "expected": "เจ้าของเปิดได้ 404 CONVERSATION_NOT_FOUND",
+   "status": 404,
+   "code": "CONVERSATION_NOT_FOUND",
+   "ollama": null,
+   "basis": "BE-007 contract"
+  },
+  {
+   "id": "QA2-I-11-no-owner-in-dto",
+   "group": "I",
+   "title": "DTO ไม่มีฟิลด์เจ้าของ",
+   "expected": "response ของ conversation/message ไม่มี userId/ownerId/ลำดับภายใน",
+   "status": null,
+   "code": null,
+   "ollama": null,
+   "basis": "BE-007 contract"
+  },
+  {
+   "id": "QA2-I-12-patch-mass-assign",
+   "group": "I",
+   "title": "PATCH ที่มีฟิลด์อื่น (userId, id, createdAt)",
+   "expected": "เปลี่ยนเฉพาะ title; id/เจ้าของ/เวลาสร้างไม่เปลี่ยน",
+   "status": 200,
+   "code": null,
+   "ollama": null,
+   "basis": "BE-007 contract"
+  },
+  {
+   "id": "QA2-I-13-user-admin-endpoint",
+   "group": "I",
+   "title": "User เรียก endpoint ระดับ Admin",
+   "expected": "403 AUTH_FORBIDDEN ไม่มีข้อมูล",
+   "status": 403,
+   "code": "AUTH_FORBIDDEN",
+   "ollama": null,
+   "basis": "BE-006 matrix"
+  },
+  {
+   "id": "QA2-I-14-forged-role-cookie",
+   "group": "I",
+   "title": "ยกระดับสิทธิ์ด้วย cookie ที่แก้ role",
+   "expected": "401 (ลายเซ็น/การเข้ารหัสของ cookie กันไว้) ไม่ใช่ 200/403",
+   "status": 401,
+   "code": "AUTH_REQUIRED",
+   "ollama": null,
+   "basis": "BE-006 matrix"
+  },
+  {
+   "id": "QA2-I-15-login-role-from-account",
+   "group": "I",
+   "title": "role มาจากบัญชีฝั่ง server ไม่ใช่จากผู้เรียก",
+   "expected": "ผู้ใช้ role User ได้ roles=[User] เสมอ",
+   "status": 200,
+   "code": null,
+   "ollama": null,
+   "basis": "BE-006 matrix"
+  },
+  {
+   "id": "QA2-C-chat-sfs-cross-site",
+   "group": "C",
+   "title": "chat: Sec-Fetch-Site: cross-site",
+   "expected": "403 AUTH_CSRF_INVALID; ไม่มีผลข้างเคียง (Ollama 0, ข้อมูลเดิม, session ยังอยู่)",
+   "status": 403,
+   "code": "AUTH_CSRF_INVALID",
+   "ollama": 0,
+   "basis": "BE-006 (SameSite guard) + BE-005 (antiforgery)"
+  },
+  {
+   "id": "QA2-C-chat-sfs-same-site",
+   "group": "C",
+   "title": "chat: Sec-Fetch-Site: same-site (เว็บพี่น้อง)",
+   "expected": "403 AUTH_CSRF_INVALID; ไม่มีผลข้างเคียง (Ollama 0, ข้อมูลเดิม, session ยังอยู่)",
+   "status": 403,
+   "code": "AUTH_CSRF_INVALID",
+   "ollama": 0,
+   "basis": "BE-006 (SameSite guard) + BE-005 (antiforgery)"
+  },
+  {
+   "id": "QA2-C-chat-origin-evil",
+   "group": "C",
+   "title": "chat: Origin: https://evil.example",
+   "expected": "403 AUTH_CSRF_INVALID; ไม่มีผลข้างเคียง (Ollama 0, ข้อมูลเดิม, session ยังอยู่)",
+   "status": 403,
+   "code": "AUTH_CSRF_INVALID",
+   "ollama": 0,
+   "basis": "BE-006 (SameSite guard) + BE-005 (antiforgery)"
+  },
+  {
+   "id": "QA2-C-chat-origin-null",
+   "group": "C",
+   "title": "chat: Origin: null (sandbox/ฟอร์มข้ามเว็บ)",
+   "expected": "403 AUTH_CSRF_INVALID; ไม่มีผลข้างเคียง (Ollama 0, ข้อมูลเดิม, session ยังอยู่)",
+   "status": 403,
+   "code": "AUTH_CSRF_INVALID",
+   "ollama": 0,
+   "basis": "BE-006 (SameSite guard) + BE-005 (antiforgery)"
+  },
+  {
+   "id": "QA2-C-chat-origin-http-same-host",
+   "group": "C",
+   "title": "chat: Origin: http://localhost (scheme ต่าง)",
+   "expected": "403 AUTH_CSRF_INVALID; ไม่มีผลข้างเคียง (Ollama 0, ข้อมูลเดิม, session ยังอยู่)",
+   "status": 403,
+   "code": "AUTH_CSRF_INVALID",
+   "ollama": 0,
+   "basis": "BE-006 (SameSite guard) + BE-005 (antiforgery)"
+  },
+  {
+   "id": "QA2-C-chat-origin-double",
+   "group": "C",
+   "title": "chat: Origin ซ้ำสองค่า",
+   "expected": "403 AUTH_CSRF_INVALID; ไม่มีผลข้างเคียง (Ollama 0, ข้อมูลเดิม, session ยังอยู่)",
+   "status": 403,
+   "code": "AUTH_CSRF_INVALID",
+   "ollama": 0,
+   "basis": "BE-006 (SameSite guard) + BE-005 (antiforgery)"
+  },
+  {
+   "id": "QA2-C-stream-sfs-cross-site",
+   "group": "C",
+   "title": "stream: Sec-Fetch-Site: cross-site",
+   "expected": "403 AUTH_CSRF_INVALID; ไม่มีผลข้างเคียง (Ollama 0, ข้อมูลเดิม, session ยังอยู่)",
+   "status": 403,
+   "code": "AUTH_CSRF_INVALID",
+   "ollama": 0,
+   "basis": "BE-006 (SameSite guard) + BE-005 (antiforgery)"
+  },
+  {
+   "id": "QA2-C-stream-sfs-same-site",
+   "group": "C",
+   "title": "stream: Sec-Fetch-Site: same-site (เว็บพี่น้อง)",
+   "expected": "403 AUTH_CSRF_INVALID; ไม่มีผลข้างเคียง (Ollama 0, ข้อมูลเดิม, session ยังอยู่)",
+   "status": 403,
+   "code": "AUTH_CSRF_INVALID",
+   "ollama": 0,
+   "basis": "BE-006 (SameSite guard) + BE-005 (antiforgery)"
+  },
+  {
+   "id": "QA2-C-stream-origin-evil",
+   "group": "C",
+   "title": "stream: Origin: https://evil.example",
+   "expected": "403 AUTH_CSRF_INVALID; ไม่มีผลข้างเคียง (Ollama 0, ข้อมูลเดิม, session ยังอยู่)",
+   "status": 403,
+   "code": "AUTH_CSRF_INVALID",
+   "ollama": 0,
+   "basis": "BE-006 (SameSite guard) + BE-005 (antiforgery)"
+  },
+  {
+   "id": "QA2-C-stream-origin-null",
+   "group": "C",
+   "title": "stream: Origin: null (sandbox/ฟอร์มข้ามเว็บ)",
+   "expected": "403 AUTH_CSRF_INVALID; ไม่มีผลข้างเคียง (Ollama 0, ข้อมูลเดิม, session ยังอยู่)",
+   "status": 403,
+   "code": "AUTH_CSRF_INVALID",
+   "ollama": 0,
+   "basis": "BE-006 (SameSite guard) + BE-005 (antiforgery)"
+  },
+  {
+   "id": "QA2-C-stream-origin-http-same-host",
+   "group": "C",
+   "title": "stream: Origin: http://localhost (scheme ต่าง)",
+   "expected": "403 AUTH_CSRF_INVALID; ไม่มีผลข้างเคียง (Ollama 0, ข้อมูลเดิม, session ยังอยู่)",
+   "status": 403,
+   "code": "AUTH_CSRF_INVALID",
+   "ollama": 0,
+   "basis": "BE-006 (SameSite guard) + BE-005 (antiforgery)"
+  },
+  {
+   "id": "QA2-C-stream-origin-double",
+   "group": "C",
+   "title": "stream: Origin ซ้ำสองค่า",
+   "expected": "403 AUTH_CSRF_INVALID; ไม่มีผลข้างเคียง (Ollama 0, ข้อมูลเดิม, session ยังอยู่)",
+   "status": 403,
+   "code": "AUTH_CSRF_INVALID",
+   "ollama": 0,
+   "basis": "BE-006 (SameSite guard) + BE-005 (antiforgery)"
+  },
+  {
+   "id": "QA2-C-conv-create-sfs-cross-site",
+   "group": "C",
+   "title": "conv-create: Sec-Fetch-Site: cross-site",
+   "expected": "403 AUTH_CSRF_INVALID; ไม่มีผลข้างเคียง (Ollama 0, ข้อมูลเดิม, session ยังอยู่)",
+   "status": 403,
+   "code": "AUTH_CSRF_INVALID",
+   "ollama": 0,
+   "basis": "BE-006 (SameSite guard) + BE-005 (antiforgery)"
+  },
+  {
+   "id": "QA2-C-conv-create-sfs-same-site",
+   "group": "C",
+   "title": "conv-create: Sec-Fetch-Site: same-site (เว็บพี่น้อง)",
+   "expected": "403 AUTH_CSRF_INVALID; ไม่มีผลข้างเคียง (Ollama 0, ข้อมูลเดิม, session ยังอยู่)",
+   "status": 403,
+   "code": "AUTH_CSRF_INVALID",
+   "ollama": 0,
+   "basis": "BE-006 (SameSite guard) + BE-005 (antiforgery)"
+  },
+  {
+   "id": "QA2-C-conv-create-origin-evil",
+   "group": "C",
+   "title": "conv-create: Origin: https://evil.example",
+   "expected": "403 AUTH_CSRF_INVALID; ไม่มีผลข้างเคียง (Ollama 0, ข้อมูลเดิม, session ยังอยู่)",
+   "status": 403,
+   "code": "AUTH_CSRF_INVALID",
+   "ollama": 0,
+   "basis": "BE-006 (SameSite guard) + BE-005 (antiforgery)"
+  },
+  {
+   "id": "QA2-C-conv-create-origin-null",
+   "group": "C",
+   "title": "conv-create: Origin: null (sandbox/ฟอร์มข้ามเว็บ)",
+   "expected": "403 AUTH_CSRF_INVALID; ไม่มีผลข้างเคียง (Ollama 0, ข้อมูลเดิม, session ยังอยู่)",
+   "status": 403,
+   "code": "AUTH_CSRF_INVALID",
+   "ollama": 0,
+   "basis": "BE-006 (SameSite guard) + BE-005 (antiforgery)"
+  },
+  {
+   "id": "QA2-C-conv-create-origin-http-same-host",
+   "group": "C",
+   "title": "conv-create: Origin: http://localhost (scheme ต่าง)",
+   "expected": "403 AUTH_CSRF_INVALID; ไม่มีผลข้างเคียง (Ollama 0, ข้อมูลเดิม, session ยังอยู่)",
+   "status": 403,
+   "code": "AUTH_CSRF_INVALID",
+   "ollama": 0,
+   "basis": "BE-006 (SameSite guard) + BE-005 (antiforgery)"
+  },
+  {
+   "id": "QA2-C-conv-create-origin-double",
+   "group": "C",
+   "title": "conv-create: Origin ซ้ำสองค่า",
+   "expected": "403 AUTH_CSRF_INVALID; ไม่มีผลข้างเคียง (Ollama 0, ข้อมูลเดิม, session ยังอยู่)",
+   "status": 403,
+   "code": "AUTH_CSRF_INVALID",
+   "ollama": 0,
+   "basis": "BE-006 (SameSite guard) + BE-005 (antiforgery)"
+  },
+  {
+   "id": "QA2-C-conv-patch-sfs-cross-site",
+   "group": "C",
+   "title": "conv-patch: Sec-Fetch-Site: cross-site",
+   "expected": "403 AUTH_CSRF_INVALID; ไม่มีผลข้างเคียง (Ollama 0, ข้อมูลเดิม, session ยังอยู่)",
+   "status": 403,
+   "code": "AUTH_CSRF_INVALID",
+   "ollama": 0,
+   "basis": "BE-006 (SameSite guard) + BE-005 (antiforgery)"
+  },
+  {
+   "id": "QA2-C-conv-patch-sfs-same-site",
+   "group": "C",
+   "title": "conv-patch: Sec-Fetch-Site: same-site (เว็บพี่น้อง)",
+   "expected": "403 AUTH_CSRF_INVALID; ไม่มีผลข้างเคียง (Ollama 0, ข้อมูลเดิม, session ยังอยู่)",
+   "status": 403,
+   "code": "AUTH_CSRF_INVALID",
+   "ollama": 0,
+   "basis": "BE-006 (SameSite guard) + BE-005 (antiforgery)"
+  },
+  {
+   "id": "QA2-C-conv-patch-origin-evil",
+   "group": "C",
+   "title": "conv-patch: Origin: https://evil.example",
+   "expected": "403 AUTH_CSRF_INVALID; ไม่มีผลข้างเคียง (Ollama 0, ข้อมูลเดิม, session ยังอยู่)",
+   "status": 403,
+   "code": "AUTH_CSRF_INVALID",
+   "ollama": 0,
+   "basis": "BE-006 (SameSite guard) + BE-005 (antiforgery)"
+  },
+  {
+   "id": "QA2-C-conv-patch-origin-null",
+   "group": "C",
+   "title": "conv-patch: Origin: null (sandbox/ฟอร์มข้ามเว็บ)",
+   "expected": "403 AUTH_CSRF_INVALID; ไม่มีผลข้างเคียง (Ollama 0, ข้อมูลเดิม, session ยังอยู่)",
+   "status": 403,
+   "code": "AUTH_CSRF_INVALID",
+   "ollama": 0,
+   "basis": "BE-006 (SameSite guard) + BE-005 (antiforgery)"
+  },
+  {
+   "id": "QA2-C-conv-patch-origin-http-same-host",
+   "group": "C",
+   "title": "conv-patch: Origin: http://localhost (scheme ต่าง)",
+   "expected": "403 AUTH_CSRF_INVALID; ไม่มีผลข้างเคียง (Ollama 0, ข้อมูลเดิม, session ยังอยู่)",
+   "status": 403,
+   "code": "AUTH_CSRF_INVALID",
+   "ollama": 0,
+   "basis": "BE-006 (SameSite guard) + BE-005 (antiforgery)"
+  },
+  {
+   "id": "QA2-C-conv-patch-origin-double",
+   "group": "C",
+   "title": "conv-patch: Origin ซ้ำสองค่า",
+   "expected": "403 AUTH_CSRF_INVALID; ไม่มีผลข้างเคียง (Ollama 0, ข้อมูลเดิม, session ยังอยู่)",
+   "status": 403,
+   "code": "AUTH_CSRF_INVALID",
+   "ollama": 0,
+   "basis": "BE-006 (SameSite guard) + BE-005 (antiforgery)"
+  },
+  {
+   "id": "QA2-C-conv-delete-sfs-cross-site",
+   "group": "C",
+   "title": "conv-delete: Sec-Fetch-Site: cross-site",
+   "expected": "403 AUTH_CSRF_INVALID; ไม่มีผลข้างเคียง (Ollama 0, ข้อมูลเดิม, session ยังอยู่)",
+   "status": 403,
+   "code": "AUTH_CSRF_INVALID",
+   "ollama": 0,
+   "basis": "BE-006 (SameSite guard) + BE-005 (antiforgery)"
+  },
+  {
+   "id": "QA2-C-conv-delete-sfs-same-site",
+   "group": "C",
+   "title": "conv-delete: Sec-Fetch-Site: same-site (เว็บพี่น้อง)",
+   "expected": "403 AUTH_CSRF_INVALID; ไม่มีผลข้างเคียง (Ollama 0, ข้อมูลเดิม, session ยังอยู่)",
+   "status": 403,
+   "code": "AUTH_CSRF_INVALID",
+   "ollama": 0,
+   "basis": "BE-006 (SameSite guard) + BE-005 (antiforgery)"
+  },
+  {
+   "id": "QA2-C-conv-delete-origin-evil",
+   "group": "C",
+   "title": "conv-delete: Origin: https://evil.example",
+   "expected": "403 AUTH_CSRF_INVALID; ไม่มีผลข้างเคียง (Ollama 0, ข้อมูลเดิม, session ยังอยู่)",
+   "status": 403,
+   "code": "AUTH_CSRF_INVALID",
+   "ollama": 0,
+   "basis": "BE-006 (SameSite guard) + BE-005 (antiforgery)"
+  },
+  {
+   "id": "QA2-C-conv-delete-origin-null",
+   "group": "C",
+   "title": "conv-delete: Origin: null (sandbox/ฟอร์มข้ามเว็บ)",
+   "expected": "403 AUTH_CSRF_INVALID; ไม่มีผลข้างเคียง (Ollama 0, ข้อมูลเดิม, session ยังอยู่)",
+   "status": 403,
+   "code": "AUTH_CSRF_INVALID",
+   "ollama": 0,
+   "basis": "BE-006 (SameSite guard) + BE-005 (antiforgery)"
+  },
+  {
+   "id": "QA2-C-conv-delete-origin-http-same-host",
+   "group": "C",
+   "title": "conv-delete: Origin: http://localhost (scheme ต่าง)",
+   "expected": "403 AUTH_CSRF_INVALID; ไม่มีผลข้างเคียง (Ollama 0, ข้อมูลเดิม, session ยังอยู่)",
+   "status": 403,
+   "code": "AUTH_CSRF_INVALID",
+   "ollama": 0,
+   "basis": "BE-006 (SameSite guard) + BE-005 (antiforgery)"
+  },
+  {
+   "id": "QA2-C-conv-delete-origin-double",
+   "group": "C",
+   "title": "conv-delete: Origin ซ้ำสองค่า",
+   "expected": "403 AUTH_CSRF_INVALID; ไม่มีผลข้างเคียง (Ollama 0, ข้อมูลเดิม, session ยังอยู่)",
+   "status": 403,
+   "code": "AUTH_CSRF_INVALID",
+   "ollama": 0,
+   "basis": "BE-006 (SameSite guard) + BE-005 (antiforgery)"
+  },
+  {
+   "id": "QA2-C-logout-sfs-cross-site",
+   "group": "C",
+   "title": "logout: Sec-Fetch-Site: cross-site",
+   "expected": "403 AUTH_CSRF_INVALID; ไม่มีผลข้างเคียง (Ollama 0, ข้อมูลเดิม, session ยังอยู่)",
+   "status": 403,
+   "code": "AUTH_CSRF_INVALID",
+   "ollama": 0,
+   "basis": "BE-006 (SameSite guard) + BE-005 (antiforgery)"
+  },
+  {
+   "id": "QA2-C-logout-sfs-same-site",
+   "group": "C",
+   "title": "logout: Sec-Fetch-Site: same-site (เว็บพี่น้อง)",
+   "expected": "403 AUTH_CSRF_INVALID; ไม่มีผลข้างเคียง (Ollama 0, ข้อมูลเดิม, session ยังอยู่)",
+   "status": 403,
+   "code": "AUTH_CSRF_INVALID",
+   "ollama": 0,
+   "basis": "BE-006 (SameSite guard) + BE-005 (antiforgery)"
+  },
+  {
+   "id": "QA2-C-logout-origin-evil",
+   "group": "C",
+   "title": "logout: Origin: https://evil.example",
+   "expected": "403 AUTH_CSRF_INVALID; ไม่มีผลข้างเคียง (Ollama 0, ข้อมูลเดิม, session ยังอยู่)",
+   "status": 403,
+   "code": "AUTH_CSRF_INVALID",
+   "ollama": 0,
+   "basis": "BE-006 (SameSite guard) + BE-005 (antiforgery)"
+  },
+  {
+   "id": "QA2-C-logout-origin-null",
+   "group": "C",
+   "title": "logout: Origin: null (sandbox/ฟอร์มข้ามเว็บ)",
+   "expected": "403 AUTH_CSRF_INVALID; ไม่มีผลข้างเคียง (Ollama 0, ข้อมูลเดิม, session ยังอยู่)",
+   "status": 403,
+   "code": "AUTH_CSRF_INVALID",
+   "ollama": 0,
+   "basis": "BE-006 (SameSite guard) + BE-005 (antiforgery)"
+  },
+  {
+   "id": "QA2-C-logout-origin-http-same-host",
+   "group": "C",
+   "title": "logout: Origin: http://localhost (scheme ต่าง)",
+   "expected": "403 AUTH_CSRF_INVALID; ไม่มีผลข้างเคียง (Ollama 0, ข้อมูลเดิม, session ยังอยู่)",
+   "status": 403,
+   "code": "AUTH_CSRF_INVALID",
+   "ollama": 0,
+   "basis": "BE-006 (SameSite guard) + BE-005 (antiforgery)"
+  },
+  {
+   "id": "QA2-C-logout-origin-double",
+   "group": "C",
+   "title": "logout: Origin ซ้ำสองค่า",
+   "expected": "403 AUTH_CSRF_INVALID; ไม่มีผลข้างเคียง (Ollama 0, ข้อมูลเดิม, session ยังอยู่)",
+   "status": 403,
+   "code": "AUTH_CSRF_INVALID",
+   "ollama": 0,
+   "basis": "BE-006 (SameSite guard) + BE-005 (antiforgery)"
+  },
+  {
+   "id": "QA2-C-allow-same-origin",
+   "group": "C",
+   "title": "Origin เดียวกัน + Sec-Fetch-Site: same-origin (เหมือน browser)",
+   "expected": "chat/stream/สร้าง/แก้/ลบ สำเร็จ",
+   "status": 200,
+   "code": null,
+   "ollama": null,
+   "basis": "BE-006 (SameSite guard) + BE-005 (antiforgery)"
+  },
+  {
+   "id": "QA2-C-allow-sfs-none",
+   "group": "C",
+   "title": "Sec-Fetch-Site: none (ผู้ใช้พิมพ์ URL)",
+   "expected": "ไม่ถูกบล็อกโดย guard",
+   "status": 200,
+   "code": null,
+   "ollama": null,
+   "basis": "BE-006 (SameSite guard) + BE-005 (antiforgery)"
+  },
+  {
+   "id": "QA2-C-allow-no-browser-headers",
+   "group": "C",
+   "title": "ไม่มี Origin/Sec-Fetch (สคริปต์/เครื่องมือ)",
+   "expected": "ไม่ถูกบล็อก 200 (CSRF ต้องมีเบราว์เซอร์; ออกแบบไว้)",
+   "status": 200,
+   "code": null,
+   "ollama": null,
+   "basis": "BE-006 (SameSite guard) + BE-005 (antiforgery)"
+  },
+  {
+   "id": "QA2-C-simple-text-plain",
+   "group": "C",
+   "title": "ฟอร์มข้ามเว็บแบบ text/plain ที่ไม่มี header เบราว์เซอร์",
+   "expected": "415 และ Ollama 0 (ไม่รับ body ที่ไม่ใช่ JSON)",
+   "status": 415,
+   "code": null,
+   "ollama": 0,
+   "basis": "ชั้นป้องกันที่สอง (JSON-only)"
+  },
+  {
+   "id": "QA2-C-simple-form-urlencoded",
+   "group": "C",
+   "title": "ฟอร์ม application/x-www-form-urlencoded",
+   "expected": "415 และ Ollama 0",
+   "status": 415,
+   "code": null,
+   "ollama": 0,
+   "basis": "ชั้นป้องกันที่สอง (JSON-only)"
+  },
+  {
+   "id": "QA2-C-cors-none",
+   "group": "C",
+   "title": "CORS: preflight และ response ข้ามเว็บ",
+   "expected": "ไม่มี Access-Control-Allow-Origin/Credentials ในทุก response",
+   "status": null,
+   "code": null,
+   "ollama": null,
+   "basis": "QA baseline"
+  },
+  {
+   "id": "QA2-C-stream-fetch-no-token",
+   "group": "C",
+   "title": "fetch POST ของหน้าเว็บ (same-origin) ไปที่ /api/chat/stream แล้วอ่านสตรีม",
+   "expected": "200 text/event-stream; started, delta, completed ตามลำดับ",
+   "status": 200,
+   "code": null,
+   "ollama": 1,
+   "basis": "Issue QA-002 3.7"
+  },
+  {
+   "id": "QA2-C-stream-fetch-with-token",
+   "group": "C",
+   "title": "เหมือนกัน แต่แนบ X-CSRF-TOKEN จาก /api/auth/csrf",
+   "expected": "200 สตรีมสำเร็จเหมือนกัน (token ที่แนบเกินจำเป็นไม่ทำให้พัง)",
+   "status": 200,
+   "code": null,
+   "ollama": 1,
+   "basis": "Issue QA-002 3.7"
+  },
+  {
+   "id": "QA2-C-method-override",
+   "group": "C",
+   "title": "X-HTTP-Method-Override: DELETE บน GET",
+   "expected": "ไม่ลบอะไร (header ถูกเมิน)",
+   "status": 200,
+   "code": null,
+   "ollama": null,
+   "basis": "QA baseline"
+  },
+  {
+   "id": "QA2-C-get-safe",
+   "group": "C",
+   "title": "GET ไม่เปลี่ยนสถานะ",
+   "expected": "เรียก GET ทุก endpoint ที่มี cookie แล้วข้อมูลไม่เปลี่ยน",
+   "status": 200,
+   "code": null,
+   "ollama": null,
+   "basis": "QA baseline"
+  },
+  {
+   "id": "QA2-H-01-home",
+   "group": "H",
+   "title": "GET / (หน้าแชต)",
+   "expected": "CSP มี default-src 'self', object-src 'none', frame-ancestors 'none'; X-Content-Type-Options nosniff; Referrer-Policy no-referrer",
+   "status": 200,
+   "code": null,
+   "ollama": null,
+   "basis": "FE-001"
+  },
+  {
+   "id": "QA2-H-02-auth-api",
+   "group": "H",
+   "title": "/api/auth/* ทุก endpoint",
+   "expected": "Cache-Control no-store, Pragma no-cache, nosniff",
+   "status": null,
+   "code": null,
+   "ollama": null,
+   "basis": "BE-005"
+  },
+  {
+   "id": "QA2-H-03-401-no-store",
+   "group": "H",
+   "title": "401 AUTH_REQUIRED จาก /api/chat",
+   "expected": "Cache-Control no-store",
+   "status": 401,
+   "code": "AUTH_REQUIRED",
+   "ollama": null,
+   "basis": "BE-006"
+  },
+  {
+   "id": "QA2-H-04-403-no-store",
+   "group": "H",
+   "title": "403 AUTH_FORBIDDEN และ AUTH_CSRF_INVALID",
+   "expected": "Cache-Control no-store",
+   "status": 403,
+   "code": null,
+   "ollama": null,
+   "basis": "BE-006"
+  },
+  {
+   "id": "QA2-H-05-conversations-no-store",
+   "group": "H",
+   "title": "response ของ /api/conversations",
+   "expected": "Cache-Control no-store",
+   "status": 200,
+   "code": null,
+   "ollama": null,
+   "basis": "BE-007"
+  },
+  {
+   "id": "QA2-H-06-chat-no-store",
+   "group": "H",
+   "title": "200 ของ /api/chat (คำตอบส่วนตัวของผู้ใช้)",
+   "expected": "Cache-Control no-store (กัน proxy/เบราว์เซอร์เก็บคำตอบ)",
+   "status": 200,
+   "code": null,
+   "ollama": null,
+   "basis": "QA baseline"
+  },
+  {
+   "id": "QA2-H-07-stream-headers",
+   "group": "H",
+   "title": "/api/chat/stream",
+   "expected": "text/event-stream; Cache-Control no-cache หรือ no-store; X-Accel-Buffering no",
+   "status": 200,
+   "code": null,
+   "ollama": null,
+   "basis": "BE-004"
+  },
+  {
+   "id": "QA2-H-08-hsts",
+   "group": "H",
+   "title": "HSTS ใน Production ผ่าน HTTPS (ชื่อโฮสต์ที่ไม่ใช่ localhost)",
+   "expected": "มี Strict-Transport-Security",
+   "status": 200,
+   "code": null,
+   "ollama": null,
+   "basis": "QA baseline"
+  },
+  {
+   "id": "QA2-H-09-no-powered-by",
+   "group": "H",
+   "title": "ไม่เปิดเผยเทคโนโลยี",
+   "expected": "ไม่มี X-Powered-By / X-AspNet-Version",
+   "status": null,
+   "code": null,
+   "ollama": null,
+   "basis": "QA baseline"
+  },
+  {
+   "id": "QA2-H-10-html-pages-frame",
+   "group": "H",
+   "title": "หน้า HTML อื่นนอกจากหน้าแชต (Privacy)",
+   "expected": "กัน framing: มี X-Frame-Options หรือ CSP frame-ancestors",
+   "status": 200,
+   "code": null,
+   "ollama": null,
+   "basis": "QA baseline"
+  },
+  {
+   "id": "QA2-H-11-api-nosniff",
+   "group": "H",
+   "title": "ทุก response ของ /api (chat, stream, conversations, 401/403)",
+   "expected": "X-Content-Type-Options: nosniff",
+   "status": null,
+   "code": null,
+   "ollama": null,
+   "basis": "QA baseline"
+  },
+  {
+   "id": "QA2-H-12-error-json",
+   "group": "H",
+   "title": "404/405/415 ใต้ /api",
+   "expected": "เป็น JSON หรือว่าง ไม่มีหน้า error HTML ของ framework",
+   "status": null,
+   "code": null,
+   "ollama": null,
+   "basis": "QA baseline"
+  },
+  {
+   "id": "QA2-L-01-ollama-500",
+   "group": "L",
+   "title": "Ollama ตอบ 500 พร้อมข้อความภายใน (พอร์ต เส้นทางเครื่อง) ผ่าน /api/chat",
+   "expected": "502 AI_PROVIDER_ERROR; body และ log ไม่มี canary/พอร์ต/host/เส้นทาง",
+   "status": 502,
+   "code": "AI_PROVIDER_ERROR",
+   "ollama": 1,
+   "basis": "AI-005"
+  },
+  {
+   "id": "QA2-L-02-ollama-500-stream",
+   "group": "L",
+   "title": "เหมือนกันผ่าน /api/chat/stream",
+   "expected": "event: error AI_PROVIDER_ERROR; ไม่มีรายละเอียดภายใน",
+   "status": 200,
+   "code": "AI_PROVIDER_ERROR",
+   "ollama": 1,
+   "basis": "AI-005"
+  },
+  {
+   "id": "QA2-L-03-ollama-down",
+   "group": "L",
+   "title": "Ollama ไม่ทำงาน (connection refused) ทั้งสอง endpoint",
+   "expected": "503 AI_UNAVAILABLE / event error AI_UNAVAILABLE; ไม่มี host:port",
+   "status": 503,
+   "code": "AI_UNAVAILABLE",
+   "ollama": null,
+   "basis": "AI-005"
+  },
+  {
+   "id": "QA2-L-04-ollama-garbage",
+   "group": "L",
+   "title": "Ollama ตอบ body เสีย",
+   "expected": "AI_INVALID_RESPONSE; ไม่มีเนื้อหา body เดิม",
+   "status": 502,
+   "code": "AI_INVALID_RESPONSE",
+   "ollama": null,
+   "basis": "AI-005"
+  },
+  {
+   "id": "QA2-L-05-userstore-exception",
+   "group": "L",
+   "title": "ฐานข้อมูลผู้ใช้โยน exception ที่มี connection string",
+   "expected": "401 AUTH_REQUIRED ทั่วไป; body และ log ไม่มี canary",
+   "status": 401,
+   "code": "AUTH_REQUIRED",
+   "ollama": 0,
+   "basis": "BE-006 (SecurityLog ไม่ใส่ข้อความ exception)"
+  },
+  {
+   "id": "QA2-L-06-history-exception",
+   "group": "L",
+   "title": "ที่เก็บประวัติโยน exception ที่มี connection string (เป็น ChatHistoryUnavailable)",
+   "expected": "503 HISTORY_UNAVAILABLE; body และ log ไม่มี canary",
+   "status": 503,
+   "code": "HISTORY_UNAVAILABLE",
+   "ollama": null,
+   "basis": "BE-007"
+  },
+  {
+   "id": "QA2-L-07-unhandled-exception",
+   "group": "L",
+   "title": "exception ที่ไม่คาดคิดจาก dependency (มีความลับในข้อความ)",
+   "expected": "500 INTERNAL_ERROR ทั่วไป; log ไม่มีความลับ",
+   "status": 500,
+   "code": "INTERNAL_ERROR",
+   "ollama": null,
+   "basis": "AGENTS.md ข้อ 12 (ไม่ log ความลับ)"
+  },
+  {
+   "id": "QA2-L-08-login-failure-logs",
+   "group": "L",
+   "title": "log หลัง login ล้มเหลวหลายแบบ",
+   "expected": "log ไม่มีรหัสผ่านที่ส่งมา hash หรือ stamp",
+   "status": null,
+   "code": null,
+   "ollama": null,
+   "basis": "BE-005"
+  },
+  {
+   "id": "QA2-L-09-sweep",
+   "group": "L",
+   "title": "กวาด log ทั้งหมดหลัง login/chat/stream/logout/ปฏิเสธต่าง ๆ",
+   "expected": "log ไม่มีรหัสผ่าน hash stamp session id ค่า cookie หรือ CSRF token",
+   "status": null,
+   "code": null,
+   "ollama": null,
+   "basis": "BE-006 SecurityLog"
+  },
+  {
+   "id": "QA2-L-10-audit-events",
+   "group": "L",
+   "title": "เหตุการณ์ตรวจสอบ",
+   "expected": "มี log 5001 (สร้าง session), 5002 (logout), 5003 (ปฏิเสธพร้อมเหตุผล), 5005 (ข้ามเว็บ) และไม่มีค่าลับ",
+   "status": null,
+   "code": null,
+   "ollama": null,
+   "basis": "BE-006 SecurityLog"
+  },
+  {
+   "id": "QA2-L-11-framework-errors",
+   "group": "L",
+   "title": "อินพุตผิด (JSON เสีย/ชนิดผิด/ใหญ่เกิน) ที่ /api",
+   "expected": "400/413/415 ไม่มี stack trace, ชื่อชนิด .NET หรือเส้นทางไฟล์",
+   "status": 400,
+   "code": "INVALID_MESSAGE",
+   "ollama": 0,
+   "basis": "AGENTS.md ข้อ 12"
+  },
+  {
+   "id": "QA2-L-12-same-reason-hidden",
+   "group": "L",
+   "title": "401 ของ session ที่ logout / หมดอายุ / ปิดบัญชี / เปลี่ยน role",
+   "expected": "body เหมือนกันทุกไบต์ (ไม่บอกเหตุผล)",
+   "status": 401,
+   "code": "AUTH_REQUIRED",
+   "ollama": null,
+   "basis": "BE-006 matrix"
+  },
+  {
+   "id": "QA2-U-01-anon-chat-x10",
+   "group": "U",
+   "title": "ไม่ล็อกอิน เรียก /api/chat 10 ครั้ง",
+   "expected": "401 ทุกครั้ง; Ollama 0",
+   "status": 401,
+   "code": "AUTH_REQUIRED",
+   "ollama": 0,
+   "basis": "Issue QA-002 3.6"
+  },
+  {
+   "id": "QA2-U-02-anon-stream-x10",
+   "group": "U",
+   "title": "ไม่ล็อกอิน เรียก /api/chat/stream 10 ครั้ง",
+   "expected": "401 JSON ทุกครั้ง; Ollama 0",
+   "status": 401,
+   "code": "AUTH_REQUIRED",
+   "ollama": 0,
+   "basis": "Issue QA-002 3.6"
+  },
+  {
+   "id": "QA2-U-03-anon-invalid-body",
+   "group": "U",
+   "title": "ไม่ล็อกอิน ส่ง body ว่าง/เสีย",
+   "expected": "401 (ตรวจสิทธิ์ก่อนตรวจ body) Ollama 0",
+   "status": 401,
+   "code": "AUTH_REQUIRED",
+   "ollama": 0,
+   "basis": "Issue QA-002 3.6"
+  },
+  {
+   "id": "QA2-U-04-anon-oversized",
+   "group": "U",
+   "title": "ไม่ล็อกอิน ส่ง body 2 MB",
+   "expected": "ไม่ใช่ 200; Ollama 0 (401 หรือ 413)",
+   "status": null,
+   "code": null,
+   "ollama": 0,
+   "basis": "Issue QA-002 3.6"
+  },
+  {
+   "id": "QA2-U-05-anon-conversation-id",
+   "group": "U",
+   "title": "ไม่ล็อกอิน ระบุ conversationId",
+   "expected": "401; Ollama 0",
+   "status": 401,
+   "code": "AUTH_REQUIRED",
+   "ollama": 0,
+   "basis": "Issue QA-002 3.6"
+  },
+  {
+   "id": "QA2-U-06-rejected-never-reach",
+   "group": "U",
+   "title": "คำขอที่ถูกปฏิเสธทุกแบบ (CSRF, session สิ้นสุด, ปิดบัญชี, 415)",
+   "expected": "Ollama 0 หลังชุดคำขอทั้งหมด",
+   "status": null,
+   "code": null,
+   "ollama": 0,
+   "basis": "Issue QA-002 3.6"
+  },
+  {
+   "id": "QA2-U-07-invalid-message",
+   "group": "U",
+   "title": "ผู้ใช้ล็อกอิน ส่งข้อความว่าง",
+   "expected": "400 INVALID_MESSAGE; Ollama 0",
+   "status": 400,
+   "code": "INVALID_MESSAGE",
+   "ollama": 0,
+   "basis": "BE-001"
+  },
+  {
+   "id": "QA2-U-08-counter-sanity",
+   "group": "U",
+   "title": "ตรวจตัวนับของ fake Ollama (คำขอถูกต้องของผู้ใช้)",
+   "expected": "chat 1 ครั้ง stream 1 ครั้ง นับได้ 1 ต่อคำขอ",
+   "status": 200,
+   "code": null,
+   "ollama": 1,
+   "basis": "ตรวจเครื่องมือวัด"
+  },
+  {
+   "id": "QA2-U-09-http-scheme",
+   "group": "U",
+   "title": "เรียก /api/chat ผ่าน HTTP",
+   "expected": "ไม่ใช่ 200; Ollama 0 (redirect หรือ 401)",
+   "status": null,
+   "code": null,
+   "ollama": 0,
+   "basis": "BE-005"
+  },
+  {
+   "id": "QA2-MS-logout",
+   "group": "MS",
+   "title": "logout จากอีกแท็บระหว่างสตรีม",
+   "expected": "event ลำดับ started, delta (เท่าที่ส่งก่อนหน้า), error AUTH_SESSION_ENDED เพียงครั้งเดียว; ไม่มี completed; ข้อความหลังเพิกถอนไม่ถึงผู้ใช้; การเชื่อมต่อ Ollama ถูกปิด",
+   "status": 200,
+   "code": "AUTH_SESSION_ENDED",
+   "ollama": 1,
+   "basis": "Issue QA-002 3.7"
+  },
+  {
+   "id": "QA2-MS-revoke-all",
+   "group": "MS",
+   "title": "เพิกถอนทุก session ระหว่างสตรีม",
+   "expected": "event ลำดับ started, delta (เท่าที่ส่งก่อนหน้า), error AUTH_SESSION_ENDED เพียงครั้งเดียว; ไม่มี completed; ข้อความหลังเพิกถอนไม่ถึงผู้ใช้; การเชื่อมต่อ Ollama ถูกปิด",
+   "status": 200,
+   "code": "AUTH_SESSION_ENDED",
+   "ollama": 1,
+   "basis": "Issue QA-002 3.7"
+  },
+  {
+   "id": "QA2-MS-disabled",
+   "group": "MS",
+   "title": "ปิดบัญชีระหว่างสตรีม (ตรวจบัญชีทุก 5 วินาที)",
+   "expected": "event ลำดับ started, delta (เท่าที่ส่งก่อนหน้า), error AUTH_SESSION_ENDED เพียงครั้งเดียว; ไม่มี completed; ข้อความหลังเพิกถอนไม่ถึงผู้ใช้; การเชื่อมต่อ Ollama ถูกปิด",
+   "status": 200,
+   "code": "AUTH_SESSION_ENDED",
+   "ollama": 1,
+   "basis": "Issue QA-002 3.7"
+  },
+  {
+   "id": "QA2-MS-role",
+   "group": "MS",
+   "title": "เปลี่ยน role ระหว่างสตรีม",
+   "expected": "event ลำดับ started, delta (เท่าที่ส่งก่อนหน้า), error AUTH_SESSION_ENDED เพียงครั้งเดียว; ไม่มี completed; ข้อความหลังเพิกถอนไม่ถึงผู้ใช้; การเชื่อมต่อ Ollama ถูกปิด",
+   "status": 200,
+   "code": "AUTH_SESSION_ENDED",
+   "ollama": 1,
+   "basis": "Issue QA-002 3.7"
+  },
+  {
+   "id": "QA2-MS-stamp",
+   "group": "MS",
+   "title": "เปลี่ยน security stamp ระหว่างสตรีม",
+   "expected": "event ลำดับ started, delta (เท่าที่ส่งก่อนหน้า), error AUTH_SESSION_ENDED เพียงครั้งเดียว; ไม่มี completed; ข้อความหลังเพิกถอนไม่ถึงผู้ใช้; การเชื่อมต่อ Ollama ถูกปิด",
+   "status": 200,
+   "code": "AUTH_SESSION_ENDED",
+   "ollama": 1,
+   "basis": "Issue QA-002 3.7"
+  },
+  {
+   "id": "QA2-MS-absolute",
+   "group": "MS",
+   "title": "ครบ 8 ชั่วโมงระหว่างสตรีม",
+   "expected": "event ลำดับ started, delta (เท่าที่ส่งก่อนหน้า), error AUTH_SESSION_ENDED เพียงครั้งเดียว; ไม่มี completed; ข้อความหลังเพิกถอนไม่ถึงผู้ใช้; การเชื่อมต่อ Ollama ถูกปิด",
+   "status": 200,
+   "code": "AUTH_SESSION_ENDED",
+   "ollama": 1,
+   "basis": "Issue QA-002 3.7"
+  },
+  {
+   "id": "QA2-MS-reuse",
+   "group": "MS",
+   "title": "ใช้ cookie เดิมหลังสตรีมถูกตัด",
+   "expected": "401 และ Ollama ไม่ถูกเรียกเพิ่ม",
+   "status": 401,
+   "code": "AUTH_REQUIRED",
+   "ollama": 1,
+   "basis": "Issue QA-002 3.7"
+  },
+  {
+   "id": "QA2-MS-store-down",
+   "group": "MS",
+   "title": "ฐานข้อมูลผู้ใช้ล่มระหว่างสตรีม",
+   "expected": "สตรีมจบด้วย error AUTH_SESSION_ENDED (fail closed); session ไม่ถูกเพิกถอน ฐานกลับมาแล้วใช้ต่อได้",
+   "status": 200,
+   "code": "AUTH_SESSION_ENDED",
+   "ollama": 1,
+   "basis": "Issue QA-002 3.7"
+  },
+  {
+   "id": "QA2-MS-long-active",
+   "group": "MS",
+   "title": "สตรีมยาว 40 นาทีที่ยังส่งข้อความอยู่",
+   "expected": "จบ completed (ไม่ถูกตัดด้วย idle 30 นาที)",
+   "status": 200,
+   "code": null,
+   "ollama": 1,
+   "basis": "Issue QA-002 3.7"
+  },
+  {
+   "id": "QA2-MS-stalled-model",
+   "group": "MS",
+   "title": "เพิกถอน session ขณะโมเดลเงียบ (กำลังคิด ไม่ส่งข้อความใหม่)",
+   "expected": "สตรีมจบด้วย error AUTH_SESSION_ENDED ภายใน 10 วินาทีหลังเพิกถอน แม้โมเดลไม่ส่งข้อความเพิ่ม",
+   "status": 200,
+   "code": "AUTH_SESSION_ENDED",
+   "ollama": 1,
+   "basis": "Issue QA-002 3.7"
+  },
+  {
+   "id": "QA2-MS-history",
+   "group": "MS",
+   "title": "สตรีมในสนทนา แล้ว session สิ้นสุด",
+   "expected": "ข้อความตอบถูกบันทึกเป็นสถานะ failed รหัส AUTH_SESSION_ENDED พร้อมข้อความที่ส่งไปแล้ว ไม่ใช่ completed",
+   "status": 200,
+   "code": "AUTH_SESSION_ENDED",
+   "ollama": 1,
+   "basis": "BE-007 + Issue QA-002 3.7"
+  },
+  {
+   "id": "QA2-MS-chat",
+   "group": "MS",
+   "title": "session สิ้นสุดระหว่างรอ /api/chat",
+   "expected": "401 AUTH_SESSION_ENDED ไม่ส่งคำตอบ",
+   "status": 401,
+   "code": "AUTH_SESSION_ENDED",
+   "ollama": 1,
+   "basis": "Issue QA-002 3.7"
+  },
+  {
+   "id": "QA2-MS-other-user",
+   "group": "MS",
+   "title": "เพิกถอน session ของคนอื่นระหว่างสตรีมของ Alice",
+   "expected": "สตรีมของ Alice จบ completed",
+   "status": 200,
+   "code": null,
+   "ollama": 1,
+   "basis": "Issue QA-002 3.7"
+  },
+  {
+   "id": "QA2-MS-wire-format",
+   "group": "MS",
+   "title": "รูป event ปิดท้ายหลังเพิกถอน",
+   "expected": "เป็น SSE ถูกต้อง: event: error, data เป็น JSON มี code/message/partial",
+   "status": 200,
+   "code": "AUTH_SESSION_ENDED",
+   "ollama": 1,
+   "basis": "BE-004 SSE contract"
+  },
+  {
+   "id": "QA2-Q-01-one-user-many",
+   "group": "Q",
+   "title": "ผู้ใช้หนึ่งคนยิงสตรีม 6 คำขอพร้อมกัน ขณะผู้ใช้อื่น 1 คำขอ (Ollama จำลองทำทีละงาน)",
+   "expected": "ทุกคำขอจบ completed หรือ error ที่มี code ตามสัญญา; ไม่มี 500/INTERNAL_ERROR; ผู้ใช้อื่นไม่ค้างเกิน 30 วินาที",
+   "status": 200,
+   "code": null,
+   "ollama": 7,
+   "basis": "Issue QA-002 3.6"
+  },
+  {
+   "id": "QA2-Q-02-timeout-message",
+   "group": "Q",
+   "title": "คิวยาวจนเลย timeout ของ Ollama",
+   "expected": "ผู้ใช้ที่ช้าได้ event error code AI_TIMEOUT พร้อมข้อความที่อ่านรู้เรื่อง ไม่ใช่การตัดการเชื่อมต่อเงียบ ๆ",
+   "status": 200,
+   "code": "AI_TIMEOUT",
+   "ollama": null,
+   "basis": "Issue QA-002 3.6 / BE-003"
+  },
+  {
+   "id": "QA2-Q-03-per-user-cap",
+   "group": "Q",
+   "title": "มีเพดานคำขอพร้อมกันต่อผู้ใช้",
+   "expected": "ผู้ใช้เดียวไม่สามารถยึดคิวทั้งหมด: อย่างน้อยบางคำขอส่วนเกินถูกปฏิเสธด้วย code ที่เข้าใจได้ (เช่น 429) (QA baseline; ถ้าไม่มีให้บันทึกเป็นข้อสังเกต)",
+   "status": 429,
+   "code": null,
+   "ollama": null,
+   "basis": "QA baseline"
+  },
+  {
+   "id": "QA2-O-01-auth-off-routes",
+   "group": "O",
+   "title": "Authentication:Enabled=false: /api/auth/*",
+   "expected": "404 ทั้ง csrf และ login (ไม่เปิดเผยว่ามี)",
+   "status": 404,
+   "code": null,
+   "ollama": 0,
+   "basis": "BE-005"
+  },
+  {
+   "id": "QA2-O-02-auth-off-chat-open",
+   "group": "O",
+   "title": "Authentication:Enabled=false: /api/chat และ /stream โดยไม่ล็อกอิน",
+   "expected": "200 (ค่าเริ่มต้นเปิดโล่งตามที่ระบุไว้ใน BE-006)",
+   "status": 200,
+   "code": null,
+   "ollama": 2,
+   "basis": "BE-006 matrix (ค่าเริ่มต้น)"
+  },
+  {
+   "id": "QA2-O-03-auth-off-admin",
+   "group": "O",
+   "title": "Authentication:Enabled=false: endpoint Admin โดยไม่ล็อกอิน",
+   "expected": "ยังต้องล็อกอิน: 401",
+   "status": 401,
+   "code": "AUTH_REQUIRED",
+   "ollama": null,
+   "basis": "BE-006 matrix"
+  },
+  {
+   "id": "QA2-O-04-history-needs-auth",
+   "group": "O",
+   "title": "ChatHistory:Enabled=true แต่ Authentication:Enabled=false",
+   "expected": "แอปไม่เริ่ม (ตรวจ options ตอนเริ่ม ล้มอย่างปิด)",
+   "status": null,
+   "code": null,
+   "ollama": null,
+   "basis": "BE-007"
+  },
+  {
+   "id": "QA2-O-05-history-off-404",
+   "group": "O",
+   "title": "ChatHistory:Enabled=false (ค่าเริ่มต้น): /api/conversations",
+   "expected": "404 ก่อนตรวจสิทธิ์ ทั้งผู้ไม่ล็อกอินและผู้ล็อกอิน",
+   "status": 404,
+   "code": null,
+   "ollama": 0,
+   "basis": "BE-007"
+  },
+  {
+   "id": "QA2-O-06-history-off-chat-conv",
+   "group": "O",
+   "title": "ChatHistory ปิด แต่ส่ง conversationId",
+   "expected": "404 CONVERSATION_NOT_FOUND; Ollama 0",
+   "status": 404,
+   "code": "CONVERSATION_NOT_FOUND",
+   "ollama": 0,
+   "basis": "BE-007"
+  },
+  {
+   "id": "QA2-O-07-production-default-open",
+   "group": "O",
+   "title": "ค่าเริ่มต้นใน appsettings.json",
+   "expected": "บันทึกเป็นข้อสังเกต: Authentication.Enabled=false เป็นค่าเริ่มต้น จึงต้องเปิดก่อนใช้กับผู้ใช้จริง",
+   "status": null,
+   "code": null,
+   "ollama": null,
+   "basis": "BE-006 matrix"
+  }
+ ]
+}
